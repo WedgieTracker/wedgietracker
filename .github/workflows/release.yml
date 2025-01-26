@@ -33,8 +33,12 @@ jobs:
           LATEST_VERSION=${LATEST_TAG}
           IFS='.' read -r MAJOR MINOR PATCH <<< "$LATEST_VERSION"
 
-          # Get commit messages since last tag
-          COMMITS=$(git log ${LATEST_TAG}..HEAD --pretty=format:"%s")
+          # Get commit messages appropriately
+          if [ "$LATEST_TAG" = "0.0.0" ]; then
+            COMMITS=$(git log --pretty=format:"%s")
+          else
+            COMMITS=$(git log ${LATEST_TAG}..HEAD --pretty=format:"%s")
+          fi
 
           # Initialize bump type
           BUMP="patch"
@@ -73,8 +77,14 @@ jobs:
       - name: Generate Release Notes
         id: release_notes
         run: |
-          # Get commit messages since last tag for release notes
-          COMMITS=$(git log ${{ steps.latest.outputs.latest_tag }}..HEAD --pretty=format:"- %s")
+          # Check if we have a real tag or the default 0.0.0
+          if [ "${{ steps.latest.outputs.latest_tag }}" = "0.0.0" ]; then
+            # If this is the first release, get all commits
+            COMMITS=$(git log --pretty=format:"- %s")
+          else
+            # Otherwise get commits since last tag
+            COMMITS=$(git log ${{ steps.latest.outputs.latest_tag }}..HEAD --pretty=format:"- %s")
+          fi
           echo "COMMITS<<EOF" >> $GITHUB_OUTPUT
           echo "$COMMITS" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
