@@ -1,0 +1,167 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Wedgie {
+  id         Int      @id @default(autoincrement())
+  videoUrl   Json?    @default("{}")
+  position   Json     @default("{\"x\": 0, \"y\": 0}")
+  wedgieDate DateTime @default(now())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  number     Int      @default(1)
+
+  teamName        String
+  teamAgainstName String
+
+  teamAgainst Team    @relation("teamAgainst", fields: [teamAgainstName], references: [name])
+  team        Team    @relation("team", fields: [teamName], references: [name])
+  types       Type[]
+  Player      Player  @relation(fields: [playerName], references: [name])
+  playerName  String
+  Season      Season  @relation(fields: [seasonName], references: [name])
+  seasonName  String
+  Game        Game?   @relation(fields: [gameName], references: [name])
+  gameName    String?
+
+  @@index([teamName])
+  @@index([teamAgainstName])
+  @@index([playerName])
+  @@index([seasonName])
+  @@index([gameName])
+}
+
+model Player {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  wedgies   Wedgie[]
+
+  @@index([name])
+}
+
+model Season {
+  id         Int      @id @default(autoincrement())
+  name       String   @unique
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  totalGames Int      @default(0)
+  games      Game[]
+  Global     Global[]
+  wedgies    Wedgie[]
+
+  @@index([name])
+}
+
+model Game {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  seasonName String?
+  season    Season?  @relation(fields: [seasonName], references: [name])
+  wedgies   Wedgie[]
+
+  @@index([seasonName])
+  @@index([name])
+}
+
+model Team {
+  id               Int      @id @default(autoincrement())
+  name             String   @unique
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  teamAgainstGames Wedgie[] @relation("teamAgainst")
+  teamGames        Wedgie[] @relation("team")
+
+  @@index([name])
+}
+
+model Type {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  wedgies   Wedgie[]
+
+  @@index([name])
+}
+
+model Global {
+  id                   Int     @id @default(autoincrement())
+  currentSeasonId      Int     @default(1)
+  currentTotalWedgies  Int     @default(0)
+  currentTotalGames    Int     @default(0)
+  currentTotalMinutes  Int     @default(0)
+  currentTotalFGA      Int     @default(0)
+  currentTotalPoss     Int     @default(0)
+  pace                 Int     @default(0)
+  simplePace           Int
+  mathPace             Int
+  liveGames            Boolean @default(false)
+  currentSeason        Season  @relation(fields: [currentSeasonId], references: [id], onDelete: Cascade)
+}
+
+model Account {
+  id                       String  @id @default(cuid())
+  userId                   String
+  type                     String
+  provider                 String
+  providerAccountId        String
+  refresh_token            String?
+  access_token             String?
+  expires_at               Int?
+  token_type               String?
+  scope                    String?
+  id_token                 String?
+  session_state            String?
+  refresh_token_expires_in Int?
+  user                     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model TshirtOrder {
+  id              Int      @id @default(autoincrement())
+  size            String
+  color           String
+  customerEmail   String
+  stripeSessionId String   @unique
+  shippingName    String
+  shippingAddress Json
+  printfulOrderId String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}

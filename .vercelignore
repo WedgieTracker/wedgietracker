@@ -1,0 +1,16 @@
+src/components/dev
+src/server/dev
+src/app/admin/wedgie-game-linking
+src/app/api/auth/instagram
+src/app/api/bluesky
+src/app/api/instagram
+src/app/api/twitter
+src/app/api/youtube
+local_database.dump
+public/github-logo-light.svg
+public/github-logo-dark.svg
+public/fonts
+public/reel-template.png
+public/shorts-template.png
+public/thumbnail-template.png
+public/thumbnail-template-1080.png

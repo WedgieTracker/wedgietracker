@@ -1,0 +1,21 @@
+[
+    {
+        "IpProtocol": "tcp",
+        "FromPort": 5432,
+        "ToPort": 5432,
+        "UserIdGroupPairs": [],
+        "IpRanges": [
+            {
+                "CidrIp": "10.0.0.0/16"
+            },
+            {
+                "CidrIp": "143.58.243.25/32"
+            },
+            {
+                "CidrIp": "0.0.0.0/0"
+            }
+        ],
+        "Ipv6Ranges": [],
+        "PrefixListIds": []
+    }
+]

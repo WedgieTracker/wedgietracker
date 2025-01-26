@@ -1,0 +1,12 @@
+@import url('https://fonts.googleapis.com/css2?family=Sono:wght@500&display=swap');
+
+.tshirtProduct svg text {
+    font-family: 'Sono', monospace;
+    font-weight: 700;
+    text-rendering: geometricPrecision;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-smooth: always;
+    font-feature-settings: "kern" 1;
+    shape-rendering: geometricPrecision;
+  }

@@ -1,0 +1,201 @@
+// @ts-nocheck
+
+"use client";
+
+import { useState } from "react";
+import { api } from "~/trpc/react";
+
+const BATCH_SIZE = 10; // Process 10 videos at a time
+
+export function BatchVideoProcessor() {
+  const [processing, setProcessing] = useState(false);
+  const [progress, setProgress] = useState({
+    current: 0,
+    total: 0,
+    batch: 0,
+    totalBatches: 0,
+  });
+  const [downloadReady, setDownloadReady] = useState(false);
+  const [failedUrls, setFailedUrls] = useState<
+    Array<{ url: string; error: string }>
+  >([]);
+
+  const { data: wedgies, isLoading } =
+    api.wedgie.getSelfHostedVideos.useQuery();
+
+  const processBatch = async (batch: typeof wedgies) => {
+    if (!batch) return;
+
+    console.log("Processing batch:", batch); // Debug entire batch
+
+    const results = await Promise.all(
+      batch.map(async (wedgie) => {
+        const videoUrl = (wedgie.videoUrl as any).selfHosted;
+        console.log("Processing URL:", videoUrl); // Debug each URL being processed
+
+        // Log the entire wedgie object to see what we're working with
+        console.log("Wedgie object:", {
+          url: videoUrl,
+          videoUrl: wedgie.videoUrl,
+          raw: wedgie,
+        });
+
+        const title = `${wedgie.playerName} WEDGIE No. ${wedgie.number} - ${wedgie.seasonName} season`;
+        const description =
+          `${wedgie.playerName} wedgie during ${wedgie.teamName} vs ${wedgie.teamAgainstName}\n\n` +
+          `Number ${wedgie.number} of the ${wedgie.seasonName} season\n\n` +
+          `WedgieTracker.com\n` +
+          `@NoDunksInc #WeAreWedgie`;
+
+        const formData = new FormData();
+        formData.append("videoUrl", videoUrl);
+        formData.append("title", title);
+        formData.append("description", description);
+        formData.append("number", wedgie.number?.toString() ?? "0");
+        formData.append("season", wedgie.seasonName ?? "");
+        formData.append("player", wedgie.playerName ?? "");
+        formData.append("batchProcess", "true");
+
+        try {
+          const response = await fetch("/api/youtube/process", {
+            method: "POST",
+            body: formData,
+          });
+          const data = await response.json();
+
+          if (!data.success) {
+            console.log("Failed URL:", {
+              url: videoUrl,
+              error: data.error,
+              response: data,
+            }); // Detailed error logging
+            setFailedUrls((prev) => [
+              ...prev,
+              {
+                url: videoUrl,
+                error: data.error || "Unknown error",
+              },
+            ]);
+          }
+          return data;
+        } catch (error) {
+          console.log("Failed URL with exception:", {
+            url: videoUrl,
+            error: error,
+          }); // Detailed error logging
+          setFailedUrls((prev) => [
+            ...prev,
+            {
+              url: videoUrl,
+              error: error instanceof Error ? error.message : "Unknown error",
+            },
+          ]);
+          return null;
+        }
+      }),
+    );
+  };
+
+  const handleProcessVideos = async () => {
+    if (!wedgies) return;
+    setProcessing(true);
+    setProgress({
+      current: 0,
+      total: wedgies.length,
+      batch: 0,
+      totalBatches: Math.ceil(wedgies.length / BATCH_SIZE),
+    });
+
+    try {
+      // Process videos in batches
+      for (let i = 0; i < wedgies.length; i += BATCH_SIZE) {
+        const batch = wedgies.slice(i, i + BATCH_SIZE);
+        await processBatch(batch);
+
+        setProgress((prev) => ({
+          ...prev,
+          current: i + batch.length,
+          batch: Math.floor(i / BATCH_SIZE) + 1,
+        }));
+      }
+
+      setDownloadReady(true);
+    } catch (error) {
+      console.error("Error processing videos:", error);
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const handleDownload = () => {
+    window.location.href = "/api/youtube/download";
+  };
+
+  return (
+    <div className="w-full max-w-md space-y-8 rounded-lg bg-white/10 p-6 text-white">
+      <h2 className="text-center text-2xl font-bold">Batch Video Processor</h2>
+
+      <div className="text-center">
+        <p className="text-lg">
+          {isLoading
+            ? "Loading..."
+            : `${wedgies?.length ?? 0} videos ready to process`}
+        </p>
+      </div>
+
+      {processing && (
+        <div className="space-y-2">
+          <div className="h-2 w-full rounded-full bg-gray-700">
+            <div
+              className="h-2 rounded-full bg-blue-600 transition-all"
+              style={{
+                width: `${(progress.current / progress.total) * 100}%`,
+              }}
+            />
+          </div>
+          <p className="text-center">
+            Processing batch {progress.batch} of {progress.totalBatches}
+          </p>
+          <p className="text-center text-sm text-gray-400">
+            {progress.current} of {progress.total} videos processed
+          </p>
+        </div>
+      )}
+
+      {failedUrls.length > 0 && (
+        <div className="mt-4 rounded-lg bg-red-900/50 p-4">
+          <h3 className="mb-2 font-bold">Failed URLs ({failedUrls.length}):</h3>
+          <div className="max-h-40 overflow-y-auto">
+            {failedUrls.map((fail, index) => (
+              <div key={index} className="mb-2 text-sm">
+                <div className="font-medium">
+                  URL: {fail.url || "No URL provided"}
+                </div>
+                <div className="text-red-300">Error: {fail.error}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="space-y-4">
+        <button
+          onClick={handleProcessVideos}
+          disabled={processing || !wedgies?.length}
+          className="w-full rounded bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+        >
+          {processing ? "Processing..." : "Process Videos"}
+        </button>
+
+        {downloadReady && (
+          <button
+            onClick={handleDownload}
+            className="w-full rounded bg-green-600 px-4 py-2 font-medium text-white hover:bg-green-700"
+          >
+            Download Processed Videos
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
