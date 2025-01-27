@@ -14,6 +14,11 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Configure Git
+        run: |
+          git config --global user.name "gek0z"
+          git config --global user.email "riccardoaltieri@me.com"
+
       - name: Set up SSH
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -25,5 +30,19 @@ jobs:
 
       - name: Push to private repository
         run: |
+          # Create a temporary branch without the excluded files
+          git checkout -b temp-sync
+          if [ -f .github/sync-exclude.txt ]; then
+            while IFS= read -r pattern; do
+              git rm -r --cached "$pattern" || true
+            done < .github/sync-exclude.txt
+          fi
+          git commit -m "Sync commit (excluding workflow files)" || true
+
+          # Push to private repository
           git remote add private git@github.com:gek0z/wedgietracker.git
-          git push private main:main --force
+          git push private temp-sync:main --force
+
+          # Cleanup
+          git checkout main
+          git branch -D temp-sync
