@@ -218,16 +218,30 @@ export function WedgieModal({
                 </h2>
                 <div>
                   <p className="text-[.9em] font-bold tracking-wider text-yellow">
-                    {new Date(wedgie.wedgieDate).toLocaleDateString("en-US", {
-                      month: "long",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
+                    {new Date(wedgie.wedgieDate).toLocaleDateString("de-DE", {
+                      day: "2-digit",
+                      month: "2-digit",
+                      year: "2-digit",
+                    }) === "01.01.70"
+                      ? "💎💎💎"
+                      : new Date(wedgie.wedgieDate).toLocaleDateString(
+                          "en-US",
+                          {
+                            month: "long",
+                            day: "numeric",
+                            year: "numeric",
+                          },
+                        )}
                   </p>
+
                   {/* season  */}
-                  <p className="mt-[.5em] text-[.5em] uppercase tracking-wider text-white">
-                    2024/25 Season
-                  </p>
+                  {wedgie.seasonName && wedgie.seasonName !== "GEMS" && (
+                    <p className="mt-[.5em] text-[.5em] uppercase tracking-wider text-white">
+                      {wedgie.seasonName
+                        ? `${wedgie.seasonName} Season`
+                        : "Season"}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -246,8 +260,10 @@ export function WedgieModal({
                   Teams
                 </p>
                 <p className="text-[1.25em] font-bold text-white">
-                  <span className="text-pink">{wedgie.teamName}</span> vs{" "}
-                  {wedgie.teamAgainstName}
+                  <span className="text-pink">{wedgie.teamName}</span>{" "}
+                  {!wedgie.teamAgainstName.includes("Unknown")
+                    ? `vs ${wedgie.teamAgainstName}`
+                    : ""}
                 </p>
 
                 <p className="text-right text-[.75em] font-bold uppercase tracking-wider text-white/60">

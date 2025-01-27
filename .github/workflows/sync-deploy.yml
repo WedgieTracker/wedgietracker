@@ -1,0 +1,22 @@
+name: Sync Private Repository
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout public repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Push to private repository
+        env:
+          GITHUB_TOKEN: ${{ secrets.SYNC_TOKEN }}
+        run: |
+          git remote add private https://x-access-token:${GITHUB_TOKEN}@github.com/gek0z/wedgietracker.git
+          git push private main:main --force

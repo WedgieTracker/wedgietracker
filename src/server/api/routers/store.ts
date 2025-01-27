@@ -109,11 +109,11 @@ export const storeRouter = createTRPCRouter({
               delivery_estimate: {
                 minimum: {
                   unit: "business_day",
-                  value: 7,
+                  value: 21,
                 },
                 maximum: {
                   unit: "business_day",
-                  value: 14,
+                  value: 28,
                 },
               },
             },
