@@ -104,7 +104,13 @@ export function Wedgie({
                 day: "2-digit",
                 month: "2-digit",
                 year: "2-digit",
-              })}
+              }) === "01.01.70"
+                ? "💎💎💎"
+                : new Date(wedgie.wedgieDate).toLocaleDateString("de-DE", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "2-digit",
+                  })}
             </div>
             <div
               className="w-full rounded-b-[0.125rem] border-t border-yellow bg-yellow px-3 py-0.5 text-center font-bold text-darkpurple transition-all duration-300 group-last:rounded-bl-xl group-hover:border-t-yellow group-hover:bg-transparent group-hover:text-yellow"
@@ -128,8 +134,10 @@ export function Wedgie({
               className="font-bold text-white"
               style={{ fontSize: sizes.teamName }}
             >
-              <span className="text-pink">{wedgie.teamName}</span> -{" "}
-              {wedgie.teamAgainstName}
+              <span className="text-pink">{wedgie.teamName}</span>{" "}
+              {!wedgie.teamAgainstName.includes("Unknown")
+                ? `- ${wedgie.teamAgainstName}`
+                : ""}
               {showSeason && (
                 <span className="vertical-text ml-2 align-baseline text-xs leading-none text-white/60">
                   {wedgie.seasonName}
