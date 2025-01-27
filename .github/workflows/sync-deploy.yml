@@ -43,7 +43,8 @@ jobs:
           git remote add private git@github.com:gek0z/wedgietracker.git
           git push private temp-sync:main --force
 
-          # Cleanup - modified to handle deleted files
+          # Cleanup - modified to forcefully remove untracked files
           git reset --hard HEAD
+          git clean -fd  # Force remove untracked files and directories
           git checkout main
           git branch -D temp-sync
