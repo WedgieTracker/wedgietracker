@@ -1,6 +1,6 @@
 ---
 title: The Evolution of the WedgieTracker
-date: "2025-01-26"
+date: "2025-01-27"
 excerpt: A brief history of the WedgieTracker and where we're headed next
 author: "Riccardo Altieri"
 # coverImage: /images/example.jpg
