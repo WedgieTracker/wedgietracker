@@ -14,9 +14,19 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Configure Git
+        run: |
+          git config --global user.name "GitHub Action"
+          git config --global user.email "action@github.com"
+
       - name: Push to private repository
         env:
           GITHUB_TOKEN: ${{ secrets.SYNC_TOKEN }}
         run: |
-          git remote add private https://x-access-token:${GITHUB_TOKEN}@github.com/gek0z/wedgietracker.git
-          git push private main:main --force
+          echo "Setting up private remote..."
+          git remote add private "https://x-access-token:${GITHUB_TOKEN}@github.com/gek0z/wedgietracker.git"
+          echo "Attempting to push to private repository..."
+          git push private main:main --force || {
+            echo "Push failed. Checking if remote is accessible..."
+            git ls-remote --exit-code private
+          }
