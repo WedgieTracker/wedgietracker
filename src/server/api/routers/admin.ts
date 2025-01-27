@@ -14,7 +14,7 @@ export const adminRouter = createTRPCRouter({
         currentSeason: true,
       },
     });
-    console.log(global);
+    // console.log(global);
     return global ?? null;
   }),
 

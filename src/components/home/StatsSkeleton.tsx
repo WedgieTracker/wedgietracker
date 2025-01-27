@@ -89,7 +89,7 @@ export function StatsSkeleton() {
         </div>
       </div>
 
-      <div className="relative flex min-h-[10em] flex-1 flex-col justify-center bg-darkpurple p-8 md:min-h-[14em]">
+      <div className="relative flex min-h-[12em] flex-1 flex-col justify-center bg-darkpurple p-8 md:min-h-[14em]">
         <div className="flex flex-row items-center justify-center gap-5">
           <div className="flex w-[100px] flex-col items-center justify-center text-center md:w-[135px]">
             <div className="w-full text-pace-text-mobile font-black uppercase leading-none tracking-wider text-pink md:text-pace-text">
