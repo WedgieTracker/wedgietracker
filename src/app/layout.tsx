@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import { TRPCReactProvider } from "~/trpc/react";
 import { Toaster } from "~/components/ui/toaster";
 import { defaultMetadata } from "~/config/metadata";
+import { Metadata } from "next";
 
 import GoogleAnalytics from "~/components/GoogleAnalytics";
 
@@ -11,7 +12,9 @@ const inter = Inter({
   variable: "--font-inter",
 });
 
-export const metadata = defaultMetadata;
+export const metadata: Metadata = {
+  ...defaultMetadata,
+};
 
 export default function RootLayout({
   children,

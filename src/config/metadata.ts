@@ -31,14 +31,6 @@ export const defaultMetadata: Metadata = {
     },
     description: APP_DESCRIPTION,
     url: APP_URL,
-    images: [
-      {
-        url: "https://res.cloudinary.com/wedgietracker/image/upload/v1736700345/assets/social-wedgietracker_bibnbu.jpg",
-        width: 1200,
-        height: 630,
-        alt: "WedgieTracker Social Share Image",
-      },
-    ],
   },
   twitter: {
     card: "summary",
@@ -47,14 +39,6 @@ export const defaultMetadata: Metadata = {
       template: `%s | ${APP_NAME}`,
     },
     description: APP_DESCRIPTION,
-    images: [
-      {
-        url: "https://res.cloudinary.com/wedgietracker/image/upload/v1736700345/assets/social-wedgietracker_bibnbu.jpg",
-        width: 1200,
-        height: 630,
-        alt: "WedgieTracker Social Share Image",
-      },
-    ],
   },
   icons: [
     { rel: "icon", url: "/favicon.ico" },
