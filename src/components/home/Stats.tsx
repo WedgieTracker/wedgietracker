@@ -106,8 +106,12 @@ export function Stats({ stats, isLoading }: StatsProps) {
     );
     const today = new Date(estFormatter.format(new Date()));
 
+    console.log("lastWedgieDate", lastWedgieDate);
+    console.log("today", today);
+
     const diffTime = Math.abs(today.getTime() - lastWedgieDate.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) - 1;
+    console.log("diffDays", diffDays);
 
     return diffDays;
   };
@@ -217,14 +221,14 @@ export function Stats({ stats, isLoading }: StatsProps) {
             </div>
           </div>
 
-          {daysAgo && daysAgo > 1 ? (
+          {daysAgo && daysAgo > 0 ? (
             <div className="ml-2 flex w-[140px] flex-row items-center justify-center gap-3">
               <div className="pl-2 text-center uppercase">
                 <div className="shadow-lg-darkpurple-light text-5xl font-black leading-none text-yellow">
                   {daysAgo}
                 </div>
                 <div className="mt-[-.6em] text-sm font-black leading-none text-pink">
-                  days
+                  {daysAgo === 1 ? "day" : "days"}
                 </div>
               </div>
               <div className="text-left font-bold uppercase leading-none tracking-wide text-white">

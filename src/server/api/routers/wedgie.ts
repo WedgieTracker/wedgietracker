@@ -367,6 +367,8 @@ export const wedgieRouter = createTRPCRouter({
       },
     });
 
+    console.log("lastWedgie", lastWedgie);
+
     // count the number of wedgies in the current season
     const currentSeasonWedgies = await ctx.db.wedgie.count({
       where: {
@@ -379,6 +381,8 @@ export const wedgieRouter = createTRPCRouter({
     if (currentSeasonWedgies < globalSettings.currentTotalWedgies) {
       dateNow = new Date();
     }
+
+    console.log("dateNow", dateNow, lastWedgie?.wedgieDate);
 
     return {
       totalWedgies: globalSettings.currentTotalWedgies ?? 0,
