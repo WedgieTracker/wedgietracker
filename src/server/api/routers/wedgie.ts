@@ -11,7 +11,6 @@ import {
 import { calculatePace } from "~/utils/paceCalculator";
 
 interface VideoUrl {
-  selfHosted?: string;
   youtube?: string;
   youtubeShort?: string;
   cloudinary?: string;
@@ -211,7 +210,6 @@ export const wedgieRouter = createTRPCRouter({
     // Filter and sort by wedgieDate
     return wedgies
       .filter((wedgie) => !(wedgie.videoUrl as VideoUrl).youtube)
-      .filter((wedgie) => (wedgie.videoUrl as VideoUrl).selfHosted !== "")
       .sort(
         (a, b) =>
           new Date(b.wedgieDate).getTime() - new Date(a.wedgieDate).getTime(),

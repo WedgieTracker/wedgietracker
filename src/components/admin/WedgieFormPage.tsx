@@ -13,7 +13,6 @@ import { WedgieSocialShareWrapper } from "~/components/admin/WedgieSocialShareWr
 import { CloudinaryUpload } from "~/components/admin/CloudinaryUpload";
 
 interface VideoUrls {
-  selfHosted?: string;
   cloudinary?: string;
   youtube?: string;
   youtubeNoDunks?: string;
@@ -52,7 +51,6 @@ export function WedgieFormPage({ wedgie, currentSeason }: WedgieFormPageProps) {
       ? (wedgie.position as { x: number; y: number })
       : null,
     videoUrl: {
-      selfHosted: (wedgie?.videoUrl as VideoUrls)?.selfHosted ?? "",
       cloudinary: (wedgie?.videoUrl as VideoUrls)?.cloudinary ?? "",
       youtube: (wedgie?.videoUrl as VideoUrls)?.youtube ?? "",
       youtubeNoDunks: (wedgie?.videoUrl as VideoUrls)?.youtubeNoDunks ?? "",
@@ -251,28 +249,6 @@ export function WedgieFormPage({ wedgie, currentSeason }: WedgieFormPageProps) {
               Video URLs
             </label>
             <div className="mt-1 space-y-2">
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Self Hosted URL"
-                  value={formData.videoUrl.selfHosted ?? ""}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      videoUrl: {
-                        ...formData.videoUrl,
-                        selfHosted: e.target.value,
-                      },
-                    })
-                  }
-                  className="block w-full rounded-md border-gray-300 bg-white/5 p-2 text-white"
-                />
-                {formData.videoUrl.selfHosted && (
-                  <span className="absolute right-2 top-2 rounded bg-green-500 px-2 py-1 text-xs font-bold text-black">
-                    Self Hosted
-                  </span>
-                )}
-              </div>
               <CloudinaryUpload
                 initialUrl={formData.videoUrl.cloudinary}
                 onUploadComplete={(url) =>
