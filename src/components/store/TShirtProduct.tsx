@@ -6,6 +6,7 @@ import { api } from "~/trpc/react";
 import type { Size, Color } from "~/types/product";
 import { cn } from "~/lib/utils";
 import { Dialog, DialogContent, DialogTitle } from "~/components/ui/dialog";
+import { Maximize2 } from "lucide-react";
 
 import styles from "./TShirtProduct.module.css";
 
@@ -19,32 +20,32 @@ const PRICE = 3499; // $34.99
 
 const TSHIRT_IMAGES: Record<Color, string[]> = {
   Black: [
-    "https://res.cloudinary.com/wedgietracker/image/upload/v1737220659/mockups-tshirt/open-black_zurvux.png",
-    "https://res.cloudinary.com/wedgietracker/image/upload/v1737220658/mockups-tshirt/side-black_ubzmjd.png",
-    "https://res.cloudinary.com/wedgietracker/image/upload/v1737800463/mockups-tshirt/back-black_irqltu.png",
-    "https://res.cloudinary.com/wedgietracker/image/upload/v1737800464/mockups-tshirt/number-black_sbfoxw.png",
-    "https://res.cloudinary.com/wedgietracker/image/upload/v1737220662/mockups-tshirt/folded-black_xyfesd.png",
+    "https://res.cloudinary.com/wedgietracker/image/upload/v1738513484/mockups-tshirt/webp/open-black_gsboy0.webp",
+    "https://res.cloudinary.com/wedgietracker/image/upload/v1738513487/mockups-tshirt/webp/side-black_lzwp9l.webp",
+    "https://res.cloudinary.com/wedgietracker/image/upload/v1738513480/mockups-tshirt/webp/back-black_zvchtb.webp",
+    "https://res.cloudinary.com/wedgietracker/image/upload/v1738513524/mockups-tshirt/webp/number-black_alrj3r.webp",
+    "https://res.cloudinary.com/wedgietracker/image/upload/v1738513480/mockups-tshirt/webp/folded-black_ydfhak.webp",
   ],
   "Ice Blue": [
-    "https://res.cloudinary.com/wedgietracker/image/upload/v1737220659/mockups-tshirt/open-blue_juilfa.png",
-    "https://res.cloudinary.com/wedgietracker/image/upload/v1737220658/mockups-tshirt/side-blue_nzoi2w.png",
-    "https://res.cloudinary.com/wedgietracker/image/upload/v1737800463/mockups-tshirt/back-blue_rcnniv.png",
-    "https://res.cloudinary.com/wedgietracker/image/upload/v1737800464/mockups-tshirt/number-blue_gsimmx.png",
-    "https://res.cloudinary.com/wedgietracker/image/upload/v1737220662/mockups-tshirt/folded-blue_eblukm.png",
+    "https://res.cloudinary.com/wedgietracker/image/upload/v1738513485/mockups-tshirt/webp/open-blue_x92czt.webp",
+    "https://res.cloudinary.com/wedgietracker/image/upload/v1738513487/mockups-tshirt/webp/side-blue_wrh7ur.webp",
+    "https://res.cloudinary.com/wedgietracker/image/upload/v1738513481/mockups-tshirt/webp/back-blue_m8aldc.webp",
+    "https://res.cloudinary.com/wedgietracker/image/upload/v1738513483/mockups-tshirt/webp/number-blue_piflos.webp",
+    "https://res.cloudinary.com/wedgietracker/image/upload/v1738513482/mockups-tshirt/webp/folded-blue_twg2vu.webp",
   ],
   Peach: [
-    "https://res.cloudinary.com/wedgietracker/image/upload/v1737220658/mockups-tshirt/open-peach_olaahj.png",
-    "https://res.cloudinary.com/wedgietracker/image/upload/v1737220658/mockups-tshirt/side-peach_xjn2om.png",
-    "https://res.cloudinary.com/wedgietracker/image/upload/v1737800464/mockups-tshirt/back-peach_bzdn9v.png",
-    "https://res.cloudinary.com/wedgietracker/image/upload/v1737800464/mockups-tshirt/number-peach_bcrds8.png",
-    "https://res.cloudinary.com/wedgietracker/image/upload/v1737220660/mockups-tshirt/folded-peach_llbbng.png",
+    "https://res.cloudinary.com/wedgietracker/image/upload/v1738513485/mockups-tshirt/webp/open-peach_p9v6rn.webp",
+    "https://res.cloudinary.com/wedgietracker/image/upload/v1738513488/mockups-tshirt/webp/side-peach_nilx9u.webp",
+    "https://res.cloudinary.com/wedgietracker/image/upload/v1738513480/mockups-tshirt/webp/back-peach_tswppe.webp",
+    "https://res.cloudinary.com/wedgietracker/image/upload/v1738513483/mockups-tshirt/webp/number-peach_ky9jhj.webp",
+    "https://res.cloudinary.com/wedgietracker/image/upload/v1738513482/mockups-tshirt/webp/folded-peach_w26ser.webp",
   ],
   White: [
-    "https://res.cloudinary.com/wedgietracker/image/upload/v1737221066/mockups-tshirt/open-white_g04hvv.png",
-    "https://res.cloudinary.com/wedgietracker/image/upload/v1737221066/mockups-tshirt/side-white_tiyzjx.png",
-    "https://res.cloudinary.com/wedgietracker/image/upload/v1737800463/mockups-tshirt/back-white_ssvodq.png",
-    "https://res.cloudinary.com/wedgietracker/image/upload/v1737800463/mockups-tshirt/number-white_fgsmgd.png",
-    "https://res.cloudinary.com/wedgietracker/image/upload/v1737221067/mockups-tshirt/folded-white_nmxh0p.png",
+    "https://res.cloudinary.com/wedgietracker/image/upload/v1738513486/mockups-tshirt/webp/open-white_lvryfx.webp",
+    "https://res.cloudinary.com/wedgietracker/image/upload/v1738513488/mockups-tshirt/webp/side-white_ymzw00.webp",
+    "https://res.cloudinary.com/wedgietracker/image/upload/v1738513480/mockups-tshirt/webp/back-white_gee4dn.webp",
+    "https://res.cloudinary.com/wedgietracker/image/upload/v1738513484/mockups-tshirt/webp/number-white_dvxyyj.webp",
+    "https://res.cloudinary.com/wedgietracker/image/upload/v1738513481/mockups-tshirt/webp/folded-white_j64vmf.webp",
   ],
 };
 
@@ -73,7 +74,58 @@ export function TShirtProduct() {
     "Getting the total number of wedgies...",
     "Counting total orders...",
     "Generating your t-shirt...",
+    "Final touches...",
   ];
+  const [dragStart, setDragStart] = useState<number | null>(null);
+  const [dragEnd, setDragEnd] = useState<number | null>(null);
+
+  // Minimum swipe distance in pixels
+  const minSwipeDistance = 50;
+
+  // Handle both touch and mouse events
+  const handleDragStart = (e: React.TouchEvent | React.MouseEvent) => {
+    // Prevent click event when dragging
+    e.preventDefault();
+    setDragEnd(null);
+    if ("touches" in e) {
+      setDragStart(e.touches[0]?.clientX ?? null);
+    } else {
+      setDragStart(e.clientX);
+    }
+  };
+
+  const handleDragMove = (e: React.TouchEvent | React.MouseEvent) => {
+    if (!dragStart) return; // Only move if we've started dragging
+
+    if ("touches" in e) {
+      setDragEnd(e.touches[0]?.clientX ?? null);
+    } else if ("clientX" in e) {
+      setDragEnd(e.clientX);
+    }
+  };
+
+  const handleDragEnd = () => {
+    if (!dragStart || !dragEnd) return;
+
+    const distance = dragStart - dragEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe) {
+      setSelectedImageIndex((prev) =>
+        prev === sortedImages.length - 1 ? 0 : prev + 1,
+      );
+    }
+    if (isRightSwipe) {
+      setSelectedImageIndex((prev) =>
+        prev === 0 ? sortedImages.length - 1 : prev - 1,
+      );
+    }
+
+    // Reset drag states
+    setDragStart(null);
+    setDragEnd(null);
+  };
 
   const checkoutMutation = api.store.createCheckoutSession.useMutation({
     onSuccess: async (sessionId) => {
@@ -220,17 +272,36 @@ export function TShirtProduct() {
         {/* Image */}
         <div className="flex flex-col gap-4">
           <div
-            onClick={() => setDialogOpen(true)}
-            className="group relative aspect-square cursor-zoom-in overflow-hidden rounded-lg bg-darkpurple-light/50"
+            // onClick={(e) => {
+            //   // Only open dialog if we're not dragging
+            //   if (!dragStart && !dragEnd) {
+            //     setDialogOpen(true);
+            //   }
+            // }}
+            onTouchStart={handleDragStart}
+            onTouchMove={handleDragMove}
+            onTouchEnd={handleDragEnd}
+            onMouseDown={handleDragStart}
+            onMouseMove={dragStart ? handleDragMove : undefined}
+            onMouseUp={handleDragEnd}
+            onMouseLeave={handleDragEnd}
+            className="group relative aspect-square cursor-pointer select-none overflow-hidden rounded-lg bg-darkpurple-light/50"
           >
             <img
               src={sortedImages[selectedImageIndex]}
               alt={`${selectedColor} T-shirt view ${selectedImageIndex + 1}`}
-              className="h-full w-full object-contain transition-transform group-hover:scale-105"
+              className="pointer-events-none h-full w-full select-none object-contain"
             />
+            {/* Add zoom icon */}
+            <div
+              className="absolute right-4 top-4 z-10 cursor-pointer rounded-full bg-darkpurple-light/80 p-2 transition-all duration-300 hover:bg-pink"
+              onClick={() => setDialogOpen(true)}
+            >
+              <Maximize2 className="h-5 w-5 text-white" />
+            </div>
             {/* Number overlay */}
             {sortedImages[selectedImageIndex]?.includes("/number-") ? (
-              <div className="pointer-events-none absolute left-1/2 top-1/2 h-full w-full -translate-x-1/2 -translate-y-1/2 transform transition-transform duration-300 group-hover:scale-105">
+              <div className="pointer-events-none absolute left-1/2 top-1/2 h-full w-full -translate-x-1/2 -translate-y-1/2 transform transition-transform duration-300">
                 <SvgNumber
                   number={availableQuantity.currentNumber}
                   selectedColor={selectedColor}
@@ -238,7 +309,7 @@ export function TShirtProduct() {
                 />
               </div>
             ) : sortedImages[selectedImageIndex]?.includes("/back-") ? (
-              <div className="pointer-events-none absolute left-1/2 top-1/2 h-full w-full -translate-x-1/2 -translate-y-1/2 transform transition-transform duration-300 group-hover:scale-105">
+              <div className="pointer-events-none absolute left-1/2 top-1/2 h-full w-full -translate-x-1/2 -translate-y-1/2 transform transition-transform duration-300">
                 <SvgNumber
                   number={availableQuantity.currentNumber}
                   selectedColor={selectedColor}
@@ -250,7 +321,7 @@ export function TShirtProduct() {
             <div
               className={cn(
                 styles.tshirtProduct,
-                "absolute bottom-0 left-0 right-0 flex justify-center gap-2 bg-gradient-to-t from-darkpurple-lighter to-transparent p-4 opacity-90 transition-opacity group-hover:opacity-100",
+                "absolute bottom-0 left-0 right-0 flex justify-center gap-2 bg-gradient-to-t from-darkpurple-light to-transparent p-4 transition-all duration-300 group-hover:from-darkpurple-lighter",
               )}
             >
               {sortedImages.map((image, index) => (
@@ -302,11 +373,20 @@ export function TShirtProduct() {
                   "flex max-h-[80vh] w-full flex-col",
                 )}
               >
-                <div className="relative aspect-square min-h-0 flex-1">
+                <div
+                  className="relative aspect-square min-h-0 flex-1"
+                  onTouchStart={handleDragStart}
+                  onTouchMove={handleDragMove}
+                  onTouchEnd={handleDragEnd}
+                  onMouseDown={handleDragStart}
+                  onMouseMove={dragStart ? handleDragMove : undefined}
+                  onMouseUp={handleDragEnd}
+                  onMouseLeave={handleDragEnd}
+                >
                   <img
                     src={sortedImages[selectedImageIndex]}
                     alt={`${selectedColor} T-shirt view ${selectedImageIndex + 1}`}
-                    className="h-full w-full object-contain"
+                    className="h-full w-full select-none object-contain"
                   />
                   {sortedImages[selectedImageIndex]?.includes("/number-") ? (
                     <div className="pointer-events-none absolute left-1/2 top-1/2 h-full w-full -translate-x-1/2 -translate-y-1/2 transform transition-transform duration-300 group-hover:scale-105">

@@ -84,7 +84,7 @@ async function uploadVideo(
         categoryId: "17",
       },
       status: {
-        privacyStatus: "unlisted",
+        privacyStatus: "public",
         madeForKids: false,
         selfDeclaredMadeForKids: false,
       },

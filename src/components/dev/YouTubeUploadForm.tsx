@@ -7,7 +7,6 @@ import { Preview } from "../admin/Preview";
 import type { WedgieWithTypes } from "~/types/wedgie";
 
 interface VideoUrl {
-  selfHosted?: string;
   youtube?: string;
   cloudinary?: string;
   youtubeNoDunks?: string;
@@ -51,14 +50,14 @@ export function YouTubeUploadForm({ wedgie }: YouTubeUploadFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!(wedgie.videoUrl as VideoUrl)?.selfHosted) return;
+    if (!(wedgie.videoUrl as VideoUrl)?.cloudinary) return;
 
     setUploading(true);
     const formData = new FormData();
 
     formData.append(
       "videoUrl",
-      (wedgie.videoUrl as VideoUrl)?.selfHosted ?? "",
+      (wedgie.videoUrl as VideoUrl)?.cloudinary ?? "",
     );
     formData.append("title", title);
     formData.append("description", description);
@@ -108,10 +107,10 @@ export function YouTubeUploadForm({ wedgie }: YouTubeUploadFormProps) {
             />
           </div>
 
-          {(wedgie.videoUrl as VideoUrl)?.selfHosted && (
+          {(wedgie.videoUrl as VideoUrl)?.cloudinary && (
             <div className="mt-4">
               <video
-                src={(wedgie.videoUrl as VideoUrl)?.selfHosted}
+                src={(wedgie.videoUrl as VideoUrl)?.cloudinary}
                 controls
                 className="max-h-[200px] rounded"
               />
@@ -144,7 +143,7 @@ export function YouTubeUploadForm({ wedgie }: YouTubeUploadFormProps) {
 
         <button
           type="submit"
-          disabled={uploading || !(wedgie.videoUrl as VideoUrl)?.selfHosted}
+          disabled={uploading || !(wedgie.videoUrl as VideoUrl)?.cloudinary}
           className="w-full rounded bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700 disabled:opacity-50"
         >
           {uploading ? "Uploading..." : "Upload Video"}
