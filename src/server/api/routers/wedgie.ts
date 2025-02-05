@@ -578,7 +578,7 @@ export const wedgieRouter = createTRPCRouter({
     const currentSeason = global?.currentSeason.name;
 
     // Get top players for current season
-    const topPlayers = await ctx.db.wedgie.groupBy({
+    const allPlayers = await ctx.db.wedgie.groupBy({
       by: ["playerName"],
       where: {
         seasonName: currentSeason,
@@ -586,12 +586,13 @@ export const wedgieRouter = createTRPCRouter({
       _count: {
         playerName: true,
       },
-      orderBy: {
-        _count: {
-          playerName: "desc",
-        },
-      },
     });
+    const maxWedgies = Math.max(
+      ...allPlayers.map((player) => player._count.playerName),
+    );
+    const topPlayers = allPlayers.filter(
+      (player) => player._count.playerName === maxWedgies,
+    );
 
     // Get all wedgies for current season to count team involvement
     const wedgies = await ctx.db.wedgie.findMany({
