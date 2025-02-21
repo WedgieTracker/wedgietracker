@@ -58,7 +58,7 @@ export async function postToTwitter(
       secret: TWITTER_CONFIG.accessTokenSecret,
     };
 
-    const tweetText = `Wedgie No ${number}, on pace for ${pace}\n\n${customMessage}\n\nWedgieTracker.com`;
+    const tweetText = `Wedgie No. ${number}, on pace for ${pace}\n\n${customMessage}\n\nWedgieTracker.com x @NoDunksInc`;
 
     let mediaId: string | undefined;
 
