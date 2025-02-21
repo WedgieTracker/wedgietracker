@@ -133,7 +133,7 @@ export function TwitterPostForm({ wedgie }: TwitterPostFormProps) {
             Custom Message (optional)
           </label>
           <textarea
-            className="w-full rounded-md border border-white/10 p-2 focus:border-indigo-500 focus:ring-indigo-500"
+            className="w-full rounded-md border border-white/10 p-2 text-black focus:border-indigo-500 focus:ring-indigo-500"
             placeholder="Enter your custom message"
             value={customMessage}
             onChange={(e) => setCustomMessage(e.target.value)}
