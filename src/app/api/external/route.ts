@@ -114,19 +114,35 @@ export async function POST(request: Request) {
   // if the request has newGames array, add each game to the database
   if (newGames) {
     // check if the game already exists
-    const existingGames = await prisma.game.findMany({
+    const existingGameNames = await prisma.game.findMany({
       where: {
         name: { in: newGames.map((game) => game.name) },
       },
+      select: {
+        name: true,
+      },
     });
-    const newGamesToCreate = newGames.filter(
-      (game) => !existingGames.some((g) => g.name === game.name),
+
+    // Create a set of existing game names for faster lookup
+    const existingGameNamesSet = new Set(
+      existingGameNames.map((game) => game.name),
     );
+
+    // Filter out games that already exist
+    const newGamesToCreate = newGames.filter(
+      (game) => !existingGameNamesSet.has(game.name),
+    );
+
+    // Only create games if there are new ones
     if (newGamesToCreate.length > 0) {
+      console.log(`Creating ${newGamesToCreate.length} new games`);
       await prisma.game.createMany({
         data: newGamesToCreate,
       });
+    } else {
+      console.log("No new games to create, all games already exist");
     }
+
     // update the pace
     const currentTotalWedgies = await prisma.global.findFirst({
       where: { id: 1 },
