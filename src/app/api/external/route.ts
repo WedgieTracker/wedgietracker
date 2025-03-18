@@ -46,6 +46,7 @@ export async function POST(request: Request) {
       name: string;
       createdAt: Date;
       seasonName: string;
+      live: boolean;
     }[];
     newTotalMinutes?: number;
     newTotalPoss?: number;
@@ -65,7 +66,7 @@ export async function POST(request: Request) {
   console.log("update request", body);
 
   // if the request has a newWedgieCount, update the global wedgie count
-  if (newWedgieCount) {
+  if (newWedgieCount && newWedgieCount > 0) {
     await prisma.global.update({
       where: { id: 1 },
       data: { currentTotalWedgies: newWedgieCount },
@@ -91,7 +92,7 @@ export async function POST(request: Request) {
   }
 
   // if the request has a newTotalGamesCount, update the global total games count
-  if (newTotalGamesCount) {
+  if (newTotalGamesCount && newTotalGamesCount > 0) {
     await prisma.global.update({
       where: { id: 1 },
       data: { currentTotalGames: newTotalGamesCount },
@@ -112,28 +113,46 @@ export async function POST(request: Request) {
   }
 
   // if the request has newGames array, add each game to the database
-  if (newGames) {
-    // check if the game already exists
-    const existingGameNames = await prisma.game.findMany({
+  if (newGames && newGames.length > 0) {
+    // Update the type expectation to include 'live' property
+    const existingGames = await prisma.game.findMany({
       where: {
         name: { in: newGames.map((game) => game.name) },
       },
       select: {
+        id: true,
         name: true,
       },
     });
 
-    // Create a set of existing game names for faster lookup
-    const existingGameNamesSet = new Set(
-      existingGameNames.map((game) => game.name),
+    // Create a map of existing game names to their IDs for faster lookup
+    const existingGamesMap = new Map(
+      existingGames.map((game) => [game.name, game.id]),
     );
 
-    // Filter out games that already exist
-    const newGamesToCreate = newGames.filter(
-      (game) => !existingGameNamesSet.has(game.name),
-    );
+    // Separate games into new ones to create and existing ones to update
+    const newGamesToCreate = [];
+    const existingGamesToUpdate = [];
 
-    // Only create games if there are new ones
+    for (const game of newGames) {
+      // Add live property to the expected game structure
+      const gameWithLive = {
+        ...game,
+      };
+
+      if (existingGamesMap.has(game.name)) {
+        // For existing games, we'll update the live status
+        existingGamesToUpdate.push({
+          id: existingGamesMap.get(game.name),
+          live: gameWithLive.live,
+        });
+      } else {
+        // For new games, create them with the live status
+        newGamesToCreate.push(gameWithLive);
+      }
+    }
+
+    // Create new games
     if (newGamesToCreate.length > 0) {
       console.log(`Creating ${newGamesToCreate.length} new games`);
       await prisma.game.createMany({
@@ -141,6 +160,19 @@ export async function POST(request: Request) {
       });
     } else {
       console.log("No new games to create, all games already exist");
+    }
+
+    // Update existing games' live status
+    if (existingGamesToUpdate.length > 0) {
+      console.log(
+        `Updating live status for ${existingGamesToUpdate.length} existing games`,
+      );
+      for (const game of existingGamesToUpdate) {
+        await prisma.game.update({
+          where: { id: game.id },
+          data: { live: game.live },
+        });
+      }
     }
 
     // update the pace
@@ -162,7 +194,7 @@ export async function POST(request: Request) {
     });
   }
 
-  if (newTotalMinutes) {
+  if (newTotalMinutes && newTotalMinutes > 0) {
     await prisma.global.update({
       where: { id: 1 },
       data: { currentTotalMinutes: newTotalMinutes },
