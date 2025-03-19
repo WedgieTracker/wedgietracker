@@ -48,9 +48,6 @@ export async function calculatePace({
     select: { currentTotalWedgies: true, currentSeasonId: true },
   });
 
-  console.log(currentWedgies);
-  console.log(seasons);
-
   // replace the currentWedgies in the seasons array where currentSeasonId matches
   const seasonRates = seasons.map((season) => {
     if (season.id === currentWedgies?.currentSeasonId) {

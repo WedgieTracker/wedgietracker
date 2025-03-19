@@ -657,6 +657,7 @@ export const wedgieRouter = createTRPCRouter({
             createdAt: {
               gt: lastWedgie.wedgieDate,
             },
+            live: false,
           },
         })
       : 0;
