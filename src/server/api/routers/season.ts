@@ -27,6 +27,10 @@ export const seasonRouter = createTRPCRouter({
       seasons.map(async (season) => {
         const wedgies = await ctx.db.wedgie.findMany({
           where: { seasonName: season.name },
+          select: {
+            teamName: true,
+            teamAgainstName: true,
+          },
         });
 
         const topPlayers = await ctx.db.wedgie.groupBy({
@@ -43,19 +47,31 @@ export const seasonRouter = createTRPCRouter({
           take: 5,
         });
 
-        const topTeams = await ctx.db.wedgie.groupBy({
-          by: ["teamName"],
-          where: { seasonName: season.name },
-          _count: {
-            teamName: true,
-          },
-          orderBy: {
-            _count: {
-              teamName: "desc",
-            },
-          },
-          take: 5,
+        // Count wedgies for each team based on the includeOpponents setting
+        const teamCounts = new Map<string, number>();
+        wedgies.forEach((wedgie) => {
+          teamCounts.set(
+            wedgie.teamName,
+            (teamCounts.get(wedgie.teamName) ?? 0) + 1,
+          );
+
+          teamCounts.set(
+            wedgie.teamAgainstName,
+            (teamCounts.get(wedgie.teamAgainstName) ?? 0) + 1,
+          );
         });
+
+        // Convert to array and sort
+        const topTeams = Array.from(teamCounts.entries())
+          .sort((a, b) => {
+            // First sort by count descending
+            const countDiff = b[1] - a[1];
+            if (countDiff !== 0) return countDiff;
+            // If counts are equal, sort by team name ascending
+            return a[0].localeCompare(b[0]);
+          })
+          .slice(0, 5)
+          .map(([name, count]) => ({ name, count }));
 
         return {
           ...season,
@@ -65,8 +81,8 @@ export const seasonRouter = createTRPCRouter({
             count: p._count.playerName,
           })),
           topTeams: topTeams.map((t) => ({
-            name: t.teamName,
-            count: t._count.teamName,
+            name: t.name,
+            count: t.count,
           })),
         };
       }),
