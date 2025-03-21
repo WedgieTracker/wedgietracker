@@ -31,11 +31,6 @@ function GoogleAnalyticsContent({ gaId }: GoogleAnalyticsProps) {
 
   useEffect(() => {
     if (hasConsent && pathname) {
-      console.log("page_view", {
-        page_title: document.title,
-        page_location: window.location.href,
-        page_path: pathname,
-      });
       window.gtag("event", "page_view", {
         page_title: document.title,
         page_location: window.location.href,

@@ -106,12 +106,8 @@ export function Stats({ stats, isLoading }: StatsProps) {
     );
     const today = new Date(estFormatter.format(new Date()));
 
-    console.log("lastWedgieDate", lastWedgieDate);
-    console.log("today", today);
-
     const diffTime = Math.abs(today.getTime() - lastWedgieDate.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) - 1;
-    console.log("diffDays", diffDays);
 
     return diffDays;
   };

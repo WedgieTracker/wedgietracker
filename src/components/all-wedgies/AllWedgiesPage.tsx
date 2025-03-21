@@ -17,9 +17,8 @@ export function AllWedgiesPage() {
 
   const { data: global, isLoading: isLoadingGlobal } =
     api.admin.getGlobal.useQuery();
-  console.log("global", global);
+
   const defaultSeason = global?.currentSeason?.name ?? "2024/25";
-  console.log("defaultSeason", defaultSeason);
 
   // Initialize filters with URL params
   const [filters, setFilters] = useState({
@@ -27,8 +26,6 @@ export function AllWedgiesPage() {
     type: "",
     playerOrTeam: searchParams.get("wp") ?? searchParams.get("wt") ?? "",
   });
-
-  console.log("filters", filters);
 
   // Queries first
   const { data: allWedgies, isLoading: isLoadingAll } =
@@ -134,20 +131,18 @@ export function AllWedgiesPage() {
             setSelectedWedgieData(null);
           }}
           onPrevious={() => {
-            console.log("Previous clicked");
             const currentIndex =
               wedgies?.findIndex((w) => w.id === selectedWedgieData.id) ?? -1;
-            console.log("Current index:", currentIndex);
+
             const prevWedgie = wedgies?.[currentIndex - 1];
             if (prevWedgie) {
               setSelectedWedgieData(prevWedgie);
             }
           }}
           onNext={() => {
-            console.log("Next clicked");
             const currentIndex =
               wedgies?.findIndex((w) => w.id === selectedWedgieData.id) ?? -1;
-            console.log("Current index:", currentIndex);
+
             const nextWedgie = wedgies?.[currentIndex + 1];
             if (nextWedgie) {
               setSelectedWedgieData(nextWedgie);

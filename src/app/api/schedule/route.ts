@@ -119,7 +119,6 @@ const nbaUpdate = async () => {
 
       if (dateProcessing.getTime() > dateStart.getTime()) {
         for (const singleGame of singleDate.games) {
-          // console.log(singleGame.gameLabel);
           if (
             singleGame.gameStatus === 3 &&
             singleGame.weekName !== "All-Star" &&
@@ -192,7 +191,7 @@ const nbaUpdate = async () => {
     // Store processed games in database
     for (const game of gamesToAdd) {
       const name = `${game.homeTeam} @ ${game.awayTeam} - ${game.gameDateTimeEst}`;
-      // console.log(name);
+
       await db.game.upsert({
         where: { name: name },
         create: {
@@ -228,7 +227,6 @@ const nbaUpdate = async () => {
     if (currentTotalWedgies) {
       // Calculate paces
 
-      console.log(currentTotalWedgies, gamesPlayed);
       pace = await calculatePace({
         currentTotalWedgies: currentTotalWedgies,
         currentTotalGames: gamesPlayed,

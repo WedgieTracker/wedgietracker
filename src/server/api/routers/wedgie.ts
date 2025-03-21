@@ -365,8 +365,6 @@ export const wedgieRouter = createTRPCRouter({
       },
     });
 
-    console.log("lastWedgie", lastWedgie);
-
     // count the number of wedgies in the current season
     const currentSeasonWedgies = await ctx.db.wedgie.count({
       where: {
@@ -379,8 +377,6 @@ export const wedgieRouter = createTRPCRouter({
     if (currentSeasonWedgies < globalSettings.currentTotalWedgies) {
       dateNow = new Date();
     }
-
-    console.log("dateNow", dateNow, lastWedgie?.wedgieDate);
 
     return {
       totalWedgies: globalSettings.currentTotalWedgies ?? 0,
@@ -774,8 +770,6 @@ export const wedgieRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      console.log("input.data.position");
-      console.log(input.data.position);
       const wedgie = await ctx.db.wedgie.update({
         where: { id: input.id },
         data: {

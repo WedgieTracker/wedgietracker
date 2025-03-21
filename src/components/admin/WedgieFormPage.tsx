@@ -39,7 +39,7 @@ interface WedgieFormPageProps {
 
 export function WedgieFormPage({ wedgie, currentSeason }: WedgieFormPageProps) {
   const router = useRouter();
-  console.log(wedgie?.position);
+
   const [formData, setFormData] = useState<WedgieFormData>({
     playerName: wedgie?.playerName ?? "",
     teamName: wedgie?.teamName ?? "",
