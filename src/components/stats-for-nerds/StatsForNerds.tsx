@@ -236,7 +236,6 @@ function SeasonComparisonWrapper({ stats }: StatsForNerdsProps) {
 }
 
 function LastWedgieWrapper({ stats }: StatsForNerdsProps) {
-  console.log(stats);
   if (!stats.lastWedgiePlayer) return null;
   // if (!stats.gamesSinceLastWedgie && !stats.lastWedgiePlayer) return null;
 

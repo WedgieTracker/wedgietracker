@@ -58,10 +58,6 @@ function getPostBySlug(slug: string): BlogPost {
     content: string;
   };
 
-  console.log(data);
-  // console the full path
-  console.log(fullPath);
-
   return {
     slug,
     title: data.title,

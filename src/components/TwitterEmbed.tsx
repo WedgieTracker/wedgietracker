@@ -18,8 +18,6 @@ export function TwitterEmbed({ tweetId }: TwitterEmbedProps) {
     };
   }, []);
 
-  console.log(tweetId);
-
   return (
     <div className="w-full">
       <blockquote className="twitter-tweet">

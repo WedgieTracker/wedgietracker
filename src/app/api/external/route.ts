@@ -63,24 +63,38 @@ export async function POST(request: Request) {
     newTotalFGA = 0,
   } = body;
 
-  console.log("update request", body);
+  console.log("Update request from rasperry pi", body);
 
   // if the request has a newWedgieCount, update the global wedgie count
   if (newWedgieCount && newWedgieCount > 0) {
+    // get the total games for the current season
+    const global = await prisma.global.findFirst({
+      where: { id: 1 },
+      include: { currentSeason: true },
+    });
+
+    if (!global) {
+      return NextResponse.json(
+        { error: "Global stats not found" },
+        { status: 500 },
+      );
+    }
+
     await prisma.global.update({
       where: { id: 1 },
       data: { currentTotalWedgies: newWedgieCount },
     });
-    // get the total games for the current season
-    const currentSeasonTotalGames = await prisma.season.findFirst({
-      where: { id: currentSeason?.currentSeasonId },
-      select: { totalGames: true },
-    });
+
     // update the pace
     const pace = await calculatePace({
       currentTotalWedgies: newWedgieCount,
-      currentTotalGames: currentSeasonTotalGames?.totalGames ?? 0,
+      currentTotalGames: global.currentTotalGames,
     });
+
+    if (!pace.medianPace) {
+      return NextResponse.json({ error: "Pace update error" }, { status: 500 });
+    }
+
     await prisma.global.update({
       where: { id: 1 },
       data: {

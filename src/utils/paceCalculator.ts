@@ -51,7 +51,6 @@ export async function calculatePace({
   // replace the currentWedgies in the seasons array where currentSeasonId matches
   const seasonRates = seasons.map((season) => {
     if (season.id === currentWedgies?.currentSeasonId) {
-      console.log("currentWedgies", currentWedgies.currentTotalWedgies);
       return currentWedgies.currentTotalWedgies / season.totalGames;
     }
     return season._count.wedgies / season.totalGames;
