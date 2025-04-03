@@ -15,7 +15,7 @@ const Wave = ({ fillPercentage }: { fillPercentage: number }) => {
 
   return (
     <div
-      className="absolute bottom-[-100px] left-0 z-0 w-full bg-pink transition-all duration-1000"
+      className="absolute bottom-[-100px] left-0 z-0 w-full overflow-hidden bg-pink transition-all duration-1000"
       style={{ height: `${currentHeight}%` }}
     >
       <div className="absolute bottom-[100%] left-0 z-0 h-[50px] w-full overflow-hidden transition-all duration-1000">
