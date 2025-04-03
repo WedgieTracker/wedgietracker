@@ -15,7 +15,7 @@ const Wave = ({ fillPercentage }: { fillPercentage: number }) => {
 
   return (
     <div
-      className="absolute bottom-0 left-0 z-0 w-full bg-pink transition-all duration-1000"
+      className="absolute bottom-[-100px] left-0 z-0 w-full bg-pink transition-all duration-1000"
       style={{ height: `${currentHeight}%` }}
     >
       <div className="absolute bottom-[100%] left-0 z-0 h-[50px] w-full overflow-hidden transition-all duration-1000">
@@ -165,7 +165,7 @@ function WedgieCounterWrapper({ stats }: StatsForNerdsProps) {
   const fillPercentage = Math.min((stats.wedgiesThisSeason / 50) * 100, 100);
 
   return (
-    <div className="relative w-full max-w-xl rounded-3xl bg-darkpurple-light pb-4">
+    <div className="relative w-full max-w-xl rounded-t-3xl bg-darkpurple-light pb-4">
       <Wave fillPercentage={fillPercentage} />
       <div className="relative z-10 mx-auto max-w-[18rem] rounded-lg bg-darkpurple-light/50 p-4 text-center md:w-[90%] lg:w-[65%] lg:min-w-[24rem] lg:max-w-[30rem]">
         <div className="text-sm font-bold leading-none text-yellow md:text-base">
