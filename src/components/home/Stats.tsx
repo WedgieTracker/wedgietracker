@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Loader } from "../loader";
 import Link from "next/link";
 import { ShareableStatsVideo } from "./ShareableStatsVideo";
+import Confetti from "react-confetti";
 
 interface StatsProps {
   stats: {
@@ -17,6 +18,41 @@ interface StatsProps {
 
 const Wave = ({ fillPercentage }: { fillPercentage: number }) => {
   const [currentHeight, setCurrentHeight] = useState(0);
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+  const [showConfetti, setShowConfetti] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Handle container dimensions
+  useEffect(() => {
+    const updateDimensions = () => {
+      if (containerRef.current) {
+        const { width, height } = containerRef.current.getBoundingClientRect();
+        setDimensions({ width, height });
+      }
+    };
+
+    updateDimensions();
+
+    // Create a ResizeObserver to watch for container size changes
+    const resizeObserver = new ResizeObserver(updateDimensions);
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
+
+    // Only show confetti after client-side rendering
+    if (fillPercentage === 100) {
+      setShowConfetti(true);
+    } else {
+      setShowConfetti(false);
+    }
+
+    return () => {
+      if (containerRef.current) {
+        resizeObserver.unobserve(containerRef.current);
+      }
+      resizeObserver.disconnect();
+    };
+  }, [fillPercentage]);
 
   useEffect(() => {
     // Start at 0 and animate to the target fillPercentage
@@ -26,7 +62,8 @@ const Wave = ({ fillPercentage }: { fillPercentage: number }) => {
 
   return (
     <div
-      className="absolute bottom-[-100px] left-0 z-0 w-full bg-pink transition-all duration-1000"
+      ref={containerRef}
+      className="absolute bottom-[0px] left-0 z-0 w-full bg-pink transition-all duration-1000"
       style={{ height: `${currentHeight}%` }}
     >
       <div className="absolute bottom-[100%] left-0 z-0 h-[50px] w-full overflow-hidden transition-all duration-1000">
@@ -74,6 +111,23 @@ const Wave = ({ fillPercentage }: { fillPercentage: number }) => {
           </svg>
         </div>
       </div>
+      {/* if fillPercentage is 100, show confetti */}
+      {showConfetti && dimensions.width > 0 && dimensions.height > 0 && (
+        <div className="absolute inset-0 z-0 h-full w-full">
+          <Confetti
+            width={dimensions.width}
+            height={dimensions.height}
+            numberOfPieces={500}
+            colors={["#eaff00", "#ff03ff", "#180138", "#542299", "#efff40"]}
+            drawShape={(ctx) => {
+              ctx.beginPath();
+              // Draw a small circle
+              ctx.arc(0, 0, 4, 0, 2 * Math.PI);
+              ctx.fill();
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 };
@@ -172,7 +226,7 @@ export function Stats({ stats, isLoading }: StatsProps) {
     <div className="md-min-h-[auto] relative flex min-h-[80svh] w-full flex-col md:sticky md:top-20 md:max-h-[calc(100svh-80px)] md:w-2/5 lg:w-1/2">
       {/* Top left section */}
 
-      <div className="relative flex min-h-[25em] flex-[2] flex-col justify-center bg-darkpurple-light p-8 md:min-h-[28em]">
+      <div className="relative flex min-h-[25em] flex-[2] flex-col justify-center overflow-hidden bg-darkpurple-light p-8 md:min-h-[28em]">
         <ShareableStatsVideo stats={stats} />
 
         <Wave fillPercentage={fillPercentage} />
