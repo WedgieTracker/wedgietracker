@@ -1,12 +1,50 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { TypingStats } from "./TypingStats";
 import Link from "next/link";
 import { Cta } from "../Cta";
+import Confetti from "react-confetti";
 
 const Wave = ({ fillPercentage }: { fillPercentage: number }) => {
   const [currentHeight, setCurrentHeight] = useState(0);
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+  const [showConfetti, setShowConfetti] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  console.log(fillPercentage);
+
+  // Handle container dimensions
+  useEffect(() => {
+    const updateDimensions = () => {
+      if (containerRef.current) {
+        const { width, height } = containerRef.current.getBoundingClientRect();
+        setDimensions({ width, height });
+      }
+    };
+
+    updateDimensions();
+
+    // Create a ResizeObserver to watch for container size changes
+    const resizeObserver = new ResizeObserver(updateDimensions);
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
+
+    // Only show confetti after client-side rendering
+    if (fillPercentage === 100) {
+      setShowConfetti(true);
+    } else {
+      setShowConfetti(false);
+    }
+
+    return () => {
+      if (containerRef.current) {
+        resizeObserver.unobserve(containerRef.current);
+      }
+      resizeObserver.disconnect();
+    };
+  }, [fillPercentage]);
 
   useEffect(() => {
     setCurrentHeight(0);
@@ -15,7 +53,8 @@ const Wave = ({ fillPercentage }: { fillPercentage: number }) => {
 
   return (
     <div
-      className="absolute bottom-[-100px] left-0 z-0 w-full bg-pink transition-all duration-1000"
+      ref={containerRef}
+      className="absolute bottom-[0] left-0 z-0 w-full bg-pink transition-all duration-1000"
       style={{ height: `${currentHeight}%` }}
     >
       <div className="absolute bottom-[100%] left-0 z-0 h-[50px] w-full overflow-hidden transition-all duration-1000">
@@ -63,6 +102,22 @@ const Wave = ({ fillPercentage }: { fillPercentage: number }) => {
           </svg>
         </div>
       </div>
+      {showConfetti && dimensions.width > 0 && dimensions.height > 0 && (
+        <div className="z-2 absolute inset-0 h-full w-full">
+          <Confetti
+            width={dimensions.width}
+            height={dimensions.height}
+            numberOfPieces={500}
+            colors={["#eaff00", "#ff03ff", "#180138", "#542299", "#efff40"]}
+            drawShape={(ctx) => {
+              ctx.beginPath();
+              // Draw a small circle
+              ctx.arc(0, 0, 4, 0, 2 * Math.PI);
+              ctx.fill();
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 };
@@ -165,7 +220,7 @@ function WedgieCounterWrapper({ stats }: StatsForNerdsProps) {
   const fillPercentage = Math.min((stats.wedgiesThisSeason / 50) * 100, 100);
 
   return (
-    <div className="relative w-full max-w-xl overflow-hidden rounded-t-3xl bg-darkpurple-light pb-4">
+    <div className="relative w-full max-w-xl overflow-hidden rounded-t-3xl bg-darkpurple-light pb-3 pt-3">
       <Wave fillPercentage={fillPercentage} />
       <div className="relative z-10 mx-auto max-w-[18rem] rounded-lg bg-darkpurple-light/50 p-4 text-center md:w-[90%] lg:w-[65%] lg:min-w-[24rem] lg:max-w-[30rem]">
         <div className="text-sm font-bold leading-none text-yellow md:text-base">
