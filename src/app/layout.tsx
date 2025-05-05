@@ -32,7 +32,7 @@ export default function RootLayout({
       </head>
       <body className="bg-darkpurple">
         {/* GTM noscript iframe for users with JavaScript disabled */}
-        {/* <noscript>
+        <noscript>
           <iframe
             src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`}
             height="0"
@@ -40,7 +40,7 @@ export default function RootLayout({
             style={{ display: "none", visibility: "hidden" }}
             title="gtm"
           />
-        </noscript> */}
+        </noscript>
 
         <TRPCReactProvider>
           {children}
