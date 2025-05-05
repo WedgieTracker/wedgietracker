@@ -1,27 +1,18 @@
 "use client";
 
-import { GoogleAnalytics as GA } from "@next/third-parties/google";
-import { usePathname, useSearchParams } from "next/navigation";
+// import Script from "next/script";
+// import { usePathname, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import CookieConsent from "./CookieConsent";
-
-declare global {
-  interface Window {
-    gtag: (
-      command: string,
-      targetId: string,
-      config?: Record<string, unknown>,
-    ) => void;
-  }
-}
+import { GoogleTagManager, sendGTMEvent } from "@next/third-parties/google";
 
 interface GoogleAnalyticsProps {
-  gaId: string;
+  gaId: string; // GTM container ID
 }
 
 function GoogleAnalyticsContent({ gaId }: GoogleAnalyticsProps) {
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+  // const pathname = usePathname();
+  // const searchParams = useSearchParams();
   const [hasConsent, setHasConsent] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -29,33 +20,71 @@ function GoogleAnalyticsContent({ gaId }: GoogleAnalyticsProps) {
     setHasConsent(consent === "accepted");
   }, []);
 
-  useEffect(() => {
-    if (hasConsent && pathname) {
-      window.gtag("event", "page_view", {
-        page_title: document.title,
-        page_location: window.location.href,
-        page_path: pathname,
-      });
-    }
-  }, [pathname, searchParams, hasConsent]);
+  // Initialize GTM once
+  // useEffect(() => {
+  //   if (typeof window !== "undefined" && !isGtmInitialized) {
+  //     window.dataLayer = window.dataLayer || [];
+  //     window.dataLayer.push({
+  //       "gtm.start": new Date().getTime(),
+  //       event: "gtm.js",
+  //       anonymize_ip: true,
+  //     });
+  //     setIsGtmInitialized(true);
+  //   }
+  // }, [isGtmInitialized]);
 
-  if (typeof window === "undefined") return null;
-  // skip if node is not prod
-  // if (process.env.NODE_ENV !== "production") return null;
+  // Track page views when pathname or searchParams change
+  // useEffect(() => {
+  //   if (typeof window !== "undefined" && pathname) {
+  //     // Clear previous dataLayer entries to prevent duplicates
+  //     const url = window.location.href;
+  //     const urlObj = new URL(url);
+  //     const pageTitle = document.title;
+
+  //     // Send page view event
+  //     sendGTMEvent({
+  //       event: "page_view",
+  //       page_location: url,
+  //       page_path: pathname,
+  //       page_title: pageTitle,
+  //       page_hostname: urlObj.hostname,
+  //     });
+
+  //     console.log(`Page view pushed for: ${pathname}`);
+  //   }
+  // }, [pathname, searchParams]);
 
   const handleAccept = () => {
+    localStorage.setItem("cookieConsent", "accepted");
     setHasConsent(true);
   };
 
   const handleDecline = () => {
+    localStorage.setItem("cookieConsent", "declined");
     setHasConsent(false);
-    // Optionally, you can clear existing cookies here
   };
+
+  if (typeof window === "undefined") return null;
 
   return (
     <>
-      {hasConsent && <GA gaId={gaId} />}
-      <CookieConsent onAccept={handleAccept} onDecline={handleDecline} />
+      {/* Show cookie consent if status is unknown */}
+      {hasConsent === null && (
+        <CookieConsent onAccept={handleAccept} onDecline={handleDecline} />
+      )}
+
+      {/* Always load GTM script */}
+      {/* <Script
+        id="gtm-script"
+        strategy="afterInteractive"
+        src={`https://www.googletagmanager.com/gtm.js?id=${gaId}`}
+      /> */}
+      <GoogleTagManager
+        gtmId={gaId}
+        dataLayer={{
+          anonymize_ip: true,
+        }}
+      />
     </>
   );
 }

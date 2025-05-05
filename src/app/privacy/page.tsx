@@ -60,7 +60,7 @@ export default function PrivacyPage() {
                     This includes:
                   </p>
                   <ul className="list-inside list-disc space-y-2">
-                    <li>IP address</li>
+                    <li>Anonymized IP address</li>
                     <li>Browser type and version</li>
                     <li>Pages visited and time spent on each page</li>
                     <li>Device information</li>
@@ -119,7 +119,7 @@ export default function PrivacyPage() {
                   <li>Correct inaccurate data</li>
                   <li>Request deletion of your data</li>
                   <li>Unsubscribe from our newsletter</li>
-                  <li>Opt-out of Google Analytics tracking</li>
+                  {/* <li>Opt-out of Google Analytics tracking</li> */}
                 </ul>
               </section>
 
