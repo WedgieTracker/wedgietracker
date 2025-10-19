@@ -17,12 +17,35 @@ export function AllWedgiesPage() {
 
   const { data: global, isLoading: isLoadingGlobal } =
     api.admin.getGlobal.useQuery();
+  const { data: seasons, isLoading: isLoadingSeasons } = api.season.getAllWithStats.useQuery();
+  const { data: stats, isLoading: isLoadingStats } = api.wedgie.getStats.useQuery();
 
-  const defaultSeason = global?.currentSeason?.name ?? "2024/25";
+  const defaultSeason = global?.currentSeason?.name ?? "2025/26";
+
+  // Find previous season when current season has 0 wedgies
+  const getPreviousSeason = () => {
+    if (!seasons || !global?.currentSeason?.name) return null;
+    
+    const currentSeasonIndex = seasons.findIndex(s => s.name === global.currentSeason.name);
+    
+    // If current season is at index 0, there's no previous season
+    // In this case, we should show the most recent season with wedgies
+    if (currentSeasonIndex === 0) {
+      const seasonWithWedgies = seasons.find(season => season.totalWedgies > 0);
+      return seasonWithWedgies || null;
+    }
+    
+    const previousSeason = seasons[currentSeasonIndex - 1];
+    return previousSeason;
+  };
+  
+  const previousSeason = getPreviousSeason();
+  const shouldShowPreviousSeason = stats?.currentSeasonWedgies === 0 && previousSeason;
+  const initialSeason = shouldShowPreviousSeason ? previousSeason.name : defaultSeason;
 
   // Initialize filters with URL params
   const [filters, setFilters] = useState({
-    season: searchParams.get("ws") ?? defaultSeason,
+    season: searchParams.get("ws") ?? initialSeason,
     type: "",
     playerOrTeam: searchParams.get("wp") ?? searchParams.get("wt") ?? "",
   });
@@ -55,6 +78,21 @@ export function AllWedgiesPage() {
     }
   }, [searchParams, wedgies, defaultSeason]);
 
+  // Update selected season when data loads
+  useEffect(() => {
+    if (shouldShowPreviousSeason && previousSeason) {
+      setFilters(prev => ({
+        ...prev,
+        season: previousSeason.name
+      }));
+    } else if (global?.currentSeason?.name) {
+      setFilters(prev => ({
+        ...prev,
+        season: global.currentSeason.name
+      }));
+    }
+  }, [shouldShowPreviousSeason, previousSeason, global?.currentSeason?.name, stats?.currentSeasonWedgies]);
+
   useEffect(() => {
     setFilters({
       ...filters,
@@ -63,7 +101,7 @@ export function AllWedgiesPage() {
   }, [global]);
 
   // Only show loading state while data is loading
-  if (isLoadingAll || isLoadingSeason || isLoadingGlobal) {
+  if (isLoadingAll || isLoadingSeason || isLoadingGlobal || isLoadingSeasons || isLoadingStats) {
     return (
       <div className="container mx-auto max-w-7xl text-white">
         <WedgieFilters
@@ -107,6 +145,13 @@ export function AllWedgiesPage() {
 
   return (
     <div className="container mx-auto max-w-7xl text-white">
+      {shouldShowPreviousSeason && (
+        <div className="mb-4 rounded-lg bg-pink/20 border border-pink/30 p-4 text-center">
+          <p className="text-sm font-bold text-pink">
+            Current season has no wedgies yet. Showing {previousSeason.name} season wedgies.
+          </p>
+        </div>
+      )}
       <WedgieFilters
         filters={filters}
         setFilters={setFilters}

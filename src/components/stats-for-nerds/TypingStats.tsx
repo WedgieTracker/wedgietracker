@@ -31,7 +31,11 @@ export function TypingStats({ stats }: TypingStatsProps) {
 
   useEffect(() => {
     const getCurrentText = () => {
-      return `${stats[currentStat].toLocaleString()} ${statLabels[currentStat]}`;
+      const value = stats[currentStat];
+      if (isNaN(value)) {
+        return `0 ${statLabels[currentStat]}`;
+      }
+      return `${value.toLocaleString()} ${statLabels[currentStat]}`;
     };
 
     const typeText = async () => {

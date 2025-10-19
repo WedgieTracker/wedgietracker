@@ -43,7 +43,7 @@ export function SeasonGamesList() {
   const handleRemoveOldGames = async () => {
     if (
       window.confirm(
-        "Are you sure you want to remove all games before October 2024? This action cannot be undone.",
+        "Are you sure you want to remove all games before October 2025? This action cannot be undone.",
       )
     ) {
       setIsDeleting(true);
@@ -54,7 +54,7 @@ export function SeasonGamesList() {
   const handleUpdateFutureSeasons = async () => {
     if (
       window.confirm(
-        "Are you sure you want to update all games after October 2024 to season 2024/25?",
+        "Are you sure you want to update all games after October 2025 to season 2025/26?",
       )
     ) {
       setIsUpdating(true);

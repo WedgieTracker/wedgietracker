@@ -93,9 +93,9 @@ const nbaUpdate = async () => {
       select: { name: true },
     });
 
-    const seasonName = currentSeason?.name ?? "2024/25";
+    const seasonName = currentSeason?.name ?? "2025/26";
 
-    const dateStart = new Date("2023-10-20");
+    const dateStart = new Date("2025-10-20");
     const currentTotalGames = currentGlobal?.currentTotalGames ?? 0;
     const currentTotalMinutes = currentGlobal?.currentTotalMinutes ?? 0;
     const currentTotalFGA = currentGlobal?.currentTotalFGA ?? 0;

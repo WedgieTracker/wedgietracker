@@ -71,6 +71,22 @@ async function WedgieListWrapper() {
 
 async function StandingsWrapper() {
   const standings = await api.wedgie.getTopStandings();
+  const stats = await api.wedgie.getStats();
+  
+  // Hide standings content when there are 0 wedgies this season
+  if (stats.currentSeasonWedgies === 0) {
+    return (
+      <div className="flex w-full max-w-2xl flex-col items-center justify-center">
+        <Link
+          href="/standings"
+          className="w-full rounded-3xl border-2 border-yellow bg-yellow py-2 text-center text-button-text font-black text-darkpurple transition-all duration-300 hover:border-yellow hover:bg-transparent hover:text-yellow"
+        >
+          SEE STANDINGS
+        </Link>
+      </div>
+    );
+  }
+  
   return <Standings players={standings.players} teams={standings.teams} />;
 }
 

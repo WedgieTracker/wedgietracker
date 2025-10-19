@@ -262,12 +262,12 @@ function SeasonComparisonWrapper({ stats }: StatsForNerdsProps) {
             WE ARE ON PACE TO MATCH
             <br />
             THE AVERAGE OF{" "}
-            <span className="text-3xl font-black text-pink">
+            <span className="font-black text-pink">
               {stats.averageLastTenSeasons}
             </span>
             <br />
             OF THE PAST{" "}
-            <span className="text-3xl font-black text-pink">10 SEASONS</span>
+            <span className="font-black text-pink">11 SEASONS</span>
           </>
         ) : (
           <div>
@@ -282,7 +282,7 @@ function SeasonComparisonWrapper({ stats }: StatsForNerdsProps) {
               {stats.averageLastTenSeasons}
             </span>
             <br />
-            OF THE PAST <span className="font-black text-pink">10 SEASONS</span>
+            OF THE PAST <span className="font-black text-pink">11 SEASONS</span>
           </div>
         )}
       </div>
@@ -321,6 +321,20 @@ function LastWedgieWrapper({ stats }: StatsForNerdsProps) {
 }
 
 function LeadersWrapper({ stats }: StatsForNerdsProps) {
+  // Hide leaders content when there are 0 wedgies this season
+  if (stats.wedgiesThisSeason === 0) {
+    return (
+      <div className="flex w-full flex-col items-center justify-center">
+        <Link
+          href="/standings"
+          className="w-full rounded-3xl border-2 border-yellow bg-yellow py-1.5 text-center text-button-text font-bold text-darkpurple transition-all duration-300 hover:bg-darkpurple hover:text-yellow"
+        >
+          SEE STANDINGS
+        </Link>
+      </div>
+    );
+  }
+
   // Find all teams that share the highest wedgie count
   const maxWedgies = stats.leaders.teams[0]?.wedgies ?? 0;
   const leadingTeams = stats.leaders.teams
