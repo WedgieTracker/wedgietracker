@@ -29,8 +29,8 @@ export const gameRouter = createTRPCRouter({
 
   updateFutureSeasons: protectedProcedure.mutation(async ({ ctx }) => {
     try {
-      const startDate = new Date("2024-10-01");
-      const newSeasonName = "2024/25";
+      const startDate = new Date("2025-10-01");
+      const newSeasonName = "2025/26";
 
       // First ensure the season exists
       await ctx.db.season.upsert({
@@ -39,7 +39,7 @@ export const gameRouter = createTRPCRouter({
         update: {},
       });
 
-      // Update all games after October 1, 2024
+      // Update all games after October 1, 2025
       const updatedGames = await ctx.db.game.updateMany({
         where: {
           createdAt: {
@@ -64,8 +64,8 @@ export const gameRouter = createTRPCRouter({
 
   removeOldGames: protectedProcedure.mutation(async ({ ctx }) => {
     try {
-      // Delete all games before October 1, 2024
-      const cutoffDate = new Date("2024-10-01");
+      // Delete all games before October 1, 2025  
+      const cutoffDate = new Date("2025-10-01");
 
       const deletedGames = await ctx.db.game.deleteMany({
         where: {
@@ -78,7 +78,7 @@ export const gameRouter = createTRPCRouter({
       return {
         success: true,
         deletedCount: deletedGames.count,
-        message: `Successfully deleted ${deletedGames.count} games before October 2024`,
+        message: `Successfully deleted ${deletedGames.count} games before October 2025`,
       };
     } catch (error) {
       console.error("Error deleting games:", error);

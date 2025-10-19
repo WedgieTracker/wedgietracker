@@ -386,6 +386,7 @@ export const wedgieRouter = createTRPCRouter({
       gamesPlayed: globalSettings.currentTotalGames ?? 0,
       lastWedgie: dateNow ?? lastWedgie?.wedgieDate ?? null,
       liveGames: globalSettings.liveGames ?? false,
+      currentSeasonWedgies: currentSeasonWedgies,
     };
   }),
 
@@ -710,7 +711,7 @@ export const wedgieRouter = createTRPCRouter({
     const globalGames = global?.currentTotalGames ?? 0;
 
     return {
-      currentSeason: currentSeason ?? "2023/24",
+      currentSeason: currentSeason ?? "2025/26",
       wedgiesThisSeason:
         currentSeasonWedgies > (global?.currentTotalWedgies ?? 0)
           ? currentSeasonWedgies
