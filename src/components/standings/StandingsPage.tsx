@@ -24,7 +24,7 @@ export function StandingsPage() {
     // In this case, we should show the most recent season with wedgies
     if (currentSeasonIndex === 0) {
       const seasonWithWedgies = seasons.find(season => season.totalWedgies > 0);
-      return seasonWithWedgies || null;
+      return seasonWithWedgies ?? null;
     }
     
     const previousSeason = seasons[currentSeasonIndex - 1];
