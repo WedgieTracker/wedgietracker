@@ -62,7 +62,8 @@ export async function calculatePace({
   const rmPace = Math.round(
     currentTotalWedgies + averageSeasonRate * gamesRemaining,
   );
-  const medianPace = Math.round((simplePace + rmPace) / 2);
+  const medianPaceUnclamped = Math.round((simplePace + rmPace) / 2);
+  const medianPace = Math.max(40, Math.min(69, medianPaceUnclamped));
 
   return {
     simplePace,
