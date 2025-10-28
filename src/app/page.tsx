@@ -32,6 +32,14 @@ export default function Home() {
           </Suspense>
           <div className="flex w-full flex-col items-center justify-center gap-12 bg-darkpurple-dark px-4 py-8 md:w-3/5 md:px-8 md:py-8 lg:w-1/2">
             <Suspense fallback={<LoaderWrapper />}>
+              <div className="w-full max-w-2xl rounded-lg border border-pink/30 bg-pink/20 p-4 text-center">
+                <p className="mb-1 text-sm font-bold uppercase tracking-wide text-yellow">
+                  Pace calculation update
+                </p>
+                <p className="m-0 text-xs text-white/80">
+                  We've switched to a more accurate pace projection. It may look a bit lower, but it's more accurate.
+                </p>
+              </div>
               <WedgieListWrapper />
 
               <StandingsWrapper />
