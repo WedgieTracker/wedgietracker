@@ -23,14 +23,14 @@ export async function POST(req: Request) {
     const pace = parseInt(formData.get("pace") as string);
     const customMessage = formData.get("customMessage") as string;
     const videoUrl = formData.get("videoUrl") as string;
-    const twitterToken = req.headers.get("Authorization")?.split(" ")[1];
+    // const twitterToken = req.headers.get("Authorization")?.split(" ")[1];
 
-    if (!twitterToken) {
-      return NextResponse.json(
-        { error: "Unauthorized twitter token" },
-        { status: 401 },
-      );
-    }
+    // if (!twitterToken) {
+    //   return NextResponse.json(
+    //     { error: "Unauthorized twitter token" },
+    //     { status: 401 },
+    //   );
+    // }
 
     const result = await postToTwitter(number, pace, customMessage, videoUrl);
 
