@@ -37,7 +37,7 @@ export default function Home() {
                   Pace calculation update
                 </p>
                 <p className="m-0 text-xs text-white/80">
-                  We've switched to a more accurate pace projection. It may look a bit lower, but it's more accurate.
+                  We&apos;ve switched to a more accurate pace projection. It may look a bit lower, but it&apos;s more accurate.
                 </p>
               </div>
               <WedgieListWrapper />
