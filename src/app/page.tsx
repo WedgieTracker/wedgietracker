@@ -32,14 +32,6 @@ export default function Home() {
           </Suspense>
           <div className="flex w-full flex-col items-center justify-center gap-12 bg-darkpurple-dark px-4 py-8 md:w-3/5 md:px-8 md:py-8 lg:w-1/2">
             <Suspense fallback={<LoaderWrapper />}>
-              <div className="w-full max-w-2xl rounded-lg border border-pink/30 bg-pink/20 p-4 text-center">
-                <p className="mb-1 text-sm font-bold uppercase tracking-wide text-yellow">
-                  Pace calculation update
-                </p>
-                <p className="m-0 text-xs text-white/80">
-                  We&apos;ve switched to a smarter pace projection. It might look a bit lower, but it&apos;s more accurate.
-                </p>
-              </div>
               <WedgieListWrapper />
 
               <StandingsWrapper />
@@ -80,7 +72,7 @@ async function WedgieListWrapper() {
 async function StandingsWrapper() {
   const standings = await api.wedgie.getTopStandings();
   const stats = await api.wedgie.getStats();
-  
+
   // Hide standings content when there are 0 wedgies this season
   if (stats.currentSeasonWedgies === 0) {
     return (
@@ -94,7 +86,7 @@ async function StandingsWrapper() {
       </div>
     );
   }
-  
+
   return <Standings players={standings.players} teams={standings.teams} />;
 }
 
