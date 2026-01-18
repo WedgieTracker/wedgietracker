@@ -71,7 +71,7 @@ export function StandingsGrid({
             {players.map((player, index) => (
               <Link
                 key={player.name}
-                href={`/all-wedgies?wp=${player.name}&ws=${currentSeason}`}
+                href={`/all-wedgies?wp=${player.name}&ws=${currentSeason || "all"}`}
                 className="group flex cursor-pointer items-center justify-between rounded-sm bg-darkpurple-light/30 p-1.5 transition-all duration-300 hover:bg-darkpurple-light/80 md:p-2"
               >
                 <div className="flex items-baseline gap-2">
@@ -115,7 +115,7 @@ export function StandingsGrid({
             {teams.map((team, index) => (
               <Link
                 key={team.name}
-                href={`/all-wedgies?wt=${team.name}&ws=${currentSeason}`}
+                href={`/all-wedgies?wt=${team.name}&ws=${currentSeason || "all"}`}
                 className="group flex cursor-pointer items-center justify-between rounded-sm bg-darkpurple-light/30 p-1.5 transition-all duration-300 hover:bg-darkpurple-light/80 md:p-2"
               >
                 <div className="flex items-baseline gap-2">
