@@ -40,11 +40,12 @@ export function TwitterPostForm({ wedgie }: TwitterPostFormProps) {
   };
 
   const handleTwitterPost = async () => {
-    const twitterToken = localStorage.getItem("twitter_token");
-    if (!twitterToken) {
+    // Check if Twitter credentials are configured on the server
+    const hasCredentials = process.env.NEXT_PUBLIC_HAS_TWITTER_CREDENTIALS === "true";
+    if (!hasCredentials) {
       toast({
         title: "Error",
-        description: "Please connect your Twitter account first",
+        description: "Twitter credentials not configured. Please check server configuration.",
         variant: "destructive",
       });
       return;
@@ -69,9 +70,9 @@ export function TwitterPostForm({ wedgie }: TwitterPostFormProps) {
 
       const response = await fetch("/api/twitter/upload", {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${twitterToken}`,
-        },
+        // headers: {
+        //   Authorization: `Bearer ${twitterToken}`,
+        // },
         body: formData,
       });
 
