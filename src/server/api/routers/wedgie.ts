@@ -122,7 +122,7 @@ export const wedgieRouter = createTRPCRouter({
       const wedgie = await ctx.db.wedgie.create({
         data: {
           ...input,
-          position: input.position ? JSON.stringify(input.position) : undefined,
+          position: input.position ?? undefined,
           types: {
             connectOrCreate: input.types.map((type) => ({
               where: { name: type },
@@ -775,7 +775,7 @@ export const wedgieRouter = createTRPCRouter({
         where: { id: input.id },
         data: {
           ...input.data,
-          position: input.data.position ?? JSON.stringify(input.data.position),
+          position: input.data.position ?? undefined,
           types: {
             set: [],
             connectOrCreate: input.data.types.map((type) => ({

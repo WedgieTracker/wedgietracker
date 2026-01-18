@@ -44,8 +44,11 @@ export function AllWedgiesPage() {
   const initialSeason = shouldShowPreviousSeason ? previousSeason.name : defaultSeason;
 
   // Initialize filters with URL params
+  const wsParam = searchParams.get("ws");
+  const hasSeasonFromUrl = wsParam !== null;
+  const isAllSeasons = wsParam === "all";
   const [filters, setFilters] = useState({
-    season: searchParams.get("ws") ?? initialSeason,
+    season: isAllSeasons ? "" : (wsParam ?? initialSeason),
     type: "",
     playerOrTeam: searchParams.get("wp") ?? searchParams.get("wt") ?? "",
   });
@@ -78,8 +81,10 @@ export function AllWedgiesPage() {
     }
   }, [searchParams, wedgies, defaultSeason]);
 
-  // Update selected season when data loads
+  // Update selected season when data loads (but not if URL explicitly specified a season)
   useEffect(() => {
+    if (hasSeasonFromUrl) return;
+
     if (shouldShowPreviousSeason && previousSeason) {
       setFilters(prev => ({
         ...prev,
@@ -91,14 +96,16 @@ export function AllWedgiesPage() {
         season: global.currentSeason.name
       }));
     }
-  }, [shouldShowPreviousSeason, previousSeason, global?.currentSeason?.name, stats?.currentSeasonWedgies]);
+  }, [shouldShowPreviousSeason, previousSeason, global?.currentSeason?.name, stats?.currentSeasonWedgies, hasSeasonFromUrl]);
 
   useEffect(() => {
+    if (hasSeasonFromUrl) return;
+
     setFilters({
       ...filters,
       season: defaultSeason,
     });
-  }, [global]);
+  }, [global, hasSeasonFromUrl]);
 
   // Only show loading state while data is loading
   if (isLoadingAll || isLoadingSeason || isLoadingGlobal || isLoadingSeasons || isLoadingStats) {
