@@ -34,6 +34,18 @@ interface WaveLayer {
   phase: number;
 }
 
+interface ConfettiParticle {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  radius: number;
+  color: string;
+  opacity: number;
+  gravity: number;
+  drag: number;
+}
+
 export function ShareableStatsVideo({ stats }: ShareableStatsVideoProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [videoBlob, setVideoBlob] = useState<Blob | null>(null);
@@ -54,6 +66,57 @@ export function ShareableStatsVideo({ stats }: ShareableStatsVideoProps) {
       phase: (3 * Math.PI) / 2,
     },
   ];
+
+  const confettiColors = ["#eaff00", "#ff03ff", "#180138", "#542299", "#efff40"];
+  const confettiParticlesRef = useRef<ConfettiParticle[]>([]);
+
+  const createConfettiParticles = (width: number, height: number): ConfettiParticle[] => {
+    const particles: ConfettiParticle[] = [];
+    for (let i = 0; i < 200; i++) {
+      particles.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        vx: (Math.random() - 0.5) * 4,
+        vy: Math.random() * -3 - 1,
+        radius: Math.random() * 5 + 3,
+        color: confettiColors[Math.floor(Math.random() * confettiColors.length)]!,
+        opacity: Math.random() * 0.6 + 0.4,
+        gravity: 0.08,
+        drag: 0.98,
+      });
+    }
+    return particles;
+  };
+
+  const drawConfetti = (
+    ctx: CanvasRenderingContext2D,
+    width: number,
+    height: number,
+  ) => {
+    const particles = confettiParticlesRef.current;
+    for (const p of particles) {
+      p.vy += p.gravity;
+      p.vx *= p.drag;
+      p.vy *= p.drag;
+      p.x += p.vx;
+      p.y += p.vy;
+
+      // Recycle particles that fall off-screen
+      if (p.y > height + p.radius) {
+        p.y = -p.radius;
+        p.x = Math.random() * width;
+        p.vy = Math.random() * -1;
+        p.vx = (Math.random() - 0.5) * 4;
+      }
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = p.opacity;
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  };
 
   /**
    * Helper function to load an image.
@@ -145,7 +208,7 @@ export function ShareableStatsVideo({ stats }: ShareableStatsVideoProps) {
     ctx.fillRect(0, 0, width, height);
 
     // Calculate wave height based on fill percentage
-    const maxHeight = height * 0.9; // Maximum height the wave can reach
+    const maxHeight = height; // Fill entire canvas at 100%
     const currentHeight = (currentFillPercentage / 100) * maxHeight;
     const baseY = height - currentHeight;
 
@@ -154,6 +217,11 @@ export function ShareableStatsVideo({ stats }: ShareableStatsVideoProps) {
       drawWaveLayer(ctx, layer, width * 0.4, baseY);
     });
 
+    // Draw confetti after waves but before stat boxes
+    if (fillPercentage >= 100 && currentFillPercentage >= fillPercentage) {
+      drawConfetti(ctx, width, height);
+    }
+
     // Stats container dimensions
     const statsWidth = width * 0.3;
     const statsHeight = height * 0.4;
@@ -161,7 +229,7 @@ export function ShareableStatsVideo({ stats }: ShareableStatsVideoProps) {
     const statsY = (height - statsHeight) / 2 + 60;
 
     // Add semi-transparent background for stats with rounded corners
-    ctx.fillStyle = "rgba(31, 0, 77, 0.5)";
+    ctx.fillStyle = "rgba(31, 0, 77, 0.75)";
     ctx.beginPath();
     ctx.roundRect(statsX, statsY, statsWidth, statsHeight, 20);
     ctx.fill();
@@ -172,15 +240,20 @@ export function ShareableStatsVideo({ stats }: ShareableStatsVideoProps) {
     ctx.textAlign = "center";
     ctx.fillText("WE'RE AT", width / 2, statsY + 60);
 
-    // Draw total wedgies number (animated)
+    // Draw total wedgies number (animated) with glow
     ctx.font = "900 280px Inter";
-    ctx.fillStyle = "#EAFF00"; // Yellow
     ctx.textAlign = "center";
+    ctx.shadowColor = "rgba(23, 0, 43, 0.8)";
+    ctx.shadowBlur = 30;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+    ctx.fillStyle = "#EAFF00"; // Yellow
     ctx.fillText(
       currentTotalWedgies.toString(),
       width / 2,
       statsY + statsHeight / 2 + 85,
     );
+    ctx.shadowBlur = 0;
 
     // Draw "WEDGIES" text
     ctx.font = "900 75px Inter";
@@ -196,7 +269,7 @@ export function ShareableStatsVideo({ stats }: ShareableStatsVideoProps) {
     const bottomY = (height - statsHeight) / 2 + 180;
 
     // Background boxes for stats
-    ctx.fillStyle = "rgba(31, 0, 77, 0.5)";
+    ctx.fillStyle = "rgba(31, 0, 77, 0.75)";
     ctx.beginPath();
     ctx.roundRect(leftStatX, bottomY, statBoxWidth, statBoxHeight, 20);
     ctx.roundRect(rightStatX, bottomY, statBoxWidth, statBoxHeight, 20);
@@ -248,9 +321,11 @@ export function ShareableStatsVideo({ stats }: ShareableStatsVideoProps) {
       const logoX = width / 2 - logoWidth / 2; // Center horizontally
       const logoY = 0 + 150; // Position vertically as needed
 
-      // Draw dark purple background
-      ctx.fillStyle = "rgb(23,0,43)"; // darkpurple
-      ctx.fillRect(logoX - 60, logoY - 60, logoWidth + 120, logoHeight + 120); // Adding padding
+      // Draw semi-transparent background matching stat boxes
+      ctx.fillStyle = "rgba(31, 0, 77, 0.75)";
+      ctx.beginPath();
+      ctx.roundRect(logoX - 60, logoY - 60, logoWidth + 120, logoHeight + 120, 20);
+      ctx.fill();
 
       // Draw the logo image
       ctx.drawImage(imageRef.current, logoX, logoY, logoWidth, logoHeight);
@@ -315,7 +390,7 @@ export function ShareableStatsVideo({ stats }: ShareableStatsVideoProps) {
     ctx.fillRect(0, 0, width, height);
 
     // Calculate wave height based on fill percentage
-    const maxHeight = height * 0.9; // Maximum height the wave can reach
+    const maxHeight = height; // Fill entire canvas at 100%
     const currentHeight = (currentFillPercentage / 100) * maxHeight;
     const baseY = height - currentHeight;
 
@@ -324,6 +399,11 @@ export function ShareableStatsVideo({ stats }: ShareableStatsVideoProps) {
       drawWaveLayer(ctx, layer, width * 0.4, baseY);
     });
 
+    // Draw confetti after waves but before stat boxes
+    if (fillPercentage >= 100 && currentFillPercentage >= fillPercentage) {
+      drawConfetti(ctx, width, height);
+    }
+
     // Stats container dimensions
     const statsWidth = width * 0.65;
     const statsHeight = height * 0.3;
@@ -331,7 +411,7 @@ export function ShareableStatsVideo({ stats }: ShareableStatsVideoProps) {
     const statsY = (height - statsHeight) / 2 - 150;
 
     // Add semi-transparent background for stats with rounded corners
-    ctx.fillStyle = "rgba(31, 0, 77, 0.5)";
+    ctx.fillStyle = "rgba(31, 0, 77, 0.75)";
     ctx.beginPath();
     ctx.roundRect(statsX, statsY, statsWidth, statsHeight, 20);
     ctx.fill();
@@ -342,15 +422,20 @@ export function ShareableStatsVideo({ stats }: ShareableStatsVideoProps) {
     ctx.textAlign = "center";
     ctx.fillText("WE'RE AT", width / 2, statsY + 85);
 
-    // Draw total wedgies number (animated)
+    // Draw total wedgies number (animated) with glow
     ctx.font = "900 380px Inter";
-    ctx.fillStyle = "#EAFF00"; // Yellow
     ctx.textAlign = "center";
+    ctx.shadowColor = "rgba(23, 0, 43, 0.8)";
+    ctx.shadowBlur = 30;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+    ctx.fillStyle = "#EAFF00"; // Yellow
     ctx.fillText(
       currentTotalWedgies.toString(),
       width / 2,
       statsY + statsHeight / 2 + 125,
     );
+    ctx.shadowBlur = 0;
 
     // Draw "WEDGIES" text
     ctx.font = "900 75px Inter";
@@ -366,7 +451,7 @@ export function ShareableStatsVideo({ stats }: ShareableStatsVideoProps) {
     const bottomY = (height - statsHeight) / 2 + 550;
 
     // Background boxes for stats
-    ctx.fillStyle = "rgba(31, 0, 77, 0.5)";
+    ctx.fillStyle = "rgba(31, 0, 77, 0.75)";
     ctx.beginPath();
     ctx.roundRect(leftStatX, bottomY, statBoxWidth, statBoxHeight, 20);
     ctx.roundRect(rightStatX, bottomY, statBoxWidth, statBoxHeight, 20);
@@ -418,9 +503,11 @@ export function ShareableStatsVideo({ stats }: ShareableStatsVideoProps) {
       const logoX = width / 2 - logoWidth / 2; // Center horizontally
       const logoY = 0 + 210; // Position vertically as needed
 
-      // Draw dark purple background
-      ctx.fillStyle = "rgb(23,0,43)"; // darkpurple
-      ctx.fillRect(logoX - 60, logoY - 60, logoWidth + 120, logoHeight + 180); // Adding padding
+      // Draw semi-transparent background matching stat boxes
+      ctx.fillStyle = "rgba(31, 0, 77, 0.75)";
+      ctx.beginPath();
+      ctx.roundRect(logoX - 60, logoY - 60, logoWidth + 120, logoHeight + 120, 20);
+      ctx.fill();
 
       // Draw the logo image
       ctx.drawImage(imageRef.current, logoX, logoY, logoWidth, logoHeight);
@@ -475,6 +562,12 @@ export function ShareableStatsVideo({ stats }: ShareableStatsVideoProps) {
 
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
+
+      // Initialize confetti particles if at 100% fill
+      const fillPercentage = Math.min((stats.totalWedgies / 50) * 100, 100);
+      if (fillPercentage >= 100) {
+        confettiParticlesRef.current = createConfettiParticles(canvas.width, canvas.height);
+      }
 
       // Load the logo image
       const logoUrl =

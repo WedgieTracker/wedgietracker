@@ -117,7 +117,8 @@ const Wave = ({ fillPercentage }: { fillPercentage: number }) => {
           <Confetti
             width={dimensions.width}
             height={dimensions.height}
-            numberOfPieces={500}
+            numberOfPieces={150}
+            gravity={0.05}
             colors={["#eaff00", "#ff03ff", "#180138", "#542299", "#efff40"]}
             drawShape={(ctx) => {
               ctx.beginPath();
