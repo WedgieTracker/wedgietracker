@@ -236,7 +236,7 @@ export function Stats({ stats, isLoading }: StatsProps) {
 
         <div className="relative z-10 mx-auto rounded-lg bg-darkpurple-light/50 p-4 text-center md:w-[90%] lg:w-[65%] lg:min-w-[24rem] lg:max-w-[30rem]">
           <div className="text-sm font-bold leading-none text-yellow md:text-base">
-            WE&apos;RE AT
+            {stats.totalWedgies > 63 ? "NEW ALL-TIME RECORD" : "WE'RE AT"}
           </div>
           <div className="whitespace-nowrap text-big-number-mobile font-black leading-none text-yellow md:text-big-number-medium lg:text-big-number">
             {displayedTotal.toFixed(0).toLocaleString()}

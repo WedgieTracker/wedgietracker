@@ -58,7 +58,7 @@ export async function postToTwitter(
       secret: TWITTER_CONFIG.accessTokenSecret,
     };
 
-    const tweetText = `Wedgie No. ${number}, on pace for ${pace}\n\n${customMessage}\n\nWedgieTracker.com x @NoDunksInc`;
+    const tweetText = `Wedgie No. ${number}, on pace for ${pace}\n\n${customMessage}\n\nWedgieTracker.com`;
 
     let mediaId: string | undefined;
 
@@ -72,6 +72,7 @@ export async function postToTwitter(
       const file = Buffer.from(buffer);
       const total_bytes = file.length;
       const base64EncodedFile = file.toString("base64");
+      console.log(`Video size: ${total_bytes} bytes (${(total_bytes / 1024 / 1024).toFixed(2)} MB)`);
 
       // INIT phase
       console.log("Starting INIT phase...");
@@ -173,20 +174,19 @@ export async function postToTwitter(
       }
 
       // Check processing status
-      const finalizeData =
-        (await finalizeResponse.json()) as TwitterMediaStatusResponse;
+      const finalizeText = await finalizeResponse.text();
+      console.log("FINALIZE response:", finalizeText);
+      const finalizeData = JSON.parse(finalizeText) as TwitterMediaStatusResponse;
       if (finalizeData.processing_info) {
         let processingInfo: TwitterProcessingInfo =
           finalizeData.processing_info;
+        console.log("Processing state:", processingInfo.state);
         while (["pending", "in_progress"].includes(processingInfo.state)) {
-          await new Promise((resolve) =>
-            setTimeout(
-              resolve,
-              processingInfo.check_after_secs
-                ? processingInfo.check_after_secs * 1000
-                : 1000,
-            ),
-          );
+          const waitTime = processingInfo.check_after_secs
+            ? processingInfo.check_after_secs * 1000
+            : 1000;
+          console.log(`Waiting ${waitTime}ms before checking status...`);
+          await new Promise((resolve) => setTimeout(resolve, waitTime));
 
           const statusRequestData = {
             url: `https://upload.twitter.com/1.1/media/upload.json?command=STATUS&media_id=${mediaId}`,
@@ -204,9 +204,17 @@ export async function postToTwitter(
             },
           });
 
-          const statusData =
-            (await statusResponse.json()) as TwitterMediaStatusResponse;
+          const statusText = await statusResponse.text();
+          console.log("STATUS response:", statusText);
+          const statusData = JSON.parse(statusText) as TwitterMediaStatusResponse;
+
+          if (!statusData.processing_info) {
+            console.log("Processing complete (no processing_info)");
+            break;
+          }
+
           processingInfo = statusData.processing_info;
+          console.log("Processing state:", processingInfo.state);
 
           if (processingInfo.state === "failed") {
             throw new Error(
@@ -214,10 +222,13 @@ export async function postToTwitter(
             );
           }
         }
+      } else {
+        console.log("No processing_info in FINALIZE response, media ready immediately");
       }
     }
 
     // Post the tweet with media
+    console.log("Posting tweet...", mediaId ? `with media ${mediaId}` : "without media");
     const tweetRequestData = {
       url: "https://api.twitter.com/2/tweets",
       method: "POST",
@@ -243,6 +254,7 @@ export async function postToTwitter(
     };
 
     if (!response.ok) {
+      console.error("Tweet post failed:", response.status, JSON.stringify(data));
       return {
         success: false,
         error: data.errors?.[0]?.message ?? "Failed to post tweet",
