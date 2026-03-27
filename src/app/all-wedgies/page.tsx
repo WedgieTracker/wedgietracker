@@ -1,3 +1,4 @@
+export const dynamic = "force-static";
 export const revalidate = 120;
 
 import { AllWedgiesPage } from "~/components/all-wedgies/AllWedgiesPage";
