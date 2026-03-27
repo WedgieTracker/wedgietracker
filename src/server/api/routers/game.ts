@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
+import { createTRPCRouter, publicProcedure } from "../trpc";
 
 export const gameRouter = createTRPCRouter({
   search: publicProcedure
@@ -26,63 +26,4 @@ export const gameRouter = createTRPCRouter({
       });
       return games;
     }),
-
-  updateFutureSeasons: protectedProcedure.mutation(async ({ ctx }) => {
-    try {
-      const startDate = new Date("2025-10-01");
-      const newSeasonName = "2025/26";
-
-      // First ensure the season exists
-      await ctx.db.season.upsert({
-        where: { name: newSeasonName },
-        create: { name: newSeasonName },
-        update: {},
-      });
-
-      // Update all games after October 1, 2025
-      const updatedGames = await ctx.db.game.updateMany({
-        where: {
-          createdAt: {
-            gte: startDate,
-          },
-        },
-        data: {
-          seasonName: newSeasonName,
-        },
-      });
-
-      return {
-        success: true,
-        updatedCount: updatedGames.count,
-        message: `Successfully updated ${updatedGames.count} games to season ${newSeasonName}`,
-      };
-    } catch (error) {
-      console.error("Error updating games:", error);
-      throw new Error("Failed to update future games");
-    }
-  }),
-
-  removeOldGames: protectedProcedure.mutation(async ({ ctx }) => {
-    try {
-      // Delete all games before October 1, 2025  
-      const cutoffDate = new Date("2025-10-01");
-
-      const deletedGames = await ctx.db.game.deleteMany({
-        where: {
-          createdAt: {
-            lt: cutoffDate,
-          },
-        },
-      });
-
-      return {
-        success: true,
-        deletedCount: deletedGames.count,
-        message: `Successfully deleted ${deletedGames.count} games before October 2025`,
-      };
-    } catch (error) {
-      console.error("Error deleting games:", error);
-      throw new Error("Failed to delete old games");
-    }
-  }),
 });

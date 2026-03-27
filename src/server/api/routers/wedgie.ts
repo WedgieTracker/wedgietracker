@@ -1,6 +1,5 @@
 import { z } from "zod";
 
-import { google } from "googleapis";
 import { unstable_cache } from "next/cache";
 
 import {
@@ -23,20 +22,6 @@ interface VideoUrl {
   cloudinary?: string;
   youtubeNoDunks?: string;
   instagram?: string;
-}
-
-interface YouTubeVideoItem {
-  id?: {
-    videoId: string;
-  };
-  snippet?: {
-    title: string;
-  };
-}
-
-interface YouTubeApiResponse {
-  items: YouTubeVideoItem[];
-  nextPageToken?: string;
 }
 
 const wedgieInput = z.object({
@@ -827,117 +812,4 @@ export const wedgieRouter = createTRPCRouter({
     }),
 
   getTotalWedgies: publicProcedure.query(() => getCachedTotalWedgies()),
-
-  updateYoutubeLinks: protectedProcedure.mutation(async ({ ctx }) => {
-    const { session } = ctx;
-
-    console.log("Starting YouTube link update...");
-
-    if (!session?.user?.accessToken) {
-      throw new Error("No access token found - please log in again");
-    }
-
-    const oauth2Client = new google.auth.OAuth2(
-      process.env.GOOGLE_CLIENT_ID,
-      process.env.GOOGLE_CLIENT_SECRET,
-      `${process.env.NEXTAUTH_URL}/api/auth/callback/google`,
-    );
-
-    oauth2Client.setCredentials({
-      access_token: session.user.accessToken,
-      token_type: "Bearer",
-    });
-
-    const youtube = google.youtube({ version: "v3", auth: oauth2Client });
-
-    try {
-      // Test the credentials in a separate try/catch first
-      try {
-        console.log("Testing credentials...");
-        await youtube.channels.list({
-          part: ["snippet"],
-          mine: true,
-        });
-      } catch (error) {
-        console.error("Error validating YouTube credentials:", error);
-        throw new Error(
-          "Invalid YouTube credentials - please try logging in again",
-        );
-      }
-
-      let allVideos: YouTubeVideoItem[] = [];
-      let nextPageToken: string | undefined = undefined;
-
-      // Only proceed if credentials are valid
-      console.log("Credentials valid, searching videos...");
-
-      do {
-        const response = await fetch(
-          `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=50&forMine=true&type=video&q=WEDGIE${
-            nextPageToken ? `&pageToken=${nextPageToken}` : ""
-          }`,
-          {
-            headers: {
-              Authorization: `Bearer ${session.user.accessToken}`,
-            },
-          },
-        );
-
-        const data = (await response.json()) as YouTubeApiResponse;
-        if (!data.items) break;
-
-        allVideos = [...allVideos, ...data.items];
-        nextPageToken = data.nextPageToken;
-
-        console.log(`Fetched ${allVideos.length} videos so far...`);
-      } while (nextPageToken);
-
-      if (allVideos.length === 0) {
-        return { success: false, message: "No videos found" };
-      }
-
-      console.log(`Processing ${allVideos.length} total videos...`);
-      let updatedCount = 0;
-
-      for (const video of allVideos) {
-        const title = video.snippet?.title;
-        if (!title) continue;
-
-        const titleRegex = /^(.*?) WEDGIE No\. (\d+)/;
-        const match = titleRegex.exec(title);
-        if (!match) continue;
-
-        const [, playerName, wedgieNumber] = match;
-        const trimmedPlayerName = playerName?.trim() ?? "";
-
-        const wedgie = await ctx.db.wedgie.findFirst({
-          where: {
-            playerName: trimmedPlayerName,
-            number: parseInt(wedgieNumber ?? "0"),
-          },
-        });
-
-        if (wedgie) {
-          await ctx.db.wedgie.update({
-            where: { id: wedgie.id },
-            data: {
-              videoUrl: {
-                ...(wedgie.videoUrl as VideoUrl),
-                youtube: `https://www.youtube.com/watch?v=${video.id?.videoId ?? ""}`,
-              },
-            },
-          });
-          updatedCount++;
-        }
-      }
-
-      return {
-        success: true,
-        message: `Updated ${updatedCount} wedgies with YouTube links (from ${allVideos.length} total videos)`,
-      };
-    } catch (error) {
-      console.error("Error updating YouTube links:", error);
-      throw error;
-    }
-  }),
 });
