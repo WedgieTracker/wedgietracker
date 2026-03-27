@@ -1,3 +1,4 @@
+export const dynamic = "force-static";
 export const revalidate = 300;
 
 import { Header } from "~/components/layout/Header";
