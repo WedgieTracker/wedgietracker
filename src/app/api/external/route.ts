@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import { PrismaClient } from "@prisma/client";
 import { env } from "~/env";
 import { calculatePace } from "~/utils/paceCalculator";
+import { CACHE_TAGS } from "~/server/cache";
 const prisma = new PrismaClient();
 
 const wedgieTrackerApiKey = env.WEDGIETRACKER_API_KEY;
@@ -228,6 +230,8 @@ export async function POST(request: Request) {
       data: { currentTotalFGA: newTotalFGA },
     });
   }
+
+  revalidateTag(CACHE_TAGS.WEDGIE_DATA);
 
   return NextResponse.json({ message: "Data updated successfully" });
 }

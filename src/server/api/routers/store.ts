@@ -1,10 +1,27 @@
 import { z } from "zod";
+import { unstable_cache } from "next/cache";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import Stripe from "stripe";
+import { db } from "~/server/db";
+import { CACHE_TAGS } from "~/server/cache";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-02-24.acacia",
 });
+
+const getCachedAvailableQuantity = unstable_cache(
+  async () => {
+    const totalWedgies = await db.wedgie.count({
+      where: { Season: { NOT: { name: "GEMS" } } },
+    });
+    const currentOrders = await db.tshirtOrder.count();
+    const inventory = totalWedgies - currentOrders;
+    const currentNumber = currentOrders + 1;
+    return { totalWedgies, currentOrders, inventory, currentNumber };
+  },
+  ["store-getAvailableQuantity"],
+  { tags: [CACHE_TAGS.STORE_DATA], revalidate: 60 },
+);
 
 export const storeRouter = createTRPCRouter({
   createCheckoutSession: publicProcedure
@@ -126,31 +143,7 @@ export const storeRouter = createTRPCRouter({
       return session.id;
     }),
 
-  getAvailableQuantity: publicProcedure.query(async ({ ctx }) => {
-    // Get total wedgies (excluding GEMS)
-    const totalWedgies = await ctx.db.wedgie.count({
-      where: {
-        Season: {
-          NOT: {
-            name: "GEMS",
-          },
-        },
-      },
-    });
-
-    // Get current number of orders
-    const currentOrders = await ctx.db.tshirtOrder.count();
-
-    const inventory = totalWedgies - currentOrders;
-
-    const currentNumber = currentOrders + 1;
-
-    // Return the minimum between inventory and total wedgies
-    return {
-      totalWedgies,
-      currentOrders,
-      inventory,
-      currentNumber,
-    };
-  }),
+  getAvailableQuantity: publicProcedure.query(() =>
+    getCachedAvailableQuantity(),
+  ),
 });

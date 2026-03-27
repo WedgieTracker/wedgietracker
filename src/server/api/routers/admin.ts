@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { unstable_cache } from "next/cache";
 
 import {
   createTRPCRouter,
@@ -6,17 +7,23 @@ import {
   protectedProcedure,
 } from "~/server/api/trpc";
 
-export const adminRouter = createTRPCRouter({
-  getGlobal: publicProcedure.query(async ({ ctx }) => {
-    const global = await ctx.db.global.findFirst({
+import { db } from "~/server/db";
+import { CACHE_TAGS, invalidateWedgieData } from "~/server/cache";
+
+const getCachedGlobal = unstable_cache(
+  async () => {
+    const global = await db.global.findFirst({
       where: { id: 1 },
-      include: {
-        currentSeason: true,
-      },
+      include: { currentSeason: true },
     });
-    // console.log(global);
     return global ?? null;
-  }),
+  },
+  ["admin-getGlobal"],
+  { tags: [CACHE_TAGS.WEDGIE_DATA], revalidate: 60 },
+);
+
+export const adminRouter = createTRPCRouter({
+  getGlobal: publicProcedure.query(() => getCachedGlobal()),
 
   updateGlobal: protectedProcedure
     .input(
@@ -32,9 +39,11 @@ export const adminRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      return ctx.db.global.update({
+      const result = await ctx.db.global.update({
         where: { id: 1 },
         data: input,
       });
+      invalidateWedgieData();
+      return result;
     }),
 });

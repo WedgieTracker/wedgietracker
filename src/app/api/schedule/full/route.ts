@@ -1,6 +1,8 @@
 import { db } from "~/server/db";
 import { NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import { calculatePace } from "~/utils/paceCalculator";
+import { CACHE_TAGS } from "~/server/cache";
 
 // Add interfaces for the NBA API response
 interface NBATeam {
@@ -250,6 +252,8 @@ const nbaUpdate = async () => {
         },
       });
     }
+
+    revalidateTag(CACHE_TAGS.WEDGIE_DATA);
 
     return NextResponse.json({
       gamesPlayed,

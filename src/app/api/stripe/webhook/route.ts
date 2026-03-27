@@ -1,7 +1,9 @@
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import Stripe from "stripe";
 import { db } from "~/server/db";
+import { CACHE_TAGS } from "~/server/cache";
 import { createPrintfulDraftOrder } from "~/server/services/printful";
 import { sendTelegramMessage } from "~/server/services/telegram";
 import { sendOrderConfirmationEmail } from "~/server/services/email";
@@ -114,6 +116,8 @@ export async function POST(req: Request) {
             },
           },
         });
+
+        revalidateTag(CACHE_TAGS.STORE_DATA);
 
         // Get current order number
         const { _count } = await db.tshirtOrder.aggregate({

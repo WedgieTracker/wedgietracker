@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { google } from "googleapis";
+import { unstable_cache } from "next/cache";
 
 import {
   createTRPCRouter,
@@ -8,7 +9,13 @@ import {
   protectedProcedure,
 } from "~/server/api/trpc";
 
+import { db } from "~/server/db";
 import { calculatePace } from "~/utils/paceCalculator";
+import {
+  CACHE_TAGS,
+  invalidateWedgieData,
+  invalidateStoreData,
+} from "~/server/cache";
 
 interface VideoUrl {
   youtube?: string;
@@ -56,6 +63,387 @@ const wedgieInput = z.object({
   gameName: z.string().optional(),
 });
 
+// --- Cached query functions ---
+
+const getCachedAll = unstable_cache(
+  async () => {
+    const wedgies = await db.wedgie.findMany({
+      orderBy: { createdAt: "desc" },
+      include: { types: true },
+    });
+    return wedgies ?? null;
+  },
+  ["wedgie-getAll"],
+  { tags: [CACHE_TAGS.WEDGIE_DATA], revalidate: 120 },
+);
+
+const getCachedBySeason = (season: string) =>
+  unstable_cache(
+    async () => {
+      return db.wedgie.findMany({
+        where: { Season: { is: { name: season } } },
+        include: { types: true },
+        orderBy: { number: "desc" },
+      });
+    },
+    ["wedgie-getBySeason", season],
+    { tags: [CACHE_TAGS.WEDGIE_DATA], revalidate: 120 },
+  )();
+
+const getCachedLatest = unstable_cache(
+  async () => {
+    return db.wedgie.findFirst({
+      orderBy: { createdAt: "desc" },
+    });
+  },
+  ["wedgie-getLatest"],
+  { tags: [CACHE_TAGS.WEDGIE_DATA], revalidate: 120 },
+);
+
+const getCachedLatestWedgies = unstable_cache(
+  async () => {
+    return db.wedgie.findMany({
+      take: 13,
+      orderBy: { wedgieDate: "desc" },
+      include: { types: true },
+    });
+  },
+  ["wedgie-getLatestWedgies"],
+  { tags: [CACHE_TAGS.WEDGIE_DATA], revalidate: 120 },
+);
+
+const getCachedStats = unstable_cache(
+  async () => {
+    const globalSettings = await db.global.findFirst({
+      where: { id: 1 },
+      select: {
+        currentTotalWedgies: true,
+        pace: true,
+        simplePace: true,
+        mathPace: true,
+        currentTotalGames: true,
+        liveGames: true,
+        currentSeason: true,
+      },
+    });
+
+    if (!globalSettings) {
+      throw new Error("No global settings found");
+    }
+
+    const lastWedgie = await db.wedgie.findFirst({
+      orderBy: { wedgieDate: "desc" },
+      select: { wedgieDate: true },
+    });
+
+    const currentSeasonWedgies = await db.wedgie.count({
+      where: { seasonName: globalSettings.currentSeason.name },
+    });
+
+    let dateNow: Date | null = null;
+    if (currentSeasonWedgies < globalSettings.currentTotalWedgies) {
+      dateNow = new Date();
+    }
+
+    return {
+      totalWedgies: globalSettings.currentTotalWedgies ?? 0,
+      currentPace: globalSettings.pace ?? 0,
+      simplePace: globalSettings.simplePace ?? 0,
+      mathPace: globalSettings.mathPace ?? 0,
+      gamesPlayed: globalSettings.currentTotalGames ?? 0,
+      lastWedgie: dateNow ?? lastWedgie?.wedgieDate ?? null,
+      liveGames: globalSettings.liveGames ?? false,
+      currentSeasonWedgies: currentSeasonWedgies,
+    };
+  },
+  ["wedgie-getStats"],
+  { tags: [CACHE_TAGS.WEDGIE_DATA], revalidate: 60 },
+);
+
+const getCachedTopStandings = unstable_cache(
+  async () => {
+    const currentSeasonGlobal = await db.global.findFirst({
+      where: { id: 1 },
+      include: { currentSeason: true },
+    });
+
+    const currentSeason = currentSeasonGlobal?.currentSeason.name;
+
+    const topPlayers = await db.wedgie.groupBy({
+      by: ["playerName"],
+      where: { seasonName: currentSeason },
+      _count: { playerName: true },
+      orderBy: [
+        { _count: { playerName: "desc" } },
+        { playerName: "asc" },
+      ],
+      take: 5,
+    });
+
+    const wedgies = await db.wedgie.findMany({
+      where: { seasonName: currentSeason },
+      select: { teamName: true, teamAgainstName: true },
+    });
+
+    const teamCounts = new Map<string, number>();
+    wedgies.forEach((wedgie) => {
+      teamCounts.set(
+        wedgie.teamName,
+        (teamCounts.get(wedgie.teamName) ?? 0) + 1,
+      );
+      teamCounts.set(
+        wedgie.teamAgainstName,
+        (teamCounts.get(wedgie.teamAgainstName) ?? 0) + 1,
+      );
+    });
+
+    const topTeams = Array.from(teamCounts.entries())
+      .sort((a, b) => {
+        const countDiff = b[1] - a[1];
+        if (countDiff !== 0) return countDiff;
+        return a[0].localeCompare(b[0]);
+      })
+      .slice(0, 5)
+      .map(([name, count]) => ({ name, count }));
+
+    return {
+      players: topPlayers.map((p) => ({
+        name: p.playerName,
+        count: p._count.playerName,
+      })),
+      teams: topTeams,
+    };
+  },
+  ["wedgie-getTopStandings"],
+  { tags: [CACHE_TAGS.WEDGIE_DATA], revalidate: 120 },
+);
+
+const getCachedSeasonStandings = (
+  season: string,
+  includeOpponents: boolean,
+) =>
+  unstable_cache(
+    async () => {
+      const whereClause = season ? { seasonName: season } : {};
+
+      const topPlayers = await db.wedgie.groupBy({
+        by: ["playerName"],
+        where: whereClause,
+        _count: { playerName: true },
+        orderBy: [
+          { _count: { playerName: "desc" } },
+          { playerName: "asc" },
+        ],
+      });
+
+      const wedgies = await db.wedgie.findMany({
+        where: whereClause,
+        select: { teamName: true, teamAgainstName: true },
+      });
+
+      const teamCounts = new Map<string, number>();
+      wedgies.forEach((wedgie) => {
+        teamCounts.set(
+          wedgie.teamName,
+          (teamCounts.get(wedgie.teamName) ?? 0) + 1,
+        );
+        if (includeOpponents) {
+          teamCounts.set(
+            wedgie.teamAgainstName,
+            (teamCounts.get(wedgie.teamAgainstName) ?? 0) + 1,
+          );
+        }
+      });
+
+      const topTeams = Array.from(teamCounts.entries())
+        .sort((a, b) => {
+          const countDiff = b[1] - a[1];
+          if (countDiff !== 0) return countDiff;
+          return a[0].localeCompare(b[0]);
+        })
+        .map(([name, count]) => ({ name, count }));
+
+      return {
+        players: topPlayers
+          .filter((p) => p.playerName)
+          .map((p) => ({
+            name: p.playerName,
+            count: p._count.playerName,
+          })),
+        teams: topTeams,
+      };
+    },
+    ["wedgie-getSeasonStandings", season, String(includeOpponents)],
+    { tags: [CACHE_TAGS.WEDGIE_DATA], revalidate: 120 },
+  )();
+
+const getCachedNerdStats = unstable_cache(
+  async () => {
+    const global = await db.global.findFirst({
+      where: { id: 1 },
+      include: { currentSeason: true },
+    });
+
+    const currentSeason = global?.currentSeason.name;
+
+    const allPlayers = await db.wedgie.groupBy({
+      by: ["playerName"],
+      where: { seasonName: currentSeason },
+      _count: { playerName: true },
+    });
+    const maxWedgies = Math.max(
+      ...allPlayers.map((player) => player._count.playerName),
+    );
+    const topPlayers = allPlayers.filter(
+      (player) => player._count.playerName === maxWedgies,
+    );
+
+    const wedgies = await db.wedgie.findMany({
+      where: { seasonName: currentSeason },
+      select: { teamName: true, teamAgainstName: true },
+    });
+
+    const teamCounts = new Map<string, number>();
+    wedgies.forEach((wedgie) => {
+      teamCounts.set(
+        wedgie.teamName,
+        (teamCounts.get(wedgie.teamName) ?? 0) + 1,
+      );
+      teamCounts.set(
+        wedgie.teamAgainstName,
+        (teamCounts.get(wedgie.teamAgainstName) ?? 0) + 1,
+      );
+    });
+
+    const topTeams = Array.from(teamCounts.entries())
+      .sort((a, b) => b[1] - a[1])
+      .map(([name, count]) => ({ name, count: count }));
+
+    const wedgiesThisSeason = await db.wedgie.count({
+      where: { seasonName: currentSeason },
+    });
+
+    const totalFGA = await db.global.findFirst({
+      where: { id: 1 },
+      select: { currentTotalFGA: true },
+    });
+
+    const fgaPerWedgie = totalFGA
+      ? totalFGA.currentTotalFGA / wedgiesThisSeason
+      : 0;
+
+    const lastWedgie = await db.wedgie.findFirst({
+      orderBy: { wedgieDate: "desc" },
+      select: { wedgieDate: true, playerName: true },
+    });
+
+    const gamesSinceLastWedgie = lastWedgie
+      ? await db.game.count({
+          where: {
+            createdAt: { gt: lastWedgie.wedgieDate },
+            live: false,
+          },
+        })
+      : 0;
+
+    const currentSeasonWedgies = wedgies.length;
+
+    const hideGamesSinceLastWedgie =
+      currentSeasonWedgies < (global?.currentTotalWedgies ?? 0) ? true : false;
+
+    const seasons = await db.season.findMany({
+      where: {
+        AND: [
+          { name: { not: "GEMS" } },
+          { name: { not: currentSeason } },
+        ],
+      },
+      include: { wedgies: true },
+    });
+
+    const seasonRates = seasons
+      .map((season) => ({
+        wedgies: season.wedgies.length,
+        games: season.totalGames,
+        rate:
+          season.totalGames > 0 ? season.wedgies.length / season.totalGames : 0,
+      }))
+      .filter((season) => season.rate > 0);
+
+    const averageSeasonRate = Math.round(
+      seasonRates.reduce((acc, season) => acc + season.wedgies, 0) /
+        seasonRates.length,
+    );
+
+    const totalSeasonsOverall = seasons.length;
+
+    const totalWedgiesOverall = seasons.reduce(
+      (acc, season) => acc + season.wedgies.length,
+      0,
+    );
+
+    const totalGamesOverall = seasons.reduce(
+      (acc, season) => acc + season.totalGames,
+      0,
+    );
+
+    const globalGames = global?.currentTotalGames ?? 0;
+
+    return {
+      currentSeason: currentSeason ?? "2025/26",
+      wedgiesThisSeason:
+        currentSeasonWedgies > (global?.currentTotalWedgies ?? 0)
+          ? currentSeasonWedgies
+          : (global?.currentTotalWedgies ?? 0),
+      fgaPerWedgie,
+      pace: global?.pace ?? 0,
+      averageLastTenSeasons: averageSeasonRate,
+      ...(hideGamesSinceLastWedgie ? {} : { gamesSinceLastWedgie }),
+      lastWedgiePlayer: lastWedgie?.playerName ?? null,
+      statsPerWedgie: {
+        fga: global
+          ? Math.round(global.currentTotalFGA / wedgiesThisSeason)
+          : 0,
+        possessions: global
+          ? Math.round(global.currentTotalPoss / wedgiesThisSeason)
+          : 0,
+        games: global
+          ? Math.round(global.currentTotalGames / wedgiesThisSeason)
+          : 0,
+        minutes: global
+          ? Math.round(global.currentTotalMinutes / wedgiesThisSeason)
+          : 0,
+      },
+      leaders: {
+        teams: topTeams.map((team) => ({
+          name: team.name,
+          wedgies: team.count,
+        })),
+        players: topPlayers.map((player) => ({
+          name: player.playerName,
+          count: player._count.playerName,
+        })),
+      },
+      totalWedgiesOverall: totalWedgiesOverall + wedgiesThisSeason,
+      totalGamesOverall: totalGamesOverall + globalGames,
+      totalSeasonsOverall: totalSeasonsOverall + 1,
+      oldSeasonsAverage: averageSeasonRate,
+    };
+  },
+  ["wedgie-getNerdStats"],
+  { tags: [CACHE_TAGS.WEDGIE_DATA], revalidate: 300 },
+);
+
+const getCachedTotalWedgies = unstable_cache(
+  async () => {
+    return db.wedgie.count({
+      where: { Season: { NOT: { name: "GEMS" } } },
+    });
+  },
+  ["wedgie-getTotalWedgies"],
+  { tags: [CACHE_TAGS.WEDGIE_DATA], revalidate: 120 },
+);
+
 export const wedgieRouter = createTRPCRouter({
   hello: publicProcedure
     .input(z.object({ text: z.string() }))
@@ -65,31 +453,11 @@ export const wedgieRouter = createTRPCRouter({
       };
     }),
 
-  getAll: publicProcedure.query(async ({ ctx }) => {
-    const wedgies = await ctx.db.wedgie.findMany({
-      orderBy: { createdAt: "desc" },
-      include: {
-        types: true,
-      },
-    });
-
-    return wedgies ?? null;
-  }),
+  getAll: publicProcedure.query(() => getCachedAll()),
 
   getBySeason: publicProcedure
     .input(z.object({ season: z.string().min(1) }))
-    .query(async ({ ctx, input }) => {
-      const wedgies = await ctx.db.wedgie.findMany({
-        where: { Season: { is: { name: input.season } } },
-        include: {
-          types: true,
-        },
-        orderBy: {
-          number: "desc",
-        },
-      });
-      return wedgies;
-    }),
+    .query(({ input }) => getCachedBySeason(input.season)),
 
   getByPlayer: publicProcedure
     .input(z.object({ player: z.string().min(1) }))
@@ -109,12 +477,7 @@ export const wedgieRouter = createTRPCRouter({
       return wedgies;
     }),
 
-  getLatest: publicProcedure.query(async ({ ctx }) => {
-    const wedgies = await ctx.db.wedgie.findFirst({
-      orderBy: { createdAt: "desc" },
-    });
-    return wedgies;
-  }),
+  getLatest: publicProcedure.query(() => getCachedLatest()),
 
   create: protectedProcedure
     .input(wedgieInput)
@@ -170,6 +533,9 @@ export const wedgieRouter = createTRPCRouter({
           });
         }
       }
+
+      invalidateWedgieData();
+      invalidateStoreData();
 
       return wedgie;
     }),
@@ -329,66 +695,9 @@ export const wedgieRouter = createTRPCRouter({
   //   return results;
   // }),
 
-  getLatestWedgies: publicProcedure.query(async ({ ctx }) => {
-    return ctx.db.wedgie.findMany({
-      take: 13,
-      orderBy: { wedgieDate: "desc" },
-      include: {
-        types: true,
-      },
-    });
-  }),
+  getLatestWedgies: publicProcedure.query(() => getCachedLatestWedgies()),
 
-  getStats: publicProcedure.query(async ({ ctx }) => {
-    const globalSettings = await ctx.db.global.findFirst({
-      where: { id: 1 },
-      select: {
-        currentTotalWedgies: true,
-        pace: true,
-        simplePace: true,
-        mathPace: true,
-        currentTotalGames: true,
-        liveGames: true,
-        currentSeason: true,
-      },
-    });
-
-    if (!globalSettings) {
-      throw new Error("No global settings found");
-    }
-
-    // get the date of the last wedgie
-    const lastWedgie = await ctx.db.wedgie.findFirst({
-      orderBy: { wedgieDate: "desc" },
-      select: {
-        wedgieDate: true,
-      },
-    });
-
-    // count the number of wedgies in the current season
-    const currentSeasonWedgies = await ctx.db.wedgie.count({
-      where: {
-        seasonName: globalSettings.currentSeason.name,
-      },
-    });
-
-    let dateNow: Date | null = null;
-
-    if (currentSeasonWedgies < globalSettings.currentTotalWedgies) {
-      dateNow = new Date();
-    }
-
-    return {
-      totalWedgies: globalSettings.currentTotalWedgies ?? 0,
-      currentPace: globalSettings.pace ?? 0,
-      simplePace: globalSettings.simplePace ?? 0,
-      mathPace: globalSettings.mathPace ?? 0,
-      gamesPlayed: globalSettings.currentTotalGames ?? 0,
-      lastWedgie: dateNow ?? lastWedgie?.wedgieDate ?? null,
-      liveGames: globalSettings.liveGames ?? false,
-      currentSeasonWedgies: currentSeasonWedgies,
-    };
-  }),
+  getStats: publicProcedure.query(() => getCachedStats()),
 
   getCloudinaryWedgies: publicProcedure.query(async ({ ctx }) => {
     return ctx.db.wedgie.findMany({
@@ -413,80 +722,7 @@ export const wedgieRouter = createTRPCRouter({
     });
   }),
 
-  getTopStandings: publicProcedure.query(async ({ ctx }) => {
-    const currentSeasonGlobal = await ctx.db.global.findFirst({
-      where: { id: 1 },
-      include: { currentSeason: true },
-    });
-
-    const currentSeason = currentSeasonGlobal?.currentSeason.name;
-
-    // Get top 5 players
-    const topPlayers = await ctx.db.wedgie.groupBy({
-      by: ["playerName"],
-      where: {
-        seasonName: currentSeason,
-      },
-      _count: {
-        playerName: true,
-      },
-      orderBy: [
-        {
-          _count: {
-            playerName: "desc",
-          },
-        },
-        {
-          playerName: "asc",
-        },
-      ],
-      take: 5,
-    });
-
-    // Get all wedgies for the current season
-    const wedgies = await ctx.db.wedgie.findMany({
-      where: {
-        seasonName: currentSeason,
-      },
-      select: {
-        teamName: true,
-        teamAgainstName: true,
-      },
-    });
-
-    // Count wedgies for each team (both as team and opponent)
-    const teamCounts = new Map<string, number>();
-    wedgies.forEach((wedgie) => {
-      teamCounts.set(
-        wedgie.teamName,
-        (teamCounts.get(wedgie.teamName) ?? 0) + 1,
-      );
-      teamCounts.set(
-        wedgie.teamAgainstName,
-        (teamCounts.get(wedgie.teamAgainstName) ?? 0) + 1,
-      );
-    });
-
-    // Convert to array and sort
-    const topTeams = Array.from(teamCounts.entries())
-      .sort((a, b) => {
-        // First sort by count descending
-        const countDiff = b[1] - a[1];
-        if (countDiff !== 0) return countDiff;
-        // If counts are equal, sort by team name ascending
-        return a[0].localeCompare(b[0]);
-      })
-      .slice(0, 5)
-      .map(([name, count]) => ({ name, count }));
-
-    return {
-      players: topPlayers.map((p) => ({
-        name: p.playerName,
-        count: p._count.playerName,
-      })),
-      teams: topTeams,
-    };
-  }),
+  getTopStandings: publicProcedure.query(() => getCachedTopStandings()),
 
   getSeasonStandings: publicProcedure
     .input(
@@ -495,262 +731,11 @@ export const wedgieRouter = createTRPCRouter({
         includeOpponents: z.boolean().default(true),
       }),
     )
-    .query(async ({ ctx, input }) => {
-      const whereClause = input.season ? { seasonName: input.season } : {};
+    .query(({ input }) =>
+      getCachedSeasonStandings(input.season, input.includeOpponents),
+    ),
 
-      // Get players
-      const topPlayers = await ctx.db.wedgie.groupBy({
-        by: ["playerName"],
-        where: whereClause,
-        _count: {
-          playerName: true,
-        },
-        orderBy: [
-          {
-            _count: {
-              playerName: "desc",
-            },
-          },
-          {
-            playerName: "asc",
-          },
-        ],
-      });
-
-      // Get all wedgies for the season
-      const wedgies = await ctx.db.wedgie.findMany({
-        where: whereClause,
-        select: {
-          teamName: true,
-          teamAgainstName: true,
-        },
-      });
-
-      // Count wedgies for each team based on the includeOpponents setting
-      const teamCounts = new Map<string, number>();
-      wedgies.forEach((wedgie) => {
-        teamCounts.set(
-          wedgie.teamName,
-          (teamCounts.get(wedgie.teamName) ?? 0) + 1,
-        );
-
-        // Only count opponent teams if includeOpponents is true
-        if (input.includeOpponents) {
-          teamCounts.set(
-            wedgie.teamAgainstName,
-            (teamCounts.get(wedgie.teamAgainstName) ?? 0) + 1,
-          );
-        }
-      });
-
-      // Convert to array and sort
-      const topTeams = Array.from(teamCounts.entries())
-        .sort((a, b) => {
-          // First sort by count descending
-          const countDiff = b[1] - a[1];
-          if (countDiff !== 0) return countDiff;
-          // If counts are equal, sort by team name ascending
-          return a[0].localeCompare(b[0]);
-        })
-        .map(([name, count]) => ({ name, count }));
-
-      return {
-        players: topPlayers
-          .filter((p) => p.playerName)
-          .map((p) => ({
-            name: p.playerName,
-            count: p._count.playerName,
-          })),
-        teams: topTeams,
-      };
-    }),
-
-  getNerdStats: publicProcedure.query(async ({ ctx }) => {
-    // Get current season
-    const global = await ctx.db.global.findFirst({
-      where: { id: 1 },
-      include: { currentSeason: true },
-    });
-
-    const currentSeason = global?.currentSeason.name;
-
-    // Get top players for current season
-    const allPlayers = await ctx.db.wedgie.groupBy({
-      by: ["playerName"],
-      where: {
-        seasonName: currentSeason,
-      },
-      _count: {
-        playerName: true,
-      },
-    });
-    const maxWedgies = Math.max(
-      ...allPlayers.map((player) => player._count.playerName),
-    );
-    const topPlayers = allPlayers.filter(
-      (player) => player._count.playerName === maxWedgies,
-    );
-
-    // Get all wedgies for current season to count team involvement
-    const wedgies = await ctx.db.wedgie.findMany({
-      where: {
-        seasonName: currentSeason,
-      },
-      select: {
-        teamName: true,
-        teamAgainstName: true,
-      },
-    });
-
-    // Count wedgies for each team (both as team and opponent)
-    const teamCounts = new Map<string, number>();
-    wedgies.forEach((wedgie) => {
-      teamCounts.set(
-        wedgie.teamName,
-        (teamCounts.get(wedgie.teamName) ?? 0) + 1,
-      );
-      teamCounts.set(
-        wedgie.teamAgainstName,
-        (teamCounts.get(wedgie.teamAgainstName) ?? 0) + 1,
-      );
-    });
-
-    // Convert to array and sort
-    const topTeams = Array.from(teamCounts.entries())
-      .sort((a, b) => b[1] - a[1])
-      .map(([name, count]) => ({ name, count: count }));
-
-    // Get total wedgies this season
-    const wedgiesThisSeason = await ctx.db.wedgie.count({
-      where: {
-        seasonName: currentSeason,
-      },
-    });
-
-    // Get total FGA this season
-    const totalFGA = await ctx.db.global.findFirst({
-      where: { id: 1 },
-      select: { currentTotalFGA: true },
-    });
-
-    // Calculate FGA per wedgie
-    const fgaPerWedgie = totalFGA
-      ? totalFGA.currentTotalFGA / wedgiesThisSeason
-      : 0;
-
-    // Get games since last wedgie
-    const lastWedgie = await ctx.db.wedgie.findFirst({
-      orderBy: { wedgieDate: "desc" },
-      select: {
-        wedgieDate: true,
-        playerName: true,
-      },
-    });
-
-    // Calculate games since last wedgie using the global currentTotalGames
-    const gamesSinceLastWedgie = lastWedgie
-      ? await ctx.db.game.count({
-          where: {
-            createdAt: {
-              gt: lastWedgie.wedgieDate,
-            },
-            live: false,
-          },
-        })
-      : 0;
-
-    const currentSeasonWedgies = wedgies.length;
-
-    const hideGamesSinceLastWedgie =
-      currentSeasonWedgies < (global?.currentTotalWedgies ?? 0) ? true : false;
-
-    // Get all seasons excluding current and gems
-    const seasons = await ctx.db.season.findMany({
-      where: {
-        AND: [
-          { name: { not: "GEMS" } },
-          { name: { not: currentSeason } }, // Exclude current season
-        ],
-      },
-      include: {
-        wedgies: true,
-      },
-    });
-
-    // Calculate rate for each season and filter out seasons with 0 rate
-    const seasonRates = seasons
-      .map((season) => ({
-        wedgies: season.wedgies.length,
-        games: season.totalGames,
-        rate:
-          season.totalGames > 0 ? season.wedgies.length / season.totalGames : 0,
-      }))
-      .filter((season) => season.rate > 0);
-
-    // Calculate average rate
-    const averageSeasonRate = Math.round(
-      seasonRates.reduce((acc, season) => acc + season.wedgies, 0) /
-        seasonRates.length,
-    );
-
-    // count the number of seasons
-    const totalSeasonsOverall = seasons.length;
-
-    // sum up the total number of wedgies
-    const totalWedgiesOverall = seasons.reduce(
-      (acc, season) => acc + season.wedgies.length,
-      0,
-    );
-
-    // sum up the total number of games summing seasons.totalGames
-    const totalGamesOverall = seasons.reduce(
-      (acc, season) => acc + season.totalGames,
-      0,
-    );
-
-    const globalGames = global?.currentTotalGames ?? 0;
-
-    return {
-      currentSeason: currentSeason ?? "2025/26",
-      wedgiesThisSeason:
-        currentSeasonWedgies > (global?.currentTotalWedgies ?? 0)
-          ? currentSeasonWedgies
-          : (global?.currentTotalWedgies ?? 0),
-      fgaPerWedgie,
-      pace: global?.pace ?? 0,
-      averageLastTenSeasons: averageSeasonRate,
-      ...(hideGamesSinceLastWedgie ? {} : { gamesSinceLastWedgie }),
-      lastWedgiePlayer: lastWedgie?.playerName ?? null,
-      statsPerWedgie: {
-        fga: global
-          ? Math.round(global.currentTotalFGA / wedgiesThisSeason)
-          : 0,
-        possessions: global
-          ? Math.round(global.currentTotalPoss / wedgiesThisSeason)
-          : 0,
-        games: global
-          ? Math.round(global.currentTotalGames / wedgiesThisSeason)
-          : 0,
-        minutes: global
-          ? Math.round(global.currentTotalMinutes / wedgiesThisSeason)
-          : 0,
-      },
-      leaders: {
-        teams: topTeams.map((team) => ({
-          name: team.name,
-          wedgies: team.count,
-        })),
-        players: topPlayers.map((player) => ({
-          name: player.playerName,
-          count: player._count.playerName,
-        })),
-      },
-      totalWedgiesOverall: totalWedgiesOverall + wedgiesThisSeason,
-      totalGamesOverall: totalGamesOverall + globalGames,
-      totalSeasonsOverall: totalSeasonsOverall + 1,
-      oldSeasonsAverage: averageSeasonRate,
-    };
-  }),
+  getNerdStats: publicProcedure.query(() => getCachedNerdStats()),
 
   getById: protectedProcedure
     .input(z.object({ id: z.string() }))
@@ -825,29 +810,23 @@ export const wedgieRouter = createTRPCRouter({
         }
       }
 
+      invalidateWedgieData();
+
       return wedgie;
     }),
 
   delete: protectedProcedure
     .input(z.object({ id: z.string() }))
-    .mutation(({ ctx, input }) => {
-      return ctx.db.wedgie.delete({
+    .mutation(async ({ ctx, input }) => {
+      const result = await ctx.db.wedgie.delete({
         where: { id: Number(input.id) },
       });
+      invalidateWedgieData();
+      invalidateStoreData();
+      return result;
     }),
 
-  getTotalWedgies: publicProcedure.query(async ({ ctx }) => {
-    const total = await ctx.db.wedgie.count({
-      where: {
-        Season: {
-          NOT: {
-            name: "GEMS",
-          },
-        },
-      },
-    });
-    return total;
-  }),
+  getTotalWedgies: publicProcedure.query(() => getCachedTotalWedgies()),
 
   updateYoutubeLinks: protectedProcedure.mutation(async ({ ctx }) => {
     const { session } = ctx;

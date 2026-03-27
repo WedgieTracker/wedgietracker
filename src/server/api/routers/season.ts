@@ -1,73 +1,63 @@
+import { unstable_cache } from "next/cache";
+
 import {
   createTRPCRouter,
   publicProcedure,
   // protectedProcedure,
 } from "~/server/api/trpc";
 
-export const seasonRouter = createTRPCRouter({
-  getAll: publicProcedure.query(async ({ ctx }) => {
-    const seasons = await ctx.db.season.findMany({
+import { db } from "~/server/db";
+import { CACHE_TAGS } from "~/server/cache";
+
+const getCachedAll = unstable_cache(
+  async () => {
+    const seasons = await db.season.findMany({
       orderBy: { createdAt: "desc" },
     });
-
     return seasons ?? null;
-  }),
+  },
+  ["season-getAll"],
+  { tags: [CACHE_TAGS.WEDGIE_DATA], revalidate: 300 },
+);
 
-  getAllWithStats: publicProcedure.query(async ({ ctx }) => {
-    const seasons = await ctx.db.season.findMany({
-      where: {
-        NOT: {
-          name: "GEMS",
-        },
-      },
+const getCachedAllWithStats = unstable_cache(
+  async () => {
+    const seasons = await db.season.findMany({
+      where: { NOT: { name: "GEMS" } },
       orderBy: { name: "desc" },
     });
 
     const seasonsWithStats = await Promise.all(
       seasons.map(async (season) => {
-        const wedgies = await ctx.db.wedgie.findMany({
+        const wedgies = await db.wedgie.findMany({
           where: { seasonName: season.name },
-          select: {
-            teamName: true,
-            teamAgainstName: true,
-          },
+          select: { teamName: true, teamAgainstName: true },
         });
 
-        const topPlayers = await ctx.db.wedgie.groupBy({
+        const topPlayers = await db.wedgie.groupBy({
           by: ["playerName"],
           where: { seasonName: season.name },
-          _count: {
-            playerName: true,
-          },
-          orderBy: {
-            _count: {
-              playerName: "desc",
-            },
-          },
+          _count: { playerName: true },
+          orderBy: { _count: { playerName: "desc" } },
           take: 5,
         });
 
-        // Count wedgies for each team based on the includeOpponents setting
         const teamCounts = new Map<string, number>();
         wedgies.forEach((wedgie) => {
           teamCounts.set(
             wedgie.teamName,
             (teamCounts.get(wedgie.teamName) ?? 0) + 1,
           );
-
           teamCounts.set(
             wedgie.teamAgainstName,
             (teamCounts.get(wedgie.teamAgainstName) ?? 0) + 1,
           );
         });
 
-        // Convert to array and sort
         const topTeams = Array.from(teamCounts.entries())
           .sort((a, b) => {
-            // First sort by count descending
             const countDiff = b[1] - a[1];
             if (countDiff !== 0) return countDiff;
-            // If counts are equal, sort by team name ascending
             return a[0].localeCompare(b[0]);
           })
           .slice(0, 5)
@@ -89,46 +79,51 @@ export const seasonRouter = createTRPCRouter({
     );
 
     return seasonsWithStats;
-  }),
+  },
+  ["season-getAllWithStats"],
+  { tags: [CACHE_TAGS.WEDGIE_DATA], revalidate: 300 },
+);
 
-  getAllWithGameCount: publicProcedure.query(async ({ ctx }) => {
-    const seasonsWithGames = await ctx.db.season.findMany({
+const getCachedAllWithGameCount = unstable_cache(
+  async () => {
+    const seasonsWithGames = await db.season.findMany({
       select: {
         id: true,
         name: true,
-        games: {
-          select: {
-            id: true,
-          },
-        },
+        games: { select: { id: true } },
       },
-      orderBy: {
-        name: "desc",
-      },
+      orderBy: { name: "desc" },
     });
 
     return seasonsWithGames.map((season) => ({
       id: season.id,
       name: season.name,
-      _count: {
-        games: season.games.length,
-      },
+      _count: { games: season.games.length },
     }));
-  }),
+  },
+  ["season-getAllWithGameCount"],
+  { tags: [CACHE_TAGS.WEDGIE_DATA], revalidate: 300 },
+);
 
-  getSeasonalProgressChartData: publicProcedure.query(async ({ ctx }) => {
-    const seasons = await ctx.db.season.findMany({
-      include: {
-        wedgies: true,
-        games: true,
-      },
-      where: {
-        NOT: {
-          name: "GEMS",
-        },
-      },
+const getCachedSeasonalProgressChartData = unstable_cache(
+  async () => {
+    return db.season.findMany({
+      include: { wedgies: true, games: true },
+      where: { NOT: { name: "GEMS" } },
     });
+  },
+  ["season-getSeasonalProgressChartData"],
+  { tags: [CACHE_TAGS.WEDGIE_DATA], revalidate: 300 },
+);
 
-    return seasons;
-  }),
+export const seasonRouter = createTRPCRouter({
+  getAll: publicProcedure.query(() => getCachedAll()),
+
+  getAllWithStats: publicProcedure.query(() => getCachedAllWithStats()),
+
+  getAllWithGameCount: publicProcedure.query(() => getCachedAllWithGameCount()),
+
+  getSeasonalProgressChartData: publicProcedure.query(() =>
+    getCachedSeasonalProgressChartData(),
+  ),
 });
