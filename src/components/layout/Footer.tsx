@@ -31,7 +31,7 @@ export function Footer() {
           </div>
 
           <span className="mr-4 whitespace-nowrap text-xs text-white lg:ml-0">
-            © 2025 WedgieTracker
+            © 2026 WedgieTracker
           </span>
 
           <Link
