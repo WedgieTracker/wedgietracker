@@ -1,3 +1,4 @@
+export const dynamic = "force-static";
 export const revalidate = 60;
 
 import { api } from "~/trpc/server";
