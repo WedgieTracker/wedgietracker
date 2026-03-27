@@ -1,8 +1,10 @@
 import { db } from "~/server/db";
 import { NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
+import { eq } from "drizzle-orm";
 import { calculatePace } from "~/utils/paceCalculator";
 import { CACHE_TAGS } from "~/server/cache";
+import { global, season, game } from "~/server/schema";
 
 // Add interfaces for the NBA API response
 interface NBATeam {
@@ -71,9 +73,9 @@ interface SuccessResponse {
 const nbaUpdate = async () => {
   try {
     // get the current values from the db
-    const currentGlobal = await db.global.findFirst({
-      where: { id: 1 },
-      select: {
+    const currentGlobal = await db.query.global.findFirst({
+      where: eq(global.id, 1),
+      columns: {
         currentTotalFGA: true,
         currentTotalPoss: true,
         currentTotalGames: true,
@@ -90,10 +92,12 @@ const nbaUpdate = async () => {
     );
     const scheduleLeague = (await response.json()) as NBAScheduleResponse;
 
-    const currentSeason = await db.season.findFirst({
-      where: { id: currentGlobal?.currentSeasonId },
-      select: { name: true },
-    });
+    const currentSeason = currentGlobal?.currentSeasonId
+      ? await db.query.season.findFirst({
+          where: eq(season.id, currentGlobal.currentSeasonId),
+          columns: { name: true },
+        })
+      : null;
 
     const seasonName = currentSeason?.name ?? "2025/26";
 
@@ -126,8 +130,8 @@ const nbaUpdate = async () => {
             singleGame.weekName !== "All-Star" &&
             singleGame.gameLabel !== "Preseason"
           ) {
-            const existingGame = await db.game.findFirst({
-              where: { id: Number(singleGame.gameId) },
+            const existingGame = await db.query.game.findFirst({
+              where: eq(game.id, Number(singleGame.gameId)),
             });
 
             if (existingGame) {
@@ -136,11 +140,10 @@ const nbaUpdate = async () => {
             }
 
             // Ensure season exists in database
-            await db.season.upsert({
-              where: { name: seasonName },
-              create: { name: seasonName },
-              update: {},
-            });
+            await db
+              .insert(season)
+              .values({ name: seasonName })
+              .onConflictDoNothing({ target: season.name });
 
             // Add game to both arrays since it's new
             gamesToAdd.push({
@@ -191,29 +194,29 @@ const nbaUpdate = async () => {
     totalPoss += posNumber;
 
     // Store processed games in database
-    for (const game of gamesToAdd) {
-      const name = `${game.homeTeam} @ ${game.awayTeam} - ${game.gameDateTimeEst}`;
+    for (const g of gamesToAdd) {
+      const name = `${g.homeTeam} @ ${g.awayTeam} - ${g.gameDateTimeEst}`;
 
-      await db.game.upsert({
-        where: { name: name },
-        create: {
-          id: Number(game.gameID),
+      await db
+        .insert(game)
+        .values({
+          id: Number(g.gameID),
           name: name,
-          createdAt: new Date(game.gameDateTimeEst),
-          seasonName: game.seasonName,
-        },
-        update: {
-          seasonName: game.seasonName,
-        },
-      });
+          createdAt: new Date(g.gameDateTimeEst).toISOString(),
+          seasonName: g.seasonName,
+        })
+        .onConflictDoUpdate({
+          target: game.name,
+          set: { seasonName: g.seasonName },
+        });
     }
 
     // update the total games of the current season if is different from the past total
-    if (gamesPlayed !== currentGlobal?.currentTotalGames) {
-      await db.season.update({
-        where: { id: currentGlobal?.currentSeasonId },
-        data: { totalGames: gamesPlayed },
-      });
+    if (gamesPlayed !== currentGlobal?.currentTotalGames && currentGlobal?.currentSeasonId) {
+      await db
+        .update(season)
+        .set({ totalGames: gamesPlayed })
+        .where(eq(season.id, currentGlobal.currentSeasonId));
     }
 
     let pace: {
@@ -228,16 +231,15 @@ const nbaUpdate = async () => {
 
     if (currentTotalWedgies) {
       // Calculate paces
-
       pace = await calculatePace({
         currentTotalWedgies: currentTotalWedgies,
         currentTotalGames: gamesPlayed,
       });
 
-      // Update the final db.global.upsert to include pace calculations
-      await db.global.upsert({
-        where: { id: 1 },
-        create: {
+      // Update the final global upsert to include pace calculations
+      await db
+        .insert(global)
+        .values({
           id: 1,
           currentSeasonId: 11,
           currentTotalFGA: totalFGA,
@@ -247,17 +249,19 @@ const nbaUpdate = async () => {
           simplePace: pace.simplePace,
           mathPace: pace.rmPace,
           pace: pace.medianPace,
-        },
-        update: {
-          currentTotalFGA: totalFGA,
-          currentTotalPoss: totalPoss,
-          currentTotalGames: gamesPlayed,
-          currentTotalMinutes: minutesPlayed,
-          simplePace: pace.simplePace,
-          mathPace: pace.rmPace,
-          pace: pace.medianPace,
-        },
-      });
+        })
+        .onConflictDoUpdate({
+          target: global.id,
+          set: {
+            currentTotalFGA: totalFGA,
+            currentTotalPoss: totalPoss,
+            currentTotalGames: gamesPlayed,
+            currentTotalMinutes: minutesPlayed,
+            simplePace: pace.simplePace,
+            mathPace: pace.rmPace,
+            pace: pace.medianPace,
+          },
+        });
     }
 
     revalidateTag(CACHE_TAGS.WEDGIE_DATA);

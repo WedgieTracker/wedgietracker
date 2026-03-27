@@ -1,17 +1,11 @@
-import { PrismaClient } from "@prisma/client";
-
+import { drizzle } from "drizzle-orm/libsql";
+import { createClient } from "@libsql/client";
 import { env } from "~/env";
+import * as schema from "./schema";
 
-const createPrismaClient = () =>
-  new PrismaClient({
-    log:
-      env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
-  });
+const client = createClient({
+  url: env.TURSO_DATABASE_URL,
+  authToken: env.TURSO_AUTH_TOKEN,
+});
 
-const globalForPrisma = globalThis as unknown as {
-  prisma: ReturnType<typeof createPrismaClient> | undefined;
-};
-
-export const db = globalForPrisma.prisma ?? createPrismaClient();
-
-if (env.NODE_ENV !== "production") globalForPrisma.prisma = db;
+export const db = drizzle(client, { schema });

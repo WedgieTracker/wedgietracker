@@ -31,7 +31,7 @@ export function WedgieFilters({
   const types = Array.from(
     new Set(
       allWedgies
-        ?.flatMap((w) => w.types?.map((t) => t.name) ?? [])
+        ?.flatMap((w) => w.types?.map((t: { name: string }) => t.name) ?? [])
         .filter(Boolean) ?? [],
     ),
   ).sort();

@@ -1,8 +1,10 @@
 import { z } from "zod";
+import { count, ne } from "drizzle-orm";
 import { unstable_cache } from "next/cache";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import Stripe from "stripe";
 import { db } from "~/server/db";
+import { wedgie, tshirtOrder } from "~/server/schema";
 import { CACHE_TAGS } from "~/server/cache";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -11,10 +13,15 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 const getCachedAvailableQuantity = unstable_cache(
   async () => {
-    const totalWedgies = await db.wedgie.count({
-      where: { Season: { NOT: { name: "GEMS" } } },
-    });
-    const currentOrders = await db.tshirtOrder.count();
+    const [wedgieCount] = await db
+      .select({ count: count() })
+      .from(wedgie)
+      .where(ne(wedgie.seasonName, "GEMS"));
+
+    const [orderCount] = await db.select({ count: count() }).from(tshirtOrder);
+
+    const totalWedgies = wedgieCount?.count ?? 0;
+    const currentOrders = orderCount?.count ?? 0;
     const inventory = totalWedgies - currentOrders;
     const currentNumber = currentOrders + 1;
     return { totalWedgies, currentOrders, inventory, currentNumber };
@@ -34,15 +41,12 @@ export const storeRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const totalWedgies = await ctx.db.wedgie.count({
-        where: {
-          Season: {
-            NOT: {
-              name: "GEMS",
-            },
-          },
-        },
-      });
+      const [wedgieCount] = await ctx.db
+        .select({ count: count() })
+        .from(wedgie)
+        .where(ne(wedgie.seasonName, "GEMS"));
+
+      const totalWedgies = wedgieCount?.count ?? 0;
 
       if (totalWedgies <= 0) {
         throw new Error("No t-shirts available");
@@ -70,48 +74,10 @@ export const storeRouter = createTRPCRouter({
         mode: "payment",
         shipping_address_collection: {
           allowed_countries: [
-            "US", // USA - NBA
-            "CA", // Canada - NBA, Toronto Raptors
-            "GB", // UK
-            "AU", // Australia - NBL
-            "NZ", // New Zealand - NBL
-            "IE", // Ireland
-            "ZA", // South Africa
-            "FR", // France - Pro A
-            "DE", // Germany - BBL
-            "IT", // Italy - Lega Basket
-            "ES", // Spain - Liga ACB
-            "PT", // Portugal
-            "NL", // Netherlands - DBL
-            "BE", // Belgium
-            "DK", // Denmark
-            "NO", // Norway
-            "SE", // Sweden
-            "CH", // Switzerland
-            "AT", // Austria
-            "PL", // Poland
-            "CZ", // Czech Republic
-            "SK", // Slovakia
-            "HU", // Hungary
-            "RO", // Romania
-            "BG", // Bulgaria
-            "HR", // Croatia
-            "SI", // Slovenia - Strong basketball nation
-            "BA", // Bosnia - Strong basketball tradition
-            "RS", // Serbia - Major basketball country
-            "GR", // Greece - Major basketball country
-            "LT", // Lithuania - Strong basketball nation
-            "LV", // Latvia - Growing basketball presence
-            "EE", // Estonia
-            "FI", // Finland
-            "IL", // Israel - Strong domestic league
-            "TR", // Turkey - BSL
-            "PH", // Philippines - PBA
-            "CN", // China - CBA
-            "JP", // Japan - B.League
-            "KR", // South Korea - KBL
-            "AR", // Argentina - Strong basketball nation
-            "BR", // Brazil - NBB
+            "US", "CA", "GB", "AU", "NZ", "IE", "ZA", "FR", "DE", "IT", "ES",
+            "PT", "NL", "BE", "DK", "NO", "SE", "CH", "AT", "PL", "CZ", "SK",
+            "HU", "RO", "BG", "HR", "SI", "BA", "RS", "GR", "LT", "LV", "EE",
+            "FI", "IL", "TR", "PH", "CN", "JP", "KR", "AR", "BR",
           ],
         },
         shipping_options: [
@@ -124,14 +90,8 @@ export const storeRouter = createTRPCRouter({
               },
               display_name: "Free Shipping",
               delivery_estimate: {
-                minimum: {
-                  unit: "business_day",
-                  value: 21,
-                },
-                maximum: {
-                  unit: "business_day",
-                  value: 28,
-                },
+                minimum: { unit: "business_day", value: 21 },
+                maximum: { unit: "business_day", value: 28 },
               },
             },
           },

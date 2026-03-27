@@ -5,8 +5,9 @@ interface Game {
   id: number;
   name: string;
   seasonName: string | null;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
+  live: boolean;
 }
 
 interface GameSearchInputProps {

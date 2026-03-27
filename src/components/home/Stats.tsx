@@ -10,7 +10,7 @@ interface StatsProps {
   stats: {
     totalWedgies: number;
     currentPace: number;
-    lastWedgie: Date | null;
+    lastWedgie: Date | string | null;
     liveGames: boolean;
   };
   isLoading?: boolean;

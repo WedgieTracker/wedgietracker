@@ -1,5 +1,7 @@
 import { z } from "zod";
+import { like, desc } from "drizzle-orm";
 import { createTRPCRouter, publicProcedure } from "../trpc";
+import { game } from "~/server/schema";
 
 export const gameRouter = createTRPCRouter({
   search: publicProcedure
@@ -10,20 +12,11 @@ export const gameRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      const games = await ctx.db.game.findMany({
-        where: input.search
-          ? {
-              name: {
-                contains: input.search,
-                mode: "insensitive",
-              },
-            }
-          : undefined,
-        take: input.take,
-        orderBy: {
-          createdAt: "desc",
-        },
-      });
-      return games;
+      return ctx.db
+        .select()
+        .from(game)
+        .where(input.search ? like(game.name, `%${input.search}%`) : undefined)
+        .orderBy(desc(game.createdAt))
+        .limit(input.take);
     }),
 });

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { eq } from "drizzle-orm";
 import { unstable_cache } from "next/cache";
 
 import {
@@ -8,15 +9,16 @@ import {
 } from "~/server/api/trpc";
 
 import { db } from "~/server/db";
+import { global } from "~/server/schema";
 import { CACHE_TAGS, invalidateWedgieData } from "~/server/cache";
 
 const getCachedGlobal = unstable_cache(
   async () => {
-    const global = await db.global.findFirst({
-      where: { id: 1 },
-      include: { currentSeason: true },
+    const result = await db.query.global.findFirst({
+      where: eq(global.id, 1),
+      with: { currentSeason: true },
     });
-    return global ?? null;
+    return result ?? null;
   },
   ["admin-getGlobal"],
   { tags: [CACHE_TAGS.WEDGIE_DATA], revalidate: 60 },
@@ -39,10 +41,11 @@ export const adminRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const result = await ctx.db.global.update({
-        where: { id: 1 },
-        data: input,
-      });
+      const [result] = await ctx.db
+        .update(global)
+        .set(input)
+        .where(eq(global.id, 1))
+        .returning();
       invalidateWedgieData();
       return result;
     }),

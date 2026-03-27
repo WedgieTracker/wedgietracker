@@ -133,7 +133,7 @@ export function AllWedgiesPage() {
     const matchesType =
       !filters.type ||
       wedgie.types?.some(
-        (t) => t.name.toLowerCase() === filters.type.toLowerCase(),
+        (t: { name: string }) => t.name.toLowerCase() === filters.type.toLowerCase(),
       );
     const matchesPlayerOrTeam =
       !filters.playerOrTeam ||

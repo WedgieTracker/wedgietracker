@@ -1,8 +1,10 @@
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
+import { count, eq } from "drizzle-orm";
 import Stripe from "stripe";
 import { db } from "~/server/db";
+import { tshirtOrder } from "~/server/schema";
 import { CACHE_TAGS } from "~/server/cache";
 import { createPrintfulDraftOrder } from "~/server/services/printful";
 import { sendTelegramMessage } from "~/server/services/telegram";
@@ -10,7 +12,6 @@ import { sendOrderConfirmationEmail } from "~/server/services/email";
 import { sendDonationConfirmationEmail } from "~/server/services/email";
 import type { Color } from "~/types/product";
 
-// Disable Next.js body parsing
 export const config = {
   api: {
     bodyParser: false,
@@ -67,15 +68,12 @@ export async function POST(req: Request) {
     const session: Stripe.Checkout.Session = event.data.object;
 
     console.log("Session metadata", event.data.object.metadata);
-
     console.log("Session", session.success_url);
 
-    // Check if this is a coffee donation by looking at the product name
     const isCoffeeDonation = session.metadata?.coffee === "true";
 
     if (isCoffeeDonation) {
       try {
-        // Send notification for coffee donation
         await sendTelegramMessage(
           `☕ New coffee donation received!\n\n` +
             `<b>Donation Details:</b>\n` +
@@ -98,9 +96,9 @@ export async function POST(req: Request) {
       }
     } else {
       try {
-        // Create order in database with metadata and shipping details
-        const order = await db.tshirtOrder.create({
-          data: {
+        const [order] = await db
+          .insert(tshirtOrder)
+          .values({
             stripeSessionId: session.id,
             customerEmail: session.customer_details?.email ?? "",
             size: session.metadata!.size ?? "",
@@ -114,19 +112,16 @@ export async function POST(req: Request) {
               postalCode: session.shipping_details?.address?.postal_code ?? "",
               country: session.shipping_details?.address?.country ?? "",
             },
-          },
-        });
+          })
+          .returning();
 
         revalidateTag(CACHE_TAGS.STORE_DATA);
 
-        // Get current order number
-        const { _count } = await db.tshirtOrder.aggregate({
-          _count: {
-            id: true,
-          },
-        });
+        const [orderCountResult] = await db
+          .select({ count: count() })
+          .from(tshirtOrder);
+        const orderCount = orderCountResult?.count ?? 0;
 
-        // Create Printful draft order
         try {
           const { result } = await createPrintfulDraftOrder({
             stripeSessionId: session.id,
@@ -141,25 +136,24 @@ export async function POST(req: Request) {
               postalCode: session.shipping_details?.address?.postal_code ?? "",
               country: session.shipping_details?.address?.country ?? "",
             },
-            orderNumber: _count.id,
+            orderNumber: orderCount,
           });
 
-          // Update database with Printful order ID
-          await db.tshirtOrder.update({
-            where: { id: order.id },
-            data: { printfulOrderId: result.id.toString() },
-          });
+          if (order) {
+            await db
+              .update(tshirtOrder)
+              .set({ printfulOrderId: result.id.toString() })
+              .where(eq(tshirtOrder.id, order.id));
+          }
 
-          // Get the folded image URL for the selected color
           const foldedImageUrl =
             TSHIRT_IMAGES[session.metadata!.color as Color]?.[0] ?? "";
 
-          // Send success notification
           await Promise.all([
             sendTelegramMessage(
               `🎉 New T-shirt order received!\n\n` +
                 `<b>Order Details:</b>\n` +
-                `• Order #: ${_count.id}\n` +
+                `• Order #: ${orderCount}\n` +
                 `• Size: ${session.metadata!.size}\n` +
                 `• Color: ${session.metadata!.color}\n` +
                 `• Customer: ${session.shipping_details?.name}\n` +
@@ -168,7 +162,7 @@ export async function POST(req: Request) {
                 `Printful draft order created successfully.`,
             ),
             sendOrderConfirmationEmail({
-              orderNumber: _count.id,
+              orderNumber: orderCount,
               size: session.metadata!.size ?? "",
               color: session.metadata!.color ?? "",
               customerName: session.shipping_details?.name ?? "",
@@ -189,11 +183,10 @@ export async function POST(req: Request) {
           ]);
         } catch (error) {
           console.error("Failed to create Printful order:", error);
-          // Send failure notification
           await sendTelegramMessage(
             `⚠️ Printful Order Creation Failed!\n\n` +
               `<b>Order Details:</b>\n` +
-              `• Order #: ${_count.id}\n` +
+              `• Order #: ${orderCount}\n` +
               `• Size: ${session.metadata!.size}\n` +
               `• Color: ${session.metadata!.color}\n` +
               `• Customer: ${session.shipping_details?.name}\n` +
@@ -202,7 +195,6 @@ export async function POST(req: Request) {
         }
       } catch (error) {
         console.error("Failed to process order:", error);
-        // Send failure notification for database error
         await sendTelegramMessage(
           `❌ Order Processing Failed!\n\n` +
             `<b>Session ID:</b> ${session.id}\n` +

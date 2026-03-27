@@ -1,5 +1,5 @@
 import { z } from "zod";
-
+import { eq, desc, ne, and, count, sql, asc, gt, inArray } from "drizzle-orm";
 import { unstable_cache } from "next/cache";
 
 import {
@@ -9,6 +9,14 @@ import {
 } from "~/server/api/trpc";
 
 import { db } from "~/server/db";
+import {
+  wedgie,
+  type as typeTable,
+  wedgieToType,
+  global,
+  season,
+  game,
+} from "~/server/schema";
 import { calculatePace } from "~/utils/paceCalculator";
 import {
   CACHE_TAGS,
@@ -22,6 +30,7 @@ interface VideoUrl {
   cloudinary?: string;
   youtubeNoDunks?: string;
   instagram?: string;
+  selfHosted?: string;
 }
 
 const wedgieInput = z.object({
@@ -48,37 +57,100 @@ const wedgieInput = z.object({
   gameName: z.string().optional(),
 });
 
+// Helper: connect or create types for a wedgie
+async function syncWedgieTypes(
+  trx: typeof db,
+  wedgieId: number,
+  typeNames: string[],
+) {
+  // Clear existing type associations
+  await trx.delete(wedgieToType).where(eq(wedgieToType.wedgieId, wedgieId));
+
+  for (const name of typeNames) {
+    // Find or create the type
+    let existing = await trx.query.type.findFirst({
+      where: eq(typeTable.name, name),
+    });
+    if (!existing) {
+      const [created] = await trx
+        .insert(typeTable)
+        .values({ name })
+        .returning();
+      existing = created;
+    }
+    // Create the join row
+    await trx
+      .insert(wedgieToType)
+      .values({ wedgieId, typeId: existing!.id });
+  }
+}
+
+// Helper: get wedgies with their types via the join table
+async function getWedgiesWithTypes(wedgieRows: { id: number }[]) {
+  type TypeInfo = { id: number; name: string; createdAt: string; updatedAt: string };
+  if (wedgieRows.length === 0) return new Map<number, TypeInfo[]>();
+  const wedgieIds = wedgieRows.map((w) => w.id);
+
+  const joinRows = await db
+    .select({
+      wedgieId: wedgieToType.wedgieId,
+      typeId: typeTable.id,
+      typeName: typeTable.name,
+      typeCreatedAt: typeTable.createdAt,
+      typeUpdatedAt: typeTable.updatedAt,
+    })
+    .from(wedgieToType)
+    .innerJoin(typeTable, eq(wedgieToType.typeId, typeTable.id))
+    .where(inArray(wedgieToType.wedgieId, wedgieIds));
+
+  const typesByWedgie = new Map<number, TypeInfo[]>();
+  for (const row of joinRows) {
+    const types = typesByWedgie.get(row.wedgieId) ?? [];
+    types.push({
+      id: row.typeId,
+      name: row.typeName,
+      createdAt: row.typeCreatedAt,
+      updatedAt: row.typeUpdatedAt,
+    });
+    typesByWedgie.set(row.wedgieId, types);
+  }
+  return typesByWedgie;
+}
+
 // --- Cached query functions ---
 
 const getCachedAll = unstable_cache(
   async () => {
-    const wedgies = await db.wedgie.findMany({
-      orderBy: { createdAt: "desc" },
-      include: { types: true },
-    });
-    return wedgies ?? null;
+    const wedgies = await db
+      .select()
+      .from(wedgie)
+      .orderBy(desc(wedgie.createdAt));
+    const typesMap = await getWedgiesWithTypes(wedgies);
+    return wedgies.map((w) => ({ ...w, types: typesMap.get(w.id) ?? [] }));
   },
   ["wedgie-getAll"],
   { tags: [CACHE_TAGS.WEDGIE_DATA], revalidate: 120 },
 );
 
-const getCachedBySeason = (season: string) =>
+const getCachedBySeason = (seasonName: string) =>
   unstable_cache(
     async () => {
-      return db.wedgie.findMany({
-        where: { Season: { is: { name: season } } },
-        include: { types: true },
-        orderBy: { number: "desc" },
-      });
+      const wedgies = await db
+        .select()
+        .from(wedgie)
+        .where(eq(wedgie.seasonName, seasonName))
+        .orderBy(desc(wedgie.number));
+      const typesMap = await getWedgiesWithTypes(wedgies);
+      return wedgies.map((w) => ({ ...w, types: typesMap.get(w.id) ?? [] }));
     },
-    ["wedgie-getBySeason", season],
+    ["wedgie-getBySeason", seasonName],
     { tags: [CACHE_TAGS.WEDGIE_DATA], revalidate: 120 },
   )();
 
 const getCachedLatest = unstable_cache(
   async () => {
-    return db.wedgie.findFirst({
-      orderBy: { createdAt: "desc" },
+    return db.query.wedgie.findFirst({
+      orderBy: desc(wedgie.createdAt),
     });
   },
   ["wedgie-getLatest"],
@@ -87,11 +159,13 @@ const getCachedLatest = unstable_cache(
 
 const getCachedLatestWedgies = unstable_cache(
   async () => {
-    return db.wedgie.findMany({
-      take: 13,
-      orderBy: { wedgieDate: "desc" },
-      include: { types: true },
-    });
+    const wedgies = await db
+      .select()
+      .from(wedgie)
+      .orderBy(desc(wedgie.wedgieDate))
+      .limit(13);
+    const typesMap = await getWedgiesWithTypes(wedgies);
+    return wedgies.map((w) => ({ ...w, types: typesMap.get(w.id) ?? [] }));
   },
   ["wedgie-getLatestWedgies"],
   { tags: [CACHE_TAGS.WEDGIE_DATA], revalidate: 120 },
@@ -99,31 +173,25 @@ const getCachedLatestWedgies = unstable_cache(
 
 const getCachedStats = unstable_cache(
   async () => {
-    const globalSettings = await db.global.findFirst({
-      where: { id: 1 },
-      select: {
-        currentTotalWedgies: true,
-        pace: true,
-        simplePace: true,
-        mathPace: true,
-        currentTotalGames: true,
-        liveGames: true,
-        currentSeason: true,
-      },
+    const globalSettings = await db.query.global.findFirst({
+      where: eq(global.id, 1),
+      with: { currentSeason: true },
     });
 
     if (!globalSettings) {
       throw new Error("No global settings found");
     }
 
-    const lastWedgie = await db.wedgie.findFirst({
-      orderBy: { wedgieDate: "desc" },
-      select: { wedgieDate: true },
+    const lastWedgie = await db.query.wedgie.findFirst({
+      orderBy: desc(wedgie.wedgieDate),
+      columns: { wedgieDate: true },
     });
 
-    const currentSeasonWedgies = await db.wedgie.count({
-      where: { seasonName: globalSettings.currentSeason.name },
-    });
+    const [wedgieCountResult] = await db
+      .select({ count: count() })
+      .from(wedgie)
+      .where(eq(wedgie.seasonName, globalSettings.currentSeason.name));
+    const currentSeasonWedgies = wedgieCountResult?.count ?? 0;
 
     let dateNow: Date | null = null;
     if (currentSeasonWedgies < globalSettings.currentTotalWedgies) {
@@ -147,38 +215,32 @@ const getCachedStats = unstable_cache(
 
 const getCachedTopStandings = unstable_cache(
   async () => {
-    const currentSeasonGlobal = await db.global.findFirst({
-      where: { id: 1 },
-      include: { currentSeason: true },
+    const currentSeasonGlobal = await db.query.global.findFirst({
+      where: eq(global.id, 1),
+      with: { currentSeason: true },
     });
 
     const currentSeason = currentSeasonGlobal?.currentSeason.name;
 
-    const topPlayers = await db.wedgie.groupBy({
-      by: ["playerName"],
-      where: { seasonName: currentSeason },
-      _count: { playerName: true },
-      orderBy: [
-        { _count: { playerName: "desc" } },
-        { playerName: "asc" },
-      ],
-      take: 5,
-    });
+    const topPlayers = await db
+      .select({ playerName: wedgie.playerName, count: count() })
+      .from(wedgie)
+      .where(eq(wedgie.seasonName, currentSeason!))
+      .groupBy(wedgie.playerName)
+      .orderBy(desc(count()), asc(wedgie.playerName))
+      .limit(5);
 
-    const wedgies = await db.wedgie.findMany({
-      where: { seasonName: currentSeason },
-      select: { teamName: true, teamAgainstName: true },
-    });
+    const wedgies = await db
+      .select({ teamName: wedgie.teamName, teamAgainstName: wedgie.teamAgainstName })
+      .from(wedgie)
+      .where(eq(wedgie.seasonName, currentSeason!));
 
     const teamCounts = new Map<string, number>();
-    wedgies.forEach((wedgie) => {
+    wedgies.forEach((w) => {
+      teamCounts.set(w.teamName, (teamCounts.get(w.teamName) ?? 0) + 1);
       teamCounts.set(
-        wedgie.teamName,
-        (teamCounts.get(wedgie.teamName) ?? 0) + 1,
-      );
-      teamCounts.set(
-        wedgie.teamAgainstName,
-        (teamCounts.get(wedgie.teamAgainstName) ?? 0) + 1,
+        w.teamAgainstName,
+        (teamCounts.get(w.teamAgainstName) ?? 0) + 1,
       );
     });
 
@@ -189,12 +251,12 @@ const getCachedTopStandings = unstable_cache(
         return a[0].localeCompare(b[0]);
       })
       .slice(0, 5)
-      .map(([name, count]) => ({ name, count }));
+      .map(([name, cnt]) => ({ name, count: cnt }));
 
     return {
       players: topPlayers.map((p) => ({
         name: p.playerName,
-        count: p._count.playerName,
+        count: p.count,
       })),
       teams: topTeams,
     };
@@ -204,38 +266,34 @@ const getCachedTopStandings = unstable_cache(
 );
 
 const getCachedSeasonStandings = (
-  season: string,
+  seasonFilter: string,
   includeOpponents: boolean,
 ) =>
   unstable_cache(
     async () => {
-      const whereClause = season ? { seasonName: season } : {};
+      const whereClause = seasonFilter
+        ? eq(wedgie.seasonName, seasonFilter)
+        : undefined;
 
-      const topPlayers = await db.wedgie.groupBy({
-        by: ["playerName"],
-        where: whereClause,
-        _count: { playerName: true },
-        orderBy: [
-          { _count: { playerName: "desc" } },
-          { playerName: "asc" },
-        ],
-      });
+      const topPlayers = await db
+        .select({ playerName: wedgie.playerName, count: count() })
+        .from(wedgie)
+        .where(whereClause)
+        .groupBy(wedgie.playerName)
+        .orderBy(desc(count()), asc(wedgie.playerName));
 
-      const wedgies = await db.wedgie.findMany({
-        where: whereClause,
-        select: { teamName: true, teamAgainstName: true },
-      });
+      const wedgies = await db
+        .select({ teamName: wedgie.teamName, teamAgainstName: wedgie.teamAgainstName })
+        .from(wedgie)
+        .where(whereClause);
 
       const teamCounts = new Map<string, number>();
-      wedgies.forEach((wedgie) => {
-        teamCounts.set(
-          wedgie.teamName,
-          (teamCounts.get(wedgie.teamName) ?? 0) + 1,
-        );
+      wedgies.forEach((w) => {
+        teamCounts.set(w.teamName, (teamCounts.get(w.teamName) ?? 0) + 1);
         if (includeOpponents) {
           teamCounts.set(
-            wedgie.teamAgainstName,
-            (teamCounts.get(wedgie.teamAgainstName) ?? 0) + 1,
+            w.teamAgainstName,
+            (teamCounts.get(w.teamAgainstName) ?? 0) + 1,
           );
         }
       });
@@ -246,167 +304,155 @@ const getCachedSeasonStandings = (
           if (countDiff !== 0) return countDiff;
           return a[0].localeCompare(b[0]);
         })
-        .map(([name, count]) => ({ name, count }));
+        .map(([name, cnt]) => ({ name, count: cnt }));
 
       return {
         players: topPlayers
           .filter((p) => p.playerName)
           .map((p) => ({
             name: p.playerName,
-            count: p._count.playerName,
+            count: p.count,
           })),
         teams: topTeams,
       };
     },
-    ["wedgie-getSeasonStandings", season, String(includeOpponents)],
+    ["wedgie-getSeasonStandings", seasonFilter, String(includeOpponents)],
     { tags: [CACHE_TAGS.WEDGIE_DATA], revalidate: 120 },
   )();
 
 const getCachedNerdStats = unstable_cache(
   async () => {
-    const global = await db.global.findFirst({
-      where: { id: 1 },
-      include: { currentSeason: true },
+    const globalRow = await db.query.global.findFirst({
+      where: eq(global.id, 1),
+      with: { currentSeason: true },
     });
 
-    const currentSeason = global?.currentSeason.name;
+    const currentSeason = globalRow?.currentSeason.name;
 
-    const allPlayers = await db.wedgie.groupBy({
-      by: ["playerName"],
-      where: { seasonName: currentSeason },
-      _count: { playerName: true },
-    });
-    const maxWedgies = Math.max(
-      ...allPlayers.map((player) => player._count.playerName),
-    );
-    const topPlayers = allPlayers.filter(
-      (player) => player._count.playerName === maxWedgies,
-    );
+    const allPlayers = await db
+      .select({ playerName: wedgie.playerName, count: count() })
+      .from(wedgie)
+      .where(eq(wedgie.seasonName, currentSeason!))
+      .groupBy(wedgie.playerName);
 
-    const wedgies = await db.wedgie.findMany({
-      where: { seasonName: currentSeason },
-      select: { teamName: true, teamAgainstName: true },
-    });
+    const maxWedgies = Math.max(...allPlayers.map((p) => p.count));
+    const topPlayers = allPlayers.filter((p) => p.count === maxWedgies);
+
+    const wedgies = await db
+      .select({ teamName: wedgie.teamName, teamAgainstName: wedgie.teamAgainstName })
+      .from(wedgie)
+      .where(eq(wedgie.seasonName, currentSeason!));
 
     const teamCounts = new Map<string, number>();
-    wedgies.forEach((wedgie) => {
+    wedgies.forEach((w) => {
+      teamCounts.set(w.teamName, (teamCounts.get(w.teamName) ?? 0) + 1);
       teamCounts.set(
-        wedgie.teamName,
-        (teamCounts.get(wedgie.teamName) ?? 0) + 1,
-      );
-      teamCounts.set(
-        wedgie.teamAgainstName,
-        (teamCounts.get(wedgie.teamAgainstName) ?? 0) + 1,
+        w.teamAgainstName,
+        (teamCounts.get(w.teamAgainstName) ?? 0) + 1,
       );
     });
 
     const topTeams = Array.from(teamCounts.entries())
       .sort((a, b) => b[1] - a[1])
-      .map(([name, count]) => ({ name, count: count }));
+      .map(([name, cnt]) => ({ name, count: cnt }));
 
-    const wedgiesThisSeason = await db.wedgie.count({
-      where: { seasonName: currentSeason },
-    });
+    const [wedgiesThisSeasonResult] = await db
+      .select({ count: count() })
+      .from(wedgie)
+      .where(eq(wedgie.seasonName, currentSeason!));
+    const wedgiesThisSeason = wedgiesThisSeasonResult?.count ?? 0;
 
-    const totalFGA = await db.global.findFirst({
-      where: { id: 1 },
-      select: { currentTotalFGA: true },
-    });
-
-    const fgaPerWedgie = totalFGA
-      ? totalFGA.currentTotalFGA / wedgiesThisSeason
+    const fgaPerWedgie = globalRow
+      ? globalRow.currentTotalFGA / wedgiesThisSeason
       : 0;
 
-    const lastWedgie = await db.wedgie.findFirst({
-      orderBy: { wedgieDate: "desc" },
-      select: { wedgieDate: true, playerName: true },
+    const lastWedgie = await db.query.wedgie.findFirst({
+      orderBy: desc(wedgie.wedgieDate),
+      columns: { wedgieDate: true, playerName: true },
     });
 
     const gamesSinceLastWedgie = lastWedgie
-      ? await db.game.count({
-          where: {
-            createdAt: { gt: lastWedgie.wedgieDate },
-            live: false,
-          },
-        })
+      ? await db
+          .select({ count: count() })
+          .from(game)
+          .where(
+            and(
+              gt(game.createdAt, lastWedgie.wedgieDate),
+              eq(game.live, false),
+            ),
+          )
+          .then((r) => r[0]?.count ?? 0)
       : 0;
 
     const currentSeasonWedgies = wedgies.length;
 
     const hideGamesSinceLastWedgie =
-      currentSeasonWedgies < (global?.currentTotalWedgies ?? 0) ? true : false;
+      currentSeasonWedgies < (globalRow?.currentTotalWedgies ?? 0);
 
-    const seasons = await db.season.findMany({
-      where: {
-        AND: [
-          { name: { not: "GEMS" } },
-          { name: { not: currentSeason } },
-        ],
-      },
-      include: { wedgies: true },
+    const seasons = await db.query.season.findMany({
+      where: and(
+        ne(season.name, "GEMS"),
+        ne(season.name, currentSeason!),
+      ),
+      with: { wedgies: true },
     });
 
     const seasonRates = seasons
-      .map((season) => ({
-        wedgies: season.wedgies.length,
-        games: season.totalGames,
-        rate:
-          season.totalGames > 0 ? season.wedgies.length / season.totalGames : 0,
+      .map((s) => ({
+        wedgies: s.wedgies.length,
+        games: s.totalGames,
+        rate: s.totalGames > 0 ? s.wedgies.length / s.totalGames : 0,
       }))
-      .filter((season) => season.rate > 0);
+      .filter((s) => s.rate > 0);
 
     const averageSeasonRate = Math.round(
-      seasonRates.reduce((acc, season) => acc + season.wedgies, 0) /
-        seasonRates.length,
+      seasonRates.reduce((acc, s) => acc + s.wedgies, 0) / seasonRates.length,
     );
 
     const totalSeasonsOverall = seasons.length;
-
     const totalWedgiesOverall = seasons.reduce(
-      (acc, season) => acc + season.wedgies.length,
+      (acc, s) => acc + s.wedgies.length,
       0,
     );
-
     const totalGamesOverall = seasons.reduce(
-      (acc, season) => acc + season.totalGames,
+      (acc, s) => acc + s.totalGames,
       0,
     );
-
-    const globalGames = global?.currentTotalGames ?? 0;
+    const globalGames = globalRow?.currentTotalGames ?? 0;
 
     return {
       currentSeason: currentSeason ?? "2025/26",
       wedgiesThisSeason:
-        currentSeasonWedgies > (global?.currentTotalWedgies ?? 0)
+        currentSeasonWedgies > (globalRow?.currentTotalWedgies ?? 0)
           ? currentSeasonWedgies
-          : (global?.currentTotalWedgies ?? 0),
+          : (globalRow?.currentTotalWedgies ?? 0),
       fgaPerWedgie,
-      pace: global?.pace ?? 0,
+      pace: globalRow?.pace ?? 0,
       averageLastTenSeasons: averageSeasonRate,
       ...(hideGamesSinceLastWedgie ? {} : { gamesSinceLastWedgie }),
       lastWedgiePlayer: lastWedgie?.playerName ?? null,
       statsPerWedgie: {
-        fga: global
-          ? Math.round(global.currentTotalFGA / wedgiesThisSeason)
+        fga: globalRow
+          ? Math.round(globalRow.currentTotalFGA / wedgiesThisSeason)
           : 0,
-        possessions: global
-          ? Math.round(global.currentTotalPoss / wedgiesThisSeason)
+        possessions: globalRow
+          ? Math.round(globalRow.currentTotalPoss / wedgiesThisSeason)
           : 0,
-        games: global
-          ? Math.round(global.currentTotalGames / wedgiesThisSeason)
+        games: globalRow
+          ? Math.round(globalRow.currentTotalGames / wedgiesThisSeason)
           : 0,
-        minutes: global
-          ? Math.round(global.currentTotalMinutes / wedgiesThisSeason)
+        minutes: globalRow
+          ? Math.round(globalRow.currentTotalMinutes / wedgiesThisSeason)
           : 0,
       },
       leaders: {
-        teams: topTeams.map((team) => ({
-          name: team.name,
-          wedgies: team.count,
+        teams: topTeams.map((t) => ({
+          name: t.name,
+          wedgies: t.count,
         })),
-        players: topPlayers.map((player) => ({
-          name: player.playerName,
-          count: player._count.playerName,
+        players: topPlayers.map((p) => ({
+          name: p.playerName,
+          count: p.count,
         })),
       },
       totalWedgiesOverall: totalWedgiesOverall + wedgiesThisSeason,
@@ -421,9 +467,11 @@ const getCachedNerdStats = unstable_cache(
 
 const getCachedTotalWedgies = unstable_cache(
   async () => {
-    return db.wedgie.count({
-      where: { Season: { NOT: { name: "GEMS" } } },
-    });
+    const [result] = await db
+      .select({ count: count() })
+      .from(wedgie)
+      .where(ne(wedgie.seasonName, "GEMS"));
+    return result?.count ?? 0;
   },
   ["wedgie-getTotalWedgies"],
   { tags: [CACHE_TAGS.WEDGIE_DATA], revalidate: 120 },
@@ -447,19 +495,28 @@ export const wedgieRouter = createTRPCRouter({
   getByPlayer: publicProcedure
     .input(z.object({ player: z.string().min(1) }))
     .query(async ({ ctx, input }) => {
-      const wedgies = await ctx.db.wedgie.findMany({
-        where: { Player: { is: { name: input.player } } },
-      });
-      return wedgies;
+      return ctx.db
+        .select()
+        .from(wedgie)
+        .where(eq(wedgie.playerName, input.player));
     }),
 
   getByType: publicProcedure
     .input(z.object({ type: z.string().min(1) }))
     .query(async ({ ctx, input }) => {
-      const wedgies = await ctx.db.wedgie.findMany({
-        where: { types: { some: { name: input.type } } },
-      });
-      return wedgies;
+      const rows = await ctx.db
+        .select({ wedgieId: wedgieToType.wedgieId })
+        .from(wedgieToType)
+        .innerJoin(typeTable, eq(wedgieToType.typeId, typeTable.id))
+        .where(eq(typeTable.name, input.type));
+
+      if (rows.length === 0) return [];
+
+      const wedgieIds = rows.map((r) => r.wedgieId);
+      return ctx.db
+        .select()
+        .from(wedgie)
+        .where(inArray(wedgie.id, wedgieIds));
     }),
 
   getLatest: publicProcedure.query(() => getCachedLatest()),
@@ -467,244 +524,115 @@ export const wedgieRouter = createTRPCRouter({
   create: protectedProcedure
     .input(wedgieInput)
     .mutation(async ({ ctx, input }) => {
-      const wedgie = await ctx.db.wedgie.create({
-        data: {
-          ...input,
-          position: input.position ?? undefined,
-          types: {
-            connectOrCreate: input.types.map((type) => ({
-              where: { name: type },
-              create: { name: type },
-            })),
-          },
-        },
-      });
+      const { types: typeNames, ...data } = input;
+
+      const [created] = await ctx.db
+        .insert(wedgie)
+        .values({
+          ...data,
+          position: data.position ?? { x: 0, y: 0 },
+          wedgieDate: data.wedgieDate.toISOString(),
+        })
+        .returning();
+
+      if (created) {
+        await syncWedgieTypes(ctx.db, created.id, typeNames);
+      }
 
       // check if the wedgie is in the current season
-      const global = await ctx.db.global.findFirst({
-        where: { id: 1 },
-        include: { currentSeason: true },
+      const globalRow = await ctx.db.query.global.findFirst({
+        where: eq(global.id, 1),
+        with: { currentSeason: true },
       });
 
-      if (global?.currentSeason.name === input.seasonName) {
+      if (globalRow?.currentSeason.name === input.seasonName) {
         // get the current total wedgies
-        const currentTotalWedgiesSeason = await ctx.db.wedgie.count({
-          where: { seasonName: input.seasonName },
-        });
+        const [countResult] = await ctx.db
+          .select({ count: count() })
+          .from(wedgie)
+          .where(eq(wedgie.seasonName, input.seasonName));
 
+        const currentTotalWedgiesSeason = countResult?.count ?? 0;
         // get the current total from the global table
-        const currentTotalWedgiesGlobal = global?.currentTotalWedgies;
+        const currentTotalWedgiesGlobal = globalRow.currentTotalWedgies;
 
         if (currentTotalWedgiesSeason > currentTotalWedgiesGlobal) {
           // update the global table
-          await ctx.db.global.update({
-            where: { id: 1 },
-            data: { currentTotalWedgies: currentTotalWedgiesSeason },
-          });
+          await ctx.db
+            .update(global)
+            .set({ currentTotalWedgies: currentTotalWedgiesSeason })
+            .where(eq(global.id, 1));
+
           // calculate the pace
           const pace = await calculatePace({
             currentTotalWedgies: currentTotalWedgiesSeason,
-            currentTotalGames: global?.currentTotalGames,
+            currentTotalGames: globalRow.currentTotalGames,
           });
 
           // update the global table
-          await ctx.db.global.update({
-            where: { id: 1 },
-            data: {
+          await ctx.db
+            .update(global)
+            .set({
               simplePace: pace.simplePace,
               mathPace: pace.rmPace,
               pace: pace.medianPace,
-            },
-          });
+            })
+            .where(eq(global.id, 1));
         }
       }
 
       invalidateWedgieData();
       invalidateStoreData();
 
-      return wedgie;
+      return created;
     }),
 
   getSelfHostedVideos: publicProcedure.query(async ({ ctx }) => {
-    const wedgies = await ctx.db.wedgie.findMany({
-      where: {
-        AND: [
-          {
-            videoUrl: {
-              path: ["selfHosted"],
-              not: { equals: null },
-            },
-          },
-          {
-            Season: {
-              name: {
-                not: "GEMS",
-              },
-            },
-          },
-        ],
-      },
-      select: {
-        id: true,
-        wedgieDate: true,
-        videoUrl: true,
-        playerName: true,
-        teamName: true,
-        teamAgainstName: true,
-        number: true,
-        seasonName: true,
-      },
-    });
+    const wedgies = await ctx.db
+      .select({
+        id: wedgie.id,
+        wedgieDate: wedgie.wedgieDate,
+        videoUrl: wedgie.videoUrl,
+        playerName: wedgie.playerName,
+        teamName: wedgie.teamName,
+        teamAgainstName: wedgie.teamAgainstName,
+        number: wedgie.number,
+        seasonName: wedgie.seasonName,
+      })
+      .from(wedgie)
+      .where(
+        and(
+          sql`json_extract(${wedgie.videoUrl}, '$.selfHosted') IS NOT NULL`,
+          ne(wedgie.seasonName, "GEMS"),
+        ),
+      );
 
-    // return wedgies;
-
-    // Filter and sort by wedgieDate
     return wedgies
-      .filter((wedgie) => !(wedgie.videoUrl as VideoUrl).youtube)
+      .filter((w) => !(w.videoUrl as VideoUrl)?.youtube)
       .sort(
         (a, b) =>
           new Date(b.wedgieDate).getTime() - new Date(a.wedgieDate).getTime(),
       );
   }),
 
-  // uploadSelfHostedToYoutube: protectedProcedure.mutation(async ({ ctx }) => {
-  //   // Get self-hosted videos with their position number in the season
-  //   const wedgies = await ctx.db.wedgie.findMany({
-  //     where: {
-  //       videoUrl: {
-  //         path: ["selfHosted"],
-  //         not: { equals: null },
-  //       },
-  //       Season: {
-  //         NOT: {
-  //           name: "GEMS",
-  //         },
-  //       },
-  //     },
-  //     include: {
-  //       Player: true,
-  //       Season: true,
-  //       Game: true,
-  //     },
-  //     orderBy: {
-  //       wedgieDate: "desc",
-  //     },
-  //     take: 5,
-  //   });
-
-  //   const filteredWedgies = wedgies.filter((wedgie) => {
-  //     return !(wedgie.videoUrl as VideoUrl).youtube;
-  //   });
-
-  //   // console.log("wedgies", wedgies);
-
-  //   const results = [];
-
-  //   for (const wedgie of filteredWedgies) {
-  //     try {
-  //       // Download the video first
-  //       const videoUrl = (wedgie.videoUrl as VideoUrl).selfHosted;
-  //       if (!videoUrl) continue;
-
-  //       const tempPath = `/tmp/${Date.now()}_${path.basename(videoUrl)}`;
-  //       await downloadFile(videoUrl, tempPath);
-
-  //       // Get the wedgie number (count of wedgies in the same season up to this date)
-  //       const wedgieNumber = wedgie.number;
-
-  //       const seasonYears = wedgie.Season.name.split("/");
-
-  //       if (!seasonYears[0] || !seasonYears[1]) {
-  //         console.log("skipping", wedgie.id);
-  //         continue;
-  //       }
-  //       console.log("seasonYears", seasonYears);
-  //       // const formattedSeason = `${seasonYears[0].slice(-2)}/${seasonYears[1].slice(-2)}`;
-
-  //       // console.log("wedgie", wedgie);
-  //       if (!wedgie.teamName || !wedgieNumber || !wedgie.teamAgainstName) {
-  //         console.log("skipping", wedgie);
-  //         continue;
-  //       }
-  //       console.log("wedgie", wedgie.teamName, wedgie.teamAgainstName);
-  //       console.log("wedgieNumber", wedgieNumber);
-
-  //       return;
-
-  //       // const uploadResult = await uploadToYoutube(
-  //       //   tempPath,
-  //       //   title,
-  //       //   description,
-  //       //   [],
-  //       //   session,
-  //       //   wedgieNumber,
-  //       //   wedgie.Season.name,
-  //       //   wedgie.Player.name,
-  //       // );
-
-  //       // // Clean up the temporary file
-  //       // await fs.promises.unlink(tempPath);
-
-  //       // // Update the wedgie record with YouTube URLs
-  //       // if (!uploadResult.original || !uploadResult.short) {
-  //       //   continue;
-  //       // }
-  //       // await ctx.db.wedgie.update({
-  //       //   where: { id: wedgie.id },
-  //       //   data: {
-  //       //     videoUrl: {
-  //       //       ...(wedgie.videoUrl as VideoUrl),
-  //       //       youtube: uploadResult.original.videoUrl,
-  //       //       youtubeShort: uploadResult.short.videoUrl,
-  //       //     },
-  //       //   },
-  //       // });
-
-  //       // results.push({
-  //       //   id: wedgie.id,
-  //       //   success: true,
-  //       //   youtubeUrl: uploadResult.original.videoUrl,
-  //       //   youtubeShortUrl: uploadResult.short.videoUrl,
-  //       // });
-  //     } catch (error) {
-  //       const errorMessage =
-  //         error instanceof Error ? error.message : "Unknown error occurred";
-  //       results.push({
-  //         id: wedgie.id,
-  //         success: false,
-  //         error: errorMessage,
-  //       });
-  //     }
-  //   }
-
-  //   return results;
-  // }),
-
   getLatestWedgies: publicProcedure.query(() => getCachedLatestWedgies()),
 
   getStats: publicProcedure.query(() => getCachedStats()),
 
   getCloudinaryWedgies: publicProcedure.query(async ({ ctx }) => {
-    return ctx.db.wedgie.findMany({
-      where: {
-        videoUrl: {
-          path: ["cloudinary"],
-          not: { equals: null },
-        },
-      },
-      select: {
-        id: true,
-        playerName: true,
-        teamName: true,
-        teamAgainstName: true,
-        number: true,
-        seasonName: true,
-        videoUrl: true,
-      },
-      orderBy: {
-        wedgieDate: "desc",
-      },
-    });
+    return ctx.db
+      .select({
+        id: wedgie.id,
+        playerName: wedgie.playerName,
+        teamName: wedgie.teamName,
+        teamAgainstName: wedgie.teamAgainstName,
+        number: wedgie.number,
+        seasonName: wedgie.seasonName,
+        videoUrl: wedgie.videoUrl,
+      })
+      .from(wedgie)
+      .where(sql`json_extract(${wedgie.videoUrl}, '$.cloudinary') IS NOT NULL`)
+      .orderBy(desc(wedgie.wedgieDate));
   }),
 
   getTopStandings: publicProcedure.query(() => getCachedTopStandings()),
@@ -724,13 +652,14 @@ export const wedgieRouter = createTRPCRouter({
 
   getById: protectedProcedure
     .input(z.object({ id: z.string() }))
-    .query(({ ctx, input }) => {
-      return ctx.db.wedgie.findUnique({
-        where: { id: Number(input.id) },
-        include: {
-          types: true,
-        },
+    .query(async ({ ctx, input }) => {
+      const w = await ctx.db.query.wedgie.findFirst({
+        where: eq(wedgie.id, Number(input.id)),
       });
+      if (!w) return null;
+
+      const typesMap = await getWedgiesWithTypes([w]);
+      return { ...w, types: typesMap.get(w.id) ?? [] };
     }),
 
   update: protectedProcedure
@@ -741,71 +670,71 @@ export const wedgieRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const wedgie = await ctx.db.wedgie.update({
-        where: { id: input.id },
-        data: {
-          ...input.data,
-          position: input.data.position ?? undefined,
-          types: {
-            set: [],
-            connectOrCreate: input.data.types.map((type) => ({
-              where: { name: type },
-              create: { name: type },
-            })),
-          },
-        },
-      });
+      const { types: typeNames, ...data } = input.data;
+
+      const [updated] = await ctx.db
+        .update(wedgie)
+        .set({
+          ...data,
+          position: data.position ?? { x: 0, y: 0 },
+          wedgieDate: data.wedgieDate.toISOString(),
+        })
+        .where(eq(wedgie.id, input.id))
+        .returning();
+
+      if (updated) {
+        await syncWedgieTypes(ctx.db, updated.id, typeNames);
+      }
 
       // check if the wedgie is in the current season
-      const global = await ctx.db.global.findFirst({
-        where: { id: 1 },
-        include: { currentSeason: true },
+      const globalRow = await ctx.db.query.global.findFirst({
+        where: eq(global.id, 1),
+        with: { currentSeason: true },
       });
 
-      if (global?.currentSeason.name === input.data.seasonName) {
-        // get the current total wedgies
-        const currentTotalWedgiesSeason = await ctx.db.wedgie.count({
-          where: { seasonName: input.data.seasonName },
-        });
+      if (globalRow?.currentSeason.name === input.data.seasonName) {
+        const [countResult] = await ctx.db
+          .select({ count: count() })
+          .from(wedgie)
+          .where(eq(wedgie.seasonName, input.data.seasonName));
 
-        // get the current total from the global table
-        const currentTotalWedgiesGlobal = global?.currentTotalWedgies;
+        const currentTotalWedgiesSeason = countResult?.count ?? 0;
+        const currentTotalWedgiesGlobal = globalRow.currentTotalWedgies;
 
         if (currentTotalWedgiesSeason > currentTotalWedgiesGlobal) {
-          // update the global table
-          await ctx.db.global.update({
-            where: { id: 1 },
-            data: { currentTotalWedgies: currentTotalWedgiesSeason },
-          });
-          // calculate the pace
+          await ctx.db
+            .update(global)
+            .set({ currentTotalWedgies: currentTotalWedgiesSeason })
+            .where(eq(global.id, 1));
+
           const pace = await calculatePace({
             currentTotalWedgies: currentTotalWedgiesSeason,
-            currentTotalGames: global?.currentTotalGames,
+            currentTotalGames: globalRow.currentTotalGames,
           });
 
-          // update the global table
-          await ctx.db.global.update({
-            where: { id: 1 },
-            data: {
+          await ctx.db
+            .update(global)
+            .set({
               simplePace: pace.simplePace,
               mathPace: pace.rmPace,
               pace: pace.medianPace,
-            },
-          });
+            })
+            .where(eq(global.id, 1));
         }
       }
 
       invalidateWedgieData();
 
-      return wedgie;
+      return updated;
     }),
 
   delete: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      const result = await ctx.db.wedgie.delete({
-        where: { id: Number(input.id) },
-      });
+      const [result] = await ctx.db
+        .delete(wedgie)
+        .where(eq(wedgie.id, Number(input.id)))
+        .returning();
       invalidateWedgieData();
       invalidateStoreData();
       return result;
