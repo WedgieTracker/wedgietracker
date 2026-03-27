@@ -1,3 +1,5 @@
+export const revalidate = 120;
+
 import { StandingsPage } from "~/components/standings/StandingsPage";
 import { Header } from "~/components/layout/Header";
 import { CircleMenu } from "~/components/layout/CircleMenu";

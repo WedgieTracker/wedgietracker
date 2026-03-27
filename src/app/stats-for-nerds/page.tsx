@@ -1,3 +1,5 @@
+export const revalidate = 300;
+
 import { Suspense } from "react";
 import { api } from "~/trpc/server";
 import { Header } from "~/components/layout/Header";
