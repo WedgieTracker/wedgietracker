@@ -1,3 +1,5 @@
+export const revalidate = 3600;
+
 import { Header } from "~/components/layout/Header";
 import { CircleMenu } from "~/components/layout/CircleMenu";
 import { MenuProvider } from "~/context/MenuContext";

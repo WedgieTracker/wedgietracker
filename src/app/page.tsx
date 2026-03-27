@@ -1,3 +1,5 @@
+export const revalidate = 60;
+
 import { api } from "~/trpc/server";
 import { Stats } from "~/components/home/Stats";
 import { StatsSkeleton } from "~/components/home/StatsSkeleton";

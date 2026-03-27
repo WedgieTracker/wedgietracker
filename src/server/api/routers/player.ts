@@ -5,6 +5,7 @@ import {
   publicProcedure,
   protectedProcedure,
 } from "~/server/api/trpc";
+import { invalidateWedgieData } from "~/server/cache";
 
 export const playerRouter = createTRPCRouter({
   getAll: publicProcedure.query(async ({ ctx }) => {
@@ -37,17 +38,21 @@ export const playerRouter = createTRPCRouter({
   update: protectedProcedure
     .input(z.object({ id: z.string(), name: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      return ctx.db.player.update({
+      const result = await ctx.db.player.update({
         where: { id: parseInt(input.id) },
         data: { name: input.name },
       });
+      invalidateWedgieData();
+      return result;
     }),
 
   delete: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      return ctx.db.player.delete({
+      const result = await ctx.db.player.delete({
         where: { id: parseInt(input.id) },
       });
+      invalidateWedgieData();
+      return result;
     }),
 });

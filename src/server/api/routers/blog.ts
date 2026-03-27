@@ -1,11 +1,13 @@
 // /api/blog
 
 import { z } from "zod";
+import { unstable_cache } from "next/cache";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
 import "server-only";
+import { CACHE_TAGS } from "~/server/cache";
 
 const postsDirectory = path.join(process.cwd(), "content/blog");
 
@@ -69,14 +71,23 @@ function getPostBySlug(slug: string): BlogPost {
   };
 }
 
+const getCachedAllPosts = unstable_cache(
+  async () => getAllPosts(),
+  ["blog-getAll"],
+  { tags: [CACHE_TAGS.BLOG_DATA], revalidate: 3600 },
+);
+
+const getCachedPostBySlug = (slug: string) =>
+  unstable_cache(
+    async () => getPostBySlug(slug),
+    ["blog-getBySlug", slug],
+    { tags: [CACHE_TAGS.BLOG_DATA], revalidate: 3600 },
+  )();
+
 export const blogRouter = createTRPCRouter({
-  getAll: publicProcedure.query(async () => {
-    return getAllPosts();
-  }),
+  getAll: publicProcedure.query(() => getCachedAllPosts()),
 
   getBySlug: publicProcedure
     .input(z.object({ slug: z.string() }))
-    .query(async ({ input }) => {
-      return getPostBySlug(input.slug);
-    }),
+    .query(({ input }) => getCachedPostBySlug(input.slug)),
 });
