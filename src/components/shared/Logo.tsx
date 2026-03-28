@@ -1,4 +1,3 @@
-import Logo from "../../../public/logo.svg";
 import Image from "next/image";
 import Link from "next/link";
 export function LogoComponent() {
@@ -6,10 +5,10 @@ export function LogoComponent() {
     <div className="flex items-center justify-center">
       <Link href="/">
         <Image
-          src={Logo as string}
+          src="/logo.svg"
           alt="Wedgietracker Logo"
-          // width={100}
-          // height={100}
+          width={120}
+          height={120}
           className="w-full max-w-[80px] md:max-w-[120px]"
         />
       </Link>

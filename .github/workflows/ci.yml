@@ -21,6 +21,7 @@ concurrency:
 jobs:
   ci:
     name: Lint, Test & Build
+    if: "!contains(github.event.pull_request.labels.*.name, 'skip-ci')"
     runs-on: ubuntu-latest
 
     steps:
