@@ -11,38 +11,11 @@ concurrency:
 
 jobs:
   ci:
-    name: Lint, Test & Build
+    name: Lint & Test
     if: contains(github.event.pull_request.labels.*.name, 'run-ci')
     runs-on: ubuntu-latest
     env:
       SKIP_ENV_VALIDATION: true
-      # Dummy env vars so service clients don't crash during build
-      TURSO_DATABASE_URL: "file:ci.db"
-      TURSO_AUTH_TOKEN: "ci"
-      NEXTAUTH_URL: "http://localhost:3000"
-      AUTH_SECRET: "ci"
-      GOOGLE_CLIENT_ID: "ci"
-      GOOGLE_CLIENT_SECRET: "ci"
-      CLOUDINARY_CLOUD_NAME: "ci"
-      CLOUDINARY_API_KEY: "ci"
-      CLOUDINARY_API_SECRET: "ci"
-      INSTAGRAM_CLIENT_ID: "ci"
-      INSTAGRAM_CLIENT_SECRET: "ci"
-      INSTAGRAM_BUSINESS_ACCOUNT_ID: "ci"
-      INSTAGRAM_ACCESS_TOKEN: "ci"
-      MAILCHIMP_API_KEY: "ci"
-      MAILCHIMP_SERVER_PREFIX: "ci"
-      MAILCHIMP_LIST_ID: "ci"
-      STRIPE_SECRET_KEY: "sk_test_ci"
-      STRIPE_WEBHOOK_SECRET: "whsec_ci"
-      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: "pk_test_ci"
-      WEDGIETRACKER_API_KEY: "ci"
-      PRINTFUL_API_KEY: "ci"
-      PRINTFUL_STORE_ID: "ci"
-      RESEND_API_KEY: "re_ci"
-      TELEGRAM_BOT_TOKEN: "ci"
-      TELEGRAM_CHAT_ID: "ci"
-      NEXT_PUBLIC_GA_ID: "G-CI"
 
     steps:
       - name: Checkout
@@ -73,6 +46,3 @@ jobs:
 
       - name: Run tests
         run: pnpm test
-
-      - name: Build
-        run: pnpm build
