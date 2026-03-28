@@ -15,7 +15,6 @@ jobs:
       github.event.comment.body == '/preview' &&
       contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)
     runs-on: ubuntu-latest
-
     steps:
       - name: Get PR branch
         id: pr
