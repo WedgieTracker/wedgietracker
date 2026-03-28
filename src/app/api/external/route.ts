@@ -4,7 +4,7 @@ import { eq, inArray } from "drizzle-orm";
 import { db } from "~/server/db";
 import { global, season, game } from "~/server/schema";
 import { env } from "~/env";
-import { calculatePace } from "~/utils/paceCalculator";
+import { calculatePace } from "~/server/pace";
 import { CACHE_TAGS } from "~/server/cache";
 
 const wedgieTrackerApiKey = env.WEDGIETRACKER_API_KEY;

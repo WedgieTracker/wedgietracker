@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
 import { db } from "~/server/db";
 import { global, season, game } from "~/server/schema";
-import { calculatePace } from "~/utils/paceCalculator";
+import { calculatePace } from "~/server/pace";
 import { CACHE_TAGS } from "~/server/cache";
 
 // ─── Types ───────────────────────────────────────────────────────────────────

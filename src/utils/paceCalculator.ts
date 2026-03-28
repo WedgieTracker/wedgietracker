@@ -1,19 +1,27 @@
-import { ne, eq } from "drizzle-orm";
-import { db } from "~/server/db";
-import { season, global } from "~/server/schema";
-
-interface PaceStats {
+export interface PaceInput {
   currentTotalWedgies: number;
   currentTotalGames: number;
   totalEstimatedGames?: number;
+  seasonRates: number[];
 }
 
-export async function calculatePace({
+export interface PaceResult {
+  simplePace: number;
+  rmPace: number;
+  medianPace: number;
+  gamesRemaining: number;
+}
+
+/**
+ * Pure math function: computes pace projections from current stats and historical rates.
+ * No database access — all data must be provided as input.
+ */
+export function computePace({
   currentTotalWedgies,
   currentTotalGames,
-  totalEstimatedGames = 1315, // Default value
-}: PaceStats) {
-  // Basic validation
+  totalEstimatedGames = 1315,
+  seasonRates,
+}: PaceInput): PaceResult {
   if (currentTotalGames <= 0) {
     return {
       simplePace: 0,
@@ -26,30 +34,16 @@ export async function calculatePace({
   const wedgiesPerGame = currentTotalWedgies / currentTotalGames;
   const gamesRemaining = totalEstimatedGames - currentTotalGames;
 
-  // Calculate simple pace
   const simplePace = Math.round(totalEstimatedGames * wedgiesPerGame);
 
-  // Get historical rates from database
-  const seasons = await db.query.season.findMany({
-    where: ne(season.name, "GEMS"),
-    with: { wedgies: { columns: { id: true } } },
-  });
-
-  const filteredSeasons = seasons.filter((s) => s.totalGames > 0);
-
-  // get the current number of wedgies from the global table
-  const currentWedgies = await db.query.global.findFirst({
-    where: eq(global.id, 1),
-    columns: { currentTotalWedgies: true, currentSeasonId: true },
-  });
-
-  // replace the currentWedgies in the seasons array where currentSeasonId matches
-  const seasonRates = filteredSeasons.map((s) => {
-    if (s.id === currentWedgies?.currentSeasonId) {
-      return currentWedgies.currentTotalWedgies / s.totalGames;
-    }
-    return s.wedgies.length / s.totalGames;
-  });
+  if (seasonRates.length === 0) {
+    return {
+      simplePace,
+      rmPace: simplePace,
+      medianPace: simplePace,
+      gamesRemaining,
+    };
+  }
 
   const averageSeasonRate =
     seasonRates.reduce((acc, rate) => acc + rate, 0) / seasonRates.length;
@@ -57,9 +51,8 @@ export async function calculatePace({
   const rmPace = Math.round(
     currentTotalWedgies + averageSeasonRate * gamesRemaining,
   );
-  // const medianPaceUnclamped = Math.round((simplePace + rmPace) / 2);
-  // const medianPace = Math.max(40, Math.min(69, medianPaceUnclamped));
   const medianPace = rmPace;
+
   return {
     simplePace,
     rmPace,
