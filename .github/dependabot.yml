@@ -12,11 +12,11 @@ updates:
         update-types:
           - "minor"
           - "patch"
+      major:
+        update-types:
+          - "major"
     labels:
       - "dependencies"
-    ignore:
-      - dependency-name: "next-auth"
-        update-types: ["version-update:semver-major"]
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
