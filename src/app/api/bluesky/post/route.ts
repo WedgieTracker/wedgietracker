@@ -1,7 +1,7 @@
 import { BskyAgent, RichText } from "@atproto/api";
 import { NextResponse } from "next/server";
 import { BLUESKY_CONFIG } from "~/server/dev/bluesky-auth";
-import { isDev } from "~/config/dev-routes";
+import { assertDevMode } from "~/config/dev-routes";
 interface VideoBlob {
   $type: string;
   ref: { $link: string };
@@ -10,12 +10,8 @@ interface VideoBlob {
 }
 
 export async function POST(req: Request) {
-  if (!isDev) {
-    return NextResponse.json(
-      { error: "Not available in production" },
-      { status: 404 },
-    );
-  }
+  const blocked = assertDevMode();
+  if (blocked) return blocked;
 
   try {
     const agent = new BskyAgent({ service: BLUESKY_CONFIG.service });

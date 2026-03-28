@@ -26,15 +26,7 @@ import {
   buildTeamStandings,
   maybeUpdateGlobalWedgieCount,
 } from "~/server/db-helpers";
-
-interface VideoUrl {
-  youtube?: string;
-  youtubeShort?: string;
-  cloudinary?: string;
-  youtubeNoDunks?: string;
-  instagram?: string;
-  selfHosted?: string;
-}
+import { type VideoUrls } from "~/types/wedgie";
 
 const wedgieInput = z.object({
   playerName: z.string(),
@@ -526,7 +518,7 @@ export const wedgieRouter = createTRPCRouter({
       );
 
     return wedgies
-      .filter((w) => !(w.videoUrl as VideoUrl)?.youtube)
+      .filter((w) => !(w.videoUrl as VideoUrls)?.youtube)
       .sort(
         (a, b) =>
           new Date(b.wedgieDate).getTime() - new Date(a.wedgieDate).getTime(),

@@ -4,15 +4,11 @@ import { auth } from "~/server/auth";
 import fs from "fs";
 import path from "path";
 import { downloadFile } from "~/server/dev/download";
-import { isDev } from "~/config/dev-routes";
+import { assertDevMode } from "~/config/dev-routes";
 
 export async function POST(req: Request) {
-  if (!isDev) {
-    return NextResponse.json(
-      { error: "Not available in production" },
-      { status: 404 },
-    );
-  }
+  const blocked = assertDevMode();
+  if (blocked) return blocked;
 
   try {
     const session = await auth();

@@ -8,16 +8,9 @@ import { TeamSearchInput } from "./TeamSearchInput";
 import { GameSearchInput } from "./GameSearchInput";
 import { CourtPositionPicker } from "./CourtPositionPicker";
 import { TypeSearchInput } from "./TypeSearchInput";
-import type { WedgieWithTypes } from "~/types/wedgie";
+import type { WedgieWithTypes, VideoUrls } from "~/types/wedgie";
 import { WedgieSocialShareWrapper } from "~/components/admin/WedgieSocialShareWrapper";
 import { CloudinaryUpload } from "~/components/admin/CloudinaryUpload";
-
-interface VideoUrls {
-  cloudinary?: string;
-  youtube?: string;
-  youtubeNoDunks?: string;
-  instagram?: string;
-}
 
 interface WedgieFormData {
   playerName: string;

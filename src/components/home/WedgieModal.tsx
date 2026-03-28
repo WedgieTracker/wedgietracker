@@ -6,18 +6,10 @@ import {
 } from "~/components/ui/dialog";
 
 import { Cross2Icon } from "@radix-ui/react-icons";
-import type { Wedgie } from "~/types/wedgie";
+import type { Wedgie, VideoUrls } from "~/types/wedgie";
 import { useState } from "react";
 import { useToast } from "~/hooks/use-toast";
 import { ShareButtons } from "~/components/ShareButtons";
-
-// Add this interface for the video URL structure
-interface VideoUrls {
-  youtube?: string;
-  cloudinary?: string;
-  youtubeNoDunks?: string;
-  instagram?: string;
-}
 
 interface WedgieModalProps {
   wedgie: Wedgie & {

@@ -1,6 +1,6 @@
 import { BskyAgent } from "@atproto/api";
 import { NextResponse } from "next/server";
-import { isDev } from "~/config/dev-routes";
+import { assertDevMode } from "~/config/dev-routes";
 
 interface LoginRequest {
   identifier: string;
@@ -8,12 +8,8 @@ interface LoginRequest {
 }
 
 export async function POST(req: Request) {
-  if (!isDev) {
-    return NextResponse.json(
-      { error: "Not available in production" },
-      { status: 404 },
-    );
-  }
+  const blocked = assertDevMode();
+  if (blocked) return blocked;
 
   try {
     const { identifier, password }: LoginRequest =

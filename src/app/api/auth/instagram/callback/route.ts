@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { INSTAGRAM_CONFIG } from "~/server/dev/instagram-auth";
 import { cookies } from "next/headers";
-import { isDev } from "~/config/dev-routes";
+import { assertDevMode } from "~/config/dev-routes";
 
 // Add these interfaces
 interface ShortLivedTokenResponse {
@@ -17,12 +17,8 @@ interface LongLivedTokenResponse {
 }
 
 export async function GET(request: Request) {
-  if (!isDev) {
-    return NextResponse.json(
-      { error: "Not available in production" },
-      { status: 404 },
-    );
-  }
+  const blocked = assertDevMode();
+  if (blocked) return blocked;
 
   const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");

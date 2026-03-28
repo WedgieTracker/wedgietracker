@@ -2,7 +2,7 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
 import { count, eq } from "drizzle-orm";
-import Stripe from "stripe";
+import type Stripe from "stripe";
 import { db } from "~/server/db";
 import { tshirtOrder } from "~/server/schema";
 import { CACHE_TAGS } from "~/server/cache";
@@ -10,6 +10,7 @@ import { createPrintfulDraftOrder } from "~/server/services/printful";
 import { sendTelegramMessage } from "~/server/services/telegram";
 import { sendOrderConfirmationEmail } from "~/server/services/email";
 import { sendDonationConfirmationEmail } from "~/server/services/email";
+import { stripe } from "~/server/services/stripe";
 import type { Color } from "~/types/product";
 
 export const config = {
@@ -32,10 +33,6 @@ const TSHIRT_IMAGES: Record<Color, string[]> = {
     "https://res.cloudinary.com/wedgietracker/image/upload/v1737221067/mockups-tshirt/folded-white_nmxh0p.png",
   ],
 };
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2025-02-24.acacia",
-});
 
 export async function POST(req: Request) {
   const body = await req.text();
