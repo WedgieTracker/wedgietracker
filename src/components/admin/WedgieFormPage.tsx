@@ -114,7 +114,10 @@ export function WedgieFormPage({ wedgie, currentSeason }: WedgieFormPageProps) {
       >
         <div className="grid grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-medium text-white">
+            <label
+              htmlFor="playerName"
+              className="block text-sm font-medium text-white"
+            >
               Player Name
             </label>
             <PlayerSearchInput
@@ -126,10 +129,14 @@ export function WedgieFormPage({ wedgie, currentSeason }: WedgieFormPageProps) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-white">
+            <label
+              htmlFor="wedgieNumber"
+              className="block text-sm font-medium text-white"
+            >
               Wedgie Number
             </label>
             <input
+              id="wedgieNumber"
               type="number"
               value={formData.number}
               onChange={(e) =>
@@ -140,7 +147,10 @@ export function WedgieFormPage({ wedgie, currentSeason }: WedgieFormPageProps) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-white">
+            <label
+              htmlFor="homeTeam"
+              className="block text-sm font-medium text-white"
+            >
               Home Team
             </label>
             <TeamSearchInput
@@ -152,7 +162,10 @@ export function WedgieFormPage({ wedgie, currentSeason }: WedgieFormPageProps) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-white">
+            <label
+              htmlFor="awayTeam"
+              className="block text-sm font-medium text-white"
+            >
               Away Team
             </label>
             <TeamSearchInput
@@ -164,8 +177,14 @@ export function WedgieFormPage({ wedgie, currentSeason }: WedgieFormPageProps) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-white">Date</label>
+            <label
+              htmlFor="wedgieDate"
+              className="block text-sm font-medium text-white"
+            >
+              Date
+            </label>
             <input
+              id="wedgieDate"
               type="date"
               value={formData.wedgieDate.toISOString().split("T")[0]}
               onChange={(e) =>
@@ -179,10 +198,14 @@ export function WedgieFormPage({ wedgie, currentSeason }: WedgieFormPageProps) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-white">
+            <label
+              htmlFor="seasonName"
+              className="block text-sm font-medium text-white"
+            >
               Season
             </label>
             <input
+              id="seasonName"
               type="text"
               value={formData.seasonName}
               onChange={(e) =>
@@ -193,7 +216,12 @@ export function WedgieFormPage({ wedgie, currentSeason }: WedgieFormPageProps) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-white">Game</label>
+            <label
+              htmlFor="gameName"
+              className="block text-sm font-medium text-white"
+            >
+              Game
+            </label>
             <GameSearchInput
               value={formData.gameName ?? ""}
               onChange={(value) =>
@@ -211,7 +239,10 @@ export function WedgieFormPage({ wedgie, currentSeason }: WedgieFormPageProps) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-white">
+            <label
+              htmlFor="wedgieTypes"
+              className="block text-sm font-medium text-white"
+            >
               Types
             </label>
             <TypeSearchInput
@@ -221,7 +252,10 @@ export function WedgieFormPage({ wedgie, currentSeason }: WedgieFormPageProps) {
           </div>
 
           <div className="col-span-2">
-            <label className="block text-sm font-medium text-white">
+            <label
+              htmlFor="courtPosition"
+              className="block text-sm font-medium text-white"
+            >
               Position
             </label>
             <div className="mt-1">
@@ -238,7 +272,10 @@ export function WedgieFormPage({ wedgie, currentSeason }: WedgieFormPageProps) {
           </div>
 
           <div className="col-span-2">
-            <label className="block text-sm font-medium text-white">
+            <label
+              htmlFor="videoUrls"
+              className="block text-sm font-medium text-white"
+            >
               Video URLs
             </label>
             <div className="mt-1 space-y-2">
@@ -271,7 +308,7 @@ export function WedgieFormPage({ wedgie, currentSeason }: WedgieFormPageProps) {
                   className="block w-full rounded-md border-gray-300 bg-white/5 p-2 text-white"
                 />
                 {formData.videoUrl.youtube && (
-                  <span className="absolute right-2 top-2 rounded bg-green-500 px-2 py-1 text-xs font-bold text-black">
+                  <span className="absolute top-2 right-2 rounded bg-green-500 px-2 py-1 text-xs font-bold text-black">
                     YouTube
                   </span>
                 )}
@@ -293,7 +330,7 @@ export function WedgieFormPage({ wedgie, currentSeason }: WedgieFormPageProps) {
                   className="block w-full rounded-md border-gray-300 bg-white/5 p-2 text-white"
                 />
                 {formData.videoUrl.youtubeNoDunks && (
-                  <span className="absolute right-2 top-2 rounded bg-green-500 px-2 py-1 text-xs font-bold text-black">
+                  <span className="absolute top-2 right-2 rounded bg-green-500 px-2 py-1 text-xs font-bold text-black">
                     YouTube No Dunks
                   </span>
                 )}
@@ -315,7 +352,7 @@ export function WedgieFormPage({ wedgie, currentSeason }: WedgieFormPageProps) {
                   className="block w-full rounded-md border-gray-300 bg-white/5 p-2 text-white"
                 />
                 {formData.videoUrl.instagram && (
-                  <span className="absolute right-2 top-2 rounded bg-green-500 px-2 py-1 text-xs font-bold text-black">
+                  <span className="absolute top-2 right-2 rounded bg-green-500 px-2 py-1 text-xs font-bold text-black">
                     Instagram
                   </span>
                 )}

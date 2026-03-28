@@ -1,4 +1,5 @@
 import "~/styles/globals.css";
+import { Suspense } from "react";
 import { Inter } from "next/font/google";
 import { TRPCReactProvider } from "~/trpc/react";
 import { Toaster } from "~/components/ui/toaster";
@@ -42,12 +43,14 @@ export default function RootLayout({
           />
         </noscript>
 
-        <TRPCReactProvider>
-          {children}
-          <Toaster />
+        <Suspense>
+          <TRPCReactProvider>
+            {children}
+            <Toaster />
 
-          <GoogleAnalytics gaId={gtmId} />
-        </TRPCReactProvider>
+            <GoogleAnalytics gaId={gtmId} />
+          </TRPCReactProvider>
+        </Suspense>
       </body>
     </html>
   );

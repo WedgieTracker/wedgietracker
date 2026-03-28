@@ -175,6 +175,7 @@ export function TShirtProduct() {
       setLoadingMessage((prev) => (prev + 1) % messages.length);
     }, 2000);
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Sort the images for the current color
@@ -188,8 +189,8 @@ export function TShirtProduct() {
 
   if (isLoadingQuantity) {
     return (
-      <div className="mx-auto flex aspect-[16/8] w-full max-w-6xl flex-col items-center justify-center rounded-xl bg-darkpurple-light/30 p-8 text-center">
-        <h2 className="text-3xl font-bold text-yellow">Loading...</h2>
+      <div className="bg-darkpurple-light/30 mx-auto flex aspect-16/8 w-full max-w-6xl flex-col items-center justify-center rounded-xl p-8 text-center">
+        <h2 className="text-yellow text-3xl font-bold">Loading...</h2>
         <p className="mt-4 text-white">{messages[loadingMessage]}</p>
       </div>
     );
@@ -197,8 +198,8 @@ export function TShirtProduct() {
 
   if (availableQuantity.inventory <= 0) {
     return (
-      <div className="mx-auto w-full max-w-3xl rounded-xl bg-darkpurple-light/30 p-4 text-center md:p-8">
-        <h2 className="rounded-xl bg-pink px-4 py-2 text-3xl font-bold uppercase text-darkpurple">
+      <div className="bg-darkpurple-light/30 mx-auto w-full max-w-3xl rounded-xl p-4 text-center md:p-8">
+        <h2 className="bg-pink text-darkpurple rounded-xl px-4 py-2 text-3xl font-bold uppercase">
           Sold Out
         </h2>
         <p className="mt-4 text-white">
@@ -265,19 +266,14 @@ export function TShirtProduct() {
     <div
       className={cn(
         styles.tshirtProduct,
-        "mx-auto max-w-6xl rounded-xl bg-transparent p-0 md:bg-darkpurple-light/30 md:p-8",
+        "md:bg-darkpurple-light/30 mx-auto max-w-6xl rounded-xl bg-transparent p-0 md:p-8",
       )}
     >
       <div className="grid gap-8 lg:grid-cols-2">
         {/* Image */}
         <div className="flex flex-col gap-4">
           <div
-            // onClick={(e) => {
-            //   // Only open dialog if we're not dragging
-            //   if (!dragStart && !dragEnd) {
-            //     setDialogOpen(true);
-            //   }
-            // }}
+            role="group"
             onTouchStart={handleDragStart}
             onTouchMove={handleDragMove}
             onTouchEnd={handleDragEnd}
@@ -285,23 +281,24 @@ export function TShirtProduct() {
             onMouseMove={dragStart ? handleDragMove : undefined}
             onMouseUp={handleDragEnd}
             onMouseLeave={handleDragEnd}
-            className="group relative aspect-square cursor-pointer select-none overflow-hidden rounded-lg bg-darkpurple-light/50"
+            className="group bg-darkpurple-light/50 relative aspect-square cursor-pointer overflow-hidden rounded-lg select-none"
           >
             <img
               src={sortedImages[selectedImageIndex]}
               alt={`${selectedColor} T-shirt view ${selectedImageIndex + 1}`}
-              className="pointer-events-none h-full w-full select-none object-contain"
+              className="pointer-events-none h-full w-full object-contain select-none"
             />
             {/* Add zoom icon */}
-            <div
-              className="absolute right-4 top-4 z-10 cursor-pointer rounded-full bg-darkpurple-light/80 p-2 transition-all duration-300 hover:bg-pink"
+            <button
+              type="button"
+              className="bg-darkpurple-light/80 hover:bg-pink absolute top-4 right-4 z-10 cursor-pointer rounded-full p-2 transition-all duration-300"
               onClick={() => setDialogOpen(true)}
             >
               <Maximize2 className="h-5 w-5 text-white" />
-            </div>
+            </button>
             {/* Number overlay */}
             {sortedImages[selectedImageIndex]?.includes("/number-") ? (
-              <div className="pointer-events-none absolute left-1/2 top-1/2 h-full w-full -translate-x-1/2 -translate-y-1/2 transform transition-transform duration-300">
+              <div className="pointer-events-none absolute top-1/2 left-1/2 h-full w-full -translate-x-1/2 -translate-y-1/2 transform transition-transform duration-300">
                 <SvgNumber
                   number={availableQuantity.currentNumber}
                   selectedColor={selectedColor}
@@ -309,7 +306,7 @@ export function TShirtProduct() {
                 />
               </div>
             ) : sortedImages[selectedImageIndex]?.includes("/back-") ? (
-              <div className="pointer-events-none absolute left-1/2 top-1/2 h-full w-full -translate-x-1/2 -translate-y-1/2 transform transition-transform duration-300">
+              <div className="pointer-events-none absolute top-1/2 left-1/2 h-full w-full -translate-x-1/2 -translate-y-1/2 transform transition-transform duration-300">
                 <SvgNumber
                   number={availableQuantity.currentNumber}
                   selectedColor={selectedColor}
@@ -321,7 +318,7 @@ export function TShirtProduct() {
             <div
               className={cn(
                 styles.tshirtProduct,
-                "absolute bottom-0 left-0 right-0 flex justify-center gap-2 bg-gradient-to-t from-darkpurple-light to-transparent p-4 transition-all duration-300 group-hover:from-darkpurple-lighter",
+                "from-darkpurple-light group-hover:from-darkpurple-lighter absolute right-0 bottom-0 left-0 flex justify-center gap-2 bg-linear-to-t to-transparent p-4 transition-all duration-300",
               )}
             >
               {sortedImages.map((image, index) => (
@@ -363,7 +360,7 @@ export function TShirtProduct() {
           </div>
 
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogContent className="max-h-[90vh] max-w-[90vw] border-darkpurple-light bg-darkpurple-light/95 p-0 md:max-w-2xl lg:max-w-4xl">
+            <DialogContent className="border-darkpurple-light bg-darkpurple-light/95 max-h-[90vh] max-w-[90vw] p-0 md:max-w-2xl lg:max-w-4xl">
               <DialogTitle className="sr-only">
                 T-shirt Image Gallery
               </DialogTitle>
@@ -374,6 +371,7 @@ export function TShirtProduct() {
                 )}
               >
                 <div
+                  role="group"
                   className="relative aspect-square min-h-0 flex-1"
                   onTouchStart={handleDragStart}
                   onTouchMove={handleDragMove}
@@ -386,10 +384,10 @@ export function TShirtProduct() {
                   <img
                     src={sortedImages[selectedImageIndex]}
                     alt={`${selectedColor} T-shirt view ${selectedImageIndex + 1}`}
-                    className="h-full w-full select-none object-contain"
+                    className="h-full w-full object-contain select-none"
                   />
                   {sortedImages[selectedImageIndex]?.includes("/number-") ? (
-                    <div className="pointer-events-none absolute left-1/2 top-1/2 h-full w-full -translate-x-1/2 -translate-y-1/2 transform transition-transform duration-300 group-hover:scale-105">
+                    <div className="pointer-events-none absolute top-1/2 left-1/2 h-full w-full -translate-x-1/2 -translate-y-1/2 transform transition-transform duration-300 group-hover:scale-105">
                       <SvgNumber
                         number={availableQuantity.currentNumber}
                         selectedColor={selectedColor}
@@ -397,7 +395,7 @@ export function TShirtProduct() {
                       />
                     </div>
                   ) : sortedImages[selectedImageIndex]?.includes("/back-") ? (
-                    <div className="pointer-events-none absolute left-1/2 top-1/2 h-full w-full -translate-x-1/2 -translate-y-1/2 transform transition-transform duration-300 group-hover:scale-105">
+                    <div className="pointer-events-none absolute top-1/2 left-1/2 h-full w-full -translate-x-1/2 -translate-y-1/2 transform transition-transform duration-300 group-hover:scale-105">
                       <SvgNumber
                         number={availableQuantity.currentNumber}
                         selectedColor={selectedColor}
@@ -409,7 +407,7 @@ export function TShirtProduct() {
                   <div
                     className={cn(
                       styles.tshirtProduct,
-                      "absolute bottom-0 left-0 right-0 flex justify-center gap-2 bg-gradient-to-t from-darkpurple-light/80 to-transparent p-1 pb-3 md:p-4 md:pb-4",
+                      "from-darkpurple-light/80 absolute right-0 bottom-0 left-0 flex justify-center gap-2 bg-linear-to-t to-transparent p-1 pb-3 md:p-4 md:pb-4",
                     )}
                   >
                     {sortedImages.map((image, index) => (
@@ -417,7 +415,7 @@ export function TShirtProduct() {
                         key={index}
                         onClick={() => setSelectedImageIndex(index)}
                         className={cn(
-                          "relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-lg border-2 transition-all sm:h-12 sm:w-12 md:h-16 md:w-16",
+                          "relative h-10 w-10 shrink-0 overflow-hidden rounded-lg border-2 transition-all sm:h-12 sm:w-12 md:h-16 md:w-16",
                           selectedImageIndex === index
                             ? "border-yellow"
                             : "border-transparent hover:border-white/20",
@@ -453,20 +451,20 @@ export function TShirtProduct() {
 
         {/* Product details */}
         <div className="flex flex-col space-y-6">
-          <h2 className="text-2xl font-bold text-yellow md:text-3xl">
+          <h2 className="text-yellow text-2xl font-bold md:text-3xl">
             OG Wedgie T-Shirt
           </h2>
           <div className="flex items-center justify-between md:items-end">
-            <div className="text-2xl font-bold leading-none text-white">
-              <p className="text-2xl font-bold leading-none text-white">
+            <div className="text-2xl leading-none font-bold text-white">
+              <p className="text-2xl leading-none font-bold text-white">
                 $ {(PRICE / 100).toFixed(2)}
               </p>
               <p className="mt-1.5 text-[10px] text-white/60 md:text-sm">
                 Free worldwide shipping
               </p>
             </div>
-            <p className="rounded-lg bg-pink px-4 py-2 text-center text-[6px] font-bold uppercase text-white md:-mt-16 md:text-[10px]">
-              <span className="mb-[.005em] block text-[4em] font-black leading-[1em] text-yellow">
+            <p className="bg-pink rounded-lg px-4 py-2 text-center text-[6px] font-bold text-white uppercase md:-mt-16 md:text-[10px]">
+              <span className="text-yellow mb-[.005em] block text-[4em] leading-[1em] font-black">
                 {availableQuantity.inventory}
               </span>
               <span className="mb-[.2em] block text-[2em] leading-[1em] text-white">
@@ -480,7 +478,7 @@ export function TShirtProduct() {
 
           {/* Size selector */}
           <div>
-            <h3 className="mb-2 text-sm font-bold uppercase text-white/60">
+            <h3 className="mb-2 text-sm font-bold text-white/60 uppercase">
               Size
             </h3>
             <div className="flex gap-2">
@@ -503,7 +501,7 @@ export function TShirtProduct() {
 
           {/* Color selector */}
           <div>
-            <h3 className="mb-2 text-sm font-bold uppercase text-white/60">
+            <h3 className="mb-2 text-sm font-bold text-white/60 uppercase">
               Color
             </h3>
             <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
@@ -515,7 +513,7 @@ export function TShirtProduct() {
                     "h-8 rounded-lg px-4 text-sm font-bold transition-all md:h-10 md:text-base",
                     selectedColor === color
                       ? "bg-yellow text-darkpurple"
-                      : "bg-darkpurple-light text-white hover:bg-darkpurple-light/80",
+                      : "bg-darkpurple-light hover:bg-darkpurple-light/80 text-white",
                   )}
                 >
                   {color}
@@ -525,13 +523,13 @@ export function TShirtProduct() {
           </div>
 
           {/* Add personalization info */}
-          <p className="text-sm font-bold uppercase text-yellow">
+          <p className="text-yellow text-sm font-bold uppercase">
             Each t-shirt is uniquely numbered.
           </p>
 
           <p className="text-xl font-bold text-white">
             Yours will be{" "}
-            <span className="ml-2 rounded-lg bg-yellow px-2 py-1 font-bold text-darkpurple">
+            <span className="bg-yellow text-darkpurple ml-2 rounded-lg px-2 py-1 font-bold">
               #{availableQuantity.currentNumber}
             </span>
           </p>
@@ -544,7 +542,7 @@ export function TShirtProduct() {
           <button
             onClick={handleBuyNow}
             disabled={loading}
-            className="mt-8 rounded-lg bg-pink px-8 py-4 font-bold text-white transition-all hover:bg-pink/80 disabled:opacity-50"
+            className="bg-pink hover:bg-pink/80 mt-8 rounded-lg px-8 py-4 font-bold text-white transition-all disabled:opacity-50"
           >
             {loading ? "Processing..." : "Buy Now"}
           </button>

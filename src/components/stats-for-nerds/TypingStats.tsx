@@ -17,7 +17,7 @@ export function TypingStats({ stats }: TypingStatsProps) {
   const [currentStat, setCurrentStat] = useState<keyof StatsPerWedgie>("fga");
   const [displayText, setDisplayText] = useState("");
   const typingRef = useRef<boolean>(false);
-  const cycleTimeoutRef = useRef<NodeJS.Timeout>();
+  const cycleTimeoutRef = useRef<NodeJS.Timeout>(undefined);
 
   const statLabels = useMemo(
     () => ({
@@ -84,18 +84,19 @@ export function TypingStats({ stats }: TypingStatsProps) {
         clearTimeout(cycleTimeoutRef.current);
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentStat, stats, statLabels]);
 
   return (
-    <div className="w-full max-w-xl rounded-b-xl bg-gradient-to-b from-darkpurple-light to-darkpurple-lighter text-base text-white md:text-xl">
-      <div className="relative flex min-h-[4.5rem] flex-col items-center justify-center md:min-h-[6rem]">
+    <div className="from-darkpurple-light to-darkpurple-lighter w-full max-w-xl rounded-b-xl bg-linear-to-b text-base text-white md:text-xl">
+      <div className="relative flex min-h-18 flex-col items-center justify-center md:min-h-24">
         <span className="block font-bold">THAT IS A WEDGIE EVERY</span>
         <span className="text-xl font-black md:text-3xl">
           <span className="text-yellow">{displayText.split(" ")[0]}</span>{" "}
-          <span className="font-bold text-pink">
+          <span className="text-pink font-bold">
             {displayText.split(" ").slice(1).join(" ")}
           </span>
-          <span className="mb-[-0.1em] ml-1 inline-block h-[1em] w-2 animate-blink bg-white" />
+          <span className="animate-blink mb-[-0.1em] ml-1 inline-block h-[1em] w-2 bg-white" />
         </span>
       </div>
     </div>

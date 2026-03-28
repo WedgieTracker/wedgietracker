@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { eq } from "drizzle-orm";
-import { unstable_cache } from "next/cache";
+import { cacheTag, cacheLife } from "next/cache";
 
 import {
   createTRPCRouter,
@@ -12,17 +12,17 @@ import { db } from "~/server/db";
 import { global } from "~/server/schema";
 import { CACHE_TAGS, invalidateWedgieData } from "~/server/cache";
 
-const getCachedGlobal = unstable_cache(
-  async () => {
-    const result = await db.query.global.findFirst({
-      where: eq(global.id, 1),
-      with: { currentSeason: true },
-    });
-    return result ?? null;
-  },
-  ["admin-getGlobal"],
-  { tags: [CACHE_TAGS.WEDGIE_DATA], revalidate: 60 },
-);
+async function getCachedGlobal() {
+  "use cache";
+  cacheTag(CACHE_TAGS.WEDGIE_DATA);
+  cacheLife({ revalidate: 60 });
+
+  const result = await db.query.global.findFirst({
+    where: eq(global.id, 1),
+    with: { currentSeason: true },
+  });
+  return result ?? null;
+}
 
 export const adminRouter = createTRPCRouter({
   getGlobal: publicProcedure.query(() => getCachedGlobal()),

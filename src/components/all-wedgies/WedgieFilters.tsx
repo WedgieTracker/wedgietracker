@@ -41,13 +41,13 @@ export function WedgieFilters({
 
   return (
     <div
-      className={`relative flex flex-col items-start justify-between rounded-xl bg-pink-darker/10 p-4 sm:flex-row ${
+      className={`bg-pink-darker/10 relative flex flex-col items-start justify-between rounded-xl p-4 sm:flex-row ${
         isLoading ? "opacity-20" : ""
       }`}
     >
       <>
         <div className="flex w-full flex-col items-start gap-4 sm:max-w-[calc(100%-95px)] sm:flex-row lg:gap-8">
-          <span className="mt-2.5 flex items-center gap-1 whitespace-nowrap text-xs font-bold tracking-wide text-yellow">
+          <span className="text-yellow mt-2.5 flex items-center gap-1 text-xs font-bold tracking-wide whitespace-nowrap">
             FILTER BY
             <svg
               className="h-3 w-3"
@@ -67,25 +67,25 @@ export function WedgieFilters({
 
           <div className="grid w-full grid-cols-2 flex-row gap-2 sm:flex">
             {/* Season Filter */}
-            <div className="relative rounded-md bg-yellow-darker/20 p-2">
+            <div className="bg-yellow-darker/20 relative rounded-md p-2">
               <button
-                className={`flex items-center gap-2 rounded-md px-0 py-0 text-sm font-bold uppercase text-yellow`}
+                className={`text-yellow flex items-center gap-2 rounded-md px-0 py-0 text-sm font-bold uppercase`}
               >
                 <span>Season</span>
                 <span
-                  className={`relative flex h-5 w-5 items-center justify-center rounded-full border-[1px] border-yellow leading-none`}
+                  className={`border-yellow relative flex h-5 w-5 items-center justify-center rounded-full border leading-none`}
                 >
-                  <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+                  <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
                     +
                   </span>
                 </span>
               </button>
               {filters.season ? (
-                <span className="mt-2 inline-block rounded-md bg-yellow px-2 py-1 font-bold text-darkpurple">
+                <span className="bg-yellow text-darkpurple mt-2 inline-block rounded-md px-2 py-1 font-bold">
                   {filters.season}
                 </span>
               ) : (
-                <span className="mt-2 inline-block rounded-md bg-yellow px-2 py-1 font-bold text-darkpurple">
+                <span className="bg-yellow text-darkpurple mt-2 inline-block rounded-md px-2 py-1 font-bold">
                   All Seasons
                 </span>
               )}
@@ -119,21 +119,21 @@ export function WedgieFilters({
               >
                 <span>Type</span>
                 <span
-                  className={`relative flex h-5 w-5 items-center justify-center rounded-full border-[1px] leading-none ${
+                  className={`relative flex h-5 w-5 items-center justify-center rounded-full border leading-none ${
                     filters.type ? "border-yellow" : "border-pink"
                   }`}
                 >
-                  <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+                  <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
                     +
                   </span>
                 </span>
               </button>
               {filters.type ? (
-                <span className="mt-2 inline-block whitespace-nowrap rounded-md bg-yellow px-2 py-1 font-bold text-darkpurple">
+                <span className="bg-yellow text-darkpurple mt-2 inline-block rounded-md px-2 py-1 font-bold whitespace-nowrap">
                   {filters.type}
                 </span>
               ) : (
-                <span className="mt-2 inline-block whitespace-nowrap rounded-md px-2 py-1 font-bold text-white/20">
+                <span className="mt-2 inline-block rounded-md px-2 py-1 font-bold whitespace-nowrap text-white/20">
                   All Types
                 </span>
               )}
@@ -169,13 +169,13 @@ export function WedgieFilters({
               >
                 <span>Team/Player</span>
                 <span
-                  className={`relative flex h-5 w-5 items-center justify-center rounded-full border-[1px] ${
+                  className={`relative flex h-5 w-5 items-center justify-center rounded-full border ${
                     isActive || filters.playerOrTeam
                       ? "border-yellow"
                       : "border-pink"
                   }`}
                 >
-                  <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+                  <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
                     +
                   </span>
                 </span>
@@ -184,7 +184,7 @@ export function WedgieFilters({
                 <div className="mt-2">
                   <input
                     type="text"
-                    className={`w-full rounded-md px-2 py-1 font-bold placeholder:text-darkpurple/50 focus:outline-none ${
+                    className={`placeholder:text-darkpurple/50 w-full rounded-md px-2 py-1 font-bold focus:outline-hidden ${
                       isActive || filters.playerOrTeam
                         ? "bg-yellow text-darkpurple"
                         : "bg-pink text-white placeholder:text-white/50"
@@ -198,27 +198,29 @@ export function WedgieFilters({
                       });
                     }}
                     placeholder="Search teams or players..."
+                    // eslint-disable-next-line jsx-a11y/no-autofocus
                     autoFocus
                   />
                 </div>
               ) : (
-                <span
-                  className="mt-2 inline-block whitespace-nowrap rounded-md px-2 py-1 font-bold text-white/20"
+                <button
+                  type="button"
+                  className="mt-2 inline-block rounded-md px-2 py-1 font-bold whitespace-nowrap text-white/20"
                   onClick={() => setIsActive(true)}
                 >
                   All Teams/Players
-                </span>
+                </button>
               )}
             </div>
           </div>
         </div>
 
         {/* Total Counter */}
-        <div className="absolute right-3 top-3 flex flex-col items-center sm:right-4 sm:top-[50%] sm:-translate-y-1/2">
-          <span className="text-3xl font-black leading-none text-yellow sm:text-6xl">
+        <div className="absolute top-3 right-3 flex flex-col items-center sm:top-[50%] sm:right-4 sm:-translate-y-1/2">
+          <span className="text-yellow text-3xl leading-none font-black sm:text-6xl">
             <Counter end={visibleWedgies} duration={200} />
           </span>
-          <span className="mt-[-.5em] text-xs font-black uppercase leading-none text-pink sm:text-2xl">
+          <span className="text-pink mt-[-.5em] text-xs leading-none font-black uppercase sm:text-2xl">
             TOTAL
           </span>
         </div>

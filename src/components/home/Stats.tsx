@@ -110,47 +110,47 @@ export function Stats({ stats, isLoading }: StatsProps) {
     <div className="md-min-h-[auto] relative flex min-h-[80svh] w-full flex-col md:sticky md:top-20 md:max-h-[calc(100svh-80px)] md:w-2/5 lg:w-1/2">
       {/* Top left section */}
 
-      <div className="relative flex min-h-[25em] flex-[2] flex-col justify-center overflow-hidden bg-darkpurple-light p-8 md:min-h-[28em]">
+      <div className="bg-darkpurple-light relative flex min-h-[25em] flex-2 flex-col justify-center overflow-hidden p-8 md:min-h-[28em]">
         <ShareableStatsVideo stats={stats} />
 
         <Wave fillPercentage={fillPercentage} showConfetti />
 
         {/* Add a red dot animated on the bottom left in case there are live games */}
 
-        <div className="relative z-10 mx-auto rounded-lg bg-darkpurple-light/50 p-4 text-center md:w-[90%] lg:w-[65%] lg:min-w-[24rem] lg:max-w-[30rem]">
-          <div className="text-sm font-bold leading-none text-yellow md:text-base">
+        <div className="bg-darkpurple-light/50 relative z-10 mx-auto rounded-lg p-4 text-center md:w-[90%] lg:w-[65%] lg:max-w-120 lg:min-w-[24rem]">
+          <div className="text-yellow text-sm leading-none font-bold md:text-base">
             {stats.totalWedgies > 63 ? "NEW ALL-TIME RECORD" : "WE'RE AT"}
           </div>
-          <div className="whitespace-nowrap text-big-number-mobile font-black leading-none text-yellow md:text-big-number-medium lg:text-big-number">
+          <div className="text-big-number-mobile text-yellow md:text-big-number-medium lg:text-big-number leading-none font-black whitespace-nowrap">
             {displayedTotal.toFixed(0).toLocaleString()}
           </div>
-          <div className="text-wedgies-text-mobile font-black leading-none text-yellow md:text-wedgies-text lg:text-wedgies-text">
+          <div className="text-wedgies-text-mobile text-yellow md:text-wedgies-text lg:text-wedgies-text leading-none font-black">
             WEDGIES
           </div>
         </div>
       </div>
 
-      <div className="relative flex min-h-[12em] flex-1 flex-col justify-center bg-darkpurple p-8 md:min-h-[14em]">
+      <div className="bg-darkpurple relative flex min-h-[12em] flex-1 flex-col justify-center p-8 md:min-h-[14em]">
         {stats.liveGames && (
           <div
             className="absolute bottom-2 left-4 z-10 z-50 flex flex-row items-center justify-center gap-2 rounded-full border border-red-500 bg-red-500/90 px-2 py-1 md:bottom-4 md:px-2 md:py-2"
             title="Updated every 15 minutes"
           >
-            <div className="z-5 relative">
-              <div className="absolute left-0 top-0 h-4 w-4 animate-ping rounded-full bg-white/50"></div>
+            <div className="relative z-5">
+              <div className="absolute top-0 left-0 h-4 w-4 animate-ping rounded-full bg-white/50"></div>
               <div className="h-4 w-4 animate-pulse rounded-full bg-white"></div>
             </div>
-            <div className="z-5 relative text-[10px] font-bold uppercase tracking-wider text-white md:text-xs">
+            <div className="relative z-5 text-[10px] font-bold tracking-wider text-white uppercase md:text-xs">
               Live games
             </div>
           </div>
         )}
         <div className="flex flex-row items-center justify-center gap-5">
           <div className="flex w-[100px] flex-col items-center justify-center text-center md:w-[135px]">
-            <div className="w-full text-pace-text-mobile font-black uppercase leading-none tracking-wider text-pink md:text-pace-text">
+            <div className="text-pace-text-mobile text-pink md:text-pace-text w-full leading-none font-black tracking-wider uppercase">
               Pace
             </div>
-            <div className="shadow-lg-darkpurple-light mt-[-.2em] w-full text-pace-number-mobile font-black leading-none text-yellow md:text-pace-number">
+            <div className="shadow-lg-darkpurple-light text-pace-number-mobile text-yellow md:text-pace-number mt-[-.2em] w-full leading-none font-black">
               {displayedPace.toFixed(0)}
             </div>
           </div>
@@ -158,24 +158,24 @@ export function Stats({ stats, isLoading }: StatsProps) {
           {daysAgo && daysAgo > 0 ? (
             <div className="ml-2 flex w-[140px] flex-row items-center justify-center gap-3">
               <div className="pl-2 text-center uppercase">
-                <div className="shadow-lg-darkpurple-light text-5xl font-black leading-none text-yellow">
+                <div className="shadow-lg-darkpurple-light text-yellow text-5xl leading-none font-black">
                   {daysAgo}
                 </div>
-                <div className="mt-[-.6em] text-sm font-black leading-none text-pink">
+                <div className="text-pink mt-[-.6em] text-sm leading-none font-black">
                   {daysAgo === 1 ? "day" : "days"}
                 </div>
               </div>
-              <div className="text-left font-bold uppercase leading-none tracking-wide text-white">
+              <div className="text-left leading-none font-bold tracking-wide text-white uppercase">
                 Without <br /> wedgies
               </div>
             </div>
           ) : (
             <div className="ml-2 flex w-[140px] flex-col items-start justify-start">
               <div className="pl-4 text-center text-4xl uppercase">
-                <div className="shadow-lg-darkpurple-light animate-color-shift font-black leading-none text-pink">
+                <div className="shadow-lg-darkpurple-light animate-color-shift text-pink leading-none font-black">
                   New
                 </div>
-                <div className="mt-[-.3em] animate-color-shift-delayed text-[0.8em] font-black leading-none text-yellow">
+                <div className="animate-color-shift-delayed text-yellow mt-[-.3em] text-[0.8em] leading-none font-black">
                   wedgie
                 </div>
               </div>
@@ -183,10 +183,10 @@ export function Stats({ stats, isLoading }: StatsProps) {
           )}
         </div>
         {/* cta */}
-        <div className="absolute left-[50%] top-0 z-10 translate-x-[-50%] translate-y-[-50%]">
+        <div className="absolute top-0 left-[50%] z-10 translate-x-[-50%] translate-y-[-50%]">
           <Link
             href="/stats-for-nerds"
-            className="block min-w-48 rounded-full border-2 border-yellow bg-yellow px-8 py-1 text-center text-button-text font-bold text-darkpurple transition-all duration-300 hover:bg-darkpurple hover:text-yellow"
+            className="border-yellow bg-yellow text-button-text text-darkpurple hover:bg-darkpurple hover:text-yellow block min-w-48 rounded-full border-2 px-8 py-1 text-center font-bold transition-all duration-300"
           >
             MORE STATS
           </Link>

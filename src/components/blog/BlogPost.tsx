@@ -37,7 +37,7 @@ export function BlogPost({ post }: BlogPostProps) {
           className="mb-8 aspect-video w-full rounded-xl object-cover"
         />
       )}
-      <h1 className="mb-4 text-4xl font-black text-yellow md:text-5xl">
+      <h1 className="text-yellow mb-4 text-4xl font-black md:text-5xl">
         {post.title}
       </h1>
       <div className="flex flex-row gap-2">
@@ -75,6 +75,7 @@ export function BlogPost({ post }: BlogPostProps) {
               iframe: ({ ...props }) => (
                 <div className="aspect-video w-full">
                   <iframe
+                    title="Embedded content"
                     {...props}
                     className="h-full w-full max-w-md rounded-lg"
                   />

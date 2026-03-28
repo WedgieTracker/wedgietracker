@@ -53,11 +53,12 @@ export function Wedgie({
 
   return (
     <>
-      <div
+      <button
+        type="button"
         key={wedgie.id}
-        className={`group mb-2 flex cursor-pointer items-center justify-between overflow-hidden bg-darkpurple-light/30 transition-all duration-300 hover:bg-darkpurple-light/80 ${
+        className={`group bg-darkpurple-light/30 hover:bg-darkpurple-light/80 mb-2 flex w-full cursor-pointer items-center justify-between overflow-hidden text-left transition-all duration-300 ${
           variant === "small"
-            ? "!last:pb-0 !mb-0 rounded-xl !border-0 !pb-0"
+            ? "!last:pb-0 mb-0! rounded-xl border-0! pb-0!"
             : "border-b-0 pb-0 first:rounded-t-xl last:mb-0 last:rounded-b-xl"
         }`}
         onClick={() => {
@@ -76,7 +77,7 @@ export function Wedgie({
           }`}
         >
           <div
-            className={`flex flex-col items-center overflow-hidden border border-darkpurple bg-pink transition-all duration-300 group-hover:border-yellow group-hover:bg-darkpurple/80 ${
+            className={`border-darkpurple bg-pink group-hover:border-yellow group-hover:bg-darkpurple/80 flex flex-col items-center overflow-hidden border transition-all duration-300 ${
               variant === "small"
                 ? "rounded-xl lg:min-h-20 lg:min-w-20"
                 : "min-w-[74px] rounded-sm group-first:rounded-tl-xl group-last:rounded-bl-xl lg:min-h-24 lg:min-w-24"
@@ -84,20 +85,20 @@ export function Wedgie({
           >
             <div className="mt-1">
               <span
-                className="mr-[-0.2rem] font-bold leading-none text-darkpurple/50 transition-all duration-300 group-hover:text-yellow"
+                className="text-darkpurple/50 group-hover:text-yellow mr-[-0.2rem] leading-none font-bold transition-all duration-300"
                 style={{ fontSize: sizes.hash }}
               >
                 #
               </span>
               <span
-                className="min-w-15 font-black leading-none text-yellow"
+                className="text-yellow min-w-15 leading-none font-black"
                 style={{ fontSize: sizes.number }}
               >
                 {wedgie.number ?? "1"}
               </span>
             </div>
             <div
-              className={`mb-2 font-black leading-none tracking-wide text-darkpurple transition-all duration-300 group-hover:text-yellow ${sizes.date}`}
+              className={`text-darkpurple group-hover:text-yellow mb-2 leading-none font-black tracking-wide transition-all duration-300 ${sizes.date}`}
               style={{ fontSize: sizes.date }}
             >
               {new Date(wedgie.wedgieDate).toLocaleDateString("de-DE", {
@@ -113,7 +114,7 @@ export function Wedgie({
                   })}
             </div>
             <div
-              className="w-full rounded-b-[0.125rem] border-t border-yellow bg-yellow px-3 py-0.5 text-center font-bold text-darkpurple transition-all duration-300 group-last:rounded-bl-xl group-hover:border-t-yellow group-hover:bg-transparent group-hover:text-yellow"
+              className="border-yellow bg-yellow text-darkpurple group-hover:border-t-yellow group-hover:text-yellow w-full rounded-b-xs border-t px-3 py-0.5 text-center font-bold transition-all duration-300 group-last:rounded-bl-xl group-hover:bg-transparent"
               style={{ fontSize: sizes.watch }}
             >
               WATCH
@@ -121,7 +122,7 @@ export function Wedgie({
           </div>
           <div className="min-w-0">
             <h3
-              className="shadow-lg-darkpurple mb-0 truncate pb-1 font-bold leading-none text-yellow"
+              className="shadow-lg-darkpurple text-yellow mb-0 truncate pb-1 leading-none font-bold"
               style={{
                 textShadow: "0 0 10px rgba(var(--darkpurple-rgb), 0.6)",
                 fontSize: sizes.playerName,
@@ -145,7 +146,7 @@ export function Wedgie({
               )}
             </p>
             <p
-              className="font-bold uppercase tracking-wide text-white/60"
+              className="font-bold tracking-wide text-white/60 uppercase"
               style={{ fontSize: sizes.types }}
             >
               {wedgie.types
@@ -155,7 +156,7 @@ export function Wedgie({
           </div>
           <div className="relative overflow-visible">
             <div
-              className={`absolute right-2 top-1/2 -translate-y-1/2 overflow-visible ${variant === "small" ? "w-20 md:w-20" : "w-20 md:w-24"}`}
+              className={`absolute top-1/2 right-2 -translate-y-1/2 overflow-visible ${variant === "small" ? "w-20 md:w-20" : "w-20 md:w-24"}`}
             >
               <div
                 style={{
@@ -181,18 +182,18 @@ export function Wedgie({
                 }}
               ></div>
               <div
-                className="absolute h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-yellow shadow-lg md:h-3 md:w-3"
+                className="bg-yellow absolute h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full shadow-lg md:h-3 md:w-3"
                 style={{
                   left: `${(wedgie.position as { x: number; y: number }).x}%`,
                   top: `${(wedgie.position as { x: number; y: number }).y}%`,
                 }}
               >
-                <div className="absolute left-1/2 top-1/2 h-[calc(100%-0.2rem)] w-[calc(100%-0.2rem)] -translate-x-1/2 -translate-y-1/2 rounded-full border border-darkpurple bg-yellow"></div>
+                <div className="border-darkpurple bg-yellow absolute top-1/2 left-1/2 h-[calc(100%-0.2rem)] w-[calc(100%-0.2rem)] -translate-x-1/2 -translate-y-1/2 rounded-full border"></div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </button>
 
       <WedgieModal
         wedgie={wedgie}

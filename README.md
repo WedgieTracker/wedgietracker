@@ -9,12 +9,15 @@ A modern web application for tracking basketball wedgies.
 
 ## Tech Stack
 
-- [Next.js](https://nextjs.org) - React framework
-- [Auth.js](https://authjs.dev/) - Authentication
+- [Next.js](https://nextjs.org) 16 - React 19 framework
+- [Auth.js](https://authjs.dev/) 5 - Authentication
 - [Drizzle ORM](https://orm.drizzle.team) - Database ORM
 - [Turso](https://turso.tech) - SQLite database
-- [Tailwind CSS](https://tailwindcss.com) - Styling
-- [tRPC](https://trpc.io) - Type-safe API
+- [Tailwind CSS](https://tailwindcss.com) 4 - Styling
+- [tRPC](https://trpc.io) 11 - Type-safe API
+- [TypeScript](https://www.typescriptlang.org/) 6 - Type safety
+- [tsgo](https://github.com/nicolo-ribaudo/tc39-proposal-structs) (TypeScript native) - Fast type checking
+- [oxlint](https://oxc.rs) - Fast linting (Rust-based)
 - [Vitest](https://vitest.dev) - Testing
 - [Vercel](https://vercel.com) - Deployment
 
@@ -99,15 +102,15 @@ pnpm dev
 | `pnpm dev`           | Start dev server with Turbo and HTTPS |
 | `pnpm build`         | Production build                      |
 | `pnpm start`         | Start production server               |
-| `pnpm lint`          | Run ESLint                            |
-| `pnpm lint:fix`      | Run ESLint with auto-fix              |
-| `pnpm typecheck`     | Run TypeScript type checking          |
+| `pnpm lint`          | Run oxlint                            |
+| `pnpm lint:fix`      | Run oxlint with auto-fix              |
+| `pnpm typecheck`     | Run type checking with tsgo (native)  |
 | `pnpm format:check`  | Check Prettier formatting             |
 | `pnpm format:write`  | Fix Prettier formatting               |
 | `pnpm test`          | Run tests once                        |
 | `pnpm test:watch`    | Run tests in watch mode               |
 | `pnpm test:coverage` | Run tests with coverage               |
-| `pnpm check`         | Run lint + typecheck + tests          |
+| `pnpm check`         | Run oxlint + tsgo + tests             |
 | `pnpm db:push`       | Push schema changes to database       |
 | `pnpm db:generate`   | Generate database migrations          |
 | `pnpm db:studio`     | Open Drizzle Studio                   |
@@ -118,8 +121,12 @@ pnpm dev
 
 This project uses [husky](https://typicode.github.io/husky/) and [lint-staged](https://github.com/lint-staged/lint-staged) to enforce code quality on every commit:
 
-- **TypeScript/TSX files**: ESLint auto-fix + Prettier formatting
+- **TypeScript/TSX files**: oxlint auto-fix + Prettier formatting
 - **JS/JSON/MD/CSS files**: Prettier formatting
+
+### Dependency Management
+
+Dependencies are kept up to date with [Dependabot](https://docs.github.com/en/code-security/dependabot), configured to open weekly PRs grouping minor and patch updates together.
 
 ### Testing
 

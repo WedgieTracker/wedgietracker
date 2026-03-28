@@ -1,7 +1,7 @@
 // /api/blog
 
 import { z } from "zod";
-import { unstable_cache } from "next/cache";
+import { cacheTag, cacheLife } from "next/cache";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import fs from "fs";
 import path from "path";
@@ -71,17 +71,21 @@ function getPostBySlug(slug: string): BlogPost {
   };
 }
 
-const getCachedAllPosts = unstable_cache(
-  async () => getAllPosts(),
-  ["blog-getAll"],
-  { tags: [CACHE_TAGS.BLOG_DATA], revalidate: 3600 },
-);
+async function getCachedAllPosts() {
+  "use cache";
+  cacheTag(CACHE_TAGS.BLOG_DATA);
+  cacheLife({ revalidate: 3600 });
 
-const getCachedPostBySlug = (slug: string) =>
-  unstable_cache(async () => getPostBySlug(slug), ["blog-getBySlug", slug], {
-    tags: [CACHE_TAGS.BLOG_DATA],
-    revalidate: 3600,
-  })();
+  return getAllPosts();
+}
+
+async function getCachedPostBySlug(slug: string) {
+  "use cache";
+  cacheTag(CACHE_TAGS.BLOG_DATA);
+  cacheLife({ revalidate: 3600 });
+
+  return getPostBySlug(slug);
+}
 
 export const blogRouter = createTRPCRouter({
   getAll: publicProcedure.query(() => getCachedAllPosts()),

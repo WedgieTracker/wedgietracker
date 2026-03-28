@@ -1,6 +1,3 @@
-export const dynamic = "force-static";
-export const revalidate = 120;
-
 import { AllWedgiesPage } from "~/components/all-wedgies/AllWedgiesPage";
 import { PageLayout } from "~/components/layout/PageLayout";
 import { Suspense } from "react";
@@ -18,11 +15,11 @@ export default async function Page() {
     <PageLayout>
       <div className="flex flex-col lg:flex-row">
         <div className="flex w-full flex-col items-center justify-center gap-8 px-4 py-4 md:gap-8 md:py-8 lg:px-8 lg:py-8">
-          <h1 className="text-center text-6xl font-black uppercase leading-none md:text-7xl">
-            <span className="text-shadow-darkpurple relative z-10 block leading-none text-yellow">
+          <h1 className="text-center text-6xl leading-none font-black uppercase md:text-7xl">
+            <span className="text-shadow-darkpurple text-yellow relative z-10 block leading-none">
               All{" "}
             </span>
-            <span className="relative z-0 mt-[-.4em] block text-[.5em] leading-none text-pink">
+            <span className="text-pink relative z-0 mt-[-.4em] block text-[.5em] leading-none">
               Wedgies
             </span>
           </h1>

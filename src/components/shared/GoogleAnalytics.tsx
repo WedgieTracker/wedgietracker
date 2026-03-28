@@ -4,7 +4,7 @@
 // import { usePathname, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import CookieConsent from "./CookieConsent";
-import { GoogleTagManager, sendGTMEvent } from "@next/third-parties/google";
+import { GoogleTagManager } from "@next/third-parties/google";
 
 interface GoogleAnalyticsProps {
   gaId: string; // GTM container ID

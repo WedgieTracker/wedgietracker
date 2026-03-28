@@ -11,12 +11,12 @@ export function BlogList() {
   if (!posts) return <NoPosts />;
 
   return (
-    <div className="mx-auto grid w-full max-w-4xl gap-8 md:grid-cols-2 [&>*:last-child]:md:col-span-2 [&>*:last-child]:md:mx-auto [&>*:last-child]:md:max-w-[calc(50%-1rem)]">
+    <div className="mx-auto grid w-full max-w-4xl gap-8 md:grid-cols-2 md:[&>*:last-child]:col-span-2 md:[&>*:last-child]:mx-auto md:[&>*:last-child]:max-w-[calc(50%-1rem)]">
       {posts.map((post) => (
         <Link
           key={post.slug}
           href={`/blog/${post.slug}`}
-          className="group relative overflow-hidden rounded-lg bg-darkpurple-lighter p-4 transition-all hover:bg-darkpurple-light/80 md:p-6"
+          className="group bg-darkpurple-lighter hover:bg-darkpurple-light/80 relative overflow-hidden rounded-lg p-4 transition-all md:p-6"
         >
           {post.coverImage && (
             <div className="mb-4 aspect-video overflow-hidden rounded-lg">
@@ -28,14 +28,14 @@ export function BlogList() {
             </div>
           )}
           <div className="space-y-2">
-            <p className="inline-block rounded-md bg-darkpurple-darker px-2 py-1 text-xs font-bold uppercase text-white">
+            <p className="bg-darkpurple-darker inline-block rounded-md px-2 py-1 text-xs font-bold text-white uppercase">
               {new Date(post.date).toLocaleDateString("en-US", {
                 month: "long",
                 day: "numeric",
                 year: "numeric",
               })}
             </p>
-            <h2 className="text-2xl font-black text-yellow md:text-3xl lg:text-4xl">
+            <h2 className="text-yellow text-2xl font-black md:text-3xl lg:text-4xl">
               {post.title}
             </h2>
             <p className="text-sm text-white/60">{post.excerpt}</p>

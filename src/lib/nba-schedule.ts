@@ -255,7 +255,7 @@ export async function nbaUpdate(includeExistingGames: boolean) {
         });
     }
 
-    revalidateTag(CACHE_TAGS.WEDGIE_DATA);
+    revalidateTag(CACHE_TAGS.WEDGIE_DATA, "max");
 
     return NextResponse.json({
       gamesPlayed,

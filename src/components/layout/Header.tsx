@@ -11,7 +11,7 @@ export function Header() {
   return (
     <>
       <header
-        className={`fixed top-0 z-[70] h-auto w-full backdrop-blur-sm transition-all duration-300`}
+        className={`fixed top-0 z-70 h-auto w-full backdrop-blur-xs transition-all duration-300`}
         style={{
           backgroundImage:
             "radial-gradient(transparent 0.5px, rgb(var(--darkpurple-rgb)) 0.5px) ",
@@ -30,7 +30,7 @@ export function Header() {
           <div className="justify-self-start">
             <Link
               href="/store"
-              className={`store-CTA relative mb-0.5 inline-block rounded-md border border-yellow px-2 py-1.5 text-[10px] font-bold uppercase tracking-wider text-yellow transition-all duration-300 before:absolute before:inset-0 before:-z-10 before:animate-gradient before:bg-gradient-to-r before:from-transparent before:via-yellow/20 before:to-transparent before:bg-[length:200%_100%] hover:bg-yellow hover:text-darkpurple md:px-3 md:text-xs ${
+              className={`store-CTA border-yellow text-yellow before:animate-gradient before:via-yellow/20 hover:bg-yellow hover:text-darkpurple relative mb-0.5 inline-block rounded-md border px-2 py-1.5 text-[10px] font-bold tracking-wider uppercase transition-all duration-300 before:absolute before:inset-0 before:-z-10 before:bg-linear-to-r before:from-transparent before:to-transparent before:bg-size-[200%_100%] md:px-3 md:text-xs ${
                 isMenuOpen ? "opacity-0" : "opacity-100"
               }`}
             >
@@ -54,17 +54,17 @@ export function Header() {
           <div className="justify-self-end">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="relative z-[60] flex flex-col gap-1 md:gap-1.5"
+              className="relative z-60 flex flex-col gap-1 md:gap-1.5"
               aria-label="Toggle menu"
             >
               <span
-                className={`h-0.5 w-5 transition-transform md:w-6 ${isMenuOpen ? "translate-y-[300%] rotate-45 bg-darkpurple md:translate-y-[400%]" : "bg-white"}`}
+                className={`h-0.5 w-5 transition-transform md:w-6 ${isMenuOpen ? "bg-darkpurple translate-y-[300%] rotate-45 md:translate-y-[400%]" : "bg-white"}`}
               />
               <span
                 className={`h-0.5 w-5 transition-opacity md:w-6 ${isMenuOpen ? "bg-darkpurple opacity-0" : "bg-white"}`}
               />
               <span
-                className={`h-0.5 w-5 transition-transform md:w-6 ${isMenuOpen ? "-translate-y-[300%] -rotate-45 bg-darkpurple md:-translate-y-[400%]" : "bg-white"}`}
+                className={`h-0.5 w-5 transition-transform md:w-6 ${isMenuOpen ? "bg-darkpurple -translate-y-[300%] -rotate-45 md:-translate-y-[400%]" : "bg-white"}`}
               />
             </button>
           </div>

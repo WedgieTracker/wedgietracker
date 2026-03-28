@@ -1,6 +1,3 @@
-export const dynamic = "force-static";
-export const revalidate = 3600;
-
 import { notFound } from "next/navigation";
 import { PageLayout } from "~/components/layout/PageLayout";
 import { BlogPost } from "~/components/blog/BlogPost";
@@ -29,7 +26,7 @@ export default async function BlogPostPage({ params }: Props) {
         <Link href="/blog">
           <Button
             variant="ghost"
-            className="mb-4 text-white/60 hover:bg-yellow hover:text-darkpurple"
+            className="hover:bg-yellow hover:text-darkpurple mb-4 text-white/60"
           >
             <ArrowLeftIcon className="mr-2 h-4 w-4" />
             Back to Blog

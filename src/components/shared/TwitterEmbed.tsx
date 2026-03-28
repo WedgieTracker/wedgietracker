@@ -21,7 +21,7 @@ export function TwitterEmbed({ tweetId }: TwitterEmbedProps) {
   return (
     <div className="w-full">
       <blockquote className="twitter-tweet">
-        <a href={`https://twitter.com/x/status/${tweetId}`}></a>
+        <a href={`https://twitter.com/x/status/${tweetId}`}>Tweet</a>
       </blockquote>
     </div>
   );

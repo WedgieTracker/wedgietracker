@@ -176,7 +176,7 @@ export async function POST(request: Request) {
     await db.update(global).set(globalUpdate).where(eq(global.id, 1));
   }
 
-  revalidateTag(CACHE_TAGS.WEDGIE_DATA);
+  revalidateTag(CACHE_TAGS.WEDGIE_DATA, "max");
 
   return NextResponse.json({ message: "Data updated successfully" });
 }

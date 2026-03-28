@@ -49,7 +49,7 @@ export function WedgieModal({
     if (type === "youtubeNoDunks") {
       // Use RegExp.exec() instead of match
       const videoIdMatch =
-        /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/.exec(
+        /(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?/\s]{11})/.exec(
           url,
         );
       const videoId = videoIdMatch?.[1];
@@ -86,19 +86,19 @@ export function WedgieModal({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-[90vw] gap-0 overflow-hidden overflow-y-auto rounded-xl border-none bg-transparent p-0 sm:max-w-lg lg:max-w-7xl lg:p-2">
-        <DialogClose className="focus:ring-none absolute right-1 top-2 z-10 rounded-full border border-yellow bg-yellow text-darkpurple shadow-lg transition-all duration-300 hover:bg-darkpurple hover:text-yellow hover:opacity-100 focus:outline-none focus:ring-offset-0 disabled:pointer-events-none sm:-top-0 lg:right-4 lg:top-1">
+        <DialogClose className="focus:ring-none border-yellow bg-yellow text-darkpurple hover:bg-darkpurple hover:text-yellow absolute top-2 right-1 z-10 rounded-full border shadow-lg transition-all duration-300 hover:opacity-100 focus:ring-offset-0 focus:outline-hidden disabled:pointer-events-none sm:top-0 lg:top-1 lg:right-4">
           <Cross2Icon className="h-6 w-6 p-1 sm:h-8 sm:w-8" />
         </DialogClose>
 
         {wedgie.videoUrl ? (
           <>
-            <div className="relative flex justify-start gap-2 p-2 pb-0 pt-4">
+            <div className="relative flex justify-start gap-2 p-2 pt-4 pb-0">
               {(wedgie.videoUrl.youtube ?? wedgie.videoUrl.cloudinary) && (
                 <button
                   className={`rounded-xl rounded-b-none px-2 py-1 text-xs font-black ${
                     activeVideo === "youtube" || activeVideo === "cloudinary"
                       ? "bg-yellow text-darkpurple"
-                      : "bg-darkpurple-lighter text-white hover:bg-yellow/20"
+                      : "bg-darkpurple-lighter hover:bg-yellow/20 text-white"
                   }`}
                   onClick={() =>
                     setActiveVideo(
@@ -114,7 +114,7 @@ export function WedgieModal({
                   className={`rounded-xl rounded-b-none px-2 py-1 text-xs font-black ${
                     activeVideo === "youtubeNoDunks"
                       ? "bg-yellow text-darkpurple"
-                      : "bg-darkpurple-lighter text-white hover:bg-yellow/20"
+                      : "bg-darkpurple-lighter hover:bg-yellow/20 text-white"
                   }`}
                   onClick={() => setActiveVideo("youtubeNoDunks")}
                 >
@@ -144,12 +144,12 @@ export function WedgieModal({
           {wedgie.teamAgainstName}
         </DialogTitle>
 
-        <div className="flex flex-col overflow-hidden rounded-xl border-darkpurple-lighter bg-darkpurple lg:flex-row">
+        <div className="border-darkpurple-lighter bg-darkpurple flex flex-col overflow-hidden rounded-xl lg:flex-row">
           {/* Video Section - Takes full width on mobile, left half on desktop */}
           <div
             className={`w-full lg:w-[65%] ${
               activeVideo === "instagram"
-                ? "aspect-video max-h-[80vh] bg-darkpurple-darker" // Vertical video ratio with max height
+                ? "bg-darkpurple-darker aspect-video max-h-[80vh]" // Vertical video ratio with max height
                 : "aspect-video" // Standard 16:9 ratio for other videos
             }`}
           >
@@ -163,6 +163,7 @@ export function WedgieModal({
               {wedgie.videoUrl && (
                 <>
                   <iframe
+                    title="Video player"
                     width="100%"
                     height="100%"
                     src={
@@ -202,14 +203,14 @@ export function WedgieModal({
             {/* Top Info */}
             <div className="space-y-2 sm:space-y-6">
               <div className="sm:text-wedgie-number flex flex-row items-center justify-start gap-4 text-xl leading-none">
-                <h2 className="mb-2 flex h-[70px] w-[70px] flex-row items-center justify-center rounded-xl bg-pink px-4 py-2 text-[1.6em] font-black text-yellow">
-                  <span className="mt-[.75em] text-[.5em] text-darkpurple">
+                <h2 className="bg-pink text-yellow mb-2 flex h-[70px] w-[70px] flex-row items-center justify-center rounded-xl px-4 py-2 text-[1.6em] font-black">
+                  <span className="text-darkpurple mt-[.75em] text-[.5em]">
                     #
                   </span>
                   {wedgie.number ?? "1"}
                 </h2>
                 <div>
-                  <p className="text-[.9em] font-bold tracking-wider text-yellow">
+                  <p className="text-yellow text-[.9em] font-bold tracking-wider">
                     {new Date(wedgie.wedgieDate).toLocaleDateString("de-DE", {
                       day: "2-digit",
                       month: "2-digit",
@@ -228,7 +229,7 @@ export function WedgieModal({
 
                   {/* season  */}
                   {wedgie.seasonName && wedgie.seasonName !== "GEMS" && (
-                    <p className="mt-[.5em] text-[.5em] uppercase tracking-wider text-white">
+                    <p className="mt-[.5em] text-[.5em] tracking-wider text-white uppercase">
                       {wedgie.seasonName
                         ? `${wedgie.seasonName} Season`
                         : "Season"}
@@ -241,14 +242,14 @@ export function WedgieModal({
                 className="sm:text-wedgie-number grid items-baseline gap-2 text-sm sm:gap-4"
                 style={{ gridTemplateColumns: "70px 1fr" }}
               >
-                <p className="text-right text-[.75em] font-bold uppercase tracking-wider text-white/60">
+                <p className="text-right text-[.75em] font-bold tracking-wider text-white/60 uppercase">
                   Player
                 </p>
-                <p className="text-[1.25em] font-bold text-yellow">
+                <p className="text-yellow text-[1.25em] font-bold">
                   {wedgie.playerName}
                 </p>
 
-                <p className="text-right text-[.75em] font-bold uppercase tracking-wider text-white/60">
+                <p className="text-right text-[.75em] font-bold tracking-wider text-white/60 uppercase">
                   Teams
                 </p>
                 <p className="text-[1.25em] font-bold text-white">
@@ -258,7 +259,7 @@ export function WedgieModal({
                     : ""}
                 </p>
 
-                <p className="text-right text-[.75em] font-bold uppercase tracking-wider text-white/60">
+                <p className="text-right text-[.75em] font-bold tracking-wider text-white/60 uppercase">
                   Type
                 </p>
                 <p className="text-[1em] text-white">
@@ -268,7 +269,7 @@ export function WedgieModal({
             </div>
 
             {/* Court Position Diagram - Optional */}
-            <div className="absolute bottom-16 right-1.5 w-full max-w-[80px] sm:relative sm:bottom-[auto] sm:right-[auto] sm:max-w-[150px]">
+            <div className="absolute right-1.5 bottom-16 w-full max-w-[80px] sm:relative sm:right-auto sm:bottom-auto sm:max-w-[150px]">
               <div
                 style={{
                   position: "relative",
@@ -293,13 +294,13 @@ export function WedgieModal({
                 }}
               ></div>
               <div
-                className="absolute h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-yellow shadow-lg"
+                className="bg-yellow absolute h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full shadow-lg"
                 style={{
                   left: `${(wedgie.position as { x: number; y: number }).x}%`,
                   top: `${(wedgie.position as { x: number; y: number }).y}%`,
                 }}
               >
-                <div className="absolute left-1/2 top-1/2 h-[calc(100%-0.2rem)] w-[calc(100%-0.2rem)] -translate-x-1/2 -translate-y-1/2 rounded-full border border-darkpurple bg-yellow"></div>
+                <div className="border-darkpurple bg-yellow absolute top-1/2 left-1/2 h-[calc(100%-0.2rem)] w-[calc(100%-0.2rem)] -translate-x-1/2 -translate-y-1/2 rounded-full border"></div>
               </div>
             </div>
           </div>
@@ -309,7 +310,7 @@ export function WedgieModal({
           <div className="flex flex-row gap-1 sm:gap-2">
             <button
               onClick={handleCopyLink}
-              className="flex items-center gap-1 rounded-md bg-yellow px-2 py-1 text-xs font-bold uppercase text-darkpurple transition-all duration-300 hover:bg-yellow/80 sm:px-3 sm:py-2"
+              className="bg-yellow text-darkpurple hover:bg-yellow/80 flex items-center gap-1 rounded-md px-2 py-1 text-xs font-bold uppercase transition-all duration-300 sm:px-3 sm:py-2"
             >
               <svg
                 className="h-4 w-4"
@@ -339,7 +340,7 @@ export function WedgieModal({
           <div className="flex flex-row gap-1 sm:gap-3">
             <button
               {...(hasPrevious ? { onClick: onPrevious } : {})}
-              className={`rounded-full border border-yellow bg-darkpurple p-1 text-yellow transition-all hover:bg-yellow hover:text-darkpurple sm:p-2 ${
+              className={`border-yellow bg-darkpurple text-yellow hover:bg-yellow hover:text-darkpurple rounded-full border p-1 transition-all sm:p-2 ${
                 !hasPrevious
                   ? "pointer-events-none cursor-not-allowed opacity-50"
                   : ""
@@ -362,7 +363,7 @@ export function WedgieModal({
 
             <button
               {...(hasNext ? { onClick: onNext } : {})}
-              className={`rounded-full border border-yellow bg-darkpurple p-1 text-yellow transition-all hover:bg-yellow hover:text-darkpurple sm:p-2 ${
+              className={`border-yellow bg-darkpurple text-yellow hover:bg-yellow hover:text-darkpurple rounded-full border p-1 transition-all sm:p-2 ${
                 !hasNext
                   ? "pointer-events-none cursor-not-allowed opacity-50"
                   : ""

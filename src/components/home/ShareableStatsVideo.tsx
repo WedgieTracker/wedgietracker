@@ -684,7 +684,7 @@ export function ShareableStatsVideo({ stats }: ShareableStatsVideoProps) {
         <TooltipProvider>
           <Tooltip delayDuration={0}>
             <TooltipTrigger asChild>
-              <div className="absolute bottom-4 right-4 z-10 hidden h-10 w-10 rounded-full border-2 border-pink bg-pink p-2 text-center font-bold text-darkpurple opacity-30 transition-all duration-300 hover:bg-darkpurple hover:text-pink hover:opacity-100 md:block">
+              <div className="border-pink bg-pink text-darkpurple hover:bg-darkpurple hover:text-pink absolute right-4 bottom-4 z-10 hidden h-10 w-10 rounded-full border-2 p-2 text-center font-bold opacity-30 transition-all duration-300 hover:opacity-100 md:block">
                 <MonitorDown className="h-5 w-5" />
                 <span className="sr-only">Share Stats Video</span>
               </div>
@@ -705,15 +705,15 @@ export function ShareableStatsVideo({ stats }: ShareableStatsVideoProps) {
               <button
                 onClick={generateVideo}
                 disabled={isGenerating}
-                className="group flex w-full flex-row items-center justify-center gap-2 rounded-full border-2 border-yellow bg-yellow px-8 py-2 text-center text-xl font-bold uppercase text-darkpurple transition-all duration-300 hover:bg-darkpurple hover:text-yellow disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
+                className="group border-yellow bg-yellow text-darkpurple hover:bg-darkpurple hover:text-yellow flex w-full flex-row items-center justify-center gap-2 rounded-full border-2 px-8 py-2 text-center text-xl font-bold uppercase transition-all duration-300 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isGenerating ? "Generating Video..." : "Generate Video"}
-                <span className="rounded-full border-2 border-darkpurple bg-darkpurple px-2 py-0.5 text-xs text-yellow transition-all duration-300 group-hover:bg-yellow group-hover:text-darkpurple">
+                <span className="border-darkpurple bg-darkpurple text-yellow group-hover:bg-yellow group-hover:text-darkpurple rounded-full border-2 px-2 py-0.5 text-xs transition-all duration-300">
                   Beta
                 </span>
               </button>
               {!isGenerating && (
-                <div className="flex w-full items-center justify-center gap-4 rounded-full border-2 border-pink p-2">
+                <div className="border-pink flex w-full items-center justify-center gap-4 rounded-full border-2 p-2">
                   <button
                     onClick={() => setVideoType("desktop")}
                     className={`flex-1 rounded-full px-4 py-2 text-sm font-bold transition-all ${
@@ -754,13 +754,13 @@ export function ShareableStatsVideo({ stats }: ShareableStatsVideoProps) {
           {isGenerating && (
             <div className="w-full space-y-2">
               <div className="flex items-center justify-center gap-2">
-                <div className="-mb-2 -mr-8 w-full max-w-24">
+                <div className="-mr-8 -mb-2 w-full max-w-24">
                   <Loader />
                 </div>
               </div>
-              <div className="relative h-2 w-full overflow-hidden rounded-full bg-darkpurple-lighter">
+              <div className="bg-darkpurple-lighter relative h-2 w-full overflow-hidden rounded-full">
                 <div
-                  className="absolute left-0 top-0 h-full bg-pink"
+                  className="bg-pink absolute top-0 left-0 h-full"
                   style={{ width: `${progress * 100}%` }}
                 />
               </div>
@@ -778,20 +778,22 @@ export function ShareableStatsVideo({ stats }: ShareableStatsVideoProps) {
                 className={`w-full rounded-lg ${
                   videoType === "desktop" ? "aspect-video" : "max-h-[400px]"
                 }`}
-              />
+              >
+                <track kind="captions" />
+              </video>
               <div className="flex w-full flex-row gap-4">
                 <button
                   onClick={() => {
                     setVideoBlob(null);
                     setIsGenerating(false);
                   }}
-                  className="flex-1 rounded-full border-2 border-pink bg-transparent px-8 py-2 text-center font-bold uppercase tracking-wide text-pink transition-all duration-300 hover:bg-pink hover:text-darkpurple"
+                  className="border-pink text-pink hover:bg-pink hover:text-darkpurple flex-1 rounded-full border-2 bg-transparent px-8 py-2 text-center font-bold tracking-wide uppercase transition-all duration-300"
                 >
                   Generate New
                 </button>
                 <button
                   onClick={handleDownload}
-                  className="flex-1 rounded-full border-2 border-yellow bg-yellow px-8 py-2 text-center font-black uppercase tracking-wide text-darkpurple transition-all duration-300 hover:bg-darkpurple hover:text-yellow"
+                  className="border-yellow bg-yellow text-darkpurple hover:bg-darkpurple hover:text-yellow flex-1 rounded-full border-2 px-8 py-2 text-center font-black tracking-wide uppercase transition-all duration-300"
                 >
                   Download
                 </button>

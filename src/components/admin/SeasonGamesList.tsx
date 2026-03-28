@@ -34,7 +34,7 @@ export function SeasonGamesList() {
         {seasonsWithGames.map((season) => (
           <div
             key={season.id}
-            className="rounded-lg bg-white/10 p-6 text-white shadow-sm"
+            className="rounded-lg bg-white/10 p-6 text-white shadow-xs"
           >
             <h3 className="text-lg font-semibold">{season.name}</h3>
             <div className="mt-4 space-y-2">

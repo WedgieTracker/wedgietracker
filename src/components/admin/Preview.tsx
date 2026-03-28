@@ -156,7 +156,7 @@ export function Preview({
   }, [number, season, player, type]);
 
   return (
-    <div className={`relative aspect-[9/16] w-full ${className}`}>
+    <div className={`relative aspect-9/16 w-full ${className}`}>
       <canvas
         ref={canvasRef}
         width={1080}

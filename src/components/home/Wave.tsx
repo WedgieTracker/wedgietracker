@@ -47,10 +47,10 @@ export function Wave({
   return (
     <div
       ref={enableConfetti ? containerRef : undefined}
-      className="absolute bottom-[0px] left-0 z-0 w-full bg-pink transition-all duration-1000"
+      className="bg-pink absolute bottom-0 left-0 z-0 w-full transition-all duration-1000"
       style={{ height: `${currentHeight}%` }}
     >
-      <div className="absolute bottom-[100%] left-0 z-0 h-[50px] w-full overflow-hidden transition-all duration-1000">
+      <div className="absolute bottom-full left-0 z-0 h-[50px] w-full overflow-hidden transition-all duration-1000">
         <div className="wave-container absolute bottom-0 left-0 w-full">
           <svg
             className="waves"

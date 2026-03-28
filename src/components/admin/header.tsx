@@ -4,11 +4,11 @@ import { SignOut } from "~/components/admin/auth";
 
 export function AdminHeader() {
   return (
-    <div className="flex items-center justify-between border-b-2 border-yellow bg-darkpurple px-4 py-4 shadow-sm md:px-8">
+    <div className="border-yellow bg-darkpurple flex items-center justify-between border-b-2 px-4 py-4 shadow-xs md:px-8">
       <div className="flex items-center gap-4">
         <SidebarTrigger
           variant={"secondary"}
-          className="bg-yellow text-black hover:bg-yellow/80"
+          className="bg-yellow hover:bg-yellow/80 text-black"
         />
         <LogoComponent />
       </div>
