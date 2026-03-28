@@ -134,7 +134,7 @@ export const storeRouter = createTRPCRouter({
         cancel_url: `${process.env.NEXTAUTH_URL}/store`,
       });
 
-      return session.id;
+      return session.url;
     }),
 
   getAvailableQuantity: publicProcedure.query(() =>

@@ -46,7 +46,6 @@ export const env = createEnv({
    */
   client: {
     // NEXT_PUBLIC_CLIENTVAR: z.string(),
-    NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string(),
     NEXT_PUBLIC_GA_ID: z.string(),
   },
 
@@ -73,8 +72,6 @@ export const env = createEnv({
     MAILCHIMP_SERVER_PREFIX: process.env.MAILCHIMP_SERVER_PREFIX,
     MAILCHIMP_LIST_ID: process.env.MAILCHIMP_LIST_ID,
     STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
-    NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:
-      process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
     WEDGIETRACKER_API_KEY: process.env.WEDGIETRACKER_API_KEY,
     PRINTFUL_API_KEY: process.env.PRINTFUL_API_KEY,
     PRINTFUL_STORE_ID: process.env.PRINTFUL_STORE_ID,

@@ -1,21 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { loadStripe } from "@stripe/stripe-js";
 import { api } from "~/trpc/react";
-
-const stripePromise = loadStripe(
-  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
-);
 
 export function BuyMeACoffee() {
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(false);
 
   const checkoutMutation = api.donations.createCheckoutSession.useMutation({
-    onSuccess: async (sessionId) => {
-      const stripe = await stripePromise;
-      await stripe?.redirectToCheckout({ sessionId });
+    onSuccess: (url) => {
+      if (url) window.location.href = url;
     },
     onError: (error) => {
       console.error("Checkout error:", error);
