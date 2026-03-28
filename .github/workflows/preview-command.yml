@@ -18,7 +18,7 @@ jobs:
     steps:
       - name: Get PR branch
         id: pr
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const pr = await github.rest.pulls.get({
@@ -30,7 +30,7 @@ jobs:
             core.setOutput('number', context.issue.number);
 
       - name: Checkout PR branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ steps.pr.outputs.ref }}
           fetch-depth: 0
@@ -63,7 +63,7 @@ jobs:
           git push private preview-pr-${{ steps.pr.outputs.number }} --force
 
       - name: Comment on PR
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             await github.rest.issues.createComment({
