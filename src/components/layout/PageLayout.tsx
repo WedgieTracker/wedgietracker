@@ -15,7 +15,7 @@ export function PageLayout({
       <div className="bg-darkpurple flex min-h-screen flex-col">
         <Header />
         {showCircleMenu && <CircleMenu />}
-        {children}
+        <div className="flex flex-1 flex-col">{children}</div>
         <Footer />
       </div>
     </MenuProvider>
