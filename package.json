@@ -92,7 +92,7 @@
     "@testing-library/user-event": "^14.6.1",
     "@types/archiver": "^6.0.4",
     "@types/mailchimp__mailchimp_marketing": "^3.0.22",
-    "@types/node": "^22.19.15",
+    "@types/node": "^25.5.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "canvas": "^3.2.0",
