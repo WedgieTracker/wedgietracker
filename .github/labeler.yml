@@ -1,0 +1,52 @@
+ci:
+  - changed-files:
+      - any-glob-to-any-file: ".github/**"
+
+docs:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "*.md"
+          - "content/**"
+
+dependencies:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "package.json"
+          - "pnpm-lock.yaml"
+
+tests:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "src/**/*.test.{ts,tsx}"
+          - "vitest.config.ts"
+          - "src/test/**"
+
+admin:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "src/app/admin/**"
+          - "src/components/admin/**"
+
+api:
+  - changed-files:
+      - any-glob-to-any-file: "src/app/api/**"
+
+components:
+  - changed-files:
+      - any-glob-to-any-file: "src/components/**"
+
+server:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "src/server/**"
+          - "src/lib/**"
+
+config:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "src/config/**"
+          - "src/env.js"
+          - "tsconfig.json"
+          - "tailwind.config.ts"
+          - "next.config.js"
+          - "drizzle.config.ts"
