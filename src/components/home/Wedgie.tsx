@@ -58,7 +58,7 @@ export function Wedgie({
         key={wedgie.id}
         className={`group bg-darkpurple-light/30 hover:bg-darkpurple-light/80 mb-2 flex w-full cursor-pointer items-center justify-between overflow-hidden text-left transition-all duration-300 ${
           variant === "small"
-            ? "!last:pb-0 mb-0! rounded-xl border-0! pb-0!"
+            ? "mb-0! rounded-xl border-0! pb-0! last:pb-0!"
             : "border-b-0 pb-0 first:rounded-t-xl last:mb-0 last:rounded-b-xl"
         }`}
         onClick={() => {
@@ -80,7 +80,7 @@ export function Wedgie({
             className={`border-darkpurple bg-pink group-hover:border-yellow group-hover:bg-darkpurple/80 flex flex-col items-center overflow-hidden border transition-all duration-300 ${
               variant === "small"
                 ? "rounded-xl lg:min-h-20 lg:min-w-20"
-                : "min-w-[74px] rounded-sm group-first:rounded-tl-xl group-last:rounded-bl-xl lg:min-h-24 lg:min-w-24"
+                : "min-w-[74px] rounded-xs group-first:rounded-tl-xl group-last:rounded-bl-xl lg:min-h-24 lg:min-w-24"
             }`}
           >
             <div className="mt-1">
