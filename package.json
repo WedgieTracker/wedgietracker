@@ -75,7 +75,7 @@
     "rehype-external-links": "^3.0.0",
     "rehype-raw": "^7.0.0",
     "remark-gfm": "^4.0.1",
-    "resend": "^4.8.0",
+    "resend": "^6.9.4",
     "server-only": "^0.0.1",
     "stripe": "^17.7.0",
     "superjson": "^2.2.6",
