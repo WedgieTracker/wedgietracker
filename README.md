@@ -107,10 +107,10 @@ pnpm dev
 | `pnpm test`          | Run tests once                        |
 | `pnpm test:watch`    | Run tests in watch mode               |
 | `pnpm test:coverage` | Run tests with coverage               |
-| `pnpm check`         | Run lint + typecheck + tests           |
-| `pnpm db:push`       | Push schema changes to database        |
-| `pnpm db:generate`   | Generate database migrations           |
-| `pnpm db:studio`     | Open Drizzle Studio                    |
+| `pnpm check`         | Run lint + typecheck + tests          |
+| `pnpm db:push`       | Push schema changes to database       |
+| `pnpm db:generate`   | Generate database migrations          |
+| `pnpm db:studio`     | Open Drizzle Studio                   |
 
 ## Development Workflow
 
@@ -137,10 +137,10 @@ Test files use the `*.test.ts` / `*.test.tsx` convention and live alongside the 
 
 **PR Checks** (opt-in): Add the `run-ci` label to a PR to trigger the CI workflow, which runs type checking, linting, format checking, and tests. You can also use these PR comment commands:
 
-| Command      | Description                                          |
-| ------------ | ---------------------------------------------------- |
-| `/ci`        | Add the `run-ci` label to trigger the CI workflow    |
-| `/preview`   | Push the PR branch to the deploy repo for a preview  |
+| Command    | Description                                         |
+| ---------- | --------------------------------------------------- |
+| `/ci`      | Add the `run-ci` label to trigger the CI workflow   |
+| `/preview` | Push the PR branch to the deploy repo for a preview |
 
 Both commands are restricted to repo owners, members, and collaborators.
 
