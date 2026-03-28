@@ -3,6 +3,16 @@ name: CI
 on:
   pull_request:
     branches: [main]
+    paths-ignore:
+      - "*.md"
+      - "LICENSE"
+      - "CODE_OF_CONDUCT.md"
+      - "CONTRIBUTING.md"
+      - ".github/sync-exclude.txt"
+      - "content/**"
+      - "database-backups/**"
+      - "public/**"
+      - "sh/**"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
