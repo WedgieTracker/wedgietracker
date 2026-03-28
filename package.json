@@ -87,7 +87,7 @@
     "@atproto/api": "^0.13.35",
     "@tailwindcss/typography": "^0.5.19",
     "@testing-library/jest-dom": "^6.9.1",
-    "@testing-library/react": "^16.3.2",
+    "@testing-library/react": "^15.0.7",
     "@testing-library/user-event": "^14.6.1",
     "@types/archiver": "^6.0.4",
     "@types/eslint": "^8.56.12",
