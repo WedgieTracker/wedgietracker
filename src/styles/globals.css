@@ -74,7 +74,8 @@
     --sidebar-accent: 240 3.7% 15.9%;
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%}
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
 }
 @layer base {
   * {
@@ -93,7 +94,6 @@
   color: #000;
 }
 
-
 .waves {
   position: relative;
   width: 100%;
@@ -104,7 +104,7 @@
 }
 
 .parallax > use {
-  animation: move-forever 25s cubic-bezier(.55,.5,.45,.5) infinite;
+  animation: move-forever 25s cubic-bezier(0.55, 0.5, 0.45, 0.5) infinite;
 }
 .parallax > use:nth-child(1) {
   animation-delay: -2s;
@@ -125,10 +125,10 @@
 
 @keyframes move-forever {
   0% {
-    transform: translate3d(-90px,0,0);
+    transform: translate3d(-90px, 0, 0);
   }
-  100% { 
-    transform: translate3d(85px,0,0);
+  100% {
+    transform: translate3d(85px, 0, 0);
   }
 }
 
@@ -160,7 +160,7 @@
   left: 0;
   top: 0;
   position: absolute;
-  transition: all .2s ease-in-out;
+  transition: all 0.2s ease-in-out;
   z-index: 2;
   filter: brightness(1);
   background-color: rgba(0, 0, 0, 0);
@@ -191,32 +191,32 @@
 
 @keyframes wedgieAnimation {
   0% {
-      transform: scale(1.5) translate(200%, 50%);
-      opacity: 0
+    transform: scale(1.5) translate(200%, 50%);
+    opacity: 0;
   }
 
   2% {
-      transform: scale(1.5) translate(200%, 50%);
-      opacity: 1
+    transform: scale(1.5) translate(200%, 50%);
+    opacity: 1;
   }
 
-  20%,80% {
-      transform: scale(1) translate(0%, 0%);
-      opacity: 1
+  20%,
+  80% {
+    transform: scale(1) translate(0%, 0%);
+    opacity: 1;
   }
 
   93% {
-      transform: scale(1) translate(0, 300%);
-      opacity: 1
+    transform: scale(1) translate(0, 300%);
+    opacity: 1;
   }
 
   95% {
-      opacity: 0
+    opacity: 0;
   }
 
   100% {
-      opacity: 0;
-      transform: scale(1.5) translate(200%, 50%)
+    opacity: 0;
+    transform: scale(1.5) translate(200%, 50%);
   }
 }
-

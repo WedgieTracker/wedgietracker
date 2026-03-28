@@ -46,6 +46,9 @@ yarn-error.log*
 .idea
 /certificates
 
+# claude code
+.claude/
+
 # Ignore Google credentials
 /credentials
 
