@@ -29,6 +29,9 @@
     "lint:fix": "next lint --fix",
     "preview": "next build && next start",
     "start": "next start",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit",
     "prepare": "husky"
   },
@@ -83,6 +86,9 @@
   "devDependencies": {
     "@atproto/api": "^0.13.35",
     "@tailwindcss/typography": "^0.5.19",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
     "@types/archiver": "^6.0.4",
     "@types/eslint": "^8.56.12",
     "@types/mailchimp__mailchimp_marketing": "^3.0.22",
@@ -97,13 +103,15 @@
     "eslint": "^8.57.1",
     "eslint-config-next": "^15.5.9",
     "husky": "^9.1.7",
+    "jsdom": "^29.0.1",
     "lint-staged": "^16.4.0",
     "oauth-1.0a": "^2.2.6",
     "postcss": "^8.5.6",
     "prettier": "^3.7.4",
     "prettier-plugin-tailwindcss": "^0.6.14",
     "tailwindcss": "^3.4.19",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.2"
   },
   "packageManager": "pnpm@9.1.1"
 }
