@@ -15,11 +15,23 @@ export const wedgie = sqliteTable(
   "wedgie",
   {
     id: integer("id").primaryKey({ autoIncrement: true }),
-    videoUrl: text("video_url", { mode: "json" }).$type<Record<string, string | undefined>>().default({}),
-    position: text("position", { mode: "json" }).$type<{ x: number; y: number }>().notNull().default({ x: 0, y: 0 }),
-    wedgieDate: text("wedgie_date").default(sql`(CURRENT_TIMESTAMP)`).notNull(),
-    createdAt: text("created_at").default(sql`(CURRENT_TIMESTAMP)`).notNull(),
-    updatedAt: text("updated_at").default(sql`(CURRENT_TIMESTAMP)`).notNull().$onUpdate(() => new Date().toISOString()),
+    videoUrl: text("video_url", { mode: "json" })
+      .$type<Record<string, string | undefined>>()
+      .default({}),
+    position: text("position", { mode: "json" })
+      .$type<{ x: number; y: number }>()
+      .notNull()
+      .default({ x: 0, y: 0 }),
+    wedgieDate: text("wedgie_date")
+      .default(sql`(CURRENT_TIMESTAMP)`)
+      .notNull(),
+    createdAt: text("created_at")
+      .default(sql`(CURRENT_TIMESTAMP)`)
+      .notNull(),
+    updatedAt: text("updated_at")
+      .default(sql`(CURRENT_TIMESTAMP)`)
+      .notNull()
+      .$onUpdate(() => new Date().toISOString()),
     number: integer("number").default(1).notNull(),
     teamName: text("team_name").notNull(),
     teamAgainstName: text("team_against_name").notNull(),
@@ -41,8 +53,13 @@ export const player = sqliteTable(
   {
     id: integer("id").primaryKey({ autoIncrement: true }),
     name: text("name").unique().notNull(),
-    createdAt: text("created_at").default(sql`(CURRENT_TIMESTAMP)`).notNull(),
-    updatedAt: text("updated_at").default(sql`(CURRENT_TIMESTAMP)`).notNull().$onUpdate(() => new Date().toISOString()),
+    createdAt: text("created_at")
+      .default(sql`(CURRENT_TIMESTAMP)`)
+      .notNull(),
+    updatedAt: text("updated_at")
+      .default(sql`(CURRENT_TIMESTAMP)`)
+      .notNull()
+      .$onUpdate(() => new Date().toISOString()),
   },
   (table) => [index("player_name_idx").on(table.name)],
 );
@@ -52,8 +69,13 @@ export const season = sqliteTable(
   {
     id: integer("id").primaryKey({ autoIncrement: true }),
     name: text("name").unique().notNull(),
-    createdAt: text("created_at").default(sql`(CURRENT_TIMESTAMP)`).notNull(),
-    updatedAt: text("updated_at").default(sql`(CURRENT_TIMESTAMP)`).notNull().$onUpdate(() => new Date().toISOString()),
+    createdAt: text("created_at")
+      .default(sql`(CURRENT_TIMESTAMP)`)
+      .notNull(),
+    updatedAt: text("updated_at")
+      .default(sql`(CURRENT_TIMESTAMP)`)
+      .notNull()
+      .$onUpdate(() => new Date().toISOString()),
     totalGames: integer("total_games").default(0).notNull(),
   },
   (table) => [index("season_name_idx").on(table.name)],
@@ -64,8 +86,13 @@ export const game = sqliteTable(
   {
     id: integer("id").primaryKey({ autoIncrement: true }),
     name: text("name").unique().notNull(),
-    createdAt: text("created_at").default(sql`(CURRENT_TIMESTAMP)`).notNull(),
-    updatedAt: text("updated_at").default(sql`(CURRENT_TIMESTAMP)`).notNull().$onUpdate(() => new Date().toISOString()),
+    createdAt: text("created_at")
+      .default(sql`(CURRENT_TIMESTAMP)`)
+      .notNull(),
+    updatedAt: text("updated_at")
+      .default(sql`(CURRENT_TIMESTAMP)`)
+      .notNull()
+      .$onUpdate(() => new Date().toISOString()),
     seasonName: text("season_name"),
     live: integer("live", { mode: "boolean" }).default(false).notNull(),
   },
@@ -80,8 +107,13 @@ export const team = sqliteTable(
   {
     id: integer("id").primaryKey({ autoIncrement: true }),
     name: text("name").unique().notNull(),
-    createdAt: text("created_at").default(sql`(CURRENT_TIMESTAMP)`).notNull(),
-    updatedAt: text("updated_at").default(sql`(CURRENT_TIMESTAMP)`).notNull().$onUpdate(() => new Date().toISOString()),
+    createdAt: text("created_at")
+      .default(sql`(CURRENT_TIMESTAMP)`)
+      .notNull(),
+    updatedAt: text("updated_at")
+      .default(sql`(CURRENT_TIMESTAMP)`)
+      .notNull()
+      .$onUpdate(() => new Date().toISOString()),
   },
   (table) => [index("team_name_idx").on(table.name)],
 );
@@ -91,8 +123,13 @@ export const type = sqliteTable(
   {
     id: integer("id").primaryKey({ autoIncrement: true }),
     name: text("name").unique().notNull(),
-    createdAt: text("created_at").default(sql`(CURRENT_TIMESTAMP)`).notNull(),
-    updatedAt: text("updated_at").default(sql`(CURRENT_TIMESTAMP)`).notNull().$onUpdate(() => new Date().toISOString()),
+    createdAt: text("created_at")
+      .default(sql`(CURRENT_TIMESTAMP)`)
+      .notNull(),
+    updatedAt: text("updated_at")
+      .default(sql`(CURRENT_TIMESTAMP)`)
+      .notNull()
+      .$onUpdate(() => new Date().toISOString()),
   },
   (table) => [index("type_name_idx").on(table.name)],
 );
@@ -108,7 +145,9 @@ export const global = sqliteTable("global", {
   pace: integer("pace").default(0).notNull(),
   simplePace: integer("simple_pace").notNull(),
   mathPace: integer("math_pace").notNull(),
-  liveGames: integer("live_games", { mode: "boolean" }).default(false).notNull(),
+  liveGames: integer("live_games", { mode: "boolean" })
+    .default(false)
+    .notNull(),
 });
 
 // ─── Many-to-Many Join Table ─────────────────────────────────────────────────
@@ -199,10 +238,17 @@ export const tshirtOrder = sqliteTable("tshirt_order", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   size: text("size").notNull(),
   color: text("color").notNull(),
-  createdAt: text("created_at").default(sql`(CURRENT_TIMESTAMP)`).notNull(),
-  updatedAt: text("updated_at").default(sql`(CURRENT_TIMESTAMP)`).notNull().$onUpdate(() => new Date().toISOString()),
+  createdAt: text("created_at")
+    .default(sql`(CURRENT_TIMESTAMP)`)
+    .notNull(),
+  updatedAt: text("updated_at")
+    .default(sql`(CURRENT_TIMESTAMP)`)
+    .notNull()
+    .$onUpdate(() => new Date().toISOString()),
   customerEmail: text("customer_email").notNull(),
-  shippingAddress: text("shipping_address", { mode: "json" }).$type<Record<string, string>>().notNull(),
+  shippingAddress: text("shipping_address", { mode: "json" })
+    .$type<Record<string, string>>()
+    .notNull(),
   shippingName: text("shipping_name").notNull(),
   stripeSessionId: text("stripe_session_id").unique().notNull(),
   printfulOrderId: text("printful_order_id"),

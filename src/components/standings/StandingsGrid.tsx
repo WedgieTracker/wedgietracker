@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Card } from "~/components/ui/card";
-import { Loader } from "~/components/loader";
+import { Loader } from "~/components/shared/Loader";
 interface StandingsGridProps {
   players: Array<{
     name: string;

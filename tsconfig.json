@@ -40,4 +40,3 @@
   ],
   "exclude": ["node_modules", "src/server/dev", "src/components/dev", "scripts"]
 }
-

@@ -15,6 +15,7 @@ A modern web application for tracking basketball wedgies.
 - [Turso](https://turso.tech) - SQLite database
 - [Tailwind CSS](https://tailwindcss.com) - Styling
 - [tRPC](https://trpc.io) - Type-safe API
+- [Vitest](https://vitest.dev) - Testing
 - [Vercel](https://vercel.com) - Deployment
 
 ## Features
@@ -28,6 +29,35 @@ A modern web application for tracking basketball wedgies.
 - Printful integration for t-shirt orders
 - Responsive design with custom animations
 - Admin dashboard for managing wedgies
+
+## Project Structure
+
+```
+src/
+├── app/                    # Next.js App Router pages
+│   ├── admin/              # Admin dashboard pages
+│   ├── api/                # API routes (stripe, social media, etc.)
+│   ├── blog/               # Blog pages
+│   ├── store/              # Store pages
+│   └── ...                 # Public pages (standings, all-wedgies, etc.)
+├── components/
+│   ├── admin/              # Admin-specific components
+│   ├── home/               # Homepage components (Stats, Wave, WedgieList)
+│   ├── layout/             # Layout components (Header, Footer, PageLayout)
+│   ├── shared/             # Shared reusable components (Loader, Cta, etc.)
+│   ├── standings/          # Standings page components
+│   └── ui/                 # shadcn/ui components
+├── config/                 # App configuration (metadata, dev routes)
+├── context/                # React context providers
+├── hooks/                  # Custom React hooks
+├── server/
+│   ├── api/                # tRPC routers and configuration
+│   ├── auth/               # Auth.js configuration
+│   ├── services/           # External service clients (Stripe, Cloudinary, etc.)
+│   └── ...                 # DB, schema, cache, helpers
+├── types/                  # Shared TypeScript types
+└── utils/                  # Pure utility functions
+```
 
 ## Local Development Setup
 
@@ -50,28 +80,6 @@ pnpm install
 cp .env.example .env
 ```
 
-Required environment variables:
-
-```env
-TURSO_DATABASE_URL="libsql://your-db-name.turso.io"
-TURSO_AUTH_TOKEN=""
-NEXTAUTH_URL="https://localhost:3000"
-GOOGLE_CLIENT_ID=""
-GOOGLE_CLIENT_SECRET=""
-CLOUDINARY_CLOUD_NAME=""
-CLOUDINARY_API_KEY=""
-CLOUDINARY_API_SECRET=""
-INSTAGRAM_CLIENT_ID=""
-INSTAGRAM_CLIENT_SECRET=""
-INSTAGRAM_BUSINESS_ACCOUNT_ID=""
-INSTAGRAM_ACCESS_TOKEN=""
-MAILCHIMP_API_KEY=""
-MAILCHIMP_SERVER_PREFIX=""
-MAILCHIMP_LIST_ID=""
-STRIPE_SECRET_KEY=""
-STRIPE_WEBHOOK_SECRET=""
-```
-
 4. Push the schema to your Turso database:
 
 ```bash
@@ -84,11 +92,61 @@ pnpm db:push
 pnpm dev
 ```
 
-## Database Management
+## Available Scripts
 
-- Push schema changes: `pnpm db:push`
-- Generate migrations: `pnpm db:generate`
-- Open Drizzle Studio: `pnpm db:studio`
+| Script               | Description                           |
+| -------------------- | ------------------------------------- |
+| `pnpm dev`           | Start dev server with Turbo and HTTPS |
+| `pnpm build`         | Production build                      |
+| `pnpm start`         | Start production server               |
+| `pnpm lint`          | Run ESLint                            |
+| `pnpm lint:fix`      | Run ESLint with auto-fix              |
+| `pnpm typecheck`     | Run TypeScript type checking          |
+| `pnpm format:check`  | Check Prettier formatting             |
+| `pnpm format:write`  | Fix Prettier formatting               |
+| `pnpm test`          | Run tests once                        |
+| `pnpm test:watch`    | Run tests in watch mode               |
+| `pnpm test:coverage` | Run tests with coverage               |
+| `pnpm check`         | Run lint + typecheck + tests          |
+| `pnpm db:push`       | Push schema changes to database       |
+| `pnpm db:generate`   | Generate database migrations          |
+| `pnpm db:studio`     | Open Drizzle Studio                   |
+
+## Development Workflow
+
+### Pre-commit Hooks
+
+This project uses [husky](https://typicode.github.io/husky/) and [lint-staged](https://github.com/lint-staged/lint-staged) to enforce code quality on every commit:
+
+- **TypeScript/TSX files**: ESLint auto-fix + Prettier formatting
+- **JS/JSON/MD/CSS files**: Prettier formatting
+
+### Testing
+
+Tests are written with [Vitest](https://vitest.dev) and [@testing-library/react](https://testing-library.com/docs/react-testing-library/intro/).
+
+```bash
+pnpm test          # Run all tests
+pnpm test:watch    # Watch mode
+pnpm test:coverage # With coverage report
+```
+
+Test files use the `*.test.ts` / `*.test.tsx` convention and live alongside the code they test.
+
+### CI/CD
+
+**PR Checks** (opt-in): Add the `run-ci` label to a PR to trigger the CI workflow, which runs type checking, linting, format checking, and tests. You can also use these PR comment commands:
+
+| Command    | Description                                         |
+| ---------- | --------------------------------------------------- |
+| `/ci`      | Add the `run-ci` label to trigger the CI workflow   |
+| `/preview` | Push the PR branch to the deploy repo for a preview |
+
+Both commands are restricted to repo owners, members, and collaborators.
+
+**Auto-labeling**: PRs are automatically labeled based on changed files (e.g. `ci`, `docs`, `tests`, `admin`, `api`, `components`, `server`, `config`, `dependencies`).
+
+**Releases**: Automatic semantic versioning on push to `main` based on commit message prefixes (`feat:` for minor, `BREAKING` for major, otherwise patch).
 
 ## Contributing
 

@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Loader } from "../loader";
+import { Loader } from "../shared/Loader";
 import {
   Dialog,
   DialogContent,
@@ -67,10 +67,19 @@ export function ShareableStatsVideo({ stats }: ShareableStatsVideoProps) {
     },
   ];
 
-  const confettiColors = ["#eaff00", "#ff03ff", "#180138", "#542299", "#efff40"];
+  const confettiColors = [
+    "#eaff00",
+    "#ff03ff",
+    "#180138",
+    "#542299",
+    "#efff40",
+  ];
   const confettiParticlesRef = useRef<ConfettiParticle[]>([]);
 
-  const createConfettiParticles = (width: number, height: number): ConfettiParticle[] => {
+  const createConfettiParticles = (
+    width: number,
+    height: number,
+  ): ConfettiParticle[] => {
     const particles: ConfettiParticle[] = [];
     for (let i = 0; i < 200; i++) {
       particles.push({
@@ -79,7 +88,8 @@ export function ShareableStatsVideo({ stats }: ShareableStatsVideoProps) {
         vx: (Math.random() - 0.5) * 4,
         vy: Math.random() * -3 - 1,
         radius: Math.random() * 5 + 3,
-        color: confettiColors[Math.floor(Math.random() * confettiColors.length)]!,
+        color:
+          confettiColors[Math.floor(Math.random() * confettiColors.length)]!,
         opacity: Math.random() * 0.6 + 0.4,
         gravity: 0.08,
         drag: 0.98,
@@ -324,7 +334,13 @@ export function ShareableStatsVideo({ stats }: ShareableStatsVideoProps) {
       // Draw semi-transparent background matching stat boxes
       ctx.fillStyle = "rgba(31, 0, 77, 0.75)";
       ctx.beginPath();
-      ctx.roundRect(logoX - 60, logoY - 60, logoWidth + 120, logoHeight + 120, 20);
+      ctx.roundRect(
+        logoX - 60,
+        logoY - 60,
+        logoWidth + 120,
+        logoHeight + 120,
+        20,
+      );
       ctx.fill();
 
       // Draw the logo image
@@ -506,7 +522,13 @@ export function ShareableStatsVideo({ stats }: ShareableStatsVideoProps) {
       // Draw semi-transparent background matching stat boxes
       ctx.fillStyle = "rgba(31, 0, 77, 0.75)";
       ctx.beginPath();
-      ctx.roundRect(logoX - 60, logoY - 60, logoWidth + 120, logoHeight + 120, 20);
+      ctx.roundRect(
+        logoX - 60,
+        logoY - 60,
+        logoWidth + 120,
+        logoHeight + 120,
+        20,
+      );
       ctx.fill();
 
       // Draw the logo image
@@ -566,7 +588,10 @@ export function ShareableStatsVideo({ stats }: ShareableStatsVideoProps) {
       // Initialize confetti particles if at 100% fill
       const fillPercentage = Math.min((stats.totalWedgies / 50) * 100, 100);
       if (fillPercentage >= 100) {
-        confettiParticlesRef.current = createConfettiParticles(canvas.width, canvas.height);
+        confettiParticlesRef.current = createConfettiParticles(
+          canvas.width,
+          canvas.height,
+        );
       }
 
       // Load the logo image

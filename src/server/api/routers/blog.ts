@@ -78,11 +78,10 @@ const getCachedAllPosts = unstable_cache(
 );
 
 const getCachedPostBySlug = (slug: string) =>
-  unstable_cache(
-    async () => getPostBySlug(slug),
-    ["blog-getBySlug", slug],
-    { tags: [CACHE_TAGS.BLOG_DATA], revalidate: 3600 },
-  )();
+  unstable_cache(async () => getPostBySlug(slug), ["blog-getBySlug", slug], {
+    tags: [CACHE_TAGS.BLOG_DATA],
+    revalidate: 3600,
+  })();
 
 export const blogRouter = createTRPCRouter({
   getAll: publicProcedure.query(() => getCachedAllPosts()),

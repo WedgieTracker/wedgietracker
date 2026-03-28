@@ -1,15 +1,11 @@
 import { NextResponse } from "next/server";
 import { createBackground } from "~/server/dev/createBackground";
 import fs from "fs";
-import { isDev } from "~/config/dev-routes";
+import { assertDevMode } from "~/config/dev-routes";
 
 export async function POST(req: Request) {
-  if (!isDev) {
-    return NextResponse.json(
-      { error: "Not available in production" },
-      { status: 404 },
-    );
-  }
+  const blocked = assertDevMode();
+  if (blocked) return blocked;
 
   try {
     const formData = await req.formData();

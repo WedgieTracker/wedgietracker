@@ -46,13 +46,18 @@ yarn-error.log*
 .idea
 /certificates
 
+# claude code
+.claude/
+
 # Ignore Google credentials
 /credentials
 
 # database backups
 /database-backups
 *.dump
-!local_database.dump
+
+# test databases
+test.db
 
 # sh scripts
 /sh

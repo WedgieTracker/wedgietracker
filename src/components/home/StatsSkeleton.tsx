@@ -1,70 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
-
-const Wave = ({ fillPercentage }: { fillPercentage: number }) => {
-  const [currentHeight, setCurrentHeight] = useState(0);
-
-  useEffect(() => {
-    // Start at 0 and animate to the target fillPercentage
-    setCurrentHeight(0);
-    setTimeout(() => setCurrentHeight(fillPercentage), 100);
-  }, [fillPercentage]);
-
-  return (
-    <div
-      className="absolute bottom-0 left-0 z-0 w-full bg-pink transition-all duration-1000"
-      style={{ height: `${currentHeight}%` }}
-    >
-      <div className="absolute bottom-[100%] left-0 z-0 h-[50px] w-full overflow-hidden transition-all duration-1000">
-        <div className="wave-container absolute bottom-0 left-0 w-full">
-          <svg
-            className="waves"
-            xmlns="http://www.w3.org/2000/svg"
-            xmlnsXlink="http://www.w3.org/1999/xlink"
-            viewBox="0 24 150 28"
-            preserveAspectRatio="none"
-            shapeRendering="auto"
-          >
-            <defs>
-              <path
-                id="gentle-wave"
-                d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z"
-              />
-            </defs>
-            <g className="parallax">
-              <use
-                xlinkHref="#gentle-wave"
-                x="48"
-                y="0"
-                fill="rgba(255,0,255,0.7)"
-              />
-              <use
-                xlinkHref="#gentle-wave"
-                x="48"
-                y="3"
-                fill="rgba(255,0,255,0.5)"
-              />
-              <use
-                xlinkHref="#gentle-wave"
-                x="48"
-                y="5"
-                fill="rgba(255,0,255,0.3)"
-              />
-              <use
-                xlinkHref="#gentle-wave"
-                x="48"
-                y="7"
-                fill="rgb(255 0 255)"
-              />
-            </g>
-          </svg>
-        </div>
-      </div>
-    </div>
-  );
-};
+import { Wave } from "./Wave";
 
 export function StatsSkeleton() {
   return (

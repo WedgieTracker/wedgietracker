@@ -72,7 +72,9 @@ export async function postToTwitter(
       const file = Buffer.from(buffer);
       const total_bytes = file.length;
       const base64EncodedFile = file.toString("base64");
-      console.log(`Video size: ${total_bytes} bytes (${(total_bytes / 1024 / 1024).toFixed(2)} MB)`);
+      console.log(
+        `Video size: ${total_bytes} bytes (${(total_bytes / 1024 / 1024).toFixed(2)} MB)`,
+      );
 
       // INIT phase
       console.log("Starting INIT phase...");
@@ -176,7 +178,9 @@ export async function postToTwitter(
       // Check processing status
       const finalizeText = await finalizeResponse.text();
       console.log("FINALIZE response:", finalizeText);
-      const finalizeData = JSON.parse(finalizeText) as TwitterMediaStatusResponse;
+      const finalizeData = JSON.parse(
+        finalizeText,
+      ) as TwitterMediaStatusResponse;
       if (finalizeData.processing_info) {
         let processingInfo: TwitterProcessingInfo =
           finalizeData.processing_info;
@@ -206,7 +210,9 @@ export async function postToTwitter(
 
           const statusText = await statusResponse.text();
           console.log("STATUS response:", statusText);
-          const statusData = JSON.parse(statusText) as TwitterMediaStatusResponse;
+          const statusData = JSON.parse(
+            statusText,
+          ) as TwitterMediaStatusResponse;
 
           if (!statusData.processing_info) {
             console.log("Processing complete (no processing_info)");
@@ -223,12 +229,17 @@ export async function postToTwitter(
           }
         }
       } else {
-        console.log("No processing_info in FINALIZE response, media ready immediately");
+        console.log(
+          "No processing_info in FINALIZE response, media ready immediately",
+        );
       }
     }
 
     // Post the tweet with media
-    console.log("Posting tweet...", mediaId ? `with media ${mediaId}` : "without media");
+    console.log(
+      "Posting tweet...",
+      mediaId ? `with media ${mediaId}` : "without media",
+    );
     const tweetRequestData = {
       url: "https://api.twitter.com/2/tweets",
       method: "POST",
@@ -254,7 +265,11 @@ export async function postToTwitter(
     };
 
     if (!response.ok) {
-      console.error("Tweet post failed:", response.status, JSON.stringify(data));
+      console.error(
+        "Tweet post failed:",
+        response.status,
+        JSON.stringify(data),
+      );
       return {
         success: false,
         error: data.errors?.[0]?.message ?? "Failed to post tweet",

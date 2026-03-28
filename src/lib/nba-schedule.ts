@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
 import { db } from "~/server/db";
 import { global, season, game } from "~/server/schema";
-import { calculatePace } from "~/utils/paceCalculator";
+import { calculatePace } from "~/server/pace";
 import { CACHE_TAGS } from "~/server/cache";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -210,7 +210,10 @@ export async function nbaUpdate(includeExistingGames: boolean) {
     }
 
     // Update the total games of the current season if different from the past total
-    if (gamesPlayed !== currentGlobal?.currentTotalGames && currentGlobal?.currentSeasonId) {
+    if (
+      gamesPlayed !== currentGlobal?.currentTotalGames &&
+      currentGlobal?.currentSeasonId
+    ) {
       await db
         .update(season)
         .set({ totalGames: gamesPlayed })

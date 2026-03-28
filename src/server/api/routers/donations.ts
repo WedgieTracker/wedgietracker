@@ -1,10 +1,6 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "../trpc";
-import Stripe from "stripe";
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2025-02-24.acacia",
-});
+import { stripe } from "~/server/services/stripe";
 
 export const donationsRouter = createTRPCRouter({
   createCheckoutSession: publicProcedure

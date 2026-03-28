@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Loader } from "../loader";
+import { Loader } from "../shared/Loader";
 import {
   Dialog,
   DialogContent,

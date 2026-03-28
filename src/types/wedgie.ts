@@ -7,3 +7,12 @@ export type Type = InferSelectModel<typeof type>;
 export interface WedgieWithTypes extends Wedgie {
   types: Type[];
 }
+
+export interface VideoUrls {
+  youtube?: string;
+  youtubeShort?: string;
+  cloudinary?: string;
+  youtubeNoDunks?: string;
+  instagram?: string;
+  selfHosted?: string;
+}

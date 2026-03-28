@@ -2,14 +2,10 @@ import { z } from "zod";
 import { count, ne } from "drizzle-orm";
 import { unstable_cache } from "next/cache";
 import { createTRPCRouter, publicProcedure } from "../trpc";
-import Stripe from "stripe";
 import { db } from "~/server/db";
 import { wedgie, tshirtOrder } from "~/server/schema";
 import { CACHE_TAGS } from "~/server/cache";
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2025-02-24.acacia",
-});
+import { stripe } from "~/server/services/stripe";
 
 const getCachedAvailableQuantity = unstable_cache(
   async () => {
@@ -74,10 +70,48 @@ export const storeRouter = createTRPCRouter({
         mode: "payment",
         shipping_address_collection: {
           allowed_countries: [
-            "US", "CA", "GB", "AU", "NZ", "IE", "ZA", "FR", "DE", "IT", "ES",
-            "PT", "NL", "BE", "DK", "NO", "SE", "CH", "AT", "PL", "CZ", "SK",
-            "HU", "RO", "BG", "HR", "SI", "BA", "RS", "GR", "LT", "LV", "EE",
-            "FI", "IL", "TR", "PH", "CN", "JP", "KR", "AR", "BR",
+            "US",
+            "CA",
+            "GB",
+            "AU",
+            "NZ",
+            "IE",
+            "ZA",
+            "FR",
+            "DE",
+            "IT",
+            "ES",
+            "PT",
+            "NL",
+            "BE",
+            "DK",
+            "NO",
+            "SE",
+            "CH",
+            "AT",
+            "PL",
+            "CZ",
+            "SK",
+            "HU",
+            "RO",
+            "BG",
+            "HR",
+            "SI",
+            "BA",
+            "RS",
+            "GR",
+            "LT",
+            "LV",
+            "EE",
+            "FI",
+            "IL",
+            "TR",
+            "PH",
+            "CN",
+            "JP",
+            "KR",
+            "AR",
+            "BR",
           ],
         },
         shipping_options: [

@@ -3,15 +3,11 @@ import { createReel } from "~/server/dev/instagram";
 import { auth } from "~/server/auth";
 import fs from "fs";
 import { v2 as cloudinary } from "cloudinary";
-import { isDev } from "~/config/dev-routes";
+import { assertDevMode } from "~/config/dev-routes";
 
 export async function POST(req: Request) {
-  if (!isDev) {
-    return NextResponse.json(
-      { error: "Not available in production" },
-      { status: 404 },
-    );
-  }
+  const blocked = assertDevMode();
+  if (blocked) return blocked;
 
   try {
     const session = await auth();

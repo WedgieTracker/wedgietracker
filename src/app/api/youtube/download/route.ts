@@ -2,16 +2,12 @@ import { NextResponse } from "next/server";
 import path from "path";
 import fs from "fs";
 import archiver from "archiver";
-import { isDev } from "~/config/dev-routes";
+import { assertDevMode } from "~/config/dev-routes";
 const BATCH_DIR = path.join(process.cwd(), "tmp", "batch-videos");
 
 export async function GET() {
-  if (!isDev) {
-    return NextResponse.json(
-      { error: "Not available in production" },
-      { status: 404 },
-    );
-  }
+  const blocked = assertDevMode();
+  if (blocked) return blocked;
 
   const archive = archiver("zip");
   const zipPath = path.join(BATCH_DIR, "videos.zip");

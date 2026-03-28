@@ -1,10 +1,7 @@
 import { ne, desc, eq, count } from "drizzle-orm";
 import { unstable_cache } from "next/cache";
 
-import {
-  createTRPCRouter,
-  publicProcedure,
-} from "~/server/api/trpc";
+import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 
 import { db } from "~/server/db";
 import { season, wedgie } from "~/server/schema";
@@ -32,7 +29,10 @@ const getCachedAllWithStats = unstable_cache(
     const seasonsWithStats = await Promise.all(
       seasons.map(async (s) => {
         const wedgies = await db
-          .select({ teamName: wedgie.teamName, teamAgainstName: wedgie.teamAgainstName })
+          .select({
+            teamName: wedgie.teamName,
+            teamAgainstName: wedgie.teamAgainstName,
+          })
           .from(wedgie)
           .where(eq(wedgie.seasonName, s.name));
 

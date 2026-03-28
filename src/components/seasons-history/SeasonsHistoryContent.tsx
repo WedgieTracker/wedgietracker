@@ -2,8 +2,8 @@
 
 import { api } from "~/trpc/react";
 import { SeasonCard } from "./SeasonCard";
-import { Loader } from "~/components/loader";
-import { Cta } from "../Cta";
+import { Loader } from "~/components/shared/Loader";
+import { Cta } from "../shared/Cta";
 export function SeasonsHistoryContent() {
   const { data: seasons, isLoading } = api.season.getAllWithStats.useQuery();
 
@@ -12,7 +12,9 @@ export function SeasonsHistoryContent() {
   if (!seasons) return null;
 
   // Filter out seasons with 0 wedgies
-  const seasonsWithWedgies = seasons.filter(season => season.totalWedgies > 0);
+  const seasonsWithWedgies = seasons.filter(
+    (season) => season.totalWedgies > 0,
+  );
 
   return (
     <div className="container mx-auto max-w-6xl space-y-4 md:space-y-8">

@@ -26,15 +26,7 @@ import {
   buildTeamStandings,
   maybeUpdateGlobalWedgieCount,
 } from "~/server/db-helpers";
-
-interface VideoUrl {
-  youtube?: string;
-  youtubeShort?: string;
-  cloudinary?: string;
-  youtubeNoDunks?: string;
-  instagram?: string;
-  selfHosted?: string;
-}
+import { type VideoUrls } from "~/types/wedgie";
 
 const wedgieInput = z.object({
   playerName: z.string(),
@@ -82,15 +74,18 @@ async function syncWedgieTypes(
       existing = created;
     }
     // Create the join row
-    await trx
-      .insert(wedgieToType)
-      .values({ wedgieId, typeId: existing!.id });
+    await trx.insert(wedgieToType).values({ wedgieId, typeId: existing!.id });
   }
 }
 
 // Helper: get wedgies with their types via the join table
 async function getWedgiesWithTypes(wedgieRows: { id: number }[]) {
-  type TypeInfo = { id: number; name: string; createdAt: string; updatedAt: string };
+  type TypeInfo = {
+    id: number;
+    name: string;
+    createdAt: string;
+    updatedAt: string;
+  };
   if (wedgieRows.length === 0) return new Map<number, TypeInfo[]>();
   const wedgieIds = wedgieRows.map((w) => w.id);
 
@@ -234,7 +229,10 @@ const getCachedTopStandings = unstable_cache(
       .limit(5);
 
     const wedgies = await db
-      .select({ teamName: wedgie.teamName, teamAgainstName: wedgie.teamAgainstName })
+      .select({
+        teamName: wedgie.teamName,
+        teamAgainstName: wedgie.teamAgainstName,
+      })
       .from(wedgie)
       .where(eq(wedgie.seasonName, currentSeason!));
 
@@ -268,7 +266,10 @@ const getCachedSeasonStandings = (
         .orderBy(desc(count()), asc(wedgie.playerName));
 
       const wedgies = await db
-        .select({ teamName: wedgie.teamName, teamAgainstName: wedgie.teamAgainstName })
+        .select({
+          teamName: wedgie.teamName,
+          teamAgainstName: wedgie.teamAgainstName,
+        })
         .from(wedgie)
         .where(whereClause);
 
@@ -305,7 +306,10 @@ const getCachedNerdStats = unstable_cache(
     const topPlayers = allPlayers.filter((p) => p.count === maxWedgies);
 
     const wedgies = await db
-      .select({ teamName: wedgie.teamName, teamAgainstName: wedgie.teamAgainstName })
+      .select({
+        teamName: wedgie.teamName,
+        teamAgainstName: wedgie.teamAgainstName,
+      })
       .from(wedgie)
       .where(eq(wedgie.seasonName, currentSeason!));
 
@@ -345,10 +349,7 @@ const getCachedNerdStats = unstable_cache(
       currentSeasonWedgies < (globalRow?.currentTotalWedgies ?? 0);
 
     const seasons = await db.query.season.findMany({
-      where: and(
-        ne(season.name, "GEMS"),
-        ne(season.name, currentSeason!),
-      ),
+      where: and(ne(season.name, "GEMS"), ne(season.name, currentSeason!)),
       with: { wedgies: true },
     });
 
@@ -369,10 +370,7 @@ const getCachedNerdStats = unstable_cache(
       (acc, s) => acc + s.wedgies.length,
       0,
     );
-    const totalGamesOverall = seasons.reduce(
-      (acc, s) => acc + s.totalGames,
-      0,
-    );
+    const totalGamesOverall = seasons.reduce((acc, s) => acc + s.totalGames, 0);
     const globalGames = globalRow?.currentTotalGames ?? 0;
 
     return {
@@ -468,10 +466,7 @@ export const wedgieRouter = createTRPCRouter({
       if (rows.length === 0) return [];
 
       const wedgieIds = rows.map((r) => r.wedgieId);
-      return ctx.db
-        .select()
-        .from(wedgie)
-        .where(inArray(wedgie.id, wedgieIds));
+      return ctx.db.select().from(wedgie).where(inArray(wedgie.id, wedgieIds));
     }),
 
   getLatest: publicProcedure.query(() => getCachedLatest()),
@@ -523,7 +518,7 @@ export const wedgieRouter = createTRPCRouter({
       );
 
     return wedgies
-      .filter((w) => !(w.videoUrl as VideoUrl)?.youtube)
+      .filter((w) => !(w.videoUrl as VideoUrls)?.youtube)
       .sort(
         (a, b) =>
           new Date(b.wedgieDate).getTime() - new Date(a.wedgieDate).getTime(),

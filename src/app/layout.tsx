@@ -4,7 +4,7 @@ import { TRPCReactProvider } from "~/trpc/react";
 import { Toaster } from "~/components/ui/toaster";
 import { defaultMetadata } from "~/config/metadata";
 
-import GoogleAnalytics from "~/components/GoogleAnalytics";
+import GoogleAnalytics from "~/components/shared/GoogleAnalytics";
 
 const inter = Inter({
   subsets: ["latin"],

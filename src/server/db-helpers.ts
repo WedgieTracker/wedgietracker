@@ -1,7 +1,7 @@
 import { eq, count } from "drizzle-orm";
 import { db } from "./db";
 import { global, wedgie } from "./schema";
-import { calculatePace } from "~/utils/paceCalculator";
+import { calculatePace } from "~/server/pace";
 
 /**
  * Builds team standings from an array of wedgies with teamName and teamAgainstName.

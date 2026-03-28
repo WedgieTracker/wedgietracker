@@ -4,7 +4,7 @@ import { eq, inArray } from "drizzle-orm";
 import { db } from "~/server/db";
 import { global, season, game } from "~/server/schema";
 import { env } from "~/env";
-import { calculatePace } from "~/utils/paceCalculator";
+import { calculatePace } from "~/server/pace";
 import { CACHE_TAGS } from "~/server/cache";
 
 const wedgieTrackerApiKey = env.WEDGIETRACKER_API_KEY;
@@ -95,11 +95,14 @@ export async function POST(request: Request) {
     const existingGames = await db
       .select({ id: game.id, name: game.name })
       .from(game)
-      .where(inArray(game.name, newGames.map((g) => g.name)));
+      .where(
+        inArray(
+          game.name,
+          newGames.map((g) => g.name),
+        ),
+      );
 
-    const existingGamesMap = new Map(
-      existingGames.map((g) => [g.name, g.id]),
-    );
+    const existingGamesMap = new Map(existingGames.map((g) => [g.name, g.id]));
 
     const newGamesToCreate = [];
     const existingGamesToUpdate = [];
@@ -138,19 +141,25 @@ export async function POST(request: Request) {
   }
 
   // Calculate pace if we have wedgie/game data to work with
-  const wedgieCount = (newWedgieCount && newWedgieCount > 0)
-    ? newWedgieCount
-    : (await db.query.global.findFirst({
-        where: eq(global.id, 1),
-        columns: { currentTotalWedgies: true },
-      }))?.currentTotalWedgies ?? 0;
+  const wedgieCount =
+    newWedgieCount && newWedgieCount > 0
+      ? newWedgieCount
+      : ((
+          await db.query.global.findFirst({
+            where: eq(global.id, 1),
+            columns: { currentTotalWedgies: true },
+          })
+        )?.currentTotalWedgies ?? 0);
 
-  const gameCount = (newTotalGamesCount && newTotalGamesCount > 0)
-    ? newTotalGamesCount
-    : (await db.query.global.findFirst({
-        where: eq(global.id, 1),
-        columns: { currentTotalGames: true },
-      }))?.currentTotalGames ?? 0;
+  const gameCount =
+    newTotalGamesCount && newTotalGamesCount > 0
+      ? newTotalGamesCount
+      : ((
+          await db.query.global.findFirst({
+            where: eq(global.id, 1),
+            columns: { currentTotalGames: true },
+          })
+        )?.currentTotalGames ?? 0);
 
   if (wedgieCount > 0 && gameCount > 0) {
     const pace = await calculatePace({
