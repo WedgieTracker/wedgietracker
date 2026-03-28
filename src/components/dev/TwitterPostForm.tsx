@@ -41,11 +41,13 @@ export function TwitterPostForm({ wedgie }: TwitterPostFormProps) {
 
   const handleTwitterPost = async () => {
     // Check if Twitter credentials are configured on the server
-    const hasCredentials = process.env.NEXT_PUBLIC_HAS_TWITTER_CREDENTIALS === "true";
+    const hasCredentials =
+      process.env.NEXT_PUBLIC_HAS_TWITTER_CREDENTIALS === "true";
     if (!hasCredentials) {
       toast({
         title: "Error",
-        description: "Twitter credentials not configured. Please check server configuration.",
+        description:
+          "Twitter credentials not configured. Please check server configuration.",
         variant: "destructive",
       });
       return;

@@ -267,8 +267,7 @@ function SeasonComparisonWrapper({ stats }: StatsForNerdsProps) {
               {stats.averageLastTenSeasons}
             </span>
             <br />
-            OF THE PAST{" "}
-            <span className="font-black text-pink">11 SEASONS</span>
+            OF THE PAST <span className="font-black text-pink">11 SEASONS</span>
           </>
         ) : (
           <div>

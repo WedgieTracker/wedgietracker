@@ -121,7 +121,7 @@ export function Wedgie({
           </div>
           <div className="min-w-0">
             <h3
-              className="shadow-lg-darkpurple pb-1 mb-0 truncate font-bold leading-none text-yellow"
+              className="shadow-lg-darkpurple mb-0 truncate pb-1 font-bold leading-none text-yellow"
               style={{
                 textShadow: "0 0 10px rgba(var(--darkpurple-rgb), 0.6)",
                 fontSize: sizes.playerName,

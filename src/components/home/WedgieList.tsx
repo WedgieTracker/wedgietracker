@@ -17,7 +17,7 @@ export function WedgieList({ wedgies }: WedgieListProps) {
       </div>
       <Link
         href="/all-wedgies"
-        className="text-button-text block w-full rounded-b-lg border-2 border-yellow bg-yellow py-1 text-center font-black text-darkpurple transition-all duration-300 hover:border-yellow hover:bg-darkpurple hover:text-yellow md:py-2"
+        className="block w-full rounded-b-lg border-2 border-yellow bg-yellow py-1 text-center text-button-text font-black text-darkpurple transition-all duration-300 hover:border-yellow hover:bg-darkpurple hover:text-yellow md:py-2"
       >
         WATCH THEM ALL
       </Link>

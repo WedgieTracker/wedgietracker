@@ -210,7 +210,10 @@ export async function nbaUpdate(includeExistingGames: boolean) {
     }
 
     // Update the total games of the current season if different from the past total
-    if (gamesPlayed !== currentGlobal?.currentTotalGames && currentGlobal?.currentSeasonId) {
+    if (
+      gamesPlayed !== currentGlobal?.currentTotalGames &&
+      currentGlobal?.currentSeasonId
+    ) {
       await db
         .update(season)
         .set({ totalGames: gamesPlayed })

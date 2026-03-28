@@ -12,7 +12,9 @@ export function SeasonsHistoryContent() {
   if (!seasons) return null;
 
   // Filter out seasons with 0 wedgies
-  const seasonsWithWedgies = seasons.filter(season => season.totalWedgies > 0);
+  const seasonsWithWedgies = seasons.filter(
+    (season) => season.totalWedgies > 0,
+  );
 
   return (
     <div className="container mx-auto max-w-6xl space-y-4 md:space-y-8">
