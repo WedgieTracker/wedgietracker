@@ -9,13 +9,14 @@ import {
 import { db } from "~/server/db";
 import { season, wedgie } from "~/server/schema";
 import { CACHE_TAGS } from "~/server/cache";
+import { buildTeamStandings } from "~/server/db-helpers";
 
 const getCachedAll = unstable_cache(
   async () => {
     const seasons = await db.query.season.findMany({
       orderBy: desc(season.createdAt),
     });
-    return seasons ?? null;
+    return seasons;
   },
   ["season-getAll"],
   { tags: [CACHE_TAGS.WEDGIE_DATA], revalidate: 300 },
@@ -46,24 +47,6 @@ const getCachedAllWithStats = unstable_cache(
           .orderBy(desc(count()))
           .limit(5);
 
-        const teamCounts = new Map<string, number>();
-        wedgies.forEach((w) => {
-          teamCounts.set(w.teamName, (teamCounts.get(w.teamName) ?? 0) + 1);
-          teamCounts.set(
-            w.teamAgainstName,
-            (teamCounts.get(w.teamAgainstName) ?? 0) + 1,
-          );
-        });
-
-        const topTeams = Array.from(teamCounts.entries())
-          .sort((a, b) => {
-            const countDiff = b[1] - a[1];
-            if (countDiff !== 0) return countDiff;
-            return a[0].localeCompare(b[0]);
-          })
-          .slice(0, 5)
-          .map(([name, cnt]) => ({ name, count: cnt }));
-
         return {
           ...s,
           totalWedgies: wedgies.length,
@@ -71,10 +54,7 @@ const getCachedAllWithStats = unstable_cache(
             name: p.playerName,
             count: p.count,
           })),
-          topTeams: topTeams.map((t) => ({
-            name: t.name,
-            count: t.count,
-          })),
+          topTeams: buildTeamStandings(wedgies, { limit: 5 }),
         };
       }),
     );

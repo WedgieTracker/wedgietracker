@@ -1,6 +1,6 @@
 import { ne, eq } from "drizzle-orm";
 import { db } from "~/server/db";
-import { season, wedgie, global } from "~/server/schema";
+import { season, global } from "~/server/schema";
 
 interface PaceStats {
   currentTotalWedgies: number;

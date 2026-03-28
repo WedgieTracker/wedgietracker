@@ -61,50 +61,14 @@ export async function POST(request: Request) {
 
   console.log("Update request from rasperry pi", body);
 
-  // if the request has a newWedgieCount, update the global wedgie count
+  // Build a single global update object to minimize DB round-trips
+  const globalUpdate: Record<string, unknown> = {};
+
   if (newWedgieCount && newWedgieCount > 0) {
-    const globalRow = await db.query.global.findFirst({
-      where: eq(global.id, 1),
-      with: { currentSeason: true },
-    });
-
-    if (!globalRow) {
-      return NextResponse.json(
-        { error: "Global stats not found" },
-        { status: 500 },
-      );
-    }
-
-    await db
-      .update(global)
-      .set({ currentTotalWedgies: newWedgieCount })
-      .where(eq(global.id, 1));
-
-    const pace = await calculatePace({
-      currentTotalWedgies: newWedgieCount,
-      currentTotalGames: globalRow.currentTotalGames,
-    });
-
-    if (!pace.medianPace) {
-      return NextResponse.json({ error: "Pace update error" }, { status: 500 });
-    }
-
-    await db
-      .update(global)
-      .set({
-        simplePace: pace.simplePace,
-        mathPace: pace.rmPace,
-        pace: pace.medianPace,
-      })
-      .where(eq(global.id, 1));
+    globalUpdate.currentTotalWedgies = newWedgieCount;
   }
-
-  // if the request has a newTotalGamesCount, update the global total games count
   if (newTotalGamesCount && newTotalGamesCount > 0) {
-    await db
-      .update(global)
-      .set({ currentTotalGames: newTotalGamesCount })
-      .where(eq(global.id, 1));
+    globalUpdate.currentTotalGames = newTotalGamesCount;
 
     if (currentSeason?.currentSeasonId) {
       await db
@@ -113,18 +77,21 @@ export async function POST(request: Request) {
         .where(eq(season.id, currentSeason.currentSeasonId));
     }
   }
-
-  // if the request has a newLiveGames, update the global live games count
   if (newLiveGames || newLiveGames === false) {
-    await db
-      .update(global)
-      .set({ liveGames: newLiveGames })
-      .where(eq(global.id, 1));
+    globalUpdate.liveGames = newLiveGames;
+  }
+  if (newTotalMinutes && newTotalMinutes > 0) {
+    globalUpdate.currentTotalMinutes = newTotalMinutes;
+  }
+  if (newTotalPoss) {
+    globalUpdate.currentTotalPoss = newTotalPoss;
+  }
+  if (newTotalFGA) {
+    globalUpdate.currentTotalFGA = newTotalFGA;
   }
 
-  // if the request has newGames array, add each game to the database
+  // Process new games
   if (newGames && newGames.length > 0) {
-    // Update the type expectation to include 'live' property
     const existingGames = await db
       .select({ id: game.id, name: game.name })
       .from(game)
@@ -158,8 +125,6 @@ export async function POST(request: Request) {
           live: g.live,
         })),
       );
-    } else {
-      console.log("No new games to create, all games already exist");
     }
 
     if (existingGamesToUpdate.length > 0) {
@@ -170,44 +135,36 @@ export async function POST(request: Request) {
         await db.update(game).set({ live: g.live }).where(eq(game.id, g.id));
       }
     }
+  }
 
-    const currentTotalWedgies = await db.query.global.findFirst({
-      where: eq(global.id, 1),
-      columns: { currentTotalWedgies: true },
-    });
+  // Calculate pace if we have wedgie/game data to work with
+  const wedgieCount = (newWedgieCount && newWedgieCount > 0)
+    ? newWedgieCount
+    : (await db.query.global.findFirst({
+        where: eq(global.id, 1),
+        columns: { currentTotalWedgies: true },
+      }))?.currentTotalWedgies ?? 0;
+
+  const gameCount = (newTotalGamesCount && newTotalGamesCount > 0)
+    ? newTotalGamesCount
+    : (await db.query.global.findFirst({
+        where: eq(global.id, 1),
+        columns: { currentTotalGames: true },
+      }))?.currentTotalGames ?? 0;
+
+  if (wedgieCount > 0 && gameCount > 0) {
     const pace = await calculatePace({
-      currentTotalWedgies: currentTotalWedgies?.currentTotalWedgies ?? 0,
-      currentTotalGames: newTotalGamesCount,
+      currentTotalWedgies: wedgieCount,
+      currentTotalGames: gameCount,
     });
-    await db
-      .update(global)
-      .set({
-        simplePace: pace.simplePace,
-        mathPace: pace.rmPace,
-        pace: pace.medianPace,
-      })
-      .where(eq(global.id, 1));
+    globalUpdate.simplePace = pace.simplePace;
+    globalUpdate.mathPace = pace.rmPace;
+    globalUpdate.pace = pace.medianPace;
   }
 
-  if (newTotalMinutes && newTotalMinutes > 0) {
-    await db
-      .update(global)
-      .set({ currentTotalMinutes: newTotalMinutes })
-      .where(eq(global.id, 1));
-  }
-
-  if (newTotalPoss) {
-    await db
-      .update(global)
-      .set({ currentTotalPoss: newTotalPoss })
-      .where(eq(global.id, 1));
-  }
-
-  if (newTotalFGA) {
-    await db
-      .update(global)
-      .set({ currentTotalFGA: newTotalFGA })
-      .where(eq(global.id, 1));
+  // Apply all global updates in a single statement
+  if (Object.keys(globalUpdate).length > 0) {
+    await db.update(global).set(globalUpdate).where(eq(global.id, 1));
   }
 
   revalidateTag(CACHE_TAGS.WEDGIE_DATA);

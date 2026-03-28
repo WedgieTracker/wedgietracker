@@ -5,7 +5,6 @@ const DevWedgieSocialShare =
   process.env.NODE_ENV === "development"
     ? dynamic(
         () =>
-          // @ts-ignore -- Development-only import that won't exist in production
           import("../../components/dev/WedgieSocialShare")
             .then(
               (mod: {

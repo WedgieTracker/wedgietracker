@@ -17,12 +17,15 @@ import {
   season,
   game,
 } from "~/server/schema";
-import { calculatePace } from "~/utils/paceCalculator";
 import {
   CACHE_TAGS,
   invalidateWedgieData,
   invalidateStoreData,
 } from "~/server/cache";
+import {
+  buildTeamStandings,
+  maybeUpdateGlobalWedgieCount,
+} from "~/server/db-helpers";
 
 interface VideoUrl {
   youtube?: string;
@@ -235,30 +238,12 @@ const getCachedTopStandings = unstable_cache(
       .from(wedgie)
       .where(eq(wedgie.seasonName, currentSeason!));
 
-    const teamCounts = new Map<string, number>();
-    wedgies.forEach((w) => {
-      teamCounts.set(w.teamName, (teamCounts.get(w.teamName) ?? 0) + 1);
-      teamCounts.set(
-        w.teamAgainstName,
-        (teamCounts.get(w.teamAgainstName) ?? 0) + 1,
-      );
-    });
-
-    const topTeams = Array.from(teamCounts.entries())
-      .sort((a, b) => {
-        const countDiff = b[1] - a[1];
-        if (countDiff !== 0) return countDiff;
-        return a[0].localeCompare(b[0]);
-      })
-      .slice(0, 5)
-      .map(([name, cnt]) => ({ name, count: cnt }));
-
     return {
       players: topPlayers.map((p) => ({
         name: p.playerName,
         count: p.count,
       })),
-      teams: topTeams,
+      teams: buildTeamStandings(wedgies, { limit: 5 }),
     };
   },
   ["wedgie-getTopStandings"],
@@ -287,25 +272,6 @@ const getCachedSeasonStandings = (
         .from(wedgie)
         .where(whereClause);
 
-      const teamCounts = new Map<string, number>();
-      wedgies.forEach((w) => {
-        teamCounts.set(w.teamName, (teamCounts.get(w.teamName) ?? 0) + 1);
-        if (includeOpponents) {
-          teamCounts.set(
-            w.teamAgainstName,
-            (teamCounts.get(w.teamAgainstName) ?? 0) + 1,
-          );
-        }
-      });
-
-      const topTeams = Array.from(teamCounts.entries())
-        .sort((a, b) => {
-          const countDiff = b[1] - a[1];
-          if (countDiff !== 0) return countDiff;
-          return a[0].localeCompare(b[0]);
-        })
-        .map(([name, cnt]) => ({ name, count: cnt }));
-
       return {
         players: topPlayers
           .filter((p) => p.playerName)
@@ -313,7 +279,7 @@ const getCachedSeasonStandings = (
             name: p.playerName,
             count: p.count,
           })),
-        teams: topTeams,
+        teams: buildTeamStandings(wedgies, { includeOpponents }),
       };
     },
     ["wedgie-getSeasonStandings", seasonFilter, String(includeOpponents)],
@@ -343,18 +309,7 @@ const getCachedNerdStats = unstable_cache(
       .from(wedgie)
       .where(eq(wedgie.seasonName, currentSeason!));
 
-    const teamCounts = new Map<string, number>();
-    wedgies.forEach((w) => {
-      teamCounts.set(w.teamName, (teamCounts.get(w.teamName) ?? 0) + 1);
-      teamCounts.set(
-        w.teamAgainstName,
-        (teamCounts.get(w.teamAgainstName) ?? 0) + 1,
-      );
-    });
-
-    const topTeams = Array.from(teamCounts.entries())
-      .sort((a, b) => b[1] - a[1])
-      .map(([name, cnt]) => ({ name, count: cnt }));
+    const topTeams = buildTeamStandings(wedgies);
 
     const [wedgiesThisSeasonResult] = await db
       .select({ count: count() })
@@ -539,47 +494,7 @@ export const wedgieRouter = createTRPCRouter({
         await syncWedgieTypes(ctx.db, created.id, typeNames);
       }
 
-      // check if the wedgie is in the current season
-      const globalRow = await ctx.db.query.global.findFirst({
-        where: eq(global.id, 1),
-        with: { currentSeason: true },
-      });
-
-      if (globalRow?.currentSeason.name === input.seasonName) {
-        // get the current total wedgies
-        const [countResult] = await ctx.db
-          .select({ count: count() })
-          .from(wedgie)
-          .where(eq(wedgie.seasonName, input.seasonName));
-
-        const currentTotalWedgiesSeason = countResult?.count ?? 0;
-        // get the current total from the global table
-        const currentTotalWedgiesGlobal = globalRow.currentTotalWedgies;
-
-        if (currentTotalWedgiesSeason > currentTotalWedgiesGlobal) {
-          // update the global table
-          await ctx.db
-            .update(global)
-            .set({ currentTotalWedgies: currentTotalWedgiesSeason })
-            .where(eq(global.id, 1));
-
-          // calculate the pace
-          const pace = await calculatePace({
-            currentTotalWedgies: currentTotalWedgiesSeason,
-            currentTotalGames: globalRow.currentTotalGames,
-          });
-
-          // update the global table
-          await ctx.db
-            .update(global)
-            .set({
-              simplePace: pace.simplePace,
-              mathPace: pace.rmPace,
-              pace: pace.medianPace,
-            })
-            .where(eq(global.id, 1));
-        }
-      }
+      await maybeUpdateGlobalWedgieCount(ctx.db, input.seasonName);
 
       invalidateWedgieData();
       invalidateStoreData();
@@ -686,42 +601,7 @@ export const wedgieRouter = createTRPCRouter({
         await syncWedgieTypes(ctx.db, updated.id, typeNames);
       }
 
-      // check if the wedgie is in the current season
-      const globalRow = await ctx.db.query.global.findFirst({
-        where: eq(global.id, 1),
-        with: { currentSeason: true },
-      });
-
-      if (globalRow?.currentSeason.name === input.data.seasonName) {
-        const [countResult] = await ctx.db
-          .select({ count: count() })
-          .from(wedgie)
-          .where(eq(wedgie.seasonName, input.data.seasonName));
-
-        const currentTotalWedgiesSeason = countResult?.count ?? 0;
-        const currentTotalWedgiesGlobal = globalRow.currentTotalWedgies;
-
-        if (currentTotalWedgiesSeason > currentTotalWedgiesGlobal) {
-          await ctx.db
-            .update(global)
-            .set({ currentTotalWedgies: currentTotalWedgiesSeason })
-            .where(eq(global.id, 1));
-
-          const pace = await calculatePace({
-            currentTotalWedgies: currentTotalWedgiesSeason,
-            currentTotalGames: globalRow.currentTotalGames,
-          });
-
-          await ctx.db
-            .update(global)
-            .set({
-              simplePace: pace.simplePace,
-              mathPace: pace.rmPace,
-              pace: pace.medianPace,
-            })
-            .where(eq(global.id, 1));
-        }
-      }
+      await maybeUpdateGlobalWedgieCount(ctx.db, input.data.seasonName);
 
       invalidateWedgieData();
 
