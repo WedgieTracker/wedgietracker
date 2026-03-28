@@ -1,2 +1,7 @@
 .github/workflows/release.yml
 .github/workflows/sync-deploy.yml
+.github/workflows/ci.yml
+.github/workflows/ci-command.yml
+.github/workflows/preview-command.yml
+.github/workflows/labeler.yml
+.github/dependabot.yml
