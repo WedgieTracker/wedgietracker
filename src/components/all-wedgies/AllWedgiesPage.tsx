@@ -2,12 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
-import { api } from "~/trpc/react";
 import { WedgieFilters } from "./WedgieFilters";
 import { WedgieGrid } from "./WedgieGrid";
 import { WedgieModal } from "~/components/home/WedgieModal";
 import type { WedgieWithTypes } from "~/types/wedgie";
 import { Cta } from "~/components/Cta";
+import { api } from "~/trpc/react";
+import { useSeasonFallback } from "~/hooks/use-season-fallback";
 
 export function AllWedgiesPage() {
   const searchParams = useSearchParams();
@@ -15,41 +16,17 @@ export function AllWedgiesPage() {
   const [selectedWedgieData, setSelectedWedgieData] =
     useState<WedgieWithTypes | null>(null);
 
-  const { data: global, isLoading: isLoadingGlobal } =
-    api.admin.getGlobal.useQuery();
-  const { data: seasons, isLoading: isLoadingSeasons } =
-    api.season.getAllWithStats.useQuery();
-  const { data: stats, isLoading: isLoadingStats } =
-    api.wedgie.getStats.useQuery();
+  const {
+    global,
+    stats,
+    defaultSeason,
+    previousSeason,
+    shouldShowPreviousSeason,
+    isLoading: isLoadingSeasonData,
+  } = useSeasonFallback();
 
-  const defaultSeason = global?.currentSeason?.name ?? "2025/26";
-
-  // Find previous season when current season has 0 wedgies
-  const getPreviousSeason = () => {
-    if (!seasons || !global?.currentSeason?.name) return null;
-
-    const currentSeasonIndex = seasons.findIndex(
-      (s) => s.name === global.currentSeason.name,
-    );
-
-    // If current season is at index 0, there's no previous season
-    // In this case, we should show the most recent season with wedgies
-    if (currentSeasonIndex === 0) {
-      const seasonWithWedgies = seasons.find(
-        (season) => season.totalWedgies > 0,
-      );
-      return seasonWithWedgies ?? null;
-    }
-
-    const previousSeason = seasons[currentSeasonIndex - 1];
-    return previousSeason;
-  };
-
-  const previousSeason = getPreviousSeason();
-  const shouldShowPreviousSeason =
-    stats?.currentSeasonWedgies === 0 && previousSeason;
   const initialSeason = shouldShowPreviousSeason
-    ? previousSeason.name
+    ? previousSeason!.name
     : defaultSeason;
 
   // Initialize filters with URL params
@@ -123,13 +100,7 @@ export function AllWedgiesPage() {
   }, [global, hasSeasonFromUrl]);
 
   // Only show loading state while data is loading
-  if (
-    isLoadingAll ||
-    isLoadingSeason ||
-    isLoadingGlobal ||
-    isLoadingSeasons ||
-    isLoadingStats
-  ) {
+  if (isLoadingAll || isLoadingSeason || isLoadingSeasonData) {
     return (
       <div className="container mx-auto max-w-7xl text-white">
         <WedgieFilters
@@ -177,7 +148,7 @@ export function AllWedgiesPage() {
       {shouldShowPreviousSeason && (
         <div className="mb-4 rounded-lg border border-pink/30 bg-pink/20 p-4 text-center">
           <p className="text-sm font-bold text-pink">
-            Current season has no wedgies yet. Showing {previousSeason.name}{" "}
+            Current season has no wedgies yet. Showing {previousSeason?.name}{" "}
             season wedgies.
           </p>
         </div>

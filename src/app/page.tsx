@@ -6,10 +6,8 @@ import { Stats } from "~/components/home/Stats";
 import { StatsSkeleton } from "~/components/home/StatsSkeleton";
 import { WedgieList } from "~/components/home/WedgieList";
 import { Standings } from "~/components/home/Standings";
-import { Header } from "~/components/layout/Header";
-import { MenuProvider } from "~/context/MenuContext";
+import { PageLayout } from "~/components/layout/PageLayout";
 import { EasterEgg } from "~/components/home/EasterEgg";
-import { Footer } from "~/components/layout/Footer";
 import type { WedgieWithTypes } from "~/types/wedgie";
 import { Suspense } from "react";
 import { Loader } from "~/components/loader";
@@ -25,31 +23,26 @@ export const metadata = generateMetadata({
 
 export default function Home() {
   return (
-    <MenuProvider>
-      <div className="flex min-h-screen flex-col bg-darkpurple">
-        <Header />
+    <PageLayout showCircleMenu={false}>
+      <div className="flex flex-col md:flex-row">
+        <Suspense fallback={<StatsSkeleton />}>
+          <StatsWrapper />
+        </Suspense>
+        <div className="flex w-full flex-col items-center justify-center gap-12 bg-darkpurple-dark px-4 py-8 md:w-3/5 md:px-8 md:py-8 lg:w-1/2">
+          <Suspense fallback={<LoaderWrapper />}>
+            <WedgieListWrapper />
 
-        <div className="flex flex-col md:flex-row">
-          <Suspense fallback={<StatsSkeleton />}>
-            <StatsWrapper />
+            <StandingsWrapper />
+
+            <TotalWedgiesWrapper />
+
+            <EasterEgg />
+            {/* Newsletter */}
+            <Newsletter />
           </Suspense>
-          <div className="flex w-full flex-col items-center justify-center gap-12 bg-darkpurple-dark px-4 py-8 md:w-3/5 md:px-8 md:py-8 lg:w-1/2">
-            <Suspense fallback={<LoaderWrapper />}>
-              <WedgieListWrapper />
-
-              <StandingsWrapper />
-
-              <TotalWedgiesWrapper />
-
-              <EasterEgg />
-              {/* Newsletter */}
-              <Newsletter />
-            </Suspense>
-          </div>
         </div>
       </div>
-      <Footer />
-    </MenuProvider>
+    </PageLayout>
   );
 }
 
