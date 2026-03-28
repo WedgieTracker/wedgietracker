@@ -12,7 +12,7 @@ jobs:
   preview:
     if: >-
       github.event.issue.pull_request &&
-      github.event.comment.body == '/preview' &&
+      startsWith(github.event.comment.body, '/preview') &&
       contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)
     runs-on: ubuntu-latest
     steps:
@@ -70,5 +70,5 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.issue.number,
-              body: `🚀 Preview branch pushed to private repo as \`preview-pr-${context.issue.number}\`. Vercel should pick it up shortly.`
+              body: `🚀 Preview branch pushed as \`preview-pr-${context.issue.number}\`. Deploy should start shortly.`
             });

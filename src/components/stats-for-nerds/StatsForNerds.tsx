@@ -27,8 +27,9 @@ const Wave = ({ fillPercentage }: { fillPercentage: number }) => {
 
     // Create a ResizeObserver to watch for container size changes
     const resizeObserver = new ResizeObserver(updateDimensions);
-    if (containerRef.current) {
-      resizeObserver.observe(containerRef.current);
+    const currentContainer = containerRef.current;
+    if (currentContainer) {
+      resizeObserver.observe(currentContainer);
     }
 
     // Only show confetti after client-side rendering
@@ -39,8 +40,8 @@ const Wave = ({ fillPercentage }: { fillPercentage: number }) => {
     }
 
     return () => {
-      if (containerRef.current) {
-        resizeObserver.unobserve(containerRef.current);
+      if (currentContainer) {
+        resizeObserver.unobserve(currentContainer);
       }
       resizeObserver.disconnect();
     };
@@ -54,10 +55,10 @@ const Wave = ({ fillPercentage }: { fillPercentage: number }) => {
   return (
     <div
       ref={containerRef}
-      className="absolute bottom-[0] left-0 z-0 w-full bg-pink transition-all duration-1000"
+      className="bg-pink absolute bottom-0 left-0 z-0 w-full transition-all duration-1000"
       style={{ height: `${currentHeight}%` }}
     >
-      <div className="absolute bottom-[100%] left-0 z-0 h-[50px] w-full overflow-hidden transition-all duration-1000">
+      <div className="absolute bottom-full left-0 z-0 h-[50px] w-full overflow-hidden transition-all duration-1000">
         <div className="wave-container absolute bottom-0 left-0 w-full">
           <svg
             className="waves"
@@ -103,7 +104,7 @@ const Wave = ({ fillPercentage }: { fillPercentage: number }) => {
         </div>
       </div>
       {showConfetti && dimensions.width > 0 && dimensions.height > 0 && (
-        <div className="z-2 absolute inset-0 h-full w-full">
+        <div className="absolute inset-0 z-2 h-full w-full">
           <Confetti
             width={dimensions.width}
             height={dimensions.height}
@@ -156,7 +157,7 @@ interface StatsForNerdsProps {
 
 export function StatsForNerds({ stats }: StatsForNerdsProps) {
   return (
-    <div className="flex w-full flex-col bg-darkpurple">
+    <div className="bg-darkpurple flex w-full flex-col">
       <div className="relative flex flex-col lg:flex-row">
         <div className="flex w-full flex-col items-center gap-0 p-0 text-center md:justify-center md:gap-0 md:p-8 lg:sticky lg:top-20 lg:h-[calc(100svh-80px)] lg:w-1/2 lg:flex-col lg:p-4">
           <SeasonHeaderWrapper stats={stats} />
@@ -187,7 +188,7 @@ function SeasonHeaderWrapper({ stats }: StatsForNerdsProps) {
   return (
     <div className="mb-4 text-base font-bold text-white md:text-2xl lg:mb-8">
       IN THE{" "}
-      <span className="rounded-lg bg-pink px-2 text-darkpurple">
+      <span className="bg-pink text-darkpurple rounded-lg px-2">
         {stats.currentSeason}
       </span>{" "}
       SEASON
@@ -221,16 +222,16 @@ function WedgieCounterWrapper({ stats }: StatsForNerdsProps) {
   const fillPercentage = Math.min((stats.wedgiesThisSeason / 50) * 100, 100);
 
   return (
-    <div className="relative w-full max-w-xl overflow-hidden rounded-t-3xl bg-darkpurple-light pb-3 pt-3">
+    <div className="bg-darkpurple-light relative w-full max-w-xl overflow-hidden rounded-t-3xl pt-3 pb-3">
       <Wave fillPercentage={fillPercentage} />
-      <div className="relative z-10 mx-auto max-w-[18rem] rounded-lg bg-darkpurple-light/50 p-4 text-center md:w-[90%] lg:w-[65%] lg:min-w-[24rem] lg:max-w-[30rem]">
-        <div className="text-sm font-bold leading-none text-yellow md:text-base">
+      <div className="bg-darkpurple-light/50 relative z-10 mx-auto max-w-[18rem] rounded-lg p-4 text-center md:w-[90%] lg:w-[65%] lg:max-w-120 lg:min-w-[24rem]">
+        <div className="text-yellow text-sm leading-none font-bold md:text-base">
           {stats.wedgiesThisSeason > 63 ? "NEW ALL-TIME RECORD" : "WE'RE AT"}
         </div>
-        <div className="whitespace-nowrap text-big-number-mobile font-black leading-none text-yellow md:text-big-number-medium lg:text-big-number">
+        <div className="text-big-number-mobile text-yellow md:text-big-number-medium lg:text-big-number leading-none font-black whitespace-nowrap">
           {displayedCount.toFixed(0).toLocaleString()}
         </div>
-        <div className="text-wedgies-text-mobile font-black leading-none text-yellow md:text-wedgies-text lg:text-wedgies-text">
+        <div className="text-wedgies-text-mobile text-yellow md:text-wedgies-text lg:text-wedgies-text leading-none font-black">
           WEDGIES
         </div>
       </div>
@@ -248,12 +249,12 @@ function TypingStatsWrapper({
 
 function SeasonComparisonWrapper({ stats }: StatsForNerdsProps) {
   return (
-    <div className="flex w-full max-w-xl flex-col items-center justify-center gap-2 rounded-3xl bg-darkpurple-dark py-4 md:flex-row md:gap-5 md:py-8">
+    <div className="bg-darkpurple-dark flex w-full max-w-xl flex-col items-center justify-center gap-2 rounded-3xl py-4 md:flex-row md:gap-5 md:py-8">
       <div className="text-center">
-        <div className="w-full text-pace-text-mobile font-black uppercase leading-none tracking-wider text-pink md:text-pace-text">
+        <div className="text-pace-text-mobile text-pink md:text-pace-text w-full leading-none font-black tracking-wider uppercase">
           Pace
         </div>
-        <div className="shadow-lg-darkpurple-light mt-[-.2em] w-full text-pace-number-mobile font-black leading-none text-yellow md:text-pace-number">
+        <div className="shadow-lg-darkpurple-light text-pace-number-mobile text-yellow md:text-pace-number mt-[-.2em] w-full leading-none font-black">
           {stats.pace.toFixed(0)}
         </div>
       </div>
@@ -263,26 +264,26 @@ function SeasonComparisonWrapper({ stats }: StatsForNerdsProps) {
             WE ARE ON PACE TO MATCH
             <br />
             THE AVERAGE OF{" "}
-            <span className="font-black text-pink">
+            <span className="text-pink font-black">
               {stats.averageLastTenSeasons}
             </span>
             <br />
-            OF THE PAST <span className="font-black text-pink">11 SEASONS</span>
+            OF THE PAST <span className="text-pink font-black">11 SEASONS</span>
           </>
         ) : (
           <div>
             IT IS{" "}
-            <span className="font-black text-pink">
+            <span className="text-pink font-black">
               {Math.abs(stats.pace - stats.averageLastTenSeasons)}
             </span>{" "}
             {stats.pace > stats.averageLastTenSeasons ? "MORE" : "LESS"} THAN
             <br />
             THE AVERAGE OF{" "}
-            <span className="font-black text-pink">
+            <span className="text-pink font-black">
               {stats.averageLastTenSeasons}
             </span>
             <br />
-            OF THE PAST <span className="font-black text-pink">11 SEASONS</span>
+            OF THE PAST <span className="text-pink font-black">11 SEASONS</span>
           </div>
         )}
       </div>
@@ -296,23 +297,23 @@ function LastWedgieWrapper({ stats }: StatsForNerdsProps) {
 
   return (
     <div className="flex w-full max-w-xl flex-col items-center justify-center">
-      <div className="flex w-full flex-col items-center justify-center rounded-t-3xl bg-darkpurple-dark p-4 text-base font-bold text-white md:p-8 md:text-xl">
+      <div className="bg-darkpurple-dark flex w-full flex-col items-center justify-center rounded-t-3xl p-4 text-base font-bold text-white md:p-8 md:text-xl">
         <span className="mb-2 flex flex-row items-center justify-center">
-          <span className="mr-2 inline-flex h-12 w-12 items-center justify-center rounded-full border-2 border-yellow bg-darkpurple text-center text-xl font-black leading-none text-yellow md:h-16 md:w-16 md:text-3xl">
+          <span className="border-yellow bg-darkpurple text-yellow mr-2 inline-flex h-12 w-12 items-center justify-center rounded-full border-2 text-center text-xl leading-none font-black md:h-16 md:w-16 md:text-3xl">
             {stats.gamesSinceLastWedgie}
           </span>{" "}
           GAMES PLAYED
         </span>
         SINCE THE LAST
         <br />
-        <span className="text-xl font-black uppercase text-yellow md:text-3xl">
+        <span className="text-yellow text-xl font-black uppercase md:text-3xl">
           {stats.lastWedgiePlayer}&apos;S
         </span>{" "}
         WEDGIE
       </div>
       <Link
         href={`/all-wedgies`}
-        className="w-full rounded-b-3xl border-2 border-yellow bg-yellow py-1.5 text-center text-button-text font-bold text-darkpurple transition-all duration-300 hover:bg-darkpurple hover:text-yellow"
+        className="border-yellow bg-yellow text-button-text text-darkpurple hover:bg-darkpurple hover:text-yellow w-full rounded-b-3xl border-2 py-1.5 text-center font-bold transition-all duration-300"
       >
         VIEW ALL WEDGIES
       </Link>
@@ -327,7 +328,7 @@ function LeadersWrapper({ stats }: StatsForNerdsProps) {
       <div className="flex w-full flex-col items-center justify-center">
         <Link
           href="/standings"
-          className="w-full rounded-3xl border-2 border-yellow bg-yellow py-1.5 text-center text-button-text font-bold text-darkpurple transition-all duration-300 hover:bg-darkpurple hover:text-yellow"
+          className="border-yellow bg-yellow text-button-text text-darkpurple hover:bg-darkpurple hover:text-yellow w-full rounded-3xl border-2 py-1.5 text-center font-bold transition-all duration-300"
         >
           SEE STANDINGS
         </Link>
@@ -343,19 +344,19 @@ function LeadersWrapper({ stats }: StatsForNerdsProps) {
 
   return (
     <div className="flex w-full flex-col items-center justify-center">
-      <div className="flex w-full flex-col items-center justify-center rounded-t-3xl bg-darkpurple-dark px-2 py-4 text-center md:p-8 md:px-4">
+      <div className="bg-darkpurple-dark flex w-full flex-col items-center justify-center rounded-t-3xl px-2 py-4 text-center md:p-8 md:px-4">
         <div className="mb-2 text-base font-bold text-white md:mb-4 lg:text-xl xl:text-2xl">
           {leadingTeams.length > 1 ? (
             <>
               {leadingTeams.slice(0, -1).map((team) => (
                 <span key={team} className="mb-1 ml-1 inline-block xl:ml-2">
-                  <span className="inline-block whitespace-nowrap rounded-lg bg-pink px-1 py-0 text-darkpurple md:px-2 md:py-0">
+                  <span className="bg-pink text-darkpurple inline-block rounded-lg px-1 py-0 whitespace-nowrap md:px-2 md:py-0">
                     {team}
                   </span>
                 </span>
               ))}{" "}
               AND{" "}
-              <span className="inline-block whitespace-nowrap rounded-lg bg-pink px-1 py-0 text-darkpurple md:px-2 md:py-0">
+              <span className="bg-pink text-darkpurple inline-block rounded-lg px-1 py-0 whitespace-nowrap md:px-2 md:py-0">
                 {leadingTeams.slice(-1)[0]}
               </span>{" "}
               ARE TIED FOR THE LEAD WITH{" "}
@@ -363,7 +364,7 @@ function LeadersWrapper({ stats }: StatsForNerdsProps) {
             </>
           ) : (
             <>
-              <span className="inline-block whitespace-nowrap rounded-lg bg-pink px-1 py-0 text-darkpurple md:px-2 md:py-0">
+              <span className="bg-pink text-darkpurple inline-block rounded-lg px-1 py-0 whitespace-nowrap md:px-2 md:py-0">
                 {leadingTeams[0] ?? "NO TEAM"}
               </span>{" "}
               CURRENTLY LEADS THE NBA WITH{" "}
@@ -383,7 +384,7 @@ function LeadersWrapper({ stats }: StatsForNerdsProps) {
         <div className="text-base font-bold md:text-xl xl:text-2xl">
           {stats.leaders.players.map((p) => (
             <span key={p.name} className="mb-1 ml-1 inline-block xl:ml-2">
-              <span className="inline-block whitespace-nowrap rounded-lg bg-pink px-1 py-0 text-darkpurple md:px-2 md:py-0">
+              <span className="bg-pink text-darkpurple inline-block rounded-lg px-1 py-0 whitespace-nowrap md:px-2 md:py-0">
                 {p.name}
               </span>
             </span>
@@ -392,7 +393,7 @@ function LeadersWrapper({ stats }: StatsForNerdsProps) {
       </div>
       <Link
         href="/standings"
-        className="w-full rounded-b-3xl border-2 border-yellow bg-yellow py-1.5 text-center text-button-text font-bold text-darkpurple transition-all duration-300 hover:bg-darkpurple hover:text-yellow"
+        className="border-yellow bg-yellow text-button-text text-darkpurple hover:bg-darkpurple hover:text-yellow w-full rounded-b-3xl border-2 py-1.5 text-center font-bold transition-all duration-300"
       >
         SEE STANDINGS
       </Link>
@@ -403,7 +404,7 @@ function LeadersWrapper({ stats }: StatsForNerdsProps) {
 function SeasonHistoryWrapper({ stats }: StatsForNerdsProps) {
   return (
     <div className="flex w-full max-w-xl flex-col items-center justify-center">
-      <div className="flex w-full flex-col items-center justify-center rounded-t-3xl bg-darkpurple-dark p-4 text-center md:p-8">
+      <div className="bg-darkpurple-dark flex w-full flex-col items-center justify-center rounded-t-3xl p-4 text-center md:p-8">
         <div className="text-xl font-bold text-white md:text-2xl">
           <span className="text-pink">{stats.totalWedgiesOverall}</span> TOTAL
           WEDGIES
@@ -420,7 +421,7 @@ function SeasonHistoryWrapper({ stats }: StatsForNerdsProps) {
       </div>
       <Link
         href="/seasons-history"
-        className="w-full rounded-b-3xl border-2 border-yellow bg-yellow py-1.5 text-center text-button-text font-bold text-darkpurple transition-all duration-300 hover:bg-darkpurple hover:text-yellow"
+        className="border-yellow bg-yellow text-button-text text-darkpurple hover:bg-darkpurple hover:text-yellow w-full rounded-b-3xl border-2 py-1.5 text-center font-bold transition-all duration-300"
       >
         SEE SEASONS HISTORY
       </Link>

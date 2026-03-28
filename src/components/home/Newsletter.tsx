@@ -10,16 +10,16 @@ export function Newsletter() {
   return (
     <div
       className={cn(
-        "w-full max-w-2xl rounded-xl bg-yellow p-4 md:p-8",
+        "bg-yellow w-full max-w-2xl rounded-xl p-4 md:p-8",
         loading &&
           "animate-pulse-slow pointer-events-none animate-pulse opacity-50",
       )}
     >
       <div className="mb-3 text-center md:mb-4 md:text-left lg:text-left">
-        <h3 className="min-w-none !mt-0 mb-0 text-2xl font-black uppercase !text-darkpurple">
+        <h3 className="min-w-none text-darkpurple! mt-0! mb-0 text-2xl font-black uppercase">
           Stay Updated
         </h3>
-        <p className="mb-0 mt-1 font-bold leading-tight text-darkpurple/80">
+        <p className="text-darkpurple/80 mt-1 mb-0 leading-tight font-bold">
           Subscribe to get the latest wedgies updates and more.
         </p>
       </div>
@@ -39,13 +39,13 @@ export function Newsletter() {
           onChange={(e) => setEmail(e.target.value)}
           placeholder="Enter your email"
           disabled={loading}
-          className="focus:ring-none flex-1 rounded-t-xl border-2 border-darkpurple bg-darkpurple px-4 py-2 text-center text-yellow placeholder:text-yellow focus:outline-none md:!rounded-l-xl md:rounded-t-none md:text-left lg:text-left"
+          className="focus:ring-none border-darkpurple bg-darkpurple text-yellow placeholder:text-yellow flex-1 rounded-t-xl border-2 px-4 py-2 text-center focus:outline-hidden md:rounded-t-none md:rounded-l-xl! md:text-left lg:text-left"
           required
         />
         <button
           type="submit"
           disabled={loading}
-          className="rounded-b-xl border-2 border-darkpurple bg-darkpurple px-4 py-2 text-xs font-black uppercase text-yellow transition-all duration-300 hover:bg-yellow hover:text-darkpurple disabled:cursor-not-allowed disabled:opacity-50 md:!rounded-r-xl md:rounded-b-none md:px-6 md:py-2 md:text-base md:text-sm"
+          className="border-darkpurple bg-darkpurple text-yellow hover:bg-yellow hover:text-darkpurple rounded-b-xl border-2 px-4 py-2 text-xs font-black uppercase transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-50 md:rounded-r-xl! md:rounded-b-none md:px-6 md:py-2 md:text-base md:text-sm"
         >
           Subscribe
         </button>

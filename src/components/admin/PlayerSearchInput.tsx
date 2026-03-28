@@ -48,7 +48,7 @@ export function PlayerSearchInput({ value, onChange }: PlayerSearchInputProps) {
       />
 
       {showDropdown && (
-        <div className="absolute z-10 mt-1 w-full rounded-md border border-gray-700 bg-darkpurple shadow-lg">
+        <div className="bg-darkpurple absolute z-10 mt-1 w-full rounded-md border border-gray-700 shadow-lg">
           {filteredPlayers.map((player) => (
             <button
               key={player.id}
@@ -85,7 +85,7 @@ export function PlayerSearchInput({ value, onChange }: PlayerSearchInputProps) {
       {isAddingNew && (
         <Dialog open={isAddingNew} onOpenChange={setIsAddingNew}>
           <div className="fixed inset-0 z-50 bg-black/50" />
-          <div className="fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2 rounded-lg bg-darkpurple p-6">
+          <div className="bg-darkpurple fixed top-1/2 left-1/2 z-50 -translate-x-1/2 -translate-y-1/2 rounded-lg p-6">
             <h2 className="mb-4 text-lg font-bold text-white">
               Add New Player
             </h2>

@@ -97,7 +97,7 @@ export function CloudinaryUpload({
         />
         <label
           htmlFor="video-upload"
-          className={`flex cursor-pointer items-center justify-center rounded-md border border-dashed border-gray-300 bg-white/5 p-6 text-white transition-all hover:border-yellow ${
+          className={`hover:border-yellow flex cursor-pointer items-center justify-center rounded-md border border-dashed border-gray-300 bg-white/5 p-6 text-white transition-all ${
             uploading ? "opacity-50" : ""
           }`}
         >

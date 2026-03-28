@@ -36,7 +36,7 @@ export function SeasonsHistoryContent() {
 
 const LoaderWrapper = () => {
   return (
-    <div className="items-top flex h-full min-h-[100svh] w-full justify-center">
+    <div className="items-top flex h-full min-h-svh w-full justify-center">
       <div className="items-top mr-[-30px] w-full max-w-[150px] justify-center">
         <Loader />
       </div>

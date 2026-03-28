@@ -47,10 +47,14 @@ export function GlobalSettingsForm() {
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <div>
-          <label className="block text-sm font-medium text-white">
+          <label
+            htmlFor="totalWedgies"
+            className="block text-sm font-medium text-white"
+          >
             Total Wedgies
           </label>
           <input
+            id="totalWedgies"
             type="number"
             value={formData.currentTotalWedgies}
             onChange={(e) =>
@@ -64,10 +68,14 @@ export function GlobalSettingsForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-white">
+          <label
+            htmlFor="totalGames"
+            className="block text-sm font-medium text-white"
+          >
             Total Games
           </label>
           <input
+            id="totalGames"
             type="number"
             value={formData.currentTotalGames}
             onChange={(e) =>
@@ -81,10 +89,14 @@ export function GlobalSettingsForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-white">
+          <label
+            htmlFor="totalMinutes"
+            className="block text-sm font-medium text-white"
+          >
             Total Minutes
           </label>
           <input
+            id="totalMinutes"
             type="number"
             value={formData.currentTotalMinutes}
             onChange={(e) =>
@@ -98,10 +110,14 @@ export function GlobalSettingsForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-white">
+          <label
+            htmlFor="totalFGA"
+            className="block text-sm font-medium text-white"
+          >
             Total Field Goal Attempts
           </label>
           <input
+            id="totalFGA"
             type="number"
             value={formData.currentTotalFGA}
             onChange={(e) =>
@@ -115,10 +131,14 @@ export function GlobalSettingsForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-white">
+          <label
+            htmlFor="totalPoss"
+            className="block text-sm font-medium text-white"
+          >
             Total Possessions
           </label>
           <input
+            id="totalPoss"
             type="number"
             value={formData.currentTotalPoss}
             onChange={(e) =>
@@ -132,8 +152,14 @@ export function GlobalSettingsForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-white">Pace</label>
+          <label
+            htmlFor="pace"
+            className="block text-sm font-medium text-white"
+          >
+            Pace
+          </label>
           <input
+            id="pace"
             type="number"
             value={formData.pace}
             onChange={(e) =>
@@ -147,10 +173,14 @@ export function GlobalSettingsForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-white">
+          <label
+            htmlFor="simplePace"
+            className="block text-sm font-medium text-white"
+          >
             Simple Pace
           </label>
           <input
+            id="simplePace"
             type="number"
             value={formData.simplePace}
             onChange={(e) =>
@@ -164,10 +194,14 @@ export function GlobalSettingsForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-white">
+          <label
+            htmlFor="mathPace"
+            className="block text-sm font-medium text-white"
+          >
             Math Pace
           </label>
           <input
+            id="mathPace"
             type="number"
             value={formData.mathPace}
             onChange={(e) =>

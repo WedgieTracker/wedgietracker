@@ -13,13 +13,13 @@ export default function PrivacyPage() {
     <PageLayout showCircleMenu={false}>
       <div className="flex flex-1 flex-col">
         <div className="container mx-auto max-w-4xl px-4 py-8 text-white">
-          <h1 className="mb-8 text-4xl font-bold text-yellow">
+          <h1 className="text-yellow mb-8 text-4xl font-bold">
             Privacy Policy
           </h1>
 
           <div className="space-y-6">
             <section>
-              <h2 className="mb-4 text-2xl font-bold text-pink">
+              <h2 className="text-pink mb-4 text-2xl font-bold">
                 Introduction
               </h2>
               <p>
@@ -31,11 +31,11 @@ export default function PrivacyPage() {
             </section>
 
             <section>
-              <h2 className="mb-4 text-2xl font-bold text-pink">
+              <h2 className="text-pink mb-4 text-2xl font-bold">
                 Information We Collect
               </h2>
               <div className="space-y-4">
-                <h3 className="text-xl font-semibold text-yellow">
+                <h3 className="text-yellow text-xl font-semibold">
                   Personal Information
                 </h3>
                 <ul className="list-inside list-disc space-y-2">
@@ -43,7 +43,7 @@ export default function PrivacyPage() {
                   <li>Name and shipping address (when you make a purchase)</li>
                 </ul>
 
-                <h3 className="text-xl font-semibold text-yellow">
+                <h3 className="text-yellow text-xl font-semibold">
                   Usage Data
                 </h3>
                 <p>
@@ -62,7 +62,7 @@ export default function PrivacyPage() {
             </section>
 
             <section>
-              <h2 className="mb-4 text-2xl font-bold text-pink">
+              <h2 className="text-pink mb-4 text-2xl font-bold">
                 How We Use Your Information
               </h2>
               <ul className="list-inside list-disc space-y-2">
@@ -75,7 +75,7 @@ export default function PrivacyPage() {
             </section>
 
             <section>
-              <h2 className="mb-4 text-2xl font-bold text-pink">
+              <h2 className="text-pink mb-4 text-2xl font-bold">
                 Third-Party Services
               </h2>
               <p className="mb-4">We use the following third-party services:</p>
@@ -89,7 +89,7 @@ export default function PrivacyPage() {
             </section>
 
             <section>
-              <h2 className="mb-4 text-2xl font-bold text-pink">
+              <h2 className="text-pink mb-4 text-2xl font-bold">
                 Data Storage and Security
               </h2>
               <p>
@@ -100,7 +100,7 @@ export default function PrivacyPage() {
             </section>
 
             <section>
-              <h2 className="mb-4 text-2xl font-bold text-pink">Your Rights</h2>
+              <h2 className="text-pink mb-4 text-2xl font-bold">Your Rights</h2>
               <p className="mb-4">You have the right to:</p>
               <ul className="list-inside list-disc space-y-2">
                 <li>Access your personal data</li>
@@ -111,7 +111,7 @@ export default function PrivacyPage() {
             </section>
 
             <section>
-              <h2 className="mb-4 text-2xl font-bold text-pink">Contact Us</h2>
+              <h2 className="text-pink mb-4 text-2xl font-bold">Contact Us</h2>
               <p>
                 For any privacy-related questions or concerns, please contact us
                 at:{" "}
@@ -125,7 +125,7 @@ export default function PrivacyPage() {
             </section>
 
             <section>
-              <h2 className="mb-4 text-2xl font-bold text-pink">
+              <h2 className="text-pink mb-4 text-2xl font-bold">
                 Updates to This Policy
               </h2>
               <p>

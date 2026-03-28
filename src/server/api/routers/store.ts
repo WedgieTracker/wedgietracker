@@ -1,30 +1,30 @@
 import { z } from "zod";
 import { count, ne } from "drizzle-orm";
-import { unstable_cache } from "next/cache";
+import { cacheTag, cacheLife } from "next/cache";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import { db } from "~/server/db";
 import { wedgie, tshirtOrder } from "~/server/schema";
 import { CACHE_TAGS } from "~/server/cache";
 import { stripe } from "~/server/services/stripe";
 
-const getCachedAvailableQuantity = unstable_cache(
-  async () => {
-    const [wedgieCount] = await db
-      .select({ count: count() })
-      .from(wedgie)
-      .where(ne(wedgie.seasonName, "GEMS"));
+async function getCachedAvailableQuantity() {
+  "use cache";
+  cacheTag(CACHE_TAGS.STORE_DATA);
+  cacheLife({ revalidate: 60 });
 
-    const [orderCount] = await db.select({ count: count() }).from(tshirtOrder);
+  const [wedgieCount] = await db
+    .select({ count: count() })
+    .from(wedgie)
+    .where(ne(wedgie.seasonName, "GEMS"));
 
-    const totalWedgies = wedgieCount?.count ?? 0;
-    const currentOrders = orderCount?.count ?? 0;
-    const inventory = totalWedgies - currentOrders;
-    const currentNumber = currentOrders + 1;
-    return { totalWedgies, currentOrders, inventory, currentNumber };
-  },
-  ["store-getAvailableQuantity"],
-  { tags: [CACHE_TAGS.STORE_DATA], revalidate: 60 },
-);
+  const [orderCount] = await db.select({ count: count() }).from(tshirtOrder);
+
+  const totalWedgies = wedgieCount?.count ?? 0;
+  const currentOrders = orderCount?.count ?? 0;
+  const inventory = totalWedgies - currentOrders;
+  const currentNumber = currentOrders + 1;
+  return { totalWedgies, currentOrders, inventory, currentNumber };
+}
 
 export const storeRouter = createTRPCRouter({
   createCheckoutSession: publicProcedure

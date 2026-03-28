@@ -73,7 +73,7 @@ export function TypeSearchInput({ value, onChange }: TypeSearchInputProps) {
         />
 
         {showDropdown && (
-          <div className="absolute z-10 mt-1 w-full rounded-md border border-gray-700 bg-darkpurple shadow-lg">
+          <div className="bg-darkpurple absolute z-10 mt-1 w-full rounded-md border border-gray-700 shadow-lg">
             {filteredTypes.map((type) => (
               <button
                 key={type.id}
@@ -110,12 +110,12 @@ export function TypeSearchInput({ value, onChange }: TypeSearchInputProps) {
         {selectedTypes.map((type) => (
           <div
             key={type}
-            className="flex items-center rounded bg-yellow px-2 py-1 text-sm text-darkpurple"
+            className="bg-yellow text-darkpurple flex items-center rounded px-2 py-1 text-sm"
           >
             <span>{type}</span>
             <button
               onClick={() => handleTypeRemove(type)}
-              className="ml-2 text-darkpurple hover:text-red-600"
+              className="text-darkpurple ml-2 hover:text-red-600"
             >
               ×
             </button>
@@ -126,7 +126,7 @@ export function TypeSearchInput({ value, onChange }: TypeSearchInputProps) {
       {isAddingNew && (
         <Dialog open={isAddingNew} onOpenChange={setIsAddingNew}>
           <div className="fixed inset-0 z-50 bg-black/50" />
-          <div className="fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2 rounded-lg bg-darkpurple p-6">
+          <div className="bg-darkpurple fixed top-1/2 left-1/2 z-50 -translate-x-1/2 -translate-y-1/2 rounded-lg p-6">
             <h2 className="mb-4 text-lg font-bold text-white">Add New Type</h2>
             <p className="mb-4 text-white">
               Are you sure you want to add &quot;{search}&quot; as a new type?

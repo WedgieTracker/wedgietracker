@@ -9,7 +9,7 @@ export function CourtPositionPicker({
   position,
   onChange,
 }: CourtPositionPickerProps) {
-  const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
     const x = ((event.clientX - rect.left) / rect.width) * 100;
     const y = ((event.clientY - rect.top) / rect.height) * 100;
@@ -28,8 +28,9 @@ export function CourtPositionPicker({
         className="relative border-2 border-white/10"
       >
         {/* Court background - Click handler moved here */}
-        <div
-          className="absolute inset-0 cursor-crosshair"
+        <button
+          type="button"
+          className="absolute inset-0 cursor-crosshair border-none bg-transparent p-0"
           onClick={handleClick}
           style={{
             backgroundImage: `url(https://res.cloudinary.com/wedgietracker/image/upload/v1735557904/assets/court_aazejm.svg)`,
@@ -37,17 +38,19 @@ export function CourtPositionPicker({
             backgroundPosition: "center center",
             backgroundRepeat: "no-repeat",
           }}
-        />
+        >
+          <span className="sr-only">Pick court position</span>
+        </button>
 
         {/* Position marker */}
         <div
-          className="absolute h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-yellow shadow-lg"
+          className="bg-yellow absolute h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full shadow-lg"
           style={{
             left: `${position.x}%`,
             top: `${position.y}%`,
           }}
         >
-          <div className="absolute left-1/2 top-1/2 h-[calc(100%-0.2rem)] w-[calc(100%-0.2rem)] -translate-x-1/2 -translate-y-1/2 rounded-full border border-darkpurple bg-yellow" />
+          <div className="border-darkpurple bg-yellow absolute top-1/2 left-1/2 h-[calc(100%-0.2rem)] w-[calc(100%-0.2rem)] -translate-x-1/2 -translate-y-1/2 rounded-full border" />
         </div>
       </div>
 

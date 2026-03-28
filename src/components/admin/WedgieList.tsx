@@ -43,7 +43,7 @@ export function WedgieList({ seasons, currentSeason }: WedgieListProps) {
         </div>
         <Link
           href="/admin/wedgies/new"
-          className="rounded-md border-2 border-yellow bg-darkpurple px-4 py-2 font-bold uppercase text-yellow transition-colors duration-300 hover:bg-yellow hover:text-black"
+          className="border-yellow bg-darkpurple text-yellow hover:bg-yellow rounded-md border-2 px-4 py-2 font-bold uppercase transition-colors duration-300 hover:text-black"
         >
           Add New Wedgie
         </Link>
@@ -53,7 +53,7 @@ export function WedgieList({ seasons, currentSeason }: WedgieListProps) {
         {wedgies?.map((wedgie) => (
           <div
             key={wedgie.id}
-            className="rounded-lg bg-white/10 p-6 text-white shadow-sm"
+            className="rounded-lg bg-white/10 p-6 text-white shadow-xs"
           >
             <h3 className="text-lg font-semibold">
               #{wedgie.number} - {wedgie.playerName}
@@ -65,7 +65,7 @@ export function WedgieList({ seasons, currentSeason }: WedgieListProps) {
             <div className="mt-3 flex space-x-4">
               <Link
                 href={`/admin/wedgies/${wedgie.id}`}
-                className="rounded-md bg-yellow px-4 py-1 font-bold uppercase text-black hover:bg-yellow/80"
+                className="bg-yellow hover:bg-yellow/80 rounded-md px-4 py-1 font-bold text-black uppercase"
               >
                 Edit
               </Link>
@@ -77,7 +77,7 @@ export function WedgieList({ seasons, currentSeason }: WedgieListProps) {
                     });
                   }
                 }}
-                className="rounded-md bg-red-500 px-4 py-1 font-bold uppercase text-white hover:bg-red-600"
+                className="rounded-md bg-red-500 px-4 py-1 font-bold text-white uppercase hover:bg-red-600"
               >
                 Delete
               </button>

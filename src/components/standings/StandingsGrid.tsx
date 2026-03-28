@@ -58,11 +58,11 @@ export function StandingsGrid({
   }
 
   return (
-    <Card className="w-full overflow-hidden border-none bg-transparent md:bg-darkpurple-light/30">
+    <Card className="md:bg-darkpurple-light/30 w-full overflow-hidden border-none bg-transparent">
       <div className="grid grid-cols-5 gap-3 p-0 md:gap-8 md:p-4">
         <div className="col-span-3">
           <h2
-            className="mb-2 pl-2 font-black leading-none text-yellow md:mb-3"
+            className="text-yellow mb-2 pl-2 leading-none font-black md:mb-3"
             style={{ fontSize: sizes.title }}
           >
             PLAYERS
@@ -72,7 +72,7 @@ export function StandingsGrid({
               <Link
                 key={player.name}
                 href={`/all-wedgies?wp=${player.name}&ws=${currentSeason || "all"}`}
-                className="group flex cursor-pointer items-center justify-between rounded-sm bg-darkpurple-light/30 p-1.5 transition-all duration-300 hover:bg-darkpurple-light/80 md:p-2"
+                className="group bg-darkpurple-light/30 hover:bg-darkpurple-light/80 flex cursor-pointer items-center justify-between rounded-sm p-1.5 transition-all duration-300 md:p-2"
               >
                 <div className="flex items-baseline gap-2">
                   <span
@@ -87,14 +87,14 @@ export function StandingsGrid({
                     {playerRanks[index]?.rank}
                   </span>
                   <span
-                    className="font-black text-white transition-all duration-300 group-hover:text-yellow"
+                    className="group-hover:text-yellow font-black text-white transition-all duration-300"
                     style={{ fontSize: sizes.name }}
                   >
                     {player.name}
                   </span>
                 </div>
                 <span
-                  className="pl-2 font-black text-yellow"
+                  className="text-yellow pl-2 font-black"
                   style={{ fontSize: sizes.name }}
                 >
                   {player.count}
@@ -106,7 +106,7 @@ export function StandingsGrid({
 
         <div className="col-span-2">
           <h2
-            className="mb-2 pl-2 font-black leading-none text-yellow md:mb-3"
+            className="text-yellow mb-2 pl-2 leading-none font-black md:mb-3"
             style={{ fontSize: sizes.title }}
           >
             TEAMS
@@ -116,7 +116,7 @@ export function StandingsGrid({
               <Link
                 key={team.name}
                 href={`/all-wedgies?wt=${team.name}&ws=${currentSeason || "all"}`}
-                className="group flex cursor-pointer items-center justify-between rounded-sm bg-darkpurple-light/30 p-1.5 transition-all duration-300 hover:bg-darkpurple-light/80 md:p-2"
+                className="group bg-darkpurple-light/30 hover:bg-darkpurple-light/80 flex cursor-pointer items-center justify-between rounded-sm p-1.5 transition-all duration-300 md:p-2"
               >
                 <div className="flex items-baseline gap-2">
                   <span
@@ -131,14 +131,14 @@ export function StandingsGrid({
                     {teamRanks[index]?.rank}
                   </span>
                   <span
-                    className="font-black text-white transition-all duration-300 group-hover:text-yellow"
+                    className="group-hover:text-yellow font-black text-white transition-all duration-300"
                     style={{ fontSize: sizes.name }}
                   >
                     {team.name}
                   </span>
                 </div>
                 <span
-                  className="pl-2 font-black text-yellow"
+                  className="text-yellow pl-2 font-black"
                   style={{ fontSize: sizes.name }}
                 >
                   {team.count}

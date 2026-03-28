@@ -13,12 +13,6 @@ import { sendDonationConfirmationEmail } from "~/server/services/email";
 import { stripe } from "~/server/services/stripe";
 import type { Color } from "~/types/product";
 
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
-
 const TSHIRT_IMAGES: Record<Color, string[]> = {
   Black: [
     "https://res.cloudinary.com/wedgietracker/image/upload/v1737220662/mockups-tshirt/folded-black_xyfesd.png",
@@ -112,7 +106,7 @@ export async function POST(req: Request) {
           })
           .returning();
 
-        revalidateTag(CACHE_TAGS.STORE_DATA);
+        revalidateTag(CACHE_TAGS.STORE_DATA, "max");
 
         const [orderCountResult] = await db
           .select({ count: count() })

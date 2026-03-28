@@ -32,7 +32,7 @@ export function PlayerList() {
         </div>
         <Link
           href="/admin/players/new"
-          className="rounded-md border-2 border-yellow bg-darkpurple px-4 py-2 font-bold uppercase text-yellow transition-colors duration-300 hover:bg-yellow hover:text-black"
+          className="border-yellow bg-darkpurple text-yellow hover:bg-yellow rounded-md border-2 px-4 py-2 font-bold uppercase transition-colors duration-300 hover:text-black"
         >
           Add New Player
         </Link>
@@ -42,7 +42,7 @@ export function PlayerList() {
         {filteredPlayers?.map((player) => (
           <div
             key={player.id}
-            className="rounded-lg bg-white/10 p-6 text-white shadow-sm"
+            className="rounded-lg bg-white/10 p-6 text-white shadow-xs"
           >
             <h3 className="text-lg font-semibold">{player.name}</h3>
             <p className="mt-2 text-sm text-gray-300">
@@ -51,7 +51,7 @@ export function PlayerList() {
             <div className="mt-4 flex space-x-4">
               <Link
                 href={`/admin/players/${player.id}`}
-                className="rounded-md border-2 border-yellow bg-yellow px-4 py-1 font-bold uppercase text-black transition-colors duration-300 hover:bg-yellow/80"
+                className="border-yellow bg-yellow hover:bg-yellow/80 rounded-md border-2 px-4 py-1 font-bold text-black uppercase transition-colors duration-300"
               >
                 Edit
               </Link>
@@ -63,7 +63,7 @@ export function PlayerList() {
                     });
                   }
                 }}
-                className="rounded-md border-2 border-red-500 bg-red-500 px-4 py-1 font-bold uppercase text-white transition-colors duration-300 hover:bg-red-600"
+                className="rounded-md border-2 border-red-500 bg-red-500 px-4 py-1 font-bold text-white uppercase transition-colors duration-300 hover:bg-red-600"
               >
                 Delete
               </button>

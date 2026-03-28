@@ -27,12 +27,12 @@ export function StandingsFilters({
 
   return (
     <div
-      className={`flex w-full items-start justify-between rounded-xl bg-pink-darker/10 p-4 ${
+      className={`bg-pink-darker/10 flex w-full items-start justify-between rounded-xl p-4 ${
         isLoading ? "opacity-20" : ""
       }`}
     >
       <div className="flex w-full flex-col items-start gap-4 md:flex-row md:gap-8">
-        <span className="mt-0 flex items-center gap-1 text-xs font-bold tracking-wide text-yellow md:mt-2.5">
+        <span className="text-yellow mt-0 flex items-center gap-1 text-xs font-bold tracking-wide md:mt-2.5">
           FILTER BY
           <svg
             className="h-3 w-3"
@@ -52,20 +52,20 @@ export function StandingsFilters({
 
         <div className="flex gap-2">
           {/* Season Filter */}
-          <div className="relative rounded-md bg-yellow-darker/20 p-2">
+          <div className="bg-yellow-darker/20 relative rounded-md p-2">
             <button
-              className={`flex items-center gap-2 rounded-md px-0 py-0 text-sm font-bold uppercase text-yellow`}
+              className={`text-yellow flex items-center gap-2 rounded-md px-0 py-0 text-sm font-bold uppercase`}
             >
               <span>Season</span>
               <span
-                className={`relative flex h-5 w-5 items-center justify-center rounded-full border-[1px] border-yellow leading-none`}
+                className={`border-yellow relative flex h-5 w-5 items-center justify-center rounded-full border leading-none`}
               >
-                <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+                <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
                   +
                 </span>
               </span>
             </button>
-            <span className="mt-2 inline-block rounded-md bg-yellow px-2 py-1 font-bold text-darkpurple">
+            <span className="bg-yellow text-darkpurple mt-2 inline-block rounded-md px-2 py-1 font-bold">
               {selectedSeason || "All Seasons"}
             </span>
             <select
@@ -83,24 +83,29 @@ export function StandingsFilters({
           </div>
 
           {/* Team Count Switch */}
-          <div className="relative rounded-md bg-yellow-darker/20 p-2">
+          <div className="bg-yellow-darker/20 relative rounded-md p-2">
             <div className="flex flex-col gap-2">
-              <span className="text-sm font-bold uppercase text-yellow">
+              <span className="text-yellow text-sm font-bold uppercase">
                 Team Counting
               </span>
-              <label className="relative inline-flex cursor-pointer items-center">
+              <label
+                htmlFor="teamCountingToggle"
+                className="relative inline-flex cursor-pointer items-center"
+              >
+                <span className="sr-only">Toggle team counting</span>
                 <div className="flex items-center gap-2">
                   <span className="relative">
                     <input
+                      id="teamCountingToggle"
                       type="checkbox"
                       checked={includeOpponents}
                       onChange={(e) => setIncludeOpponents(e.target.checked)}
                       className="peer sr-only"
                     />
-                    <div className="peer h-6 w-11 rounded-full bg-darkpurple-lighter after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-pink after:transition-all after:content-[''] peer-checked:bg-darkpurple-lighter peer-checked:after:translate-x-full peer-checked:after:bg-yellow"></div>
+                    <div className="peer bg-darkpurple-lighter after:bg-pink peer-checked:bg-darkpurple-lighter peer-checked:after:bg-yellow h-6 w-11 rounded-full after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:transition-all after:content-[''] peer-checked:after:translate-x-full"></div>
                   </span>
                   <span>
-                    <span className="block w-16 text-[10px] font-medium uppercase text-white">
+                    <span className="block w-16 text-[10px] font-medium text-white uppercase">
                       {includeOpponents
                         ? "Including Opponents"
                         : "Player's Team Only"}

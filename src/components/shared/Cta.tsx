@@ -18,11 +18,11 @@ export function Cta({ links, variant = "large" }: CtaProps) {
   return (
     <div className={`${variant === "small" ? "w-full" : "mx-auto max-w-2xl"}`}>
       <div
-        className={`flex flex-col items-center gap-2 rounded-t-3xl bg-yellow py-6 ${
+        className={`bg-yellow flex flex-col items-center gap-2 rounded-t-3xl py-6 ${
           variant === "small" ? "px-8" : "px-8"
         }`}
       >
-        <h2 className="text-center text-lg font-bold text-darkpurple">
+        <h2 className="text-darkpurple text-center text-lg font-bold">
           Find out more
         </h2>
 
@@ -31,11 +31,11 @@ export function Cta({ links, variant = "large" }: CtaProps) {
             <a
               key={link.url}
               href={link.url}
-              className={`order-2 whitespace-nowrap border-2 border-darkpurple bg-darkpurple px-4 text-center font-semibold uppercase tracking-wide text-yellow transition-colors hover:bg-yellow hover:text-darkpurple ${
+              className={`border-darkpurple bg-darkpurple text-yellow hover:bg-yellow hover:text-darkpurple order-2 border-2 px-4 text-center font-semibold tracking-wide whitespace-nowrap uppercase transition-colors ${
                 links.indexOf(link) === 0
-                  ? "rounded-b-md rounded-t-xl sm:rounded-l-xl sm:rounded-r-md"
+                  ? "rounded-t-xl rounded-b-md sm:rounded-l-xl sm:rounded-r-md"
                   : links.indexOf(link) === links.length - 1
-                    ? "rounded-b-xl rounded-t-md sm:rounded-l-md sm:rounded-r-xl"
+                    ? "rounded-t-md rounded-b-xl sm:rounded-l-md sm:rounded-r-xl"
                     : "rounded-md"
               } ${variant === "small" ? "py-1 text-sm" : "py-1 text-base"}`}
               style={{
@@ -47,8 +47,8 @@ export function Cta({ links, variant = "large" }: CtaProps) {
           ))}
         </div>
       </div>
-      <div className="flex flex-col items-center gap-2 rounded-b-3xl border-t-2 border-darkpurple bg-yellow px-8 py-6">
-        <p className="text-center text-xs text-darkpurple md:text-sm">
+      <div className="border-darkpurple bg-yellow flex flex-col items-center gap-2 rounded-b-3xl border-t-2 px-8 py-6">
+        <p className="text-darkpurple text-center text-xs md:text-sm">
           Subscribe to our newsletter to get updates on the latest wedgies and
           other news.
         </p>
@@ -68,13 +68,13 @@ export function Cta({ links, variant = "large" }: CtaProps) {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
               disabled={loading}
-              className="focus:ring-none flex-1 rounded-t-xl border-2 border-darkpurple bg-darkpurple px-4 py-1 text-center text-yellow placeholder:text-yellow focus:outline-none sm:!rounded-l-xl sm:rounded-t-none sm:text-left"
+              className="focus:ring-none border-darkpurple bg-darkpurple text-yellow placeholder:text-yellow flex-1 rounded-t-xl border-2 px-4 py-1 text-center focus:outline-hidden sm:rounded-t-none sm:rounded-l-xl! sm:text-left"
               required
             />
             <button
               type="submit"
               disabled={loading}
-              className="rounded-b-xl border-2 border-darkpurple bg-darkpurple px-6 py-1 font-black uppercase text-yellow transition-all duration-300 hover:bg-yellow hover:text-darkpurple disabled:cursor-not-allowed disabled:opacity-50 sm:!rounded-r-xl sm:rounded-b-none"
+              className="border-darkpurple bg-darkpurple text-yellow hover:bg-yellow hover:text-darkpurple rounded-b-xl border-2 px-6 py-1 font-black uppercase transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-50 sm:rounded-r-xl! sm:rounded-b-none"
             >
               Subscribe
             </button>

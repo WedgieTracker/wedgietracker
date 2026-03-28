@@ -250,7 +250,7 @@ export function ShareButtons({ url, title }: ShareButtonsProps) {
         rel="noopener noreferrer"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        className="flex h-7 w-7 items-center justify-center gap-1 rounded-md bg-white text-xs font-bold uppercase text-black transition-all duration-300 hover:bg-black/20 sm:h-8 sm:w-8"
+        className="flex h-7 w-7 items-center justify-center gap-1 rounded-md bg-white text-xs font-bold text-black uppercase transition-all duration-300 hover:bg-black/20 sm:h-8 sm:w-8"
       >
         <XformerlyTwitter isHovered={isHovered} />
       </a>
@@ -259,7 +259,7 @@ export function ShareButtons({ url, title }: ShareButtonsProps) {
         href={shareLinks.reddit}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex h-7 w-7 items-center justify-center gap-1 rounded-md bg-white text-xs font-bold uppercase text-white transition-all duration-300 hover:bg-[#FF4500]/20 sm:h-8 sm:w-8"
+        className="flex h-7 w-7 items-center justify-center gap-1 rounded-md bg-white text-xs font-bold text-white uppercase transition-all duration-300 hover:bg-[#FF4500]/20 sm:h-8 sm:w-8"
       >
         <Reddit />
       </a>
@@ -267,7 +267,7 @@ export function ShareButtons({ url, title }: ShareButtonsProps) {
         href={shareLinks.bluesky}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex h-7 w-7 items-center justify-center gap-1 rounded-md bg-white text-xs font-bold uppercase text-black transition-all duration-300 hover:bg-[#1185FE]/20 sm:h-8 sm:w-8"
+        className="flex h-7 w-7 items-center justify-center gap-1 rounded-md bg-white text-xs font-bold text-black uppercase transition-all duration-300 hover:bg-[#1185FE]/20 sm:h-8 sm:w-8"
       >
         <Bluesky />
       </a>

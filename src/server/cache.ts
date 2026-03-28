@@ -7,9 +7,9 @@ export const CACHE_TAGS = {
 } as const;
 
 export function invalidateWedgieData() {
-  revalidateTag(CACHE_TAGS.WEDGIE_DATA);
+  revalidateTag(CACHE_TAGS.WEDGIE_DATA, "max");
 }
 
 export function invalidateStoreData() {
-  revalidateTag(CACHE_TAGS.STORE_DATA);
+  revalidateTag(CACHE_TAGS.STORE_DATA, "max");
 }

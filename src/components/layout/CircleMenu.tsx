@@ -20,15 +20,15 @@ export function CircleMenu() {
 
   return (
     <div
-      className={`fixed left-0 top-0 z-[50] h-[100svh] w-[100vw] ${
+      className={`fixed top-0 left-0 z-50 h-svh w-screen ${
         isMenuOpen ? "pointer-events-auto" : "pointer-events-none"
       }`}
     >
       {/* Dark overlay */}
       {/* <div
-        className={`fixed left-0 top-0 z-[50] h-[100svh] w-[100vw] transition-all duration-300 ${
+        className={`fixed left-0 top-0 z-50 h-svh w-screen transition-all duration-300 ${
           isMenuOpen
-            ? "opacity-100 backdrop-blur-[4px]"
+            ? "opacity-100 backdrop-blur-xs"
             : "pointer-events-none opacity-0 backdrop-blur-[0px]"
         }`}
         onClick={() => setIsMenuOpen(false)}
@@ -41,7 +41,7 @@ export function CircleMenu() {
 
       {/* Menu */}
       <div
-        className={`fixed right-0 top-0 z-[50] h-[100svh] w-[100vw] transition-opacity duration-300 ${
+        className={`fixed top-0 right-0 z-50 h-svh w-screen transition-opacity duration-300 ${
           isMenuOpen
             ? "pointer-events-auto opacity-100"
             : "pointer-events-none opacity-0"
@@ -49,7 +49,7 @@ export function CircleMenu() {
       >
         {/* Yellow circle background */}
         <div
-          className="fixed right-0 top-0 h-[800px] w-[800px] -translate-y-1/2 translate-x-1/2 rounded-full bg-[#e5ff00] transition-transform duration-500 ease-in-out md:top-5"
+          className="fixed top-0 right-0 h-[800px] w-[800px] translate-x-1/2 -translate-y-1/2 rounded-full bg-[#e5ff00] transition-transform duration-500 ease-in-out md:top-5"
           style={{
             transform: isMenuOpen
               ? "translate(35%, -50%) scale(1)"
@@ -59,7 +59,7 @@ export function CircleMenu() {
 
         {/* Menu items */}
         <nav
-          className={`fixed right-0 top-16 flex items-center justify-center transition-opacity delay-200 duration-300 md:pt-1 ${
+          className={`fixed top-16 right-0 flex items-center justify-center transition-opacity delay-200 duration-300 md:pt-1 ${
             isMenuOpen ? "opacity-100" : "opacity-0"
           }`}
         >
@@ -68,7 +68,7 @@ export function CircleMenu() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="text-md font-bold text-black transition-colors hover:text-pink md:text-lg"
+                className="text-md hover:text-pink font-bold text-black transition-colors md:text-lg"
                 onClick={() => setIsMenuOpen(false)}
               >
                 {item.label}
@@ -77,19 +77,19 @@ export function CircleMenu() {
 
             {/* Social links */}
             <div
-              className={`mt-2 text-xs font-bold uppercase text-black transition-opacity delay-300 duration-300 ${
+              className={`mt-2 text-xs font-bold text-black uppercase transition-opacity delay-300 duration-300 ${
                 isMenuOpen ? "opacity-100" : "opacity-0"
               }`}
             >
               Find us on
-              <div className="-mr-2 mt-1 flex gap-2 md:gap-3">
+              <div className="mt-1 -mr-2 flex gap-2 md:gap-3">
                 {socialLinks.map((social) => (
                   <a
                     key={social.href}
                     href={social.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="rounded-full p-2 text-lg text-black transition-colors hover:bg-darkpurple"
+                    className="hover:bg-darkpurple rounded-full p-2 text-lg text-black transition-colors"
                     onClick={() => setIsMenuOpen(false)}
                     onMouseEnter={() => setHoveredSocial(social.href)}
                     onMouseLeave={() => setHoveredSocial(null)}

@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import Link from "next/link";
 import { PageLayout } from "~/components/layout/PageLayout";
 
@@ -11,6 +12,7 @@ export default async function SuccessPage({
 }: {
   searchParams: Promise<SearchParams>;
 }) {
+  await connection();
   const params = await searchParams;
   const sessionId = params.session_id;
   const coffee = params.coffee;
@@ -18,7 +20,7 @@ export default async function SuccessPage({
     <PageLayout showCircleMenu={false}>
       <div className="flex flex-1 items-center justify-center px-4">
         <div className="max-w-md text-center">
-          <h1 className="mb-4 text-4xl font-bold text-yellow">Thank You!</h1>
+          <h1 className="text-yellow mb-4 text-4xl font-bold">Thank You!</h1>
           {coffee === "true" ? (
             <p className="mb-4 text-xl text-white">
               Your coffee donation has been confirmed.
@@ -30,9 +32,9 @@ export default async function SuccessPage({
           )}
 
           {sessionId && coffee !== "true" && (
-            <div className="mb-6 rounded-lg bg-darkpurple-light p-4">
+            <div className="bg-darkpurple-light mb-6 rounded-lg p-4">
               <p className="mb-2 text-sm text-white/60">Order ID</p>
-              <p className="break-all font-mono text-sm text-white">
+              <p className="font-mono text-sm break-all text-white">
                 {sessionId}
               </p>
             </div>
@@ -52,7 +54,7 @@ export default async function SuccessPage({
 
           <Link
             href="/store"
-            className="rounded-lg bg-pink px-8 py-4 font-bold text-white transition-all hover:bg-pink/80"
+            className="bg-pink hover:bg-pink/80 rounded-lg px-8 py-4 font-bold text-white transition-all"
           >
             Return to Store
           </Link>

@@ -1,6 +1,10 @@
 import { z } from "zod";
 import { like, asc } from "drizzle-orm";
-import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+import {
+  createTRPCRouter,
+  publicProcedure,
+  protectedProcedure,
+} from "~/server/api/trpc";
 import { type } from "~/server/schema";
 
 export const typeRouter = createTRPCRouter({
@@ -19,7 +23,7 @@ export const typeRouter = createTRPCRouter({
         .limit(10);
     }),
 
-  create: publicProcedure
+  create: protectedProcedure
     .input(z.object({ name: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const [result] = await ctx.db.insert(type).values(input).returning();

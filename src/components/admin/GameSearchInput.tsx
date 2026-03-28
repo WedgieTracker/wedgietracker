@@ -82,9 +82,10 @@ export function GameSearchInput({
       {isOpen && games.data && (
         <div className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-gray-800 shadow-lg">
           {games.data.map((game) => (
-            <div
+            <button
+              type="button"
               key={game.id}
-              className="cursor-pointer px-4 py-2 text-white hover:bg-gray-700"
+              className="w-full cursor-pointer px-4 py-2 text-left text-white hover:bg-gray-700"
               onClick={() => handleGameSelect(game)}
             >
               <div className="font-bold">{game.name.split(" - ")[0]}</div>
@@ -102,7 +103,7 @@ export function GameSearchInput({
                   timeZoneName: "short",
                 })}
               </div>
-            </div>
+            </button>
           ))}
         </div>
       )}

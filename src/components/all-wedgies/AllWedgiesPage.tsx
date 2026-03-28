@@ -97,6 +97,7 @@ export function AllWedgiesPage() {
       ...filters,
       season: defaultSeason,
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [global, hasSeasonFromUrl]);
 
   // Only show loading state while data is loading
@@ -146,8 +147,8 @@ export function AllWedgiesPage() {
   return (
     <div className="container mx-auto max-w-7xl text-white">
       {shouldShowPreviousSeason && (
-        <div className="mb-4 rounded-lg border border-pink/30 bg-pink/20 p-4 text-center">
-          <p className="text-sm font-bold text-pink">
+        <div className="border-pink/30 bg-pink/20 mb-4 rounded-lg border p-4 text-center">
+          <p className="text-pink text-sm font-bold">
             Current season has no wedgies yet. Showing {previousSeason?.name}{" "}
             season wedgies.
           </p>
