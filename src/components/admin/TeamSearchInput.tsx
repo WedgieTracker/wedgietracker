@@ -25,7 +25,7 @@ export function TeamSearchInput({ value, onChange }: TeamSearchInputProps) {
   const handleAddNewTeam = async () => {
     try {
       const result = await createTeamMutation.mutateAsync({ name: search });
-      onChange(result.name);
+      onChange(result!.name);
       setIsAddingNew(false);
       setShowDropdown(false);
     } catch (error) {

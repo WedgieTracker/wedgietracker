@@ -6,7 +6,7 @@ import {
 } from "~/components/ui/dialog";
 
 import { Cross2Icon } from "@radix-ui/react-icons";
-import type { Wedgie } from "@prisma/client";
+import type { Wedgie } from "~/types/wedgie";
 import { useState } from "react";
 import { useToast } from "~/hooks/use-toast";
 import { ShareButtons } from "~/components/ShareButtons";

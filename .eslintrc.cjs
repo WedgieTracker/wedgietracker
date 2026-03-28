@@ -10,7 +10,7 @@ const config = {
     "plugin:@typescript-eslint/recommended-type-checked",
     "plugin:@typescript-eslint/stylistic-type-checked",
   ],
-  ignorePatterns: ["src/components/admin/WedgieSocialShareWrapper.tsx"],
+  ignorePatterns: ["src/server/dev", "src/components/dev", "scripts"],
   rules: {
     "@next/next/no-img-element": "off",
     "@typescript-eslint/array-type": "off",

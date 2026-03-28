@@ -1,20 +1,22 @@
+import { ne, desc, eq, count } from "drizzle-orm";
 import { unstable_cache } from "next/cache";
 
 import {
   createTRPCRouter,
   publicProcedure,
-  // protectedProcedure,
 } from "~/server/api/trpc";
 
 import { db } from "~/server/db";
+import { season, wedgie } from "~/server/schema";
 import { CACHE_TAGS } from "~/server/cache";
+import { buildTeamStandings } from "~/server/db-helpers";
 
 const getCachedAll = unstable_cache(
   async () => {
-    const seasons = await db.season.findMany({
-      orderBy: { createdAt: "desc" },
+    const seasons = await db.query.season.findMany({
+      orderBy: desc(season.createdAt),
     });
-    return seasons ?? null;
+    return seasons;
   },
   ["season-getAll"],
   { tags: [CACHE_TAGS.WEDGIE_DATA], revalidate: 300 },
@@ -22,58 +24,37 @@ const getCachedAll = unstable_cache(
 
 const getCachedAllWithStats = unstable_cache(
   async () => {
-    const seasons = await db.season.findMany({
-      where: { NOT: { name: "GEMS" } },
-      orderBy: { name: "desc" },
+    const seasons = await db.query.season.findMany({
+      where: ne(season.name, "GEMS"),
+      orderBy: desc(season.name),
     });
 
     const seasonsWithStats = await Promise.all(
-      seasons.map(async (season) => {
-        const wedgies = await db.wedgie.findMany({
-          where: { seasonName: season.name },
-          select: { teamName: true, teamAgainstName: true },
-        });
+      seasons.map(async (s) => {
+        const wedgies = await db
+          .select({ teamName: wedgie.teamName, teamAgainstName: wedgie.teamAgainstName })
+          .from(wedgie)
+          .where(eq(wedgie.seasonName, s.name));
 
-        const topPlayers = await db.wedgie.groupBy({
-          by: ["playerName"],
-          where: { seasonName: season.name },
-          _count: { playerName: true },
-          orderBy: { _count: { playerName: "desc" } },
-          take: 5,
-        });
-
-        const teamCounts = new Map<string, number>();
-        wedgies.forEach((wedgie) => {
-          teamCounts.set(
-            wedgie.teamName,
-            (teamCounts.get(wedgie.teamName) ?? 0) + 1,
-          );
-          teamCounts.set(
-            wedgie.teamAgainstName,
-            (teamCounts.get(wedgie.teamAgainstName) ?? 0) + 1,
-          );
-        });
-
-        const topTeams = Array.from(teamCounts.entries())
-          .sort((a, b) => {
-            const countDiff = b[1] - a[1];
-            if (countDiff !== 0) return countDiff;
-            return a[0].localeCompare(b[0]);
+        const topPlayers = await db
+          .select({
+            playerName: wedgie.playerName,
+            count: count(),
           })
-          .slice(0, 5)
-          .map(([name, count]) => ({ name, count }));
+          .from(wedgie)
+          .where(eq(wedgie.seasonName, s.name))
+          .groupBy(wedgie.playerName)
+          .orderBy(desc(count()))
+          .limit(5);
 
         return {
-          ...season,
+          ...s,
           totalWedgies: wedgies.length,
           topPlayers: topPlayers.map((p) => ({
             name: p.playerName,
-            count: p._count.playerName,
+            count: p.count,
           })),
-          topTeams: topTeams.map((t) => ({
-            name: t.name,
-            count: t.count,
-          })),
+          topTeams: buildTeamStandings(wedgies, { limit: 5 }),
         };
       }),
     );
@@ -86,19 +67,15 @@ const getCachedAllWithStats = unstable_cache(
 
 const getCachedAllWithGameCount = unstable_cache(
   async () => {
-    const seasonsWithGames = await db.season.findMany({
-      select: {
-        id: true,
-        name: true,
-        games: { select: { id: true } },
-      },
-      orderBy: { name: "desc" },
+    const seasonsWithGames = await db.query.season.findMany({
+      orderBy: desc(season.name),
+      with: { games: { columns: { id: true } } },
     });
 
-    return seasonsWithGames.map((season) => ({
-      id: season.id,
-      name: season.name,
-      _count: { games: season.games.length },
+    return seasonsWithGames.map((s) => ({
+      id: s.id,
+      name: s.name,
+      _count: { games: s.games.length },
     }));
   },
   ["season-getAllWithGameCount"],
@@ -107,9 +84,9 @@ const getCachedAllWithGameCount = unstable_cache(
 
 const getCachedSeasonalProgressChartData = unstable_cache(
   async () => {
-    return db.season.findMany({
-      include: { wedgies: true, games: true },
-      where: { NOT: { name: "GEMS" } },
+    return db.query.season.findMany({
+      where: ne(season.name, "GEMS"),
+      with: { wedgies: true, games: true },
     });
   },
   ["season-getSeasonalProgressChartData"],

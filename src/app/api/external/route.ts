@@ -1,24 +1,23 @@
 import { NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
-import { PrismaClient } from "@prisma/client";
+import { eq, inArray } from "drizzle-orm";
+import { db } from "~/server/db";
+import { global, season, game } from "~/server/schema";
 import { env } from "~/env";
 import { calculatePace } from "~/utils/paceCalculator";
 import { CACHE_TAGS } from "~/server/cache";
-const prisma = new PrismaClient();
 
 const wedgieTrackerApiKey = env.WEDGIETRACKER_API_KEY;
 
 export async function GET() {
-  const global = await prisma.global.findFirst({
-    where: {
-      id: 1,
-    },
-    select: {
+  const globalRow = await db.query.global.findFirst({
+    where: eq(global.id, 1),
+    columns: {
       currentTotalWedgies: true,
       liveGames: true,
     },
   });
-  return NextResponse.json(global);
+  return NextResponse.json(globalRow);
 }
 
 export async function POST(request: Request) {
@@ -29,16 +28,11 @@ export async function POST(request: Request) {
   }
 
   // get the current season
-  const currentSeason = await prisma.global.findFirst({
-    where: {
-      id: 1,
-    },
-    select: {
-      currentSeasonId: true,
-    },
+  const currentSeason = await db.query.global.findFirst({
+    where: eq(global.id, 1),
+    columns: { currentSeasonId: true },
   });
 
-  // parse the request body
   const body = (await request.json()) as {
     newWedgieCount?: number;
     newTotalGamesCount?: number;
@@ -67,168 +61,110 @@ export async function POST(request: Request) {
 
   console.log("Update request from rasperry pi", body);
 
-  // if the request has a newWedgieCount, update the global wedgie count
+  // Build a single global update object to minimize DB round-trips
+  const globalUpdate: Record<string, unknown> = {};
+
   if (newWedgieCount && newWedgieCount > 0) {
-    // get the total games for the current season
-    const global = await prisma.global.findFirst({
-      where: { id: 1 },
-      include: { currentSeason: true },
-    });
-
-    if (!global) {
-      return NextResponse.json(
-        { error: "Global stats not found" },
-        { status: 500 },
-      );
-    }
-
-    await prisma.global.update({
-      where: { id: 1 },
-      data: { currentTotalWedgies: newWedgieCount },
-    });
-
-    // update the pace
-    const pace = await calculatePace({
-      currentTotalWedgies: newWedgieCount,
-      currentTotalGames: global.currentTotalGames,
-    });
-
-    if (!pace.medianPace) {
-      return NextResponse.json({ error: "Pace update error" }, { status: 500 });
-    }
-
-    await prisma.global.update({
-      where: { id: 1 },
-      data: {
-        simplePace: pace.simplePace,
-        mathPace: pace.rmPace,
-        pace: pace.medianPace,
-      },
-    });
+    globalUpdate.currentTotalWedgies = newWedgieCount;
   }
-
-  // if the request has a newTotalGamesCount, update the global total games count
   if (newTotalGamesCount && newTotalGamesCount > 0) {
-    await prisma.global.update({
-      where: { id: 1 },
-      data: { currentTotalGames: newTotalGamesCount },
-    });
-    // update the current season total games
-    await prisma.season.update({
-      where: { id: currentSeason?.currentSeasonId },
-      data: { totalGames: newTotalGamesCount },
-    });
-  }
+    globalUpdate.currentTotalGames = newTotalGamesCount;
 
-  // if the request has a newLiveGames, update the global live games count
+    if (currentSeason?.currentSeasonId) {
+      await db
+        .update(season)
+        .set({ totalGames: newTotalGamesCount })
+        .where(eq(season.id, currentSeason.currentSeasonId));
+    }
+  }
   if (newLiveGames || newLiveGames === false) {
-    await prisma.global.update({
-      where: { id: 1 },
-      data: { liveGames: newLiveGames },
-    });
+    globalUpdate.liveGames = newLiveGames;
+  }
+  if (newTotalMinutes && newTotalMinutes > 0) {
+    globalUpdate.currentTotalMinutes = newTotalMinutes;
+  }
+  if (newTotalPoss) {
+    globalUpdate.currentTotalPoss = newTotalPoss;
+  }
+  if (newTotalFGA) {
+    globalUpdate.currentTotalFGA = newTotalFGA;
   }
 
-  // if the request has newGames array, add each game to the database
+  // Process new games
   if (newGames && newGames.length > 0) {
-    // Update the type expectation to include 'live' property
-    const existingGames = await prisma.game.findMany({
-      where: {
-        name: { in: newGames.map((game) => game.name) },
-      },
-      select: {
-        id: true,
-        name: true,
-      },
-    });
+    const existingGames = await db
+      .select({ id: game.id, name: game.name })
+      .from(game)
+      .where(inArray(game.name, newGames.map((g) => g.name)));
 
-    // Create a map of existing game names to their IDs for faster lookup
     const existingGamesMap = new Map(
-      existingGames.map((game) => [game.name, game.id]),
+      existingGames.map((g) => [g.name, g.id]),
     );
 
-    // Separate games into new ones to create and existing ones to update
     const newGamesToCreate = [];
     const existingGamesToUpdate = [];
 
-    for (const game of newGames) {
-      // Add live property to the expected game structure
-      const gameWithLive = {
-        ...game,
-      };
-
-      if (existingGamesMap.has(game.name)) {
-        // For existing games, we'll update the live status
+    for (const g of newGames) {
+      if (existingGamesMap.has(g.name)) {
         existingGamesToUpdate.push({
-          id: existingGamesMap.get(game.name),
-          live: gameWithLive.live,
+          id: existingGamesMap.get(g.name)!,
+          live: g.live,
         });
       } else {
-        // For new games, create them with the live status
-        newGamesToCreate.push(gameWithLive);
+        newGamesToCreate.push(g);
       }
     }
 
-    // Create new games
     if (newGamesToCreate.length > 0) {
       console.log(`Creating ${newGamesToCreate.length} new games`);
-      await prisma.game.createMany({
-        data: newGamesToCreate,
-      });
-    } else {
-      console.log("No new games to create, all games already exist");
+      await db.insert(game).values(
+        newGamesToCreate.map((g) => ({
+          name: g.name,
+          createdAt: new Date(g.createdAt).toISOString(),
+          seasonName: g.seasonName,
+          live: g.live,
+        })),
+      );
     }
 
-    // Update existing games' live status
     if (existingGamesToUpdate.length > 0) {
       console.log(
         `Updating live status for ${existingGamesToUpdate.length} existing games`,
       );
-      for (const game of existingGamesToUpdate) {
-        await prisma.game.update({
-          where: { id: game.id },
-          data: { live: game.live },
-        });
+      for (const g of existingGamesToUpdate) {
+        await db.update(game).set({ live: g.live }).where(eq(game.id, g.id));
       }
     }
+  }
 
-    // update the pace
-    const currentTotalWedgies = await prisma.global.findFirst({
-      where: { id: 1 },
-      select: { currentTotalWedgies: true },
-    });
+  // Calculate pace if we have wedgie/game data to work with
+  const wedgieCount = (newWedgieCount && newWedgieCount > 0)
+    ? newWedgieCount
+    : (await db.query.global.findFirst({
+        where: eq(global.id, 1),
+        columns: { currentTotalWedgies: true },
+      }))?.currentTotalWedgies ?? 0;
+
+  const gameCount = (newTotalGamesCount && newTotalGamesCount > 0)
+    ? newTotalGamesCount
+    : (await db.query.global.findFirst({
+        where: eq(global.id, 1),
+        columns: { currentTotalGames: true },
+      }))?.currentTotalGames ?? 0;
+
+  if (wedgieCount > 0 && gameCount > 0) {
     const pace = await calculatePace({
-      currentTotalWedgies: currentTotalWedgies?.currentTotalWedgies ?? 0,
-      currentTotalGames: newTotalGamesCount,
+      currentTotalWedgies: wedgieCount,
+      currentTotalGames: gameCount,
     });
-    await prisma.global.update({
-      where: { id: 1 },
-      data: {
-        simplePace: pace.simplePace,
-        mathPace: pace.rmPace,
-        pace: pace.medianPace,
-      },
-    });
+    globalUpdate.simplePace = pace.simplePace;
+    globalUpdate.mathPace = pace.rmPace;
+    globalUpdate.pace = pace.medianPace;
   }
 
-  if (newTotalMinutes && newTotalMinutes > 0) {
-    await prisma.global.update({
-      where: { id: 1 },
-      data: { currentTotalMinutes: newTotalMinutes },
-    });
-  }
-
-  if (newTotalPoss) {
-    await prisma.global.update({
-      where: { id: 1 },
-      data: { currentTotalPoss: newTotalPoss },
-    });
-  }
-
-  if (newTotalFGA) {
-    await prisma.global.update({
-      where: { id: 1 },
-      data: { currentTotalFGA: newTotalFGA },
-    });
+  // Apply all global updates in a single statement
+  if (Object.keys(globalUpdate).length > 0) {
+    await db.update(global).set(globalUpdate).where(eq(global.id, 1));
   }
 
   revalidateTag(CACHE_TAGS.WEDGIE_DATA);

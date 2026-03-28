@@ -44,13 +44,13 @@ export function AllWedgiesPage() {
   const initialSeason = shouldShowPreviousSeason ? previousSeason.name : defaultSeason;
 
   // Initialize filters with URL params
-  const wsParam = searchParams.get("ws");
+  const wsParam = searchParams?.get("ws") ?? null;
   const hasSeasonFromUrl = wsParam !== null;
   const isAllSeasons = wsParam === "all";
   const [filters, setFilters] = useState({
     season: isAllSeasons ? "" : (wsParam ?? initialSeason),
     type: "",
-    playerOrTeam: searchParams.get("wp") ?? searchParams.get("wt") ?? "",
+    playerOrTeam: searchParams?.get("wp") ?? searchParams?.get("wt") ?? "",
   });
 
   // Queries first
@@ -66,8 +66,8 @@ export function AllWedgiesPage() {
   const wedgies = filters.season ? seasonWedgies : allWedgies;
 
   useEffect(() => {
-    const wedgieNumber = searchParams.get("wn");
-    const season = searchParams.get("ws");
+    const wedgieNumber = searchParams?.get("wn") ?? null;
+    const season = searchParams?.get("ws") ?? null;
 
     if (wedgieNumber && wedgies) {
       const wedgie = wedgies.find(
@@ -133,7 +133,7 @@ export function AllWedgiesPage() {
     const matchesType =
       !filters.type ||
       wedgie.types?.some(
-        (t) => t.name.toLowerCase() === filters.type.toLowerCase(),
+        (t: { name: string }) => t.name.toLowerCase() === filters.type.toLowerCase(),
       );
     const matchesPlayerOrTeam =
       !filters.playerOrTeam ||

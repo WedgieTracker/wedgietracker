@@ -9,13 +9,12 @@ A modern web application for tracking basketball wedgies.
 
 ## Tech Stack
 
-- [T3 Stack](https://github.com/t3-oss/create-t3-app) - Full-stack ecosystem
 - [Next.js](https://nextjs.org) - React framework
 - [Auth.js](https://authjs.dev/) - Authentication
-- [Prisma](https://prisma.io) - Database ORM
+- [Drizzle ORM](https://orm.drizzle.team) - Database ORM
+- [Turso](https://turso.tech) - SQLite database
 - [Tailwind CSS](https://tailwindcss.com) - Styling
 - [tRPC](https://trpc.io) - Type-safe API
-- [Neon](https://neon.tech) - Serverless Postgres
 - [Vercel](https://vercel.com) - Deployment
 
 ## Features
@@ -45,17 +44,7 @@ cd wedgietracker
 pnpm install
 ```
 
-3. Set up your local database:
-
-```bash
-# Start the local PostgreSQL database using Docker
-./start-database.sh
-
-# Import the local backup dump
-pg_restore -d "postgresql://postgres:password@localhost:5432/wedgietracker" local_database.dump
-```
-
-4. Create a `.env` file based on `.env.example` and add your environment variables:
+3. Create a `.env` file based on `.env.example` and add your environment variables:
 
 ```bash
 cp .env.example .env
@@ -64,7 +53,8 @@ cp .env.example .env
 Required environment variables:
 
 ```env
-DATABASE_URL="postgresql://postgres:password@localhost:5432/wedgietracker"
+TURSO_DATABASE_URL="libsql://your-db-name.turso.io"
+TURSO_AUTH_TOKEN=""
 NEXTAUTH_URL="https://localhost:3000"
 GOOGLE_CLIENT_ID=""
 GOOGLE_CLIENT_SECRET=""
@@ -82,13 +72,13 @@ STRIPE_SECRET_KEY=""
 STRIPE_WEBHOOK_SECRET=""
 ```
 
-5. Initialize the database:
+4. Push the schema to your Turso database:
 
 ```bash
 pnpm db:push
 ```
 
-6. Start the development server:
+5. Start the development server:
 
 ```bash
 pnpm dev
@@ -96,9 +86,9 @@ pnpm dev
 
 ## Database Management
 
-- Reset database: `pnpm db:push --force-reset`
-- Generate Prisma client: `pnpm db:generate`
-- Open Prisma Studio: `pnpm db:studio`
+- Push schema changes: `pnpm db:push`
+- Generate migrations: `pnpm db:generate`
+- Open Drizzle Studio: `pnpm db:studio`
 
 ## Contributing
 

@@ -30,7 +30,7 @@ export function TypeSearchInput({ value, onChange }: TypeSearchInputProps) {
   const handleAddNewType = async () => {
     try {
       const result = await createTypeMutation.mutateAsync({ name: search });
-      const newTypes = [...selectedTypes, result.name];
+      const newTypes = [...selectedTypes, result!.name];
       setSelectedTypes(newTypes);
       onChange(newTypes);
       setIsAddingNew(false);

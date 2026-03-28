@@ -60,7 +60,7 @@ export function WedgieList({ seasons, currentSeason }: WedgieListProps) {
             </h3>
             <p className="mt-1 text-sm text-gray-300">
               {wedgie.teamName} - {wedgie.teamAgainstName} |{" "}
-              {wedgie.wedgieDate.toLocaleDateString()}
+              {new Date(wedgie.wedgieDate).toLocaleDateString()}
             </p>
             <div className="mt-3 flex space-x-4">
               <Link

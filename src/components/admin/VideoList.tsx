@@ -30,7 +30,7 @@ export function VideoList() {
             {wedgie.playerName} - {wedgie.teamName} vs {wedgie.teamAgainstName}
           </h3>
           <p className="mt-2 text-sm text-gray-300">
-            {wedgie.wedgieDate.toLocaleDateString()}
+            {new Date(wedgie.wedgieDate).toLocaleDateString()}
           </p>
           <div className="mt-4 flex gap-4">
             <a

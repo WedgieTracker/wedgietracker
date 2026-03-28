@@ -25,7 +25,7 @@ export function PlayerSearchInput({ value, onChange }: PlayerSearchInputProps) {
   const handleAddNewPlayer = async () => {
     try {
       const result = await createPlayerMutation.mutateAsync({ name: search });
-      onChange(result.name);
+      onChange(result!.name);
       setIsAddingNew(false);
       setShowDropdown(false);
     } catch (error) {

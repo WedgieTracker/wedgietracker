@@ -1,6 +1,6 @@
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { ne, eq } from "drizzle-orm";
+import { db } from "~/server/db";
+import { season, global } from "~/server/schema";
 
 interface PaceStats {
   currentTotalWedgies: number;
@@ -30,30 +30,25 @@ export async function calculatePace({
   const simplePace = Math.round(totalEstimatedGames * wedgiesPerGame);
 
   // Get historical rates from database
-  const seasons = await prisma.season.findMany({
-    where: {
-      NOT: { name: "GEMS" },
-      totalGames: { gt: 0 },
-    },
-    include: {
-      _count: {
-        select: { wedgies: true },
-      },
-    },
+  const seasons = await db.query.season.findMany({
+    where: ne(season.name, "GEMS"),
+    with: { wedgies: { columns: { id: true } } },
   });
 
+  const filteredSeasons = seasons.filter((s) => s.totalGames > 0);
+
   // get the current number of wedgies from the global table
-  const currentWedgies = await prisma.global.findUnique({
-    where: { id: 1 },
-    select: { currentTotalWedgies: true, currentSeasonId: true },
+  const currentWedgies = await db.query.global.findFirst({
+    where: eq(global.id, 1),
+    columns: { currentTotalWedgies: true, currentSeasonId: true },
   });
 
   // replace the currentWedgies in the seasons array where currentSeasonId matches
-  const seasonRates = seasons.map((season) => {
-    if (season.id === currentWedgies?.currentSeasonId) {
-      return currentWedgies.currentTotalWedgies / season.totalGames;
+  const seasonRates = filteredSeasons.map((s) => {
+    if (s.id === currentWedgies?.currentSeasonId) {
+      return currentWedgies.currentTotalWedgies / s.totalGames;
     }
-    return season._count.wedgies / season.totalGames;
+    return s.wedgies.length / s.totalGames;
   });
 
   const averageSeasonRate =
