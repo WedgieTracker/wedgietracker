@@ -12,7 +12,7 @@ export function PageLayout({
 }) {
   return (
     <MenuProvider>
-      <div className="flex min-h-screen flex-col bg-darkpurple">
+      <div className="bg-darkpurple flex min-h-screen flex-col">
         <Header />
         {showCircleMenu && <CircleMenu />}
         {children}

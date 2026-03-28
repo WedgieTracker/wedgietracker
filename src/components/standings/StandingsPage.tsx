@@ -65,8 +65,8 @@ export function StandingsPage() {
   return (
     <div className="container mx-auto max-w-3xl text-white">
       {shouldShowPreviousSeason && (
-        <div className="mb-4 rounded-lg border border-pink/30 bg-pink/20 p-4 text-center">
-          <p className="text-sm font-bold text-pink">
+        <div className="border-pink/30 bg-pink/20 mb-4 rounded-lg border p-4 text-center">
+          <p className="text-pink text-sm font-bold">
             Current season has no wedgies yet. Showing {previousSeason?.name}{" "}
             season standings.
           </p>

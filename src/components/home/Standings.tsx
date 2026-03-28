@@ -41,11 +41,11 @@ export function Standings({ players, teams }: StandingsProps) {
   };
 
   return (
-    <Card className="w-full max-w-2xl overflow-hidden rounded-sm border-none bg-darkpurple-light/30">
+    <Card className="bg-darkpurple-light/30 w-full max-w-2xl overflow-hidden rounded-sm border-none">
       <div className="grid grid-cols-5 gap-8 p-1 py-2 md:p-4 md:py-4">
         <div className="col-span-3">
           <h2
-            className="mb-2 pl-2 font-black leading-none text-yellow md:mb-3"
+            className="text-yellow mb-2 pl-2 leading-none font-black md:mb-3"
             style={{ fontSize: sizes.title }}
           >
             PLAYERS
@@ -55,7 +55,7 @@ export function Standings({ players, teams }: StandingsProps) {
               <Link
                 key={player.name}
                 href={`/all-wedgies?wp=${player.name}`}
-                className="group flex cursor-pointer items-center justify-between rounded-sm bg-darkpurple-light/30 p-1.5 transition-all duration-300 hover:bg-darkpurple-light/80 md:p-2"
+                className="group bg-darkpurple-light/30 hover:bg-darkpurple-light/80 flex cursor-pointer items-center justify-between rounded-sm p-1.5 transition-all duration-300 md:p-2"
               >
                 <div className="flex items-baseline gap-2">
                   <span
@@ -74,14 +74,14 @@ export function Standings({ players, teams }: StandingsProps) {
                     {playerRanks[index]?.rank}
                   </span>
                   <span
-                    className="font-black text-white transition-all duration-300 group-hover:text-yellow"
+                    className="group-hover:text-yellow font-black text-white transition-all duration-300"
                     style={{ fontSize: sizes.name }}
                   >
                     {player.name}
                   </span>
                 </div>
                 <span
-                  className="pr-2 font-black text-yellow"
+                  className="text-yellow pr-2 font-black"
                   style={{ fontSize: sizes.name }}
                 >
                   {player.count}
@@ -93,7 +93,7 @@ export function Standings({ players, teams }: StandingsProps) {
 
         <div className="col-span-2">
           <h2
-            className="mb-2 pl-4 font-black leading-none text-yellow md:mb-3"
+            className="text-yellow mb-2 pl-4 leading-none font-black md:mb-3"
             style={{ fontSize: sizes.title }}
           >
             TEAMS
@@ -103,7 +103,7 @@ export function Standings({ players, teams }: StandingsProps) {
               <Link
                 key={team.name}
                 href={`/all-wedgies?wt=${team.name}`}
-                className="group flex cursor-pointer items-center justify-between rounded-sm bg-darkpurple-light/30 p-1.5 transition-all duration-300 hover:bg-darkpurple-light/80 md:p-2"
+                className="group bg-darkpurple-light/30 hover:bg-darkpurple-light/80 flex cursor-pointer items-center justify-between rounded-sm p-1.5 transition-all duration-300 md:p-2"
               >
                 <div className="flex items-baseline gap-2">
                   <span
@@ -122,14 +122,14 @@ export function Standings({ players, teams }: StandingsProps) {
                     {teamRanks[index]?.rank}
                   </span>
                   <span
-                    className="font-black text-white transition-all duration-300 group-hover:text-yellow"
+                    className="group-hover:text-yellow font-black text-white transition-all duration-300"
                     style={{ fontSize: sizes.name }}
                   >
                     {team.name}
                   </span>
                 </div>
                 <span
-                  className="pr-2 font-black text-yellow"
+                  className="text-yellow pr-2 font-black"
                   style={{ fontSize: sizes.name }}
                 >
                   {team.count}
@@ -142,7 +142,7 @@ export function Standings({ players, teams }: StandingsProps) {
 
       <Link
         href="/standings"
-        className="block w-full rounded-b-lg border-2 border-yellow bg-yellow py-2 text-center text-button-text font-black text-darkpurple transition-all duration-300 hover:border-yellow hover:bg-transparent hover:text-yellow"
+        className="border-yellow bg-yellow text-button-text text-darkpurple hover:border-yellow hover:text-yellow block w-full rounded-b-lg border-2 py-2 text-center font-black transition-all duration-300 hover:bg-transparent"
       >
         SEE STANDINGS
       </Link>

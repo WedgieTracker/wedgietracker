@@ -146,7 +146,7 @@ export function TwitterPostForm({ wedgie }: TwitterPostFormProps) {
 
         <div className="rounded-md border border-white/10 p-4">
           <h3 className="mb-2 font-semibold">Preview:</h3>
-          <p className="whitespace-pre-wrap text-sm text-white">
+          <p className="text-sm whitespace-pre-wrap text-white">
             {generatePreview()}
           </p>
         </div>

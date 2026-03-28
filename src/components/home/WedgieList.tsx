@@ -9,7 +9,7 @@ interface WedgieListProps {
 
 export function WedgieList({ wedgies }: WedgieListProps) {
   return (
-    <Card className="w-full max-w-2xl overflow-hidden rounded-sm border-none bg-darkpurple shadow-lg">
+    <Card className="bg-darkpurple w-full max-w-2xl overflow-hidden rounded-sm border-none shadow-lg">
       <div className="p-2 md:p-4">
         {wedgies.slice(0, 3).map((wedgie) => (
           <Wedgie key={wedgie.id} wedgie={wedgie} />
@@ -17,7 +17,7 @@ export function WedgieList({ wedgies }: WedgieListProps) {
       </div>
       <Link
         href="/all-wedgies"
-        className="block w-full rounded-b-lg border-2 border-yellow bg-yellow py-1 text-center text-button-text font-black text-darkpurple transition-all duration-300 hover:border-yellow hover:bg-darkpurple hover:text-yellow md:py-2"
+        className="border-yellow bg-yellow text-button-text text-darkpurple hover:border-yellow hover:bg-darkpurple hover:text-yellow block w-full rounded-b-lg border-2 py-1 text-center font-black transition-all duration-300 md:py-2"
       >
         WATCH THEM ALL
       </Link>

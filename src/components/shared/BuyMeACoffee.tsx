@@ -31,11 +31,11 @@ export function BuyMeACoffee() {
   };
 
   return (
-    <div className="flex w-full flex-col items-center gap-3 rounded-xl bg-yellow p-4 px-2 text-center md:p-8 lg:p-8">
-      <h3 className="text-xl font-bold text-darkpurple">
+    <div className="bg-yellow flex w-full flex-col items-center gap-3 rounded-xl p-4 px-2 text-center md:p-8 lg:p-8">
+      <h3 className="text-darkpurple text-xl font-bold">
         ☕ Buy us a coffee ☕
       </h3>
-      <p className="text-sm text-darkpurple md:text-base">
+      <p className="text-darkpurple text-sm md:text-base">
         If you like what we&apos;re doing, please consider{" "}
         <strong>buying us a coffee!</strong>
         <br />
@@ -47,25 +47,25 @@ export function BuyMeACoffee() {
         <div className="flex items-center gap-0">
           <button
             onClick={() => setQuantity(Math.max(1, quantity - 1))}
-            className="rounded-l-lg bg-pink/20 px-2 py-1 text-pink hover:bg-pink/30"
+            className="bg-pink/20 text-pink hover:bg-pink/30 rounded-l-lg px-2 py-1"
             disabled={quantity <= 1}
           >
             -
           </button>
-          <span className="flex items-center gap-0 bg-pink px-2 py-1 font-bold text-white">
+          <span className="bg-pink flex items-center gap-0 px-2 py-1 font-bold text-white">
             <span className="font-normal text-white opacity-40">×</span>
             {quantity}
           </span>
           <button
             onClick={() => setQuantity(quantity + 1)}
-            className="rounded-r-lg bg-pink/20 px-2 py-1 text-pink hover:bg-pink/30"
+            className="bg-pink/20 text-pink hover:bg-pink/30 rounded-r-lg px-2 py-1"
           >
             +
           </button>
         </div>
         <span className="text-darkpurple">
           Total:{" "}
-          <span className="rounded-lg border border-darkpurple px-2 py-1 font-bold text-darkpurple">
+          <span className="border-darkpurple text-darkpurple rounded-lg border px-2 py-1 font-bold">
             ${quantity * 1}
           </span>
         </span>
@@ -73,7 +73,7 @@ export function BuyMeACoffee() {
       <button
         onClick={handleDonate}
         disabled={loading}
-        className="flex items-center gap-2 rounded-lg bg-pink px-4 py-2 font-bold text-white transition-all hover:bg-pink/80 disabled:opacity-50"
+        className="bg-pink hover:bg-pink/80 flex items-center gap-2 rounded-lg px-4 py-2 font-bold text-white transition-all disabled:opacity-50"
       >
         {loading ? (
           "Processing..."

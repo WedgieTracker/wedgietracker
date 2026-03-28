@@ -42,10 +42,10 @@ const items = [
 
 export function AppSidebar() {
   return (
-    <Sidebar className="border-r-2 border-yellow bg-yellow">
+    <Sidebar className="border-yellow bg-yellow border-r-2">
       <SidebarContent className="bg-yellow text-black">
         <SidebarGroup>
-          <SidebarGroupLabel className="inline-block bg-darkpurple px-4 py-2 text-center font-bold uppercase text-yellow">
+          <SidebarGroupLabel className="bg-darkpurple text-yellow inline-block px-4 py-2 text-center font-bold uppercase">
             Admin Dashboard
           </SidebarGroupLabel>
           <SidebarGroupContent>
