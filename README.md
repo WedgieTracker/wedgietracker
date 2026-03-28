@@ -148,8 +148,6 @@ Both commands are restricted to repo owners, members, and collaborators.
 
 **Releases**: Automatic semantic versioning on push to `main` based on commit message prefixes (`feat:` for minor, `BREAKING` for major, otherwise patch).
 
-**Deploy flow**: On push to `main`, code is synced to a private repo which handles Vercel deployments.
-
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request or open an issue. See our [CONTRIBUTING.md](CONTRIBUTING.md) for more details.
