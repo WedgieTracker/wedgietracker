@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Loader } from "../loader";
+import { Loader } from "../shared/Loader";
 import {
   Dialog,
   DialogContent,

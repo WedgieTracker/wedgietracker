@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { api } from "~/trpc/react";
 import { StandingsFilters } from "./StandingsFilters";
 import { StandingsGrid } from "./StandingsGrid";
-import { Cta } from "../Cta";
+import { Cta } from "../shared/Cta";
 import { useSeasonFallback } from "~/hooks/use-season-fallback";
 
 export function StandingsPage() {

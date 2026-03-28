@@ -1,5 +1,5 @@
 import { SidebarTrigger } from "~/components/ui/sidebar";
-import { LogoComponent } from "~/components/logo";
+import { LogoComponent } from "~/components/shared/Logo";
 import { SignOut } from "~/components/admin/auth";
 
 export function AdminHeader() {

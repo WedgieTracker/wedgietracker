@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { TypingStats } from "./TypingStats";
 import Link from "next/link";
-import { Cta } from "../Cta";
+import { Cta } from "../shared/Cta";
 import Confetti from "react-confetti";
 
 const Wave = ({ fillPercentage }: { fillPercentage: number }) => {

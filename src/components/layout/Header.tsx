@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { LogoComponent } from "~/components/logo";
+import { LogoComponent } from "~/components/shared/Logo";
 import { useMenu } from "~/context/MenuContext";
 import { CircleMenu } from "./CircleMenu";
 

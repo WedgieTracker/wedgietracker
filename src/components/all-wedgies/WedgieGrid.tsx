@@ -1,5 +1,5 @@
 import { Wedgie } from "~/components/home/Wedgie";
-import { Loader } from "~/components/loader";
+import { Loader } from "~/components/shared/Loader";
 import type { WedgieWithTypes } from "~/types/wedgie";
 
 interface WedgieGridProps {

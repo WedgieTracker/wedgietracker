@@ -4,7 +4,7 @@ export const revalidate = 120;
 import { AllWedgiesPage } from "~/components/all-wedgies/AllWedgiesPage";
 import { PageLayout } from "~/components/layout/PageLayout";
 import { Suspense } from "react";
-import { Loader } from "~/components/loader";
+import { Loader } from "~/components/shared/Loader";
 import { generateMetadata } from "~/config/metadata";
 
 export const metadata = generateMetadata({

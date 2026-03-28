@@ -52,7 +52,9 @@ yarn-error.log*
 # database backups
 /database-backups
 *.dump
-!local_database.dump
+
+# test databases
+test.db
 
 # sh scripts
 /sh

@@ -9,7 +9,7 @@ import { Cross2Icon } from "@radix-ui/react-icons";
 import type { Wedgie, VideoUrls } from "~/types/wedgie";
 import { useState } from "react";
 import { useToast } from "~/hooks/use-toast";
-import { ShareButtons } from "~/components/ShareButtons";
+import { ShareButtons } from "~/components/shared/ShareButtons";
 
 interface WedgieModalProps {
   wedgie: Wedgie & {

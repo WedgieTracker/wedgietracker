@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { api } from "~/trpc/react";
-import { Loader } from "~/components/loader";
+import { Loader } from "~/components/shared/Loader";
 export function BlogList() {
   const { data: posts, isLoading } = api.blog.getAll.useQuery();
   // return <LoaderWrapper />;

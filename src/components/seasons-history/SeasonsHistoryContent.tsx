@@ -2,8 +2,8 @@
 
 import { api } from "~/trpc/react";
 import { SeasonCard } from "./SeasonCard";
-import { Loader } from "~/components/loader";
-import { Cta } from "../Cta";
+import { Loader } from "~/components/shared/Loader";
+import { Cta } from "../shared/Cta";
 export function SeasonsHistoryContent() {
   const { data: seasons, isLoading } = api.season.getAllWithStats.useQuery();
 

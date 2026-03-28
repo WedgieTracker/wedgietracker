@@ -6,7 +6,7 @@ import { WedgieFilters } from "./WedgieFilters";
 import { WedgieGrid } from "./WedgieGrid";
 import { WedgieModal } from "~/components/home/WedgieModal";
 import type { WedgieWithTypes } from "~/types/wedgie";
-import { Cta } from "~/components/Cta";
+import { Cta } from "~/components/shared/Cta";
 import { api } from "~/trpc/react";
 import { useSeasonFallback } from "~/hooks/use-season-fallback";
 

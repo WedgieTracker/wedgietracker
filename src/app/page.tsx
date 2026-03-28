@@ -10,7 +10,7 @@ import { PageLayout } from "~/components/layout/PageLayout";
 import { EasterEgg } from "~/components/home/EasterEgg";
 import type { WedgieWithTypes } from "~/types/wedgie";
 import { Suspense } from "react";
-import { Loader } from "~/components/loader";
+import { Loader } from "~/components/shared/Loader";
 import Link from "next/link";
 import { Newsletter } from "~/components/home/Newsletter";
 import { generateMetadata } from "~/config/metadata";

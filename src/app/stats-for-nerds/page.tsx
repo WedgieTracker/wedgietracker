@@ -5,7 +5,7 @@ import { Suspense } from "react";
 import { api } from "~/trpc/server";
 import { PageLayout } from "~/components/layout/PageLayout";
 import { StatsForNerds } from "~/components/stats-for-nerds/StatsForNerds";
-import { Loader } from "~/components/loader";
+import { Loader } from "~/components/shared/Loader";
 import { generateMetadata } from "~/config/metadata";
 
 export const metadata = generateMetadata({

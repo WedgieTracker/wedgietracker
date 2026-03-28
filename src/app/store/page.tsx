@@ -4,9 +4,9 @@ export const revalidate = 60;
 import { Suspense } from "react";
 import { PageLayout } from "~/components/layout/PageLayout";
 import { TShirtProduct } from "~/components/store/TShirtProduct";
-import { Loader } from "~/components/loader";
+import { Loader } from "~/components/shared/Loader";
 import { generateMetadata } from "~/config/metadata";
-import { BuyMeACoffee } from "~/components/BuyMeACoffee";
+import { BuyMeACoffee } from "~/components/shared/BuyMeACoffee";
 
 export const metadata = generateMetadata({
   title: "OG Wedgie T-Shirt",

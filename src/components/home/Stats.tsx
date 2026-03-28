@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Loader } from "../loader";
+import { Loader } from "../shared/Loader";
 import Link from "next/link";
 import { ShareableStatsVideo } from "./ShareableStatsVideo";
 import { Wave } from "./Wave";

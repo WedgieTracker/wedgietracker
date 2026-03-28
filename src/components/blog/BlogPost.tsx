@@ -5,7 +5,7 @@ import rehypeRaw from "rehype-raw";
 import rehypeExternalLinks from "rehype-external-links";
 import remarkGfm from "remark-gfm";
 import { ExternalLink } from "lucide-react";
-import { TwitterEmbed } from "~/components/TwitterEmbed";
+import { TwitterEmbed } from "~/components/shared/TwitterEmbed";
 import type { BlogPost as BlogPostType } from "~/types/blog";
 import type { ReactNode } from "react";
 import { Newsletter } from "~/components/home/Newsletter";
