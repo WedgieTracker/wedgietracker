@@ -25,6 +25,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       SKIP_ENV_VALIDATION: true
+      TURSO_DATABASE_URL: "file:ci.db"
+      TURSO_AUTH_TOKEN: "ci"
 
     steps:
       - name: Checkout
