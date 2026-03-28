@@ -32,7 +32,8 @@ export async function POST(req: Request) {
     const rt = new RichText({ text: baseText });
     await rt.detectFacets(agent); // This will automatically detect links, mentions, and tags
 
-    let embed;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- atproto v0.19 changed embed types
+    let embed: any;
     if (videoUrl) {
       // Get service auth token with the correct audience
       const { data: serviceAuth } =
@@ -126,7 +127,7 @@ export async function POST(req: Request) {
       embed = {
         $type: "app.bsky.embed.video",
         video: videoBlob,
-        aspectRatio: { width: 16, height: 9 }, // Default aspect ratio
+        aspectRatio: { width: 16, height: 9 },
       };
     }
 
@@ -134,6 +135,7 @@ export async function POST(req: Request) {
     await agent.post({
       text: rt.text,
       facets: rt.facets,
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       embed: embed,
     });
 

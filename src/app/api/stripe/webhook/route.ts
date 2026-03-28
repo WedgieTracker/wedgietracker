@@ -94,14 +94,27 @@ export async function POST(req: Request) {
             customerEmail: session.customer_details?.email ?? "",
             size: session.metadata!.size ?? "",
             color: session.metadata!.color ?? "",
-            shippingName: session.shipping_details?.name ?? "",
+            shippingName:
+              session.collected_information?.shipping_details?.name ?? "",
             shippingAddress: {
-              line1: session.shipping_details?.address?.line1 ?? "",
-              line2: session.shipping_details?.address?.line2 ?? "",
-              city: session.shipping_details?.address?.city ?? "",
-              state: session.shipping_details?.address?.state ?? "",
-              postalCode: session.shipping_details?.address?.postal_code ?? "",
-              country: session.shipping_details?.address?.country ?? "",
+              line1:
+                session.collected_information?.shipping_details?.address
+                  ?.line1 ?? "",
+              line2:
+                session.collected_information?.shipping_details?.address
+                  ?.line2 ?? "",
+              city:
+                session.collected_information?.shipping_details?.address
+                  ?.city ?? "",
+              state:
+                session.collected_information?.shipping_details?.address
+                  ?.state ?? "",
+              postalCode:
+                session.collected_information?.shipping_details?.address
+                  ?.postal_code ?? "",
+              country:
+                session.collected_information?.shipping_details?.address
+                  ?.country ?? "",
             },
           })
           .returning();
@@ -118,14 +131,26 @@ export async function POST(req: Request) {
             stripeSessionId: session.id,
             size: session.metadata!.size ?? "",
             color: session.metadata!.color ?? "",
-            shippingName: session.shipping_details?.name ?? "",
+            shippingName:
+              session.collected_information?.shipping_details?.name ?? "",
             shippingAddress: {
-              line1: session.shipping_details?.address?.line1 ?? "",
-              line2: session.shipping_details?.address?.line2,
-              city: session.shipping_details?.address?.city ?? "",
-              state: session.shipping_details?.address?.state ?? "",
-              postalCode: session.shipping_details?.address?.postal_code ?? "",
-              country: session.shipping_details?.address?.country ?? "",
+              line1:
+                session.collected_information?.shipping_details?.address
+                  ?.line1 ?? "",
+              line2:
+                session.collected_information?.shipping_details?.address?.line2,
+              city:
+                session.collected_information?.shipping_details?.address
+                  ?.city ?? "",
+              state:
+                session.collected_information?.shipping_details?.address
+                  ?.state ?? "",
+              postalCode:
+                session.collected_information?.shipping_details?.address
+                  ?.postal_code ?? "",
+              country:
+                session.collected_information?.shipping_details?.address
+                  ?.country ?? "",
             },
             orderNumber: orderCount,
           });
@@ -147,7 +172,7 @@ export async function POST(req: Request) {
                 `• Order #: ${orderCount}\n` +
                 `• Size: ${session.metadata!.size}\n` +
                 `• Color: ${session.metadata!.color}\n` +
-                `• Customer: ${session.shipping_details?.name}\n` +
+                `• Customer: ${session.collected_information?.shipping_details?.name}\n` +
                 `• Email: ${session.customer_details?.email}\n` +
                 `• Amount: $${(session.amount_total ?? 0) / 100}\n\n` +
                 `Printful draft order created successfully.`,
@@ -156,16 +181,28 @@ export async function POST(req: Request) {
               orderNumber: orderCount,
               size: session.metadata!.size ?? "",
               color: session.metadata!.color ?? "",
-              customerName: session.shipping_details?.name ?? "",
+              customerName:
+                session.collected_information?.shipping_details?.name ?? "",
               customerEmail: session.customer_details?.email ?? "",
               shippingAddress: {
-                line1: session.shipping_details?.address?.line1 ?? "",
-                line2: session.shipping_details?.address?.line2 ?? "",
-                city: session.shipping_details?.address?.city ?? "",
-                state: session.shipping_details?.address?.state ?? "",
+                line1:
+                  session.collected_information?.shipping_details?.address
+                    ?.line1 ?? "",
+                line2:
+                  session.collected_information?.shipping_details?.address
+                    ?.line2 ?? "",
+                city:
+                  session.collected_information?.shipping_details?.address
+                    ?.city ?? "",
+                state:
+                  session.collected_information?.shipping_details?.address
+                    ?.state ?? "",
                 postalCode:
-                  session.shipping_details?.address?.postal_code ?? "",
-                country: session.shipping_details?.address?.country ?? "",
+                  session.collected_information?.shipping_details?.address
+                    ?.postal_code ?? "",
+                country:
+                  session.collected_information?.shipping_details?.address
+                    ?.country ?? "",
               },
               amount: session.amount_total ?? 0,
               foldedImageUrl,
@@ -180,7 +217,7 @@ export async function POST(req: Request) {
               `• Order #: ${orderCount}\n` +
               `• Size: ${session.metadata!.size}\n` +
               `• Color: ${session.metadata!.color}\n` +
-              `• Customer: ${session.shipping_details?.name}\n` +
+              `• Customer: ${session.collected_information?.shipping_details?.name}\n` +
               `• Error: ${error instanceof Error ? error.message : "Unknown error"}`,
           );
         }

@@ -33,6 +33,6 @@ export const donationsRouter = createTRPCRouter({
         cancel_url: `${process.env.NEXTAUTH_URL}/store`,
       });
 
-      return session.id;
+      return session.url;
     }),
 });

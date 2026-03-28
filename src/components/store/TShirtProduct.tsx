@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { loadStripe } from "@stripe/stripe-js";
 import { api } from "~/trpc/react";
 import type { Size, Color } from "~/types/product";
 import { cn } from "~/lib/utils";
@@ -9,10 +8,6 @@ import { Dialog, DialogContent, DialogTitle } from "~/components/ui/dialog";
 import { Maximize2 } from "lucide-react";
 
 import styles from "./TShirtProduct.module.css";
-
-const stripePromise = loadStripe(
-  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
-);
 
 const SIZES: Size[] = ["XS", "S", "M", "L", "XL", "XXL"];
 const COLORS: Color[] = ["Black", "White", "Ice Blue", "Peach"];
@@ -128,9 +123,8 @@ export function TShirtProduct() {
   };
 
   const checkoutMutation = api.store.createCheckoutSession.useMutation({
-    onSuccess: async (sessionId) => {
-      const stripe = await stripePromise;
-      await stripe?.redirectToCheckout({ sessionId });
+    onSuccess: (url) => {
+      if (url) window.location.href = url;
     },
     onError: (error) => {
       console.error("Checkout error:", error);
