@@ -44,7 +44,7 @@ const DialogContent = React.forwardRef<
       ref={ref}
       aria-describedby={undefined}
       className={cn(
-        "bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed inset-0 z-90 m-auto grid h-fit max-h-[90vh] w-full max-w-lg gap-4 border p-6 shadow-lg duration-200 sm:rounded-lg",
+        "bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed inset-0 z-90 m-auto flex h-fit max-h-[90vh] w-full max-w-lg flex-col items-stretch gap-4 border p-6 shadow-lg duration-200 sm:rounded-lg",
         className,
       )}
       {...props}

@@ -199,7 +199,7 @@ export function WedgieModal({
           </div>
 
           {/* Info Section - Takes full width on mobile, right half on desktop */}
-          <div className="flex w-full flex-col justify-between p-6 px-4 sm:px-6 md:p-8 lg:w-[35%]">
+          <div className="relative flex w-full flex-col justify-between p-6 px-4 sm:px-6 md:p-8 lg:w-[35%]">
             {/* Top Info */}
             <div className="space-y-2 sm:space-y-6">
               <div className="sm:text-wedgie-number flex flex-row items-center justify-start gap-4 text-xl leading-none">
