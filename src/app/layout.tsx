@@ -4,8 +4,9 @@ import { Inter } from "next/font/google";
 import { TRPCReactProvider } from "~/trpc/react";
 import { Toaster } from "~/components/ui/toaster";
 import { defaultMetadata } from "~/config/metadata";
+import { GoogleTagManager } from "@next/third-parties/google";
 
-import GoogleAnalytics from "~/components/shared/GoogleAnalytics";
+import ConsentBanner from "~/components/shared/ConsentBanner";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -30,25 +31,32 @@ export default function RootLayout({
           property="twitter:image"
           content="https://res.cloudinary.com/wedgietracker/image/upload/v1736700345/assets/social-wedgietracker_bibnbu.jpg"
         />
+        {/* Set consent mode defaults before GTM loads */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('consent', 'default', {
+                'analytics_storage': 'denied',
+                'ad_storage': 'denied',
+                'ad_user_data': 'denied',
+                'ad_personalization': 'denied',
+                'wait_for_update': 500
+              });
+            `,
+          }}
+        />
       </head>
       <body className="bg-darkpurple">
-        {/* GTM noscript iframe for users with JavaScript disabled */}
-        <noscript>
-          <iframe
-            src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`}
-            height="0"
-            width="0"
-            style={{ display: "none", visibility: "hidden" }}
-            title="gtm"
-          />
-        </noscript>
+        <GoogleTagManager gtmId={gtmId} />
 
         <Suspense>
           <TRPCReactProvider>
             {children}
             <Toaster />
 
-            <GoogleAnalytics gaId={gtmId} />
+            <ConsentBanner />
           </TRPCReactProvider>
         </Suspense>
       </body>

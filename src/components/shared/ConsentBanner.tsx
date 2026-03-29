@@ -3,35 +3,41 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
-interface CookieConsentProps {
-  onAccept: () => void;
-  onDecline: () => void;
+function updateConsent(granted: boolean) {
+  window.dataLayer = window.dataLayer || [];
+  function gtag(...args: unknown[]) {
+    window.dataLayer.push(args);
+  }
+  gtag("consent", "update", {
+    analytics_storage: granted ? "granted" : "denied",
+    ad_storage: granted ? "granted" : "denied",
+    ad_user_data: granted ? "granted" : "denied",
+    ad_personalization: granted ? "granted" : "denied",
+  });
 }
 
-export default function CookieConsent({
-  onAccept,
-  onDecline,
-}: CookieConsentProps) {
+export default function ConsentBanner() {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    // Check if user has already made a choice
-    const cookieConsent = localStorage.getItem("cookieConsent");
-    if (!cookieConsent) {
+    const consent = localStorage.getItem("cookieConsent");
+    if (consent === "accepted") {
+      updateConsent(true);
+    } else if (!consent) {
       setIsVisible(true);
     }
   }, []);
 
   const handleAccept = () => {
     localStorage.setItem("cookieConsent", "accepted");
+    updateConsent(true);
     setIsVisible(false);
-    onAccept();
   };
 
   const handleDecline = () => {
     localStorage.setItem("cookieConsent", "declined");
+    updateConsent(false);
     setIsVisible(false);
-    onDecline();
   };
 
   if (!isVisible) return null;
