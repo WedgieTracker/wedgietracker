@@ -3,11 +3,14 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
-function updateConsent(granted: boolean) {
+function gtag(...args: unknown[]) {
   window.dataLayer = window.dataLayer || [];
-  function gtag(...args: unknown[]) {
-    window.dataLayer.push(args);
-  }
+  // GTM expects the arguments object, not an array
+  // eslint-disable-next-line prefer-rest-params
+  window.dataLayer.push(arguments);
+}
+
+function updateConsent(granted: boolean) {
   gtag("consent", "update", {
     analytics_storage: granted ? "granted" : "denied",
     ad_storage: granted ? "granted" : "denied",
