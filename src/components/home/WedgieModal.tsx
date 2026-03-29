@@ -306,7 +306,7 @@ export function WedgieModal({
           </div>
         </div>
 
-        <div className="mt-2 flex flex-row justify-between pb-0.5">
+        <div className="mt-2 flex flex-row items-center justify-between pb-0.5">
           <div className="flex flex-row gap-1 sm:gap-2">
             <button
               onClick={handleCopyLink}
