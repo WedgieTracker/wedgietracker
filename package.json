@@ -107,7 +107,7 @@
     "prettier": "^3.8.1",
     "prettier-plugin-tailwindcss": "^0.7.2",
     "tailwindcss": "^4.2.2",
-    "@typescript/native-preview": "^7.0.0-dev.20260328.1",
+    "@typescript/native-preview": "^7.0.0-dev.20260330.1",
     "typescript": "^6.0.2",
     "vitest": "^4.1.2"
   },
