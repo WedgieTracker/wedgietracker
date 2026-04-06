@@ -3,10 +3,11 @@ updates:
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
-      interval: "weekly"
-      day: "monday"
+      interval: "monthly"
     target-branch: "main"
     open-pull-requests-limit: 10
+    reviewers:
+      - "gek0z"
     groups:
       minor-and-patch:
         update-types:
@@ -20,7 +21,9 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
+    reviewers:
+      - "gek0z"
     groups:
       all-actions:
         patterns:
