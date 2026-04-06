@@ -23,10 +23,10 @@ export default function ConsentBanner() {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
+    // Returning users already have consent set in the head script (layout.tsx).
+    // Only show the banner if the user hasn't made a choice yet.
     const consent = localStorage.getItem("cookieConsent");
-    if (consent === "accepted") {
-      updateConsent(true);
-    } else if (!consent) {
+    if (!consent) {
       setIsVisible(true);
     }
   }, []);

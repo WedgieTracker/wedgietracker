@@ -37,12 +37,15 @@ export default function RootLayout({
             __html: `
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
+
+              var hasConsent = false;
+              try { hasConsent = localStorage.getItem('cookieConsent') === 'accepted'; } catch(e) {}
+
               gtag('consent', 'default', {
-                'analytics_storage': 'denied',
-                'ad_storage': 'denied',
-                'ad_user_data': 'denied',
-                'ad_personalization': 'denied',
-                'wait_for_update': 500
+                'analytics_storage': hasConsent ? 'granted' : 'denied',
+                'ad_storage': hasConsent ? 'granted' : 'denied',
+                'ad_user_data': hasConsent ? 'granted' : 'denied',
+                'ad_personalization': hasConsent ? 'granted' : 'denied',
               });
             `,
           }}
