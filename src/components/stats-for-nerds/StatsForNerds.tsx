@@ -321,8 +321,8 @@ function SeasonComparisonWrapper({ stats }: StatsForNerdsProps) {
 }
 
 function LastWedgieWrapper({ stats }: StatsForNerdsProps) {
-  if (!stats.lastWedgiePlayer) return null;
-  // if (!stats.gamesSinceLastWedgie && !stats.lastWedgiePlayer) return null;
+  if (!stats.lastWedgiePlayer || stats.gamesSinceLastWedgie === undefined)
+    return null;
 
   return (
     <div className="flex w-full max-w-xl flex-col items-center justify-center">
