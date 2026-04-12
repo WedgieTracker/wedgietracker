@@ -130,6 +130,7 @@ interface StatsForNerdsProps {
     wedgiesThisSeason: number;
     fgaPerWedgie: number;
     pace: number;
+    previousRecord: number;
     averageLastTenSeasons: number;
     gamesSinceLastWedgie?: number | undefined;
     lastWedgiePlayer: string | null;
@@ -226,7 +227,11 @@ function WedgieCounterWrapper({ stats }: StatsForNerdsProps) {
       <Wave fillPercentage={fillPercentage} />
       <div className="bg-darkpurple-light/50 relative z-10 mx-auto max-w-[18rem] rounded-lg p-4 text-center md:w-[90%] lg:w-[65%] lg:max-w-120 lg:min-w-[24rem]">
         <div className="text-yellow text-sm leading-none font-bold md:text-base">
-          {stats.wedgiesThisSeason > 63 ? "NEW ALL-TIME RECORD" : "WE'RE AT"}
+          {stats.wedgiesThisSeason > stats.previousRecord
+            ? "NEW ALL-TIME RECORD"
+            : stats.wedgiesThisSeason === stats.previousRecord
+              ? "ALL-TIME RECORD TIED"
+              : "WE'RE AT"}
         </div>
         <div className="text-big-number-mobile text-yellow md:text-big-number-medium lg:text-big-number leading-none font-black whitespace-nowrap">
           {displayedCount.toFixed(0).toLocaleString()}
@@ -248,18 +253,36 @@ function TypingStatsWrapper({
 }
 
 function SeasonComparisonWrapper({ stats }: StatsForNerdsProps) {
+  const showPace = stats.pace !== stats.wedgiesThisSeason;
+  const isMatchingAverage = stats.pace === stats.averageLastTenSeasons;
+  const diff = Math.abs(stats.pace - stats.averageLastTenSeasons);
+  const isMore = stats.pace > stats.averageLastTenSeasons;
+
   return (
     <div className="bg-darkpurple-dark flex w-full max-w-xl flex-col items-center justify-center gap-2 rounded-3xl py-4 md:flex-row md:gap-5 md:py-8">
-      <div className="text-center">
-        <div className="text-pace-text-mobile text-pink md:text-pace-text w-full leading-none font-black tracking-wider uppercase">
-          Pace
+      {showPace ? (
+        <div className="text-center">
+          <div className="text-pace-text-mobile text-pink md:text-pace-text w-full leading-none font-black tracking-wider uppercase">
+            Pace
+          </div>
+          <div className="shadow-lg-darkpurple-light text-pace-number-mobile text-yellow md:text-pace-number mt-[-.2em] w-full leading-none font-black">
+            {stats.pace.toFixed(0)}
+          </div>
         </div>
-        <div className="shadow-lg-darkpurple-light text-pace-number-mobile text-yellow md:text-pace-number mt-[-.2em] w-full leading-none font-black">
-          {stats.pace.toFixed(0)}
-        </div>
-      </div>
+      ) : (
+        !isMatchingAverage && (
+          <div className="text-center">
+            <div className="shadow-lg-darkpurple-light text-pace-number-mobile text-yellow md:text-pace-number w-full leading-none font-black">
+              {diff}
+            </div>
+            <div className="text-pace-text-mobile text-pink md:text-pace-text mt-[-.6em] w-full leading-none font-black tracking-wider uppercase">
+              {isMore ? "More" : "Less"}
+            </div>
+          </div>
+        )
+      )}
       <div className="text-center text-xl font-bold text-white md:text-left">
-        {stats.pace === stats.averageLastTenSeasons ? (
+        {isMatchingAverage ? (
           <>
             WE ARE ON PACE TO MATCH
             <br />
@@ -270,15 +293,21 @@ function SeasonComparisonWrapper({ stats }: StatsForNerdsProps) {
             <br />
             OF THE PAST <span className="text-pink font-black">11 SEASONS</span>
           </>
-        ) : (
+        ) : showPace ? (
           <div>
-            IT IS{" "}
-            <span className="text-pink font-black">
-              {Math.abs(stats.pace - stats.averageLastTenSeasons)}
-            </span>{" "}
-            {stats.pace > stats.averageLastTenSeasons ? "MORE" : "LESS"} THAN
+            IT IS <span className="text-pink font-black">{diff}</span>{" "}
+            {isMore ? "MORE" : "LESS"} THAN
             <br />
             THE AVERAGE OF{" "}
+            <span className="text-pink font-black">
+              {stats.averageLastTenSeasons}
+            </span>
+            <br />
+            OF THE PAST <span className="text-pink font-black">11 SEASONS</span>
+          </div>
+        ) : (
+          <div>
+            THAN THE AVERAGE OF{" "}
             <span className="text-pink font-black">
               {stats.averageLastTenSeasons}
             </span>

@@ -193,6 +193,21 @@ async function getCachedStats() {
     .where(eq(wedgie.seasonName, globalSettings.currentSeason.name));
   const currentSeasonWedgies = wedgieCountResult?.count ?? 0;
 
+  const previousSeasonCounts = await db
+    .select({ count: count() })
+    .from(wedgie)
+    .where(
+      and(
+        ne(wedgie.seasonName, globalSettings.currentSeason.name),
+        ne(wedgie.seasonName, "GEMS"),
+      ),
+    )
+    .groupBy(wedgie.seasonName);
+  const previousRecord =
+    previousSeasonCounts.length > 0
+      ? Math.max(...previousSeasonCounts.map((s) => s.count))
+      : 0;
+
   let dateNow: Date | null = null;
   if (currentSeasonWedgies < globalSettings.currentTotalWedgies) {
     dateNow = new Date();
@@ -207,6 +222,7 @@ async function getCachedStats() {
     lastWedgie: dateNow ?? lastWedgie?.wedgieDate ?? null,
     liveGames: globalSettings.liveGames ?? false,
     currentSeasonWedgies: currentSeasonWedgies,
+    previousRecord,
   };
 }
 
@@ -371,6 +387,9 @@ async function getCachedNerdStats() {
   const totalGamesOverall = seasons.reduce((acc, s) => acc + s.totalGames, 0);
   const globalGames = globalRow?.currentTotalGames ?? 0;
 
+  const previousRecord =
+    seasons.length > 0 ? Math.max(...seasons.map((s) => s.wedgies.length)) : 0;
+
   return {
     currentSeason: currentSeason ?? "2025/26",
     wedgiesThisSeason:
@@ -410,6 +429,7 @@ async function getCachedNerdStats() {
     totalGamesOverall: totalGamesOverall + globalGames,
     totalSeasonsOverall: totalSeasonsOverall + 1,
     oldSeasonsAverage: averageSeasonRate,
+    previousRecord,
   };
 }
 
