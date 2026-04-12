@@ -10,6 +10,8 @@ interface StatsProps {
   stats: {
     totalWedgies: number;
     currentPace: number;
+    gamesPlayed: number;
+    previousRecord: number;
     lastWedgie: Date | string | null;
     liveGames: boolean;
   };
@@ -51,6 +53,7 @@ export function Stats({ stats, isLoading }: StatsProps) {
   };
 
   const daysAgo = getDaysAgo();
+  const showPace = stats.currentPace !== stats.totalWedgies;
 
   useEffect(() => {
     // Reset to 0 when stats.currentPace changes
@@ -117,9 +120,13 @@ export function Stats({ stats, isLoading }: StatsProps) {
 
         {/* Add a red dot animated on the bottom left in case there are live games */}
 
-        <div className="bg-darkpurple-light/50 relative z-10 mx-auto rounded-lg p-4 text-center md:w-[90%] lg:w-[65%] lg:max-w-120 lg:min-w-[24rem]">
+        <div className="bg-darkpurple-light/50 relative z-10 mx-auto w-[clamp(16rem,_13rem_+_16vw,_28rem)] rounded-lg p-4 text-center md:w-[90%] lg:w-[65%] lg:max-w-120 lg:min-w-[24rem]">
           <div className="text-yellow text-sm leading-none font-bold md:text-base">
-            {stats.totalWedgies > 63 ? "NEW ALL-TIME RECORD" : "WE'RE AT"}
+            {stats.totalWedgies > stats.previousRecord
+              ? "NEW ALL-TIME RECORD"
+              : stats.totalWedgies === stats.previousRecord
+                ? "ALL-TIME RECORD TIED"
+                : "WE'RE AT"}
           </div>
           <div className="text-big-number-mobile text-yellow md:text-big-number-medium lg:text-big-number leading-none font-black whitespace-nowrap">
             {displayedTotal.toFixed(0).toLocaleString()}
@@ -146,18 +153,24 @@ export function Stats({ stats, isLoading }: StatsProps) {
           </div>
         )}
         <div className="flex flex-row items-center justify-center gap-5">
-          <div className="flex w-[100px] flex-col items-center justify-center text-center md:w-[135px]">
-            <div className="text-pace-text-mobile text-pink md:text-pace-text w-full leading-none font-black tracking-wider uppercase">
-              Pace
+          {showPace && (
+            <div className="flex w-[100px] flex-col items-center justify-center text-center md:w-[135px]">
+              <div className="text-pace-text-mobile text-pink md:text-pace-text w-full leading-none font-black tracking-wider uppercase">
+                Pace
+              </div>
+              <div className="shadow-lg-darkpurple-light text-pace-number-mobile text-yellow md:text-pace-number mt-[-.2em] w-full leading-none font-black">
+                {displayedPace.toFixed(0)}
+              </div>
             </div>
-            <div className="shadow-lg-darkpurple-light text-pace-number-mobile text-yellow md:text-pace-number mt-[-.2em] w-full leading-none font-black">
-              {displayedPace.toFixed(0)}
-            </div>
-          </div>
+          )}
 
           {daysAgo && daysAgo > 0 ? (
-            <div className="ml-2 flex w-[140px] flex-row items-center justify-center gap-3">
-              <div className="pl-2 text-center uppercase">
+            <div
+              className={`flex w-[140px] flex-row items-center justify-center gap-3 ${showPace ? "ml-2" : ""}`}
+            >
+              <div
+                className={`text-center uppercase ${showPace ? "pl-2" : ""}`}
+              >
                 <div className="shadow-lg-darkpurple-light text-yellow text-5xl leading-none font-black">
                   {daysAgo}
                 </div>
@@ -170,8 +183,12 @@ export function Stats({ stats, isLoading }: StatsProps) {
               </div>
             </div>
           ) : (
-            <div className="ml-2 flex w-[140px] flex-col items-start justify-start">
-              <div className="pl-4 text-center text-4xl uppercase">
+            <div
+              className={`flex w-[140px] flex-col items-start justify-start ${showPace ? "ml-2" : ""}`}
+            >
+              <div
+                className={`text-center text-4xl uppercase ${showPace ? "pl-4" : ""}`}
+              >
                 <div className="shadow-lg-darkpurple-light animate-color-shift text-pink leading-none font-black">
                   New
                 </div>

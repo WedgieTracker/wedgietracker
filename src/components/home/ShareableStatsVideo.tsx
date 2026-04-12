@@ -22,6 +22,8 @@ interface ShareableStatsVideoProps {
   stats: {
     totalWedgies: number;
     currentPace: number;
+    gamesPlayed: number;
+    previousRecord: number;
     lastWedgie: Date | string | null;
     liveGames: boolean;
   };
@@ -205,6 +207,9 @@ export function ShareableStatsVideo({ stats }: ShareableStatsVideoProps) {
     const currentPaceValue = Math.round(
       stats.currentPace * numberAnimationProgress,
     );
+    const currentGamesValue = Math.round(
+      stats.gamesPlayed * numberAnimationProgress,
+    );
 
     // Calculate fill percentage and animate it (complete in 2 seconds)
     const fillPercentage = Math.min((stats.totalWedgies / 50) * 100, 100);
@@ -244,11 +249,17 @@ export function ShareableStatsVideo({ stats }: ShareableStatsVideoProps) {
     ctx.roundRect(statsX, statsY, statsWidth, statsHeight, 20);
     ctx.fill();
 
-    // Draw "WE'RE AT" text
+    // Draw status text (WE'RE AT / NEW ALL-TIME RECORD / ALL-TIME RECORD TIED)
+    const statusText =
+      stats.totalWedgies > stats.previousRecord
+        ? "NEW ALL-TIME RECORD"
+        : stats.totalWedgies === stats.previousRecord
+          ? "ALL-TIME RECORD TIED"
+          : "WE'RE AT";
     ctx.font = "700 32px Inter";
     ctx.fillStyle = "#EAFF00"; // Yellow
     ctx.textAlign = "center";
-    ctx.fillText("WE'RE AT", width / 2, statsY + 60);
+    ctx.fillText(statusText, width / 2, statsY + 60);
 
     // Draw total wedgies number (animated) with glow
     ctx.font = "900 280px Inter";
@@ -278,6 +289,8 @@ export function ShareableStatsVideo({ stats }: ShareableStatsVideoProps) {
     // Bottom stats section
     const bottomY = (height - statsHeight) / 2 + 180;
 
+    const showPace = stats.currentPace !== stats.totalWedgies;
+
     // Background boxes for stats
     ctx.fillStyle = "rgba(31, 0, 77, 0.75)";
     ctx.beginPath();
@@ -285,14 +298,25 @@ export function ShareableStatsVideo({ stats }: ShareableStatsVideoProps) {
     ctx.roundRect(rightStatX, bottomY, statBoxWidth, statBoxHeight, 20);
     ctx.fill();
 
-    // Draw Pace (left side) - animated number
-    ctx.font = "900 60px Inter";
-    ctx.fillStyle = "#FF00FF"; // Pink
-    ctx.textAlign = "center";
-    ctx.fillText("PACE", width * 0.25, bottomY + 180);
-    ctx.font = "900 120px Inter";
-    ctx.fillStyle = "#EAFF00"; // Yellow
-    ctx.fillText(currentPaceValue.toString(), width * 0.25, bottomY + 120);
+    // Draw Pace or Games Played (left side) - animated number
+    if (showPace) {
+      ctx.font = "900 60px Inter";
+      ctx.fillStyle = "#FF00FF"; // Pink
+      ctx.textAlign = "center";
+      ctx.fillText("PACE", width * 0.25, bottomY + 180);
+      ctx.font = "900 120px Inter";
+      ctx.fillStyle = "#EAFF00"; // Yellow
+      ctx.fillText(currentPaceValue.toString(), width * 0.25, bottomY + 120);
+    } else {
+      ctx.font = "900 120px Inter";
+      ctx.fillStyle = "#EAFF00"; // Yellow
+      ctx.textAlign = "center";
+      ctx.fillText(currentGamesValue.toString(), width * 0.25, bottomY + 116);
+      ctx.font = "700 28px Inter";
+      ctx.fillStyle = "#FF00FF"; // Pink
+      ctx.fillText("GAMES", width * 0.25, bottomY + 152);
+      ctx.fillText("PLAYED", width * 0.25, bottomY + 182);
+    }
 
     // Draw days without wedgies or new wedgie (right side)
     const daysWithoutWedgie = stats.lastWedgie
@@ -393,6 +417,9 @@ export function ShareableStatsVideo({ stats }: ShareableStatsVideoProps) {
     const currentPaceValue = Math.round(
       stats.currentPace * numberAnimationProgress,
     );
+    const currentGamesValue = Math.round(
+      stats.gamesPlayed * numberAnimationProgress,
+    );
 
     // Calculate fill percentage and animate it (complete in 2 seconds)
     const fillPercentage = Math.min((stats.totalWedgies / 50) * 100, 100);
@@ -432,11 +459,17 @@ export function ShareableStatsVideo({ stats }: ShareableStatsVideoProps) {
     ctx.roundRect(statsX, statsY, statsWidth, statsHeight, 20);
     ctx.fill();
 
-    // Draw "WE'RE AT" text
+    // Draw status text (WE'RE AT / NEW ALL-TIME RECORD / ALL-TIME RECORD TIED)
+    const statusText =
+      stats.totalWedgies > stats.previousRecord
+        ? "NEW ALL-TIME RECORD"
+        : stats.totalWedgies === stats.previousRecord
+          ? "ALL-TIME RECORD TIED"
+          : "WE'RE AT";
     ctx.font = "700 32px Inter";
     ctx.fillStyle = "#EAFF00"; // Yellow
     ctx.textAlign = "center";
-    ctx.fillText("WE'RE AT", width / 2, statsY + 85);
+    ctx.fillText(statusText, width / 2, statsY + 85);
 
     // Draw total wedgies number (animated) with glow
     ctx.font = "900 380px Inter";
@@ -466,21 +499,34 @@ export function ShareableStatsVideo({ stats }: ShareableStatsVideoProps) {
     // Bottom stats section
     const bottomY = (height - statsHeight) / 2 + 550;
 
+    const showPace = stats.currentPace !== stats.totalWedgies;
+
     // Background boxes for stats
     ctx.fillStyle = "rgba(31, 0, 77, 0.75)";
     ctx.beginPath();
-    ctx.roundRect(leftStatX, bottomY, statBoxWidth, statBoxHeight, 20);
     ctx.roundRect(rightStatX, bottomY, statBoxWidth, statBoxHeight, 20);
+    ctx.roundRect(leftStatX, bottomY, statBoxWidth, statBoxHeight, 20);
     ctx.fill();
 
-    // Draw Pace (left side) - animated number
-    ctx.font = "900 90px Inter";
-    ctx.fillStyle = "#FF00FF"; // Pink
-    ctx.textAlign = "center";
-    ctx.fillText("PACE", width * 0.32, bottomY + 215);
-    ctx.font = "900 165px Inter";
-    ctx.fillStyle = "#EAFF00"; // Yellow
-    ctx.fillText(currentPaceValue.toString(), width * 0.32, bottomY + 155);
+    // Draw Pace or Games Played (left side) - animated number
+    if (showPace) {
+      ctx.font = "900 90px Inter";
+      ctx.fillStyle = "#FF00FF"; // Pink
+      ctx.textAlign = "center";
+      ctx.fillText("PACE", width * 0.32, bottomY + 215);
+      ctx.font = "900 165px Inter";
+      ctx.fillStyle = "#EAFF00"; // Yellow
+      ctx.fillText(currentPaceValue.toString(), width * 0.32, bottomY + 155);
+    } else {
+      ctx.font = "900 140px Inter";
+      ctx.fillStyle = "#EAFF00"; // Yellow
+      ctx.textAlign = "center";
+      ctx.fillText(currentGamesValue.toString(), width * 0.32, bottomY + 140);
+      ctx.font = "700 36px Inter";
+      ctx.fillStyle = "#FF00FF"; // Pink
+      ctx.fillText("GAMES", width * 0.32, bottomY + 185);
+      ctx.fillText("PLAYED", width * 0.32, bottomY + 225);
+    }
 
     // Draw days without wedgies or new wedgie (right side)
     const daysWithoutWedgie = stats.lastWedgie
