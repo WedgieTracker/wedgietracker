@@ -10,6 +10,7 @@ import type { Wedgie, VideoUrls } from "~/types/wedgie";
 import { useState } from "react";
 import { useToast } from "~/hooks/use-toast";
 import { ShareButtons } from "~/components/shared/ShareButtons";
+import { CourtPositionDiagram } from "./CourtPositionDiagram";
 
 interface WedgieModalProps {
   wedgie: Wedgie & {
@@ -270,38 +271,9 @@ export function WedgieModal({
 
             {/* Court Position Diagram - Optional */}
             <div className="absolute right-1.5 bottom-16 w-full max-w-[80px] sm:relative sm:right-auto sm:bottom-auto sm:max-w-[150px]">
-              <div
-                style={{
-                  position: "relative",
-                  top: "0",
-                  left: "0",
-                  width: "100%",
-                  paddingBottom: "73.3%",
-                }}
-              ></div>
-              <div
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  position: "absolute",
-                  top: "50%",
-                  left: "50%",
-                  transform: "translate(-50%, -50%)",
-                  backgroundImage: `url(https://res.cloudinary.com/wedgietracker/image/upload/v1735557904/assets/court_aazejm.svg)`,
-                  backgroundSize: "contain",
-                  backgroundPosition: "center center",
-                  backgroundRepeat: "no-repeat",
-                }}
-              ></div>
-              <div
-                className="bg-yellow absolute h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full shadow-lg"
-                style={{
-                  left: `${(wedgie.position as { x: number; y: number }).x}%`,
-                  top: `${(wedgie.position as { x: number; y: number }).y}%`,
-                }}
-              >
-                <div className="border-darkpurple bg-yellow absolute top-1/2 left-1/2 h-[calc(100%-0.2rem)] w-[calc(100%-0.2rem)] -translate-x-1/2 -translate-y-1/2 rounded-full border"></div>
-              </div>
+              <CourtPositionDiagram
+                position={wedgie.position as { x: number; y: number }}
+              />
             </div>
           </div>
         </div>
