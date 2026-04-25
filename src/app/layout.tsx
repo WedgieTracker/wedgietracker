@@ -85,16 +85,14 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: buildBootstrapScript(gtmId) }}
         />
 
-        <Suspense fallback={<div className="bg-darkpurple min-h-screen" />}>
-          <TRPCReactProvider>
-            {children}
-            <Toaster />
+        <TRPCReactProvider>
+          {children}
+          <Toaster />
 
-            <Suspense fallback={null}>
-              <ConsentBannerGeo />
-            </Suspense>
-          </TRPCReactProvider>
-        </Suspense>
+          <Suspense fallback={null}>
+            <ConsentBannerGeo />
+          </Suspense>
+        </TRPCReactProvider>
       </body>
     </html>
   );
