@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { PageLayout } from "~/components/layout/PageLayout";
 import { BlogPost } from "~/components/blog/BlogPost";
@@ -5,6 +6,7 @@ import { api } from "~/trpc/server";
 import Link from "next/link";
 import { Button } from "~/components/ui/button";
 import { ArrowLeftIcon } from "lucide-react";
+import { Loader } from "~/components/shared/Loader";
 
 interface Props {
   params: Promise<{
@@ -12,14 +14,7 @@ interface Props {
   }>;
 }
 
-export default async function BlogPostPage({ params }: Props) {
-  const resolvedParams = await params;
-  const post = await api.blog.getBySlug({ slug: resolvedParams.slug });
-
-  if (!post) {
-    notFound();
-  }
-
+export default function BlogPostPage({ params }: Props) {
   return (
     <PageLayout>
       <div className="mx-auto max-w-4xl px-4 py-8 md:px-8">
@@ -32,8 +27,27 @@ export default async function BlogPostPage({ params }: Props) {
             Back to Blog
           </Button>
         </Link>
-        <BlogPost post={post} />
+        <Suspense
+          fallback={
+            <div className="flex min-h-[60svh] items-center justify-center">
+              <Loader />
+            </div>
+          }
+        >
+          <BlogPostBody params={params} />
+        </Suspense>
       </div>
     </PageLayout>
   );
+}
+
+async function BlogPostBody({ params }: Props) {
+  const resolvedParams = await params;
+  const post = await api.blog.getBySlug({ slug: resolvedParams.slug });
+
+  if (!post) {
+    notFound();
+  }
+
+  return <BlogPost post={post} />;
 }
