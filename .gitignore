@@ -49,6 +49,9 @@ yarn-error.log*
 # claude code
 .claude/
 
+# fallow analysis cache
+.fallow/
+
 # Ignore Google credentials
 /credentials
 

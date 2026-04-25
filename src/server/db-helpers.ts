@@ -1,5 +1,5 @@
 import { eq, count } from "drizzle-orm";
-import { db } from "./db";
+import type { db } from "./db";
 import { global, wedgie } from "./schema";
 import { calculatePace } from "~/server/pace";
 
@@ -33,40 +33,6 @@ export function buildTeamStandings(
     .map(([name, cnt]) => ({ name, count: cnt }));
 
   return limit ? sorted.slice(0, limit) : sorted;
-}
-
-/**
- * Calculates pace and updates the global singleton row with pace values.
- * Merges all fields into a single UPDATE statement.
- */
-export async function updateGlobalPace(params: {
-  currentTotalWedgies: number;
-  currentTotalGames: number;
-  extraFields?: Partial<{
-    currentTotalWedgies: number;
-    currentTotalGames: number;
-    currentTotalMinutes: number;
-    currentTotalFGA: number;
-    currentTotalPoss: number;
-    liveGames: boolean;
-  }>;
-}) {
-  const pace = await calculatePace({
-    currentTotalWedgies: params.currentTotalWedgies,
-    currentTotalGames: params.currentTotalGames,
-  });
-
-  await db
-    .update(global)
-    .set({
-      simplePace: pace.simplePace,
-      mathPace: pace.rmPace,
-      pace: pace.medianPace,
-      ...params.extraFields,
-    })
-    .where(eq(global.id, 1));
-
-  return pace;
 }
 
 /**

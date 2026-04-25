@@ -1,11 +1,11 @@
-export interface PaceInput {
+interface PaceInput {
   currentTotalWedgies: number;
   currentTotalGames: number;
   totalEstimatedGames?: number;
   seasonRates: number[];
 }
 
-export interface PaceResult {
+interface PaceResult {
   simplePace: number;
   rmPace: number;
   medianPace: number;

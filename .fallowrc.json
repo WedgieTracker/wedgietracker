@@ -1,0 +1,13 @@
+{
+  "$schema": "https://docs.fallow.tools/schema/fallow-config.json",
+  "ignoreExports": [
+    {
+      "file": "src/components/ui/**",
+      "exports": ["*"]
+    },
+    {
+      "file": "src/trpc/react.tsx",
+      "exports": ["RouterInputs", "RouterOutputs"]
+    }
+  ]
+}

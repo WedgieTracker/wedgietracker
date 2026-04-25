@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { api } from "~/trpc/react";
-import { Dialog } from "@radix-ui/react-dialog";
+import { AddNewEntityDialog } from "./AddNewEntityDialog";
 
 interface PlayerSearchInputProps {
   value: string;
@@ -83,41 +83,13 @@ export function PlayerSearchInput({ value, onChange }: PlayerSearchInputProps) {
       )}
 
       {isAddingNew && (
-        <Dialog open={isAddingNew} onOpenChange={setIsAddingNew}>
-          <div className="fixed inset-0 z-50 bg-black/50" />
-          <div className="bg-darkpurple fixed top-1/2 left-1/2 z-50 -translate-x-1/2 -translate-y-1/2 rounded-lg p-6">
-            <h2 className="mb-4 text-lg font-bold text-white">
-              Add New Player
-            </h2>
-            <p className="mb-4 text-white">
-              Are you sure you want to add &quot;{search}&quot; as a new player?
-            </p>
-            <div className="flex justify-end space-x-4">
-              <button
-                type="button"
-                className="px-4 py-2 text-white hover:text-gray-300"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setIsAddingNew(false);
-                }}
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  void handleAddNewPlayer();
-                }}
-              >
-                Add Player
-              </button>
-            </div>
-          </div>
-        </Dialog>
+        <AddNewEntityDialog
+          open={isAddingNew}
+          onOpenChange={setIsAddingNew}
+          entityLabel="Player"
+          searchValue={search}
+          onConfirm={() => void handleAddNewPlayer()}
+        />
       )}
     </div>
   );

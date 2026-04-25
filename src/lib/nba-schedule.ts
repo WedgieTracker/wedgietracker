@@ -52,7 +52,7 @@ interface ErrorResponse {
   };
 }
 
-export interface GameDetail {
+interface GameDetail {
   gameID: string;
   gameDateTimeEst: string;
   homeTeam: string;
@@ -60,7 +60,7 @@ export interface GameDetail {
   seasonName: string;
 }
 
-export interface SuccessResponse {
+interface SuccessResponse {
   gamesPlayed: number;
   minutesPlayed: number;
   totalFGA: number;
