@@ -28,6 +28,131 @@ const TSHIRT_IMAGES: Record<Color, string[]> = {
   ],
 };
 
+async function handleCoffeeDonation(session: Stripe.Checkout.Session) {
+  try {
+    await sendTelegramMessage(
+      `☕ New coffee donation received!\n\n` +
+        `<b>Donation Details:</b>\n` +
+        `• Amount: $${(session.amount_total ?? 0) / 100}\n` +
+        `• From: ${session.customer_details?.email ?? "Anonymous"}\n`,
+    );
+
+    await sendDonationConfirmationEmail({
+      customerName: session.customer_details?.name ?? "",
+      customerEmail: session.customer_details?.email ?? "",
+      amount: (session.amount_total ?? 0) / 100,
+    });
+  } catch (error) {
+    console.error("Failed to process coffee donation:", error);
+    await sendTelegramMessage(
+      `❌ Coffee Donation Processing Failed!\n\n` +
+        `<b>Session ID:</b> ${session.id}\n` +
+        `<b>Error:</b> ${error instanceof Error ? error.message : "Unknown error"}`,
+    );
+  }
+}
+
+async function handleTshirtOrder(session: Stripe.Checkout.Session) {
+  const address = session.collected_information?.shipping_details?.address;
+  const shippingAddress = {
+    line1: address?.line1 ?? "",
+    line2: address?.line2 ?? "",
+    city: address?.city ?? "",
+    state: address?.state ?? "",
+    postalCode: address?.postal_code ?? "",
+    country: address?.country ?? "",
+  };
+  const shippingName =
+    session.collected_information?.shipping_details?.name ?? "";
+  const customerEmail = session.customer_details?.email ?? "";
+  const size = session.metadata!.size ?? "";
+  const color = session.metadata!.color ?? "";
+
+  try {
+    const [order] = await db
+      .insert(tshirtOrder)
+      .values({
+        stripeSessionId: session.id,
+        customerEmail,
+        size,
+        color,
+        shippingName,
+        shippingAddress,
+      })
+      .returning();
+
+    revalidateTag(CACHE_TAGS.STORE_DATA, "max");
+
+    const [orderCountResult] = await db
+      .select({ count: count() })
+      .from(tshirtOrder);
+    const orderCount = orderCountResult?.count ?? 0;
+
+    try {
+      const { result } = await createPrintfulDraftOrder({
+        stripeSessionId: session.id,
+        size,
+        color,
+        shippingName,
+        shippingAddress,
+        orderNumber: orderCount,
+      });
+
+      if (order) {
+        await db
+          .update(tshirtOrder)
+          .set({ printfulOrderId: result.id.toString() })
+          .where(eq(tshirtOrder.id, order.id));
+      }
+
+      const foldedImageUrl = TSHIRT_IMAGES[color as Color]?.[0] ?? "";
+
+      await Promise.all([
+        sendTelegramMessage(
+          `🎉 New T-shirt order received!\n\n` +
+            `<b>Order Details:</b>\n` +
+            `• Order #: ${orderCount}\n` +
+            `• Size: ${size}\n` +
+            `• Color: ${color}\n` +
+            `• Customer: ${shippingName}\n` +
+            `• Email: ${customerEmail}\n` +
+            `• Amount: $${(session.amount_total ?? 0) / 100}\n\n` +
+            `Printful draft order created successfully.`,
+        ),
+        sendOrderConfirmationEmail({
+          orderNumber: orderCount,
+          size,
+          color,
+          customerName: shippingName,
+          customerEmail,
+          shippingAddress,
+          amount: session.amount_total ?? 0,
+          foldedImageUrl,
+          stripeSessionId: session.id,
+        }),
+      ]);
+    } catch (error) {
+      console.error("Failed to create Printful order:", error);
+      await sendTelegramMessage(
+        `⚠️ Printful Order Creation Failed!\n\n` +
+          `<b>Order Details:</b>\n` +
+          `• Order #: ${orderCount}\n` +
+          `• Size: ${size}\n` +
+          `• Color: ${color}\n` +
+          `• Customer: ${shippingName}\n` +
+          `• Error: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
+    }
+  } catch (error) {
+    console.error("Failed to process order:", error);
+    await sendTelegramMessage(
+      `❌ Order Processing Failed!\n\n` +
+        `<b>Session ID:</b> ${session.id}\n` +
+        `<b>Error:</b> ${error instanceof Error ? error.message : "Unknown error"}`,
+    );
+  }
+}
+
 export async function POST(req: Request) {
   const body = await req.text();
   const signature = (await headers()).get("stripe-signature");
@@ -56,135 +181,14 @@ export async function POST(req: Request) {
   }
 
   if (event.type === "checkout.session.completed") {
-    const session: Stripe.Checkout.Session = event.data.object;
-
-    console.log("Session metadata", event.data.object.metadata);
+    const session = event.data.object;
+    console.log("Session metadata", session.metadata);
     console.log("Session", session.success_url);
 
-    const isCoffeeDonation = session.metadata?.coffee === "true";
-
-    if (isCoffeeDonation) {
-      try {
-        await sendTelegramMessage(
-          `☕ New coffee donation received!\n\n` +
-            `<b>Donation Details:</b>\n` +
-            `• Amount: $${(session.amount_total ?? 0) / 100}\n` +
-            `• From: ${session.customer_details?.email ?? "Anonymous"}\n`,
-        );
-
-        await sendDonationConfirmationEmail({
-          customerName: session.customer_details?.name ?? "",
-          customerEmail: session.customer_details?.email ?? "",
-          amount: (session.amount_total ?? 0) / 100,
-        });
-      } catch (error) {
-        console.error("Failed to process coffee donation:", error);
-        await sendTelegramMessage(
-          `❌ Coffee Donation Processing Failed!\n\n` +
-            `<b>Session ID:</b> ${session.id}\n` +
-            `<b>Error:</b> ${error instanceof Error ? error.message : "Unknown error"}`,
-        );
-      }
+    if (session.metadata?.coffee === "true") {
+      await handleCoffeeDonation(session);
     } else {
-      try {
-        const address =
-          session.collected_information?.shipping_details?.address;
-        const shippingAddress = {
-          line1: address?.line1 ?? "",
-          line2: address?.line2 ?? "",
-          city: address?.city ?? "",
-          state: address?.state ?? "",
-          postalCode: address?.postal_code ?? "",
-          country: address?.country ?? "",
-        };
-        const shippingName =
-          session.collected_information?.shipping_details?.name ?? "";
-        const customerEmail = session.customer_details?.email ?? "";
-        const size = session.metadata!.size ?? "";
-        const color = session.metadata!.color ?? "";
-
-        const [order] = await db
-          .insert(tshirtOrder)
-          .values({
-            stripeSessionId: session.id,
-            customerEmail,
-            size,
-            color,
-            shippingName,
-            shippingAddress,
-          })
-          .returning();
-
-        revalidateTag(CACHE_TAGS.STORE_DATA, "max");
-
-        const [orderCountResult] = await db
-          .select({ count: count() })
-          .from(tshirtOrder);
-        const orderCount = orderCountResult?.count ?? 0;
-
-        try {
-          const { result } = await createPrintfulDraftOrder({
-            stripeSessionId: session.id,
-            size,
-            color,
-            shippingName,
-            shippingAddress,
-            orderNumber: orderCount,
-          });
-
-          if (order) {
-            await db
-              .update(tshirtOrder)
-              .set({ printfulOrderId: result.id.toString() })
-              .where(eq(tshirtOrder.id, order.id));
-          }
-
-          const foldedImageUrl = TSHIRT_IMAGES[color as Color]?.[0] ?? "";
-
-          await Promise.all([
-            sendTelegramMessage(
-              `🎉 New T-shirt order received!\n\n` +
-                `<b>Order Details:</b>\n` +
-                `• Order #: ${orderCount}\n` +
-                `• Size: ${size}\n` +
-                `• Color: ${color}\n` +
-                `• Customer: ${shippingName}\n` +
-                `• Email: ${customerEmail}\n` +
-                `• Amount: $${(session.amount_total ?? 0) / 100}\n\n` +
-                `Printful draft order created successfully.`,
-            ),
-            sendOrderConfirmationEmail({
-              orderNumber: orderCount,
-              size,
-              color,
-              customerName: shippingName,
-              customerEmail,
-              shippingAddress,
-              amount: session.amount_total ?? 0,
-              foldedImageUrl,
-              stripeSessionId: session.id,
-            }),
-          ]);
-        } catch (error) {
-          console.error("Failed to create Printful order:", error);
-          await sendTelegramMessage(
-            `⚠️ Printful Order Creation Failed!\n\n` +
-              `<b>Order Details:</b>\n` +
-              `• Order #: ${orderCount}\n` +
-              `• Size: ${size}\n` +
-              `• Color: ${color}\n` +
-              `• Customer: ${shippingName}\n` +
-              `• Error: ${error instanceof Error ? error.message : "Unknown error"}`,
-          );
-        }
-      } catch (error) {
-        console.error("Failed to process order:", error);
-        await sendTelegramMessage(
-          `❌ Order Processing Failed!\n\n` +
-            `<b>Session ID:</b> ${session.id}\n` +
-            `<b>Error:</b> ${error instanceof Error ? error.message : "Unknown error"}`,
-        );
-      }
+      await handleTshirtOrder(session);
     }
   }
 

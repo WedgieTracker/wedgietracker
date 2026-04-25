@@ -12,6 +12,48 @@ import { useToast } from "~/hooks/use-toast";
 import { ShareButtons } from "~/components/shared/ShareButtons";
 import { CourtPositionDiagram } from "./CourtPositionDiagram";
 
+type ActiveVideo = "youtube" | "cloudinary" | "youtubeNoDunks" | "instagram";
+
+function pickInitialVideo(videoUrl: VideoUrls | null): ActiveVideo | null {
+  if (videoUrl?.youtube) return "youtube";
+  if (videoUrl?.cloudinary) return "cloudinary";
+  if (videoUrl?.youtubeNoDunks) return "youtubeNoDunks";
+  if (videoUrl?.instagram) return "instagram";
+  return null;
+}
+
+function toYoutubeEmbed(url: string): string {
+  const videoIdMatch =
+    /(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?/\s]{11})/.exec(
+      url,
+    );
+  const videoId = videoIdMatch?.[1];
+
+  const timeMatch = /[?&](?:t|start)=(\d+)/.exec(url);
+  const startTime = timeMatch?.[1] ?? "";
+
+  const embedUrl = `https://www.youtube.com/embed/${videoId}`;
+  return startTime ? `${embedUrl}?start=${startTime}` : embedUrl;
+}
+
+function getVideoSrc(
+  activeVideo: ActiveVideo | null,
+  videoUrl: VideoUrls,
+): string | undefined {
+  switch (activeVideo) {
+    case "youtube":
+      return toYoutubeEmbed(videoUrl.youtube ?? "");
+    case "youtubeNoDunks":
+      return toYoutubeEmbed(videoUrl.youtubeNoDunks ?? "");
+    case "instagram":
+      return `${videoUrl.instagram}embed`;
+    case "cloudinary":
+      return videoUrl.cloudinary;
+    default:
+      return undefined;
+  }
+}
+
 interface WedgieModalProps {
   wedgie: Wedgie & {
     types: { name: string }[];
@@ -36,33 +78,9 @@ export function WedgieModal({
   hasNext = false,
 }: WedgieModalProps) {
   const { toast } = useToast();
-  const [activeVideo, setActiveVideo] = useState<
-    "youtube" | "cloudinary" | "youtubeNoDunks" | "instagram" | null
-  >(() => {
-    if (wedgie.videoUrl?.youtube) return "youtube";
-    if (wedgie.videoUrl?.cloudinary) return "cloudinary";
-    if (wedgie.videoUrl?.youtubeNoDunks) return "youtubeNoDunks";
-    if (wedgie.videoUrl?.instagram) return "instagram";
-    return null;
-  });
-
-  const getVideoUrl = (url: string, type: "youtubeNoDunks" | "cloudinary") => {
-    if (type === "youtubeNoDunks") {
-      // Use RegExp.exec() instead of match
-      const videoIdMatch =
-        /(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?/\s]{11})/.exec(
-          url,
-        );
-      const videoId = videoIdMatch?.[1];
-
-      const timeMatch = /[?&](?:t|start)=(\d+)/.exec(url);
-      const startTime = timeMatch?.[1] ?? "";
-
-      const embedUrl = `https://www.youtube.com/embed/${videoId}`;
-      return startTime ? `${embedUrl}?start=${startTime}` : embedUrl;
-    }
-    return url;
-  };
+  const [activeVideo, setActiveVideo] = useState<ActiveVideo | null>(() =>
+    pickInitialVideo(wedgie.videoUrl),
+  );
 
   const handleCopyLink = async () => {
     const baseUrl = window.location.origin;
@@ -167,21 +185,7 @@ export function WedgieModal({
                     title="Video player"
                     width="100%"
                     height="100%"
-                    src={
-                      activeVideo === "youtube"
-                        ? getVideoUrl(
-                            wedgie.videoUrl.youtube ?? "",
-                            "youtubeNoDunks",
-                          )
-                        : activeVideo === "youtubeNoDunks"
-                          ? getVideoUrl(
-                              wedgie.videoUrl.youtubeNoDunks ?? "",
-                              "youtubeNoDunks",
-                            )
-                          : activeVideo === "instagram"
-                            ? `${wedgie.videoUrl.instagram}embed`
-                            : wedgie.videoUrl.cloudinary
-                    }
+                    src={getVideoSrc(activeVideo, wedgie.videoUrl)}
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowFullScreen
                     {...(activeVideo === "instagram" && {
