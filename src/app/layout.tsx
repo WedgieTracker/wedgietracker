@@ -1,5 +1,6 @@
 import "~/styles/globals.css";
 import { Suspense } from "react";
+import Script from "next/script";
 import { Inter } from "next/font/google";
 import { TRPCReactProvider } from "~/trpc/react";
 import { Toaster } from "~/components/ui/toaster";
@@ -23,17 +24,10 @@ export default function RootLayout({
 
   return (
     <html lang="en" className={`${inter.variable}`}>
-      <head>
-        <meta
-          property="og:image"
-          content="https://res.cloudinary.com/wedgietracker/image/upload/v1736700345/assets/social-wedgietracker_bibnbu.jpg"
-        />
-        <meta
-          property="twitter:image"
-          content="https://res.cloudinary.com/wedgietracker/image/upload/v1736700345/assets/social-wedgietracker_bibnbu.jpg"
-        />
-        {/* Consent Mode v2 — region-targeted defaults, applied before GTM loads */}
-        <script
+      <body className="bg-darkpurple">
+        <Script
+          id="gtm-consent-defaults"
+          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
             __html: `
               window.dataLayer = window.dataLayer || [];
@@ -77,8 +71,6 @@ export default function RootLayout({
             `,
           }}
         />
-      </head>
-      <body className="bg-darkpurple">
         <GoogleTagManager gtmId={gtmId} />
 
         <Suspense>

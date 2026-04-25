@@ -5,6 +5,8 @@ const APP_DESCRIPTION =
   "NBA original WedgieTracker. We count how many times a basketball gets stuck between the rim and the backboard. NoDunks Inspired.";
 const APP_URL =
   process.env.NEXT_PUBLIC_APP_URL ?? "https://www.wedgietracker.com";
+const DEFAULT_SOCIAL_IMAGE =
+  "https://res.cloudinary.com/wedgietracker/image/upload/v1736700345/assets/social-wedgietracker_bibnbu.jpg";
 
 export const defaultMetadata: Metadata = {
   applicationName: APP_NAME,
@@ -31,6 +33,7 @@ export const defaultMetadata: Metadata = {
     },
     description: APP_DESCRIPTION,
     url: APP_URL,
+    images: [{ url: DEFAULT_SOCIAL_IMAGE }],
   },
   twitter: {
     card: "summary",
@@ -39,6 +42,7 @@ export const defaultMetadata: Metadata = {
       template: `%s | ${APP_NAME}`,
     },
     description: APP_DESCRIPTION,
+    images: [DEFAULT_SOCIAL_IMAGE],
   },
   icons: [
     { rel: "icon", url: "/favicon.ico" },
@@ -65,13 +69,13 @@ export function generateMetadata({
       ...defaultMetadata.openGraph,
       title: title,
       description: description,
-      images: image ? [{ url: image }] : undefined,
+      images: image ? [{ url: image }] : defaultMetadata.openGraph?.images,
     },
     twitter: {
       ...defaultMetadata.twitter,
       title: title,
       description: description,
-      images: image ? [image] : undefined,
+      images: image ? [image] : defaultMetadata.twitter?.images,
     },
     robots: {
       index: !noIndex,
