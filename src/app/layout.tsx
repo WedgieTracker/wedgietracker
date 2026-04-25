@@ -4,6 +4,7 @@ import { Inter } from "next/font/google";
 import { TRPCReactProvider } from "~/trpc/react";
 import { Toaster } from "~/components/ui/toaster";
 import { defaultMetadata } from "~/config/metadata";
+import { GoogleTagManager } from "@next/third-parties/google";
 
 import ConsentBannerGeo from "~/components/shared/ConsentBannerGeo";
 import { CONSENT_REQUIRED_REGIONS } from "~/lib/consent-region";
@@ -16,13 +17,11 @@ const inter = Inter({
 export const metadata = defaultMetadata;
 
 /**
- * GA4 Consent Mode v2 defaults + GTM bootstrap, inlined as one plain
- * <script>. Replaces @next/third-parties' <GoogleTagManager>, which is a
- * "use client" wrapper around <Script> and adds an extra client-component
- * boundary at the top of <body>. Folding the dataLayer init + script
- * loader into a single plain SSR script avoids that boundary entirely.
+ * GA4 Consent Mode v2 defaults — must execute before GTM loads. Rendered
+ * inline so the browser runs it during HTML parse, before <GoogleTagManager>
+ * (afterInteractive) injects gtm.js.
  */
-const buildBootstrapScript = (gtmId: string) => `
+const consentDefaultsScript = `
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
 
@@ -61,16 +60,6 @@ const buildBootstrapScript = (gtmId: string) => `
 
   gtag('set', 'url_passthrough', true);
   gtag('set', 'ads_data_redaction', true);
-
-  // GTM bootstrap (inlined from @next/third-parties' _next-gtm-init):
-  window.dataLayer.push({'gtm.start': new Date().getTime(), event: 'gtm.js'});
-  (function() {
-    var f = document.getElementsByTagName('script')[0];
-    var j = document.createElement('script');
-    j.async = true;
-    j.src = 'https://www.googletagmanager.com/gtm.js?id=${gtmId}';
-    f.parentNode.insertBefore(j, f);
-  })();
 `;
 
 export default function RootLayout({
@@ -81,9 +70,8 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable}`}>
       <body className="bg-darkpurple">
-        <script
-          dangerouslySetInnerHTML={{ __html: buildBootstrapScript(gtmId) }}
-        />
+        <script dangerouslySetInnerHTML={{ __html: consentDefaultsScript }} />
+        <GoogleTagManager gtmId={gtmId} />
 
         <TRPCReactProvider>
           {children}
