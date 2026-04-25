@@ -1,19 +1,12 @@
 import { NextResponse } from "next/server";
 import { postToTwitter } from "~/server/dev/twitter";
-import { auth } from "~/server/auth";
-import { assertDevMode } from "~/config/dev-routes";
+import { requireDevSession } from "~/server/dev/requireDevSession";
 
 export async function POST(req: Request) {
-  const blocked = assertDevMode();
-  if (blocked) return blocked;
+  const guard = await requireDevSession();
+  if ("errorResponse" in guard) return guard.errorResponse;
 
   try {
-    const session = await auth();
-
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
     const formData = await req.formData();
     const number = parseInt(formData.get("number") as string);
     const pace = parseInt(formData.get("pace") as string);

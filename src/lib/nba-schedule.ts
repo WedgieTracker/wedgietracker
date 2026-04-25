@@ -52,7 +52,7 @@ interface ErrorResponse {
   };
 }
 
-export interface GameDetail {
+interface GameDetail {
   gameID: string;
   gameDateTimeEst: string;
   homeTeam: string;
@@ -60,7 +60,7 @@ export interface GameDetail {
   seasonName: string;
 }
 
-export interface SuccessResponse {
+interface SuccessResponse {
   gamesPlayed: number;
   minutesPlayed: number;
   totalFGA: number;
@@ -74,6 +74,112 @@ export interface SuccessResponse {
 }
 
 // ─── Core NBA Update ─────────────────────────────────────────────────────────
+
+const PRESEASON_LABEL = "Preseason";
+const ALL_STAR_LABEL = "All-Star";
+const FINAL_GAME_STATUS = 3;
+const REGULATION_MINUTES = 48;
+const OT_PERIOD_MINUTES = 5;
+
+function isEligibleGame(g: NBAGameStatus) {
+  return (
+    g.gameStatus === FINAL_GAME_STATUS &&
+    g.weekName !== ALL_STAR_LABEL &&
+    g.gameLabel !== PRESEASON_LABEL
+  );
+}
+
+function computeGameMinutes(gameStatus: string): number {
+  if (gameStatus === "Final") return REGULATION_MINUTES;
+  const otMatches = /Final\/OT(\d*)/.exec(gameStatus);
+  if (!otMatches) return 0;
+  const otPeriods = otMatches[1] ? parseInt(otMatches[1]) : 1;
+  return REGULATION_MINUTES + OT_PERIOD_MINUTES * otPeriods;
+}
+
+function toGameDetail(g: NBAGameStatus, seasonName: string): GameDetail {
+  return {
+    gameID: g.gameId,
+    gameDateTimeEst: g.gameDateTimeEst,
+    homeTeam: g.homeTeam.teamTricode,
+    awayTeam: g.awayTeam.teamTricode,
+    seasonName,
+  };
+}
+
+async function extractGamesFromSchedule(
+  scheduleLeague: NBAScheduleResponse,
+  dateStart: Date,
+  includeExistingGames: boolean,
+  seasonName: string,
+) {
+  const gamesToAdd: GameDetail[] = [];
+  const gamesURLs: string[] = [];
+  let addedGames = 0;
+  let addedMinutes = 0;
+
+  for (const singleDate of scheduleLeague.leagueSchedule.gameDates) {
+    if (new Date(singleDate.gameDate).getTime() <= dateStart.getTime()) {
+      continue;
+    }
+
+    for (const singleGame of singleDate.games) {
+      if (!isEligibleGame(singleGame)) continue;
+
+      const existingGame = await db.query.game.findFirst({
+        where: eq(game.id, Number(singleGame.gameId)),
+      });
+
+      const detail = toGameDetail(singleGame, seasonName);
+
+      if (existingGame) {
+        if (includeExistingGames) gamesToAdd.push(detail);
+        continue;
+      }
+
+      gamesURLs.push(
+        `https://cdn.nba.com/static/json/liveData/playbyplay/playbyplay_${singleGame.gameId}.json`,
+      );
+      addedGames += 1;
+      addedMinutes += computeGameMinutes(singleGame.gameStatusText);
+      gamesToAdd.push(detail);
+    }
+  }
+
+  return { gamesToAdd, gamesURLs, addedGames, addedMinutes };
+}
+
+async function upsertGames(games: GameDetail[]) {
+  for (const g of games) {
+    await db
+      .insert(game)
+      .values({
+        id: Number(g.gameID),
+        name: `${g.homeTeam} @ ${g.awayTeam} - ${g.gameDateTimeEst}`,
+        createdAt: new Date(g.gameDateTimeEst).toISOString(),
+        seasonName: g.seasonName,
+      })
+      .onConflictDoUpdate({
+        target: game.name,
+        set: { seasonName: g.seasonName },
+      });
+  }
+}
+
+async function upsertGlobalStats(values: {
+  currentTotalFGA: number;
+  currentTotalPoss: number;
+  currentTotalGames: number;
+  currentTotalMinutes: number;
+  simplePace: number;
+  mathPace: number;
+  pace: number;
+}) {
+  await db
+    .insert(global)
+    .values({ id: 1, currentSeasonId: 11, ...values })
+    .onConflictDoUpdate({ target: global.id, set: values });
+}
 
 /**
  * Fetches NBA schedule, processes new games, calculates stats, and updates the DB.
@@ -111,14 +217,7 @@ export async function nbaUpdate(includeExistingGames: boolean) {
       : null;
 
     const seasonName = currentSeason?.name ?? "2025/26";
-
     const dateStart = new Date("2025-10-20");
-    let gamesPlayed = currentGlobal?.currentTotalGames ?? 0;
-    let minutesPlayed = currentGlobal?.currentTotalMinutes ?? 0;
-    let totalFGA = currentGlobal?.currentTotalFGA ?? 0;
-    let totalPoss = currentGlobal?.currentTotalPoss ?? 0;
-    const gamesToAdd: GameDetail[] = [];
-    const gamesURLs: string[] = [];
 
     // Ensure season exists in database (once, before processing games)
     await db
@@ -126,88 +225,23 @@ export async function nbaUpdate(includeExistingGames: boolean) {
       .values({ name: seasonName })
       .onConflictDoNothing({ target: season.name });
 
-    // Process schedule data
-    for (const singleDate of scheduleLeague.leagueSchedule.gameDates) {
-      const dateProcessing = new Date(singleDate.gameDate);
+    const { gamesToAdd, gamesURLs, addedGames, addedMinutes } =
+      await extractGamesFromSchedule(
+        scheduleLeague,
+        dateStart,
+        includeExistingGames,
+        seasonName,
+      );
 
-      if (dateProcessing.getTime() > dateStart.getTime()) {
-        for (const singleGame of singleDate.games) {
-          if (
-            singleGame.gameStatus === 3 &&
-            singleGame.weekName !== "All-Star" &&
-            singleGame.gameLabel !== "Preseason"
-          ) {
-            const existingGame = await db.query.game.findFirst({
-              where: eq(game.id, Number(singleGame.gameId)),
-            });
-
-            if (existingGame) {
-              if (includeExistingGames) {
-                gamesToAdd.push({
-                  gameID: singleGame.gameId,
-                  gameDateTimeEst: singleGame.gameDateTimeEst,
-                  homeTeam: singleGame.homeTeam.teamTricode,
-                  awayTeam: singleGame.awayTeam.teamTricode,
-                  seasonName: seasonName,
-                });
-              }
-              continue;
-            }
-
-            gamesURLs.push(
-              `https://cdn.nba.com/static/json/liveData/playbyplay/playbyplay_${singleGame.gameId}.json`,
-            );
-
-            gamesPlayed++;
-
-            // Calculate minutes played based on overtime periods
-            const baseMinutes = 48;
-            const otMinutes = 5;
-            const gameStatus = singleGame.gameStatusText;
-            const otRegex = /Final\/OT(\d*)/;
-            const otMatches = otRegex.exec(gameStatus);
-
-            if (gameStatus === "Final") {
-              minutesPlayed += baseMinutes;
-            } else if (otMatches) {
-              const otPeriods = otMatches[1] ? parseInt(otMatches[1]) : 1;
-              minutesPlayed += baseMinutes + otMinutes * otPeriods;
-            }
-
-            gamesToAdd.push({
-              gameID: singleGame.gameId,
-              gameDateTimeEst: singleGame.gameDateTimeEst,
-              homeTeam: singleGame.homeTeam.teamTricode,
-              awayTeam: singleGame.awayTeam.teamTricode,
-              seasonName: seasonName,
-            });
-          }
-        }
-      }
-    }
+    const gamesPlayed = (currentGlobal?.currentTotalGames ?? 0) + addedGames;
+    const minutesPlayed =
+      (currentGlobal?.currentTotalMinutes ?? 0) + addedMinutes;
 
     const { fgaGame, posNumber } = await gamesFetch(gamesURLs);
+    const totalFGA = (currentGlobal?.currentTotalFGA ?? 0) + fgaGame;
+    const totalPoss = (currentGlobal?.currentTotalPoss ?? 0) + posNumber;
 
-    totalFGA += fgaGame;
-    totalPoss += posNumber;
-
-    // Store processed games in database
-    for (const g of gamesToAdd) {
-      const name = `${g.homeTeam} @ ${g.awayTeam} - ${g.gameDateTimeEst}`;
-
-      await db
-        .insert(game)
-        .values({
-          id: Number(g.gameID),
-          name: name,
-          createdAt: new Date(g.gameDateTimeEst).toISOString(),
-          seasonName: g.seasonName,
-        })
-        .onConflictDoUpdate({
-          target: game.name,
-          set: { seasonName: g.seasonName },
-        });
-    }
+    await upsertGames(gamesToAdd);
 
     // Update the total games of the current season if different from the past total
     if (
@@ -224,35 +258,19 @@ export async function nbaUpdate(includeExistingGames: boolean) {
 
     if (currentTotalWedgies) {
       pace = await calculatePace({
-        currentTotalWedgies: currentTotalWedgies,
+        currentTotalWedgies,
         currentTotalGames: gamesPlayed,
       });
 
-      await db
-        .insert(global)
-        .values({
-          id: 1,
-          currentSeasonId: 11,
-          currentTotalFGA: totalFGA,
-          currentTotalPoss: totalPoss,
-          currentTotalGames: gamesPlayed,
-          currentTotalMinutes: minutesPlayed,
-          simplePace: pace.simplePace,
-          mathPace: pace.rmPace,
-          pace: pace.medianPace,
-        })
-        .onConflictDoUpdate({
-          target: global.id,
-          set: {
-            currentTotalFGA: totalFGA,
-            currentTotalPoss: totalPoss,
-            currentTotalGames: gamesPlayed,
-            currentTotalMinutes: minutesPlayed,
-            simplePace: pace.simplePace,
-            mathPace: pace.rmPace,
-            pace: pace.medianPace,
-          },
-        });
+      await upsertGlobalStats({
+        currentTotalFGA: totalFGA,
+        currentTotalPoss: totalPoss,
+        currentTotalGames: gamesPlayed,
+        currentTotalMinutes: minutesPlayed,
+        simplePace: pace.simplePace,
+        mathPace: pace.rmPace,
+        pace: pace.medianPace,
+      });
     }
 
     revalidateTag(CACHE_TAGS.WEDGIE_DATA, "max");

@@ -10,6 +10,49 @@ import type { Wedgie, VideoUrls } from "~/types/wedgie";
 import { useState } from "react";
 import { useToast } from "~/hooks/use-toast";
 import { ShareButtons } from "~/components/shared/ShareButtons";
+import { CourtPositionDiagram } from "./CourtPositionDiagram";
+
+type ActiveVideo = "youtube" | "cloudinary" | "youtubeNoDunks" | "instagram";
+
+function pickInitialVideo(videoUrl: VideoUrls | null): ActiveVideo | null {
+  if (videoUrl?.youtube) return "youtube";
+  if (videoUrl?.cloudinary) return "cloudinary";
+  if (videoUrl?.youtubeNoDunks) return "youtubeNoDunks";
+  if (videoUrl?.instagram) return "instagram";
+  return null;
+}
+
+function toYoutubeEmbed(url: string): string {
+  const videoIdMatch =
+    /(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?/\s]{11})/.exec(
+      url,
+    );
+  const videoId = videoIdMatch?.[1];
+
+  const timeMatch = /[?&](?:t|start)=(\d+)/.exec(url);
+  const startTime = timeMatch?.[1] ?? "";
+
+  const embedUrl = `https://www.youtube.com/embed/${videoId}`;
+  return startTime ? `${embedUrl}?start=${startTime}` : embedUrl;
+}
+
+function getVideoSrc(
+  activeVideo: ActiveVideo | null,
+  videoUrl: VideoUrls,
+): string | undefined {
+  switch (activeVideo) {
+    case "youtube":
+      return toYoutubeEmbed(videoUrl.youtube ?? "");
+    case "youtubeNoDunks":
+      return toYoutubeEmbed(videoUrl.youtubeNoDunks ?? "");
+    case "instagram":
+      return `${videoUrl.instagram}embed`;
+    case "cloudinary":
+      return videoUrl.cloudinary;
+    default:
+      return undefined;
+  }
+}
 
 interface WedgieModalProps {
   wedgie: Wedgie & {
@@ -35,33 +78,9 @@ export function WedgieModal({
   hasNext = false,
 }: WedgieModalProps) {
   const { toast } = useToast();
-  const [activeVideo, setActiveVideo] = useState<
-    "youtube" | "cloudinary" | "youtubeNoDunks" | "instagram" | null
-  >(() => {
-    if (wedgie.videoUrl?.youtube) return "youtube";
-    if (wedgie.videoUrl?.cloudinary) return "cloudinary";
-    if (wedgie.videoUrl?.youtubeNoDunks) return "youtubeNoDunks";
-    if (wedgie.videoUrl?.instagram) return "instagram";
-    return null;
-  });
-
-  const getVideoUrl = (url: string, type: "youtubeNoDunks" | "cloudinary") => {
-    if (type === "youtubeNoDunks") {
-      // Use RegExp.exec() instead of match
-      const videoIdMatch =
-        /(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?/\s]{11})/.exec(
-          url,
-        );
-      const videoId = videoIdMatch?.[1];
-
-      const timeMatch = /[?&](?:t|start)=(\d+)/.exec(url);
-      const startTime = timeMatch?.[1] ?? "";
-
-      const embedUrl = `https://www.youtube.com/embed/${videoId}`;
-      return startTime ? `${embedUrl}?start=${startTime}` : embedUrl;
-    }
-    return url;
-  };
+  const [activeVideo, setActiveVideo] = useState<ActiveVideo | null>(() =>
+    pickInitialVideo(wedgie.videoUrl),
+  );
 
   const handleCopyLink = async () => {
     const baseUrl = window.location.origin;
@@ -166,21 +185,7 @@ export function WedgieModal({
                     title="Video player"
                     width="100%"
                     height="100%"
-                    src={
-                      activeVideo === "youtube"
-                        ? getVideoUrl(
-                            wedgie.videoUrl.youtube ?? "",
-                            "youtubeNoDunks",
-                          )
-                        : activeVideo === "youtubeNoDunks"
-                          ? getVideoUrl(
-                              wedgie.videoUrl.youtubeNoDunks ?? "",
-                              "youtubeNoDunks",
-                            )
-                          : activeVideo === "instagram"
-                            ? `${wedgie.videoUrl.instagram}embed`
-                            : wedgie.videoUrl.cloudinary
-                    }
+                    src={getVideoSrc(activeVideo, wedgie.videoUrl)}
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowFullScreen
                     {...(activeVideo === "instagram" && {
@@ -270,38 +275,9 @@ export function WedgieModal({
 
             {/* Court Position Diagram - Optional */}
             <div className="absolute right-1.5 bottom-16 w-full max-w-[80px] sm:relative sm:right-auto sm:bottom-auto sm:max-w-[150px]">
-              <div
-                style={{
-                  position: "relative",
-                  top: "0",
-                  left: "0",
-                  width: "100%",
-                  paddingBottom: "73.3%",
-                }}
-              ></div>
-              <div
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  position: "absolute",
-                  top: "50%",
-                  left: "50%",
-                  transform: "translate(-50%, -50%)",
-                  backgroundImage: `url(https://res.cloudinary.com/wedgietracker/image/upload/v1735557904/assets/court_aazejm.svg)`,
-                  backgroundSize: "contain",
-                  backgroundPosition: "center center",
-                  backgroundRepeat: "no-repeat",
-                }}
-              ></div>
-              <div
-                className="bg-yellow absolute h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full shadow-lg"
-                style={{
-                  left: `${(wedgie.position as { x: number; y: number }).x}%`,
-                  top: `${(wedgie.position as { x: number; y: number }).y}%`,
-                }}
-              >
-                <div className="border-darkpurple bg-yellow absolute top-1/2 left-1/2 h-[calc(100%-0.2rem)] w-[calc(100%-0.2rem)] -translate-x-1/2 -translate-y-1/2 rounded-full border"></div>
-              </div>
+              <CourtPositionDiagram
+                position={wedgie.position as { x: number; y: number }}
+              />
             </div>
           </div>
         </div>

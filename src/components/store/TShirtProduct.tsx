@@ -256,6 +256,49 @@ export function TShirtProduct() {
     );
   };
 
+  const ThumbnailButton = ({
+    image,
+    index,
+    sizeClassName = "h-16 w-16",
+    onClick,
+  }: {
+    image: string;
+    index: number;
+    sizeClassName?: string;
+    onClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  }) => (
+    <button
+      key={index}
+      onClick={onClick}
+      className={cn(
+        "relative overflow-hidden rounded-lg border-2 transition-all",
+        sizeClassName,
+        selectedImageIndex === index
+          ? "border-yellow"
+          : "border-transparent hover:border-white/20",
+      )}
+    >
+      <img
+        src={image}
+        alt={`${selectedColor} T-shirt view ${index + 1}`}
+        className="h-full w-full object-cover"
+      />
+      {image.includes("/number-") ? (
+        <SvgNumber
+          number={availableQuantity.currentNumber}
+          selectedColor={selectedColor}
+          position="number"
+        />
+      ) : image.includes("/back-") ? (
+        <SvgNumber
+          number={availableQuantity.currentNumber}
+          selectedColor={selectedColor}
+          position="back"
+        />
+      ) : null}
+    </button>
+  );
+
   return (
     <div
       className={cn(
@@ -316,39 +359,15 @@ export function TShirtProduct() {
               )}
             >
               {sortedImages.map((image, index) => (
-                <button
+                <ThumbnailButton
                   key={index}
+                  image={image}
+                  index={index}
                   onClick={(e) => {
-                    e.stopPropagation(); // Prevent dialog from opening
+                    e.stopPropagation();
                     setSelectedImageIndex(index);
                   }}
-                  className={cn(
-                    "relative h-16 w-16 overflow-hidden rounded-lg border-2 transition-all",
-                    selectedImageIndex === index
-                      ? "border-yellow"
-                      : "border-transparent hover:border-white/20",
-                  )}
-                >
-                  <img
-                    src={image}
-                    alt={`${selectedColor} T-shirt view ${index + 1}`}
-                    className="h-full w-full object-cover"
-                  />
-                  {/* Number overlay */}
-                  {image.includes("/number-") ? (
-                    <SvgNumber
-                      number={availableQuantity.currentNumber}
-                      selectedColor={selectedColor}
-                      position="number"
-                    />
-                  ) : image.includes("/back-") ? (
-                    <SvgNumber
-                      number={availableQuantity.currentNumber}
-                      selectedColor={selectedColor}
-                      position="back"
-                    />
-                  ) : null}
-                </button>
+                />
               ))}
             </div>
           </div>
@@ -405,36 +424,13 @@ export function TShirtProduct() {
                     )}
                   >
                     {sortedImages.map((image, index) => (
-                      <button
+                      <ThumbnailButton
                         key={index}
+                        image={image}
+                        index={index}
+                        sizeClassName="h-10 w-10 shrink-0 sm:h-12 sm:w-12 md:h-16 md:w-16"
                         onClick={() => setSelectedImageIndex(index)}
-                        className={cn(
-                          "relative h-10 w-10 shrink-0 overflow-hidden rounded-lg border-2 transition-all sm:h-12 sm:w-12 md:h-16 md:w-16",
-                          selectedImageIndex === index
-                            ? "border-yellow"
-                            : "border-transparent hover:border-white/20",
-                        )}
-                      >
-                        <img
-                          src={image}
-                          alt={`${selectedColor} T-shirt view ${index + 1}`}
-                          className="h-full w-full object-cover"
-                        />
-                        {/* Number overlay */}
-                        {image.includes("/number-") ? (
-                          <SvgNumber
-                            number={availableQuantity.currentNumber}
-                            selectedColor={selectedColor}
-                            position="number"
-                          />
-                        ) : image.includes("/back-") ? (
-                          <SvgNumber
-                            number={availableQuantity.currentNumber}
-                            selectedColor={selectedColor}
-                            position="back"
-                          />
-                        ) : null}
-                      </button>
+                      />
                     ))}
                   </div>
                 </div>

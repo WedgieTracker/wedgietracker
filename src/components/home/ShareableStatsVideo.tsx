@@ -48,6 +48,16 @@ interface ConfettiParticle {
   drag: number;
 }
 
+function getWedgieDays(lastWedgie: Date | string | null) {
+  if (!lastWedgie) return { daysWithoutWedgie: 0, hasNewWedgie: false };
+  const elapsedMs = new Date().getTime() - new Date(lastWedgie).getTime();
+  const elapsedDays = elapsedMs / (1000 * 60 * 60 * 24);
+  return {
+    daysWithoutWedgie: Math.ceil(elapsedDays) - 1,
+    hasNewWedgie: elapsedDays < 1,
+  };
+}
+
 export function ShareableStatsVideo({ stats }: ShareableStatsVideoProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [videoBlob, setVideoBlob] = useState<Blob | null>(null);
@@ -184,13 +194,62 @@ export function ShareableStatsVideo({ stats }: ShareableStatsVideoProps) {
     }
   };
 
+  const drawLogoAndUrlBadge = (
+    ctx: CanvasRenderingContext2D,
+    width: number,
+    height: number,
+    logoY: number,
+    urlBottomOffset: number,
+  ) => {
+    if (imageRef.current) {
+      const logoWidth = 300;
+      const logoHeight = 100;
+      const logoX = width / 2 - logoWidth / 2;
+
+      ctx.fillStyle = "rgba(31, 0, 77, 0.75)";
+      ctx.beginPath();
+      ctx.roundRect(
+        logoX - 60,
+        logoY - 60,
+        logoWidth + 120,
+        logoHeight + 120,
+        20,
+      );
+      ctx.fill();
+      ctx.drawImage(imageRef.current, logoX, logoY, logoWidth, logoHeight);
+    }
+
+    const urlText = "WEDGIETRACKER.COM";
+    ctx.font = "700 24px Inter";
+    const textMetrics = ctx.measureText(urlText);
+    const padding = 40;
+    const buttonWidth = textMetrics.width + padding * 2;
+    const buttonHeight = 50;
+    const buttonX = width / 2 - buttonWidth / 2;
+    const buttonY = height - urlBottomOffset;
+
+    ctx.strokeStyle = "rgb(23,0,43)";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.roundRect(
+      buttonX,
+      buttonY,
+      buttonWidth,
+      buttonHeight,
+      buttonHeight / 2,
+    );
+    ctx.stroke();
+
+    ctx.fillStyle = "rgb(23,0,43)";
+    ctx.textAlign = "center";
+    ctx.fillText(urlText, width / 2, buttonY + 34);
+  };
+
   /**
-   * Draws the current frame on the canvas.
-   * @param ctx - The canvas rendering context.
-   * @param progress - The progress of the video generation (0 to 1).
-   * @param stats - The stats data.
+   * Common preamble: clears canvas, draws waves and confetti, returns
+   * shared animation values used by every frame layout.
    */
-  const drawFrame = (
+  const setupFrame = (
     ctx: CanvasRenderingContext2D,
     progress: number,
     stats: ShareableStatsVideoProps["stats"],
@@ -199,7 +258,6 @@ export function ShareableStatsVideo({ stats }: ShareableStatsVideoProps) {
     const width = canvas.width;
     const height = canvas.height;
 
-    // Animate numbers from 0 to target (complete in ~1 second)
     const numberAnimationProgress = Math.min(progress * 20, 1);
     const currentTotalWedgies = Math.round(
       stats.totalWedgies * numberAnimationProgress,
@@ -211,31 +269,52 @@ export function ShareableStatsVideo({ stats }: ShareableStatsVideoProps) {
       stats.gamesPlayed * numberAnimationProgress,
     );
 
-    // Calculate fill percentage and animate it (complete in 2 seconds)
     const fillPercentage = Math.min((stats.totalWedgies / 50) * 100, 100);
     const currentFillPercentage = Math.min(
       fillPercentage,
       ((progress * 20) / 2) * 100,
     );
 
-    // Clear canvas with dark purple background
-    ctx.fillStyle = "rgb(23,0,43)"; // darkpurple
+    ctx.fillStyle = "rgb(23,0,43)";
     ctx.fillRect(0, 0, width, height);
 
-    // Calculate wave height based on fill percentage
-    const maxHeight = height; // Fill entire canvas at 100%
-    const currentHeight = (currentFillPercentage / 100) * maxHeight;
-    const baseY = height - currentHeight;
+    const baseY = height - (currentFillPercentage / 100) * height;
 
-    // Draw each wave layer
     waveLayers.forEach((layer) => {
       drawWaveLayer(ctx, layer, width * 0.4, baseY);
     });
 
-    // Draw confetti after waves but before stat boxes
     if (fillPercentage >= 100 && currentFillPercentage >= fillPercentage) {
       drawConfetti(ctx, width, height);
     }
+
+    return {
+      width,
+      height,
+      currentTotalWedgies,
+      currentPaceValue,
+      currentGamesValue,
+    };
+  };
+
+  /**
+   * Draws the current frame on the canvas.
+   * @param ctx - The canvas rendering context.
+   * @param progress - The progress of the video generation (0 to 1).
+   * @param stats - The stats data.
+   */
+  const drawFrame = (
+    ctx: CanvasRenderingContext2D,
+    progress: number,
+    stats: ShareableStatsVideoProps["stats"],
+  ) => {
+    const {
+      width,
+      height,
+      currentTotalWedgies,
+      currentPaceValue,
+      currentGamesValue,
+    } = setupFrame(ctx, progress, stats);
 
     // Stats container dimensions
     const statsWidth = width * 0.3;
@@ -319,17 +398,7 @@ export function ShareableStatsVideo({ stats }: ShareableStatsVideoProps) {
     }
 
     // Draw days without wedgies or new wedgie (right side)
-    const daysWithoutWedgie = stats.lastWedgie
-      ? Math.ceil(
-          (new Date().getTime() - new Date(stats.lastWedgie).getTime()) /
-            (1000 * 60 * 60 * 24),
-        ) - 1
-      : 0;
-    const hasNewWedgie = stats.lastWedgie
-      ? (new Date().getTime() - new Date(stats.lastWedgie).getTime()) /
-          (1000 * 60 * 60 * 24) <
-        1
-      : false;
+    const { daysWithoutWedgie, hasNewWedgie } = getWedgieDays(stats.lastWedgie);
 
     if (hasNewWedgie) {
       ctx.font = "900 64px Inter";
@@ -348,56 +417,7 @@ export function ShareableStatsVideo({ stats }: ShareableStatsVideoProps) {
       ctx.fillText("WEDGIES", width * 0.75, bottomY + 182);
     }
 
-    // Draw Logo with Dark Purple Background
-    if (imageRef.current) {
-      const logoWidth = 300; // Adjust logo width as needed
-      const logoHeight = 100; // Adjust logo height as needed
-      const logoX = width / 2 - logoWidth / 2; // Center horizontally
-      const logoY = 0 + 150; // Position vertically as needed
-
-      // Draw semi-transparent background matching stat boxes
-      ctx.fillStyle = "rgba(31, 0, 77, 0.75)";
-      ctx.beginPath();
-      ctx.roundRect(
-        logoX - 60,
-        logoY - 60,
-        logoWidth + 120,
-        logoHeight + 120,
-        20,
-      );
-      ctx.fill();
-
-      // Draw the logo image
-      ctx.drawImage(imageRef.current, logoX, logoY, logoWidth, logoHeight);
-    }
-
-    // Add button-like background for URL
-    const urlText = "WEDGIETRACKER.COM";
-    ctx.font = "700 24px Inter";
-    const textMetrics = ctx.measureText(urlText);
-    const padding = 40;
-    const buttonWidth = textMetrics.width + padding * 2;
-    const buttonHeight = 50;
-    const buttonX = width / 2 - buttonWidth / 2;
-    const buttonY = height - 159;
-
-    // Draw rounded rectangle border
-    ctx.strokeStyle = "rgb(23,0,43)"; // Dark Purple
-    ctx.lineWidth = 2; // Border width
-    ctx.beginPath();
-    ctx.roundRect(
-      buttonX,
-      buttonY,
-      buttonWidth,
-      buttonHeight,
-      buttonHeight / 2,
-    );
-    ctx.stroke();
-
-    // Draw text
-    ctx.fillStyle = "rgb(23,0,43)"; // Dark Purple
-    ctx.textAlign = "center";
-    ctx.fillText(urlText, width / 2, height - 125);
+    drawLogoAndUrlBadge(ctx, width, height, 150, 159);
   };
 
   const drawVerticalFrame = (
@@ -405,47 +425,13 @@ export function ShareableStatsVideo({ stats }: ShareableStatsVideoProps) {
     progress: number,
     stats: ShareableStatsVideoProps["stats"],
   ) => {
-    const canvas = ctx.canvas;
-    const width = canvas.width;
-    const height = canvas.height;
-
-    // Animate numbers from 0 to target (complete in ~1 second)
-    const numberAnimationProgress = Math.min(progress * 20, 1);
-    const currentTotalWedgies = Math.round(
-      stats.totalWedgies * numberAnimationProgress,
-    );
-    const currentPaceValue = Math.round(
-      stats.currentPace * numberAnimationProgress,
-    );
-    const currentGamesValue = Math.round(
-      stats.gamesPlayed * numberAnimationProgress,
-    );
-
-    // Calculate fill percentage and animate it (complete in 2 seconds)
-    const fillPercentage = Math.min((stats.totalWedgies / 50) * 100, 100);
-    const currentFillPercentage = Math.min(
-      fillPercentage,
-      ((progress * 20) / 2) * 100,
-    );
-
-    // Clear canvas with dark purple background
-    ctx.fillStyle = "rgb(23,0,43)"; // darkpurple
-    ctx.fillRect(0, 0, width, height);
-
-    // Calculate wave height based on fill percentage
-    const maxHeight = height; // Fill entire canvas at 100%
-    const currentHeight = (currentFillPercentage / 100) * maxHeight;
-    const baseY = height - currentHeight;
-
-    // Draw each wave layer
-    waveLayers.forEach((layer) => {
-      drawWaveLayer(ctx, layer, width * 0.4, baseY);
-    });
-
-    // Draw confetti after waves but before stat boxes
-    if (fillPercentage >= 100 && currentFillPercentage >= fillPercentage) {
-      drawConfetti(ctx, width, height);
-    }
+    const {
+      width,
+      height,
+      currentTotalWedgies,
+      currentPaceValue,
+      currentGamesValue,
+    } = setupFrame(ctx, progress, stats);
 
     // Stats container dimensions
     const statsWidth = width * 0.65;
@@ -529,17 +515,7 @@ export function ShareableStatsVideo({ stats }: ShareableStatsVideoProps) {
     }
 
     // Draw days without wedgies or new wedgie (right side)
-    const daysWithoutWedgie = stats.lastWedgie
-      ? Math.ceil(
-          (new Date().getTime() - new Date(stats.lastWedgie).getTime()) /
-            (1000 * 60 * 60 * 24),
-        ) - 1
-      : 0;
-    const hasNewWedgie = stats.lastWedgie
-      ? (new Date().getTime() - new Date(stats.lastWedgie).getTime()) /
-          (1000 * 60 * 60 * 24) <
-        1
-      : false;
+    const { daysWithoutWedgie, hasNewWedgie } = getWedgieDays(stats.lastWedgie);
 
     if (hasNewWedgie) {
       ctx.font = "900 94px Inter";
@@ -558,56 +534,7 @@ export function ShareableStatsVideo({ stats }: ShareableStatsVideoProps) {
       ctx.fillText("WEDGIES", width * 0.685, bottomY + 225);
     }
 
-    // Draw Logo with Dark Purple Background
-    if (imageRef.current) {
-      const logoWidth = 300; // Adjust logo width as needed
-      const logoHeight = 100; // Adjust logo height as needed
-      const logoX = width / 2 - logoWidth / 2; // Center horizontally
-      const logoY = 0 + 210; // Position vertically as needed
-
-      // Draw semi-transparent background matching stat boxes
-      ctx.fillStyle = "rgba(31, 0, 77, 0.75)";
-      ctx.beginPath();
-      ctx.roundRect(
-        logoX - 60,
-        logoY - 60,
-        logoWidth + 120,
-        logoHeight + 120,
-        20,
-      );
-      ctx.fill();
-
-      // Draw the logo image
-      ctx.drawImage(imageRef.current, logoX, logoY, logoWidth, logoHeight);
-    }
-
-    // Add button-like background for URL
-    const urlText = "WEDGIETRACKER.COM";
-    ctx.font = "700 24px Inter";
-    const textMetrics = ctx.measureText(urlText);
-    const padding = 40;
-    const buttonWidth = textMetrics.width + padding * 2;
-    const buttonHeight = 50;
-    const buttonX = width / 2 - buttonWidth / 2;
-    const buttonY = height - 259;
-
-    // Draw rounded rectangle border
-    ctx.strokeStyle = "rgb(23,0,43)"; // Dark Purple
-    ctx.lineWidth = 2; // Border width
-    ctx.beginPath();
-    ctx.roundRect(
-      buttonX,
-      buttonY,
-      buttonWidth,
-      buttonHeight,
-      buttonHeight / 2,
-    );
-    ctx.stroke();
-
-    // Draw text
-    ctx.fillStyle = "rgb(23,0,43)"; // Dark Purple
-    ctx.textAlign = "center";
-    ctx.fillText(urlText, width / 2, height - 225);
+    drawLogoAndUrlBadge(ctx, width, height, 210, 259);
   };
 
   /**

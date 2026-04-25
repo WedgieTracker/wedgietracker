@@ -1,30 +1,13 @@
 import { Resend } from "resend";
-import OrderConfirmationEmail from "./emails/OrderConfirmation";
+import OrderConfirmationEmail, {
+  type OrderConfirmationEmailProps,
+} from "./emails/OrderConfirmation";
 import DonationConfirmationEmail from "./emails/DonationConfirmation";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-interface SendOrderConfirmationEmailParams {
-  orderNumber: number;
-  size: string;
-  color: string;
-  customerName: string;
-  customerEmail: string;
-  shippingAddress: {
-    line1: string;
-    line2?: string | null;
-    city: string;
-    state: string;
-    postalCode: string;
-    country: string;
-  };
-  amount: number;
-  foldedImageUrl: string;
-  stripeSessionId: string;
-}
-
 export async function sendOrderConfirmationEmail(
-  params: SendOrderConfirmationEmailParams,
+  params: OrderConfirmationEmailProps,
 ) {
   try {
     await resend.emails.send({

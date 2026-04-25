@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { WedgieModal } from "./WedgieModal";
+import { CourtPositionDiagram } from "./CourtPositionDiagram";
 import type { WedgieWithTypes } from "~/types/wedgie";
 
 interface WedgieProps {
@@ -158,38 +159,10 @@ export function Wedgie({
             <div
               className={`absolute top-1/2 right-2 -translate-y-1/2 overflow-visible ${variant === "small" ? "w-20 md:w-20" : "w-20 md:w-24"}`}
             >
-              <div
-                style={{
-                  position: "relative",
-                  top: "0",
-                  left: "0",
-                  width: "100%",
-                  paddingBottom: "73.3%",
-                }}
-              ></div>
-              <div
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  position: "absolute",
-                  top: "50%",
-                  left: "50%",
-                  transform: "translate(-50%, -50%)",
-                  backgroundImage: `url(https://res.cloudinary.com/wedgietracker/image/upload/v1735557904/assets/court_aazejm.svg)`,
-                  backgroundSize: "contain",
-                  backgroundPosition: "center center",
-                  backgroundRepeat: "no-repeat",
-                }}
-              ></div>
-              <div
-                className="bg-yellow absolute h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full shadow-lg md:h-3 md:w-3"
-                style={{
-                  left: `${(wedgie.position as { x: number; y: number }).x}%`,
-                  top: `${(wedgie.position as { x: number; y: number }).y}%`,
-                }}
-              >
-                <div className="border-darkpurple bg-yellow absolute top-1/2 left-1/2 h-[calc(100%-0.2rem)] w-[calc(100%-0.2rem)] -translate-x-1/2 -translate-y-1/2 rounded-full border"></div>
-              </div>
+              <CourtPositionDiagram
+                position={wedgie.position as { x: number; y: number }}
+                dotClassName="h-2 w-2 md:h-3 md:w-3"
+              />
             </div>
           </div>
         </div>

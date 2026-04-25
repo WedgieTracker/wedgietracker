@@ -172,5 +172,4 @@ const socialLinks = [
   },
 ];
 
-// Move all the icon components and socialLinks array here
-export { XformerlyTwitter, Instagram, YouTube, Bluesky, Github, socialLinks };
+export { socialLinks };
