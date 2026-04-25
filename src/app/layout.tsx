@@ -1,17 +1,13 @@
 import "~/styles/globals.css";
 import { Suspense } from "react";
-import { headers } from "next/headers";
 import { Inter } from "next/font/google";
 import { TRPCReactProvider } from "~/trpc/react";
 import { Toaster } from "~/components/ui/toaster";
 import { defaultMetadata } from "~/config/metadata";
 import { GoogleTagManager } from "@next/third-parties/google";
 
-import ConsentBanner from "~/components/shared/ConsentBanner";
-import {
-  CONSENT_REQUIRED_REGIONS,
-  isConsentRequiredCountry,
-} from "~/lib/consent-region";
+import ConsentBannerGeo from "~/components/shared/ConsentBannerGeo";
+import { CONSENT_REQUIRED_REGIONS } from "~/lib/consent-region";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -20,12 +16,10 @@ const inter = Inter({
 
 export const metadata = defaultMetadata;
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   const gtmId = process.env.NEXT_PUBLIC_GA_ID!;
-  const country = (await headers()).get("x-vercel-ip-country");
-  const requiresConsent = isConsentRequiredCountry(country);
 
   return (
     <html lang="en" className={`${inter.variable}`}>
@@ -92,7 +86,9 @@ export default async function RootLayout({
             {children}
             <Toaster />
 
-            <ConsentBanner requiresConsent={requiresConsent} />
+            <Suspense>
+              <ConsentBannerGeo />
+            </Suspense>
           </TRPCReactProvider>
         </Suspense>
       </body>
