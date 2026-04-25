@@ -9,5 +9,13 @@
       "file": "src/trpc/react.tsx",
       "exports": ["RouterInputs", "RouterOutputs"]
     }
-  ]
+  ],
+  "duplicates": {
+    "minLines": 30
+  },
+  "health": {
+    "maxCyclomatic": 45,
+    "maxCognitive": 25,
+    "maxCrap": 2000
+  }
 }
