@@ -4,7 +4,6 @@ import { Inter } from "next/font/google";
 import { TRPCReactProvider } from "~/trpc/react";
 import { Toaster } from "~/components/ui/toaster";
 import { defaultMetadata } from "~/config/metadata";
-import { GoogleTagManager } from "@next/third-parties/google";
 
 import ConsentBannerGeo from "~/components/shared/ConsentBannerGeo";
 import { CONSENT_REQUIRED_REGIONS } from "~/lib/consent-region";
@@ -16,7 +15,14 @@ const inter = Inter({
 
 export const metadata = defaultMetadata;
 
-const consentDefaultsScript = `
+/**
+ * GA4 Consent Mode v2 defaults + GTM bootstrap, inlined as one plain
+ * <script>. Replaces @next/third-parties' <GoogleTagManager>, which is a
+ * "use client" wrapper around <Script> and adds an extra client-component
+ * boundary at the top of <body>. Folding the dataLayer init + script
+ * loader into a single plain SSR script avoids that boundary entirely.
+ */
+const buildBootstrapScript = (gtmId: string) => `
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
 
@@ -55,6 +61,16 @@ const consentDefaultsScript = `
 
   gtag('set', 'url_passthrough', true);
   gtag('set', 'ads_data_redaction', true);
+
+  // GTM bootstrap (inlined from @next/third-parties' _next-gtm-init):
+  window.dataLayer.push({'gtm.start': new Date().getTime(), event: 'gtm.js'});
+  (function() {
+    var f = document.getElementsByTagName('script')[0];
+    var j = document.createElement('script');
+    j.async = true;
+    j.src = 'https://www.googletagmanager.com/gtm.js?id=${gtmId}';
+    f.parentNode.insertBefore(j, f);
+  })();
 `;
 
 export default function RootLayout({
@@ -65,24 +81,16 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable}`}>
       <body className="bg-darkpurple">
-        {/*
-         * GA4 Consent Mode v2 defaults — must execute before GTM loads.
-         * Rendered as a plain React <script> (not next/script) because
-         * `strategy="beforeInteractive"` with inline dangerouslySetInnerHTML
-         * triggers Safari's HierarchyRequestError under Next 16's streaming
-         * metadata + cacheComponents (vercel/next.js#43383).
-         * React 19 does not hoist inline scripts, so this executes during
-         * HTML parse — before the afterInteractive GTM script.
-         */}
-        <script dangerouslySetInnerHTML={{ __html: consentDefaultsScript }} />
-        <GoogleTagManager gtmId={gtmId} />
+        <script
+          dangerouslySetInnerHTML={{ __html: buildBootstrapScript(gtmId) }}
+        />
 
-        <Suspense>
+        <Suspense fallback={<div className="bg-darkpurple min-h-screen" />}>
           <TRPCReactProvider>
             {children}
             <Toaster />
 
-            <Suspense>
+            <Suspense fallback={null}>
               <ConsentBannerGeo />
             </Suspense>
           </TRPCReactProvider>
