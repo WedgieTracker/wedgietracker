@@ -19,17 +19,22 @@ function updateConsent(granted: boolean) {
   });
 }
 
-export default function ConsentBanner() {
+interface ConsentBannerProps {
+  requiresConsent: boolean;
+}
+
+export default function ConsentBanner({ requiresConsent }: ConsentBannerProps) {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    // Returning users already have consent set in the head script (layout.tsx).
-    // Only show the banner if the user hasn't made a choice yet.
+    // Banner only renders in regions that legally require explicit opt-in.
+    // Elsewhere, defaults are 'granted' via the head script (layout.tsx).
+    if (!requiresConsent) return;
     const consent = localStorage.getItem("cookieConsent");
     if (!consent) {
       setIsVisible(true);
     }
-  }, []);
+  }, [requiresConsent]);
 
   const handleAccept = () => {
     localStorage.setItem("cookieConsent", "accepted");
