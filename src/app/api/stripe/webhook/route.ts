@@ -87,35 +87,31 @@ export async function POST(req: Request) {
       }
     } else {
       try {
+        const address =
+          session.collected_information?.shipping_details?.address;
+        const shippingAddress = {
+          line1: address?.line1 ?? "",
+          line2: address?.line2 ?? "",
+          city: address?.city ?? "",
+          state: address?.state ?? "",
+          postalCode: address?.postal_code ?? "",
+          country: address?.country ?? "",
+        };
+        const shippingName =
+          session.collected_information?.shipping_details?.name ?? "";
+        const customerEmail = session.customer_details?.email ?? "";
+        const size = session.metadata!.size ?? "";
+        const color = session.metadata!.color ?? "";
+
         const [order] = await db
           .insert(tshirtOrder)
           .values({
             stripeSessionId: session.id,
-            customerEmail: session.customer_details?.email ?? "",
-            size: session.metadata!.size ?? "",
-            color: session.metadata!.color ?? "",
-            shippingName:
-              session.collected_information?.shipping_details?.name ?? "",
-            shippingAddress: {
-              line1:
-                session.collected_information?.shipping_details?.address
-                  ?.line1 ?? "",
-              line2:
-                session.collected_information?.shipping_details?.address
-                  ?.line2 ?? "",
-              city:
-                session.collected_information?.shipping_details?.address
-                  ?.city ?? "",
-              state:
-                session.collected_information?.shipping_details?.address
-                  ?.state ?? "",
-              postalCode:
-                session.collected_information?.shipping_details?.address
-                  ?.postal_code ?? "",
-              country:
-                session.collected_information?.shipping_details?.address
-                  ?.country ?? "",
-            },
+            customerEmail,
+            size,
+            color,
+            shippingName,
+            shippingAddress,
           })
           .returning();
 
@@ -129,29 +125,10 @@ export async function POST(req: Request) {
         try {
           const { result } = await createPrintfulDraftOrder({
             stripeSessionId: session.id,
-            size: session.metadata!.size ?? "",
-            color: session.metadata!.color ?? "",
-            shippingName:
-              session.collected_information?.shipping_details?.name ?? "",
-            shippingAddress: {
-              line1:
-                session.collected_information?.shipping_details?.address
-                  ?.line1 ?? "",
-              line2:
-                session.collected_information?.shipping_details?.address?.line2,
-              city:
-                session.collected_information?.shipping_details?.address
-                  ?.city ?? "",
-              state:
-                session.collected_information?.shipping_details?.address
-                  ?.state ?? "",
-              postalCode:
-                session.collected_information?.shipping_details?.address
-                  ?.postal_code ?? "",
-              country:
-                session.collected_information?.shipping_details?.address
-                  ?.country ?? "",
-            },
+            size,
+            color,
+            shippingName,
+            shippingAddress,
             orderNumber: orderCount,
           });
 
@@ -162,48 +139,27 @@ export async function POST(req: Request) {
               .where(eq(tshirtOrder.id, order.id));
           }
 
-          const foldedImageUrl =
-            TSHIRT_IMAGES[session.metadata!.color as Color]?.[0] ?? "";
+          const foldedImageUrl = TSHIRT_IMAGES[color as Color]?.[0] ?? "";
 
           await Promise.all([
             sendTelegramMessage(
               `🎉 New T-shirt order received!\n\n` +
                 `<b>Order Details:</b>\n` +
                 `• Order #: ${orderCount}\n` +
-                `• Size: ${session.metadata!.size}\n` +
-                `• Color: ${session.metadata!.color}\n` +
-                `• Customer: ${session.collected_information?.shipping_details?.name}\n` +
-                `• Email: ${session.customer_details?.email}\n` +
+                `• Size: ${size}\n` +
+                `• Color: ${color}\n` +
+                `• Customer: ${shippingName}\n` +
+                `• Email: ${customerEmail}\n` +
                 `• Amount: $${(session.amount_total ?? 0) / 100}\n\n` +
                 `Printful draft order created successfully.`,
             ),
             sendOrderConfirmationEmail({
               orderNumber: orderCount,
-              size: session.metadata!.size ?? "",
-              color: session.metadata!.color ?? "",
-              customerName:
-                session.collected_information?.shipping_details?.name ?? "",
-              customerEmail: session.customer_details?.email ?? "",
-              shippingAddress: {
-                line1:
-                  session.collected_information?.shipping_details?.address
-                    ?.line1 ?? "",
-                line2:
-                  session.collected_information?.shipping_details?.address
-                    ?.line2 ?? "",
-                city:
-                  session.collected_information?.shipping_details?.address
-                    ?.city ?? "",
-                state:
-                  session.collected_information?.shipping_details?.address
-                    ?.state ?? "",
-                postalCode:
-                  session.collected_information?.shipping_details?.address
-                    ?.postal_code ?? "",
-                country:
-                  session.collected_information?.shipping_details?.address
-                    ?.country ?? "",
-              },
+              size,
+              color,
+              customerName: shippingName,
+              customerEmail,
+              shippingAddress,
               amount: session.amount_total ?? 0,
               foldedImageUrl,
               stripeSessionId: session.id,
@@ -215,9 +171,9 @@ export async function POST(req: Request) {
             `⚠️ Printful Order Creation Failed!\n\n` +
               `<b>Order Details:</b>\n` +
               `• Order #: ${orderCount}\n` +
-              `• Size: ${session.metadata!.size}\n` +
-              `• Color: ${session.metadata!.color}\n` +
-              `• Customer: ${session.collected_information?.shipping_details?.name}\n` +
+              `• Size: ${size}\n` +
+              `• Color: ${color}\n` +
+              `• Customer: ${shippingName}\n` +
               `• Error: ${error instanceof Error ? error.message : "Unknown error"}`,
           );
         }

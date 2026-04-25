@@ -1,19 +1,13 @@
 import { NextResponse } from "next/server";
 import { uploadToInstagram } from "~/server/dev/instagram";
-import { auth } from "~/server/auth";
-import { assertDevMode } from "~/config/dev-routes";
+import { requireDevSession } from "~/server/dev/requireDevSession";
 
 export async function POST(req: Request) {
-  const blocked = assertDevMode();
-  if (blocked) return blocked;
+  const guard = await requireDevSession();
+  if ("errorResponse" in guard) return guard.errorResponse;
+  const { session } = guard;
 
   try {
-    const session = await auth();
-
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
     const formData = await req.formData();
     const videoUrl = formData.get("videoUrl") as string;
     const title = formData.get("title") as string;

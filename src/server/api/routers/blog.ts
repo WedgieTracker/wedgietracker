@@ -25,34 +25,7 @@ interface BlogPost extends BlogPostData {
   content: string;
 }
 
-function getAllPosts(): BlogPost[] {
-  const fileNames = fs.readdirSync(postsDirectory);
-  const posts = fileNames.map((fileName) => {
-    const slug = fileName.replace(/\.md$/, "");
-    const fullPath = path.join(postsDirectory, fileName);
-    const fileContents = fs.readFileSync(fullPath, "utf8");
-    const matterResult = matter(fileContents);
-    const { data, content } = matterResult as unknown as {
-      data: BlogPostData;
-      content: string;
-    };
-
-    return {
-      slug,
-      title: data.title,
-      date: data.date,
-      excerpt: data.excerpt,
-      coverImage: data.coverImage,
-      author: data.author,
-      content,
-    };
-  });
-
-  return posts.sort((a, b) => (a.date > b.date ? -1 : 1));
-}
-
-function getPostBySlug(slug: string): BlogPost {
-  const fullPath = path.join(postsDirectory, `${slug}.md`);
+function parseBlogPost(slug: string, fullPath: string): BlogPost {
   const fileContents = fs.readFileSync(fullPath, "utf8");
   const matterResult = matter(fileContents);
   const { data, content } = matterResult as unknown as {
@@ -69,6 +42,22 @@ function getPostBySlug(slug: string): BlogPost {
     author: data.author,
     content,
   };
+}
+
+function getAllPosts(): BlogPost[] {
+  return fs
+    .readdirSync(postsDirectory)
+    .map((fileName) =>
+      parseBlogPost(
+        fileName.replace(/\.md$/, ""),
+        path.join(postsDirectory, fileName),
+      ),
+    )
+    .sort((a, b) => (a.date > b.date ? -1 : 1));
+}
+
+function getPostBySlug(slug: string): BlogPost {
+  return parseBlogPost(slug, path.join(postsDirectory, `${slug}.md`));
 }
 
 async function getCachedAllPosts() {
