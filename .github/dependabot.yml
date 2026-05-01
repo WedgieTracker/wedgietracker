@@ -8,6 +8,8 @@ updates:
     open-pull-requests-limit: 10
     reviewers:
       - "gek0z"
+    assignees:
+      - "gek0z"
     groups:
       minor-and-patch:
         update-types:
@@ -23,6 +25,8 @@ updates:
     schedule:
       interval: "monthly"
     reviewers:
+      - "gek0z"
+    assignees:
       - "gek0z"
     groups:
       all-actions:
