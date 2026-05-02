@@ -78,8 +78,6 @@ CREATE TABLE `wedgie_to_type` (
 	FOREIGN KEY (`wedgie_id`) REFERENCES `wedgie`(`id`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`type_id`) REFERENCES `type`(`id`) ON UPDATE no action ON DELETE cascade
 );
-DROP INDEX IF EXISTS "account_provider_providerAccountId_idx";
-CREATE UNIQUE INDEX `account_provider_providerAccountId_idx` ON `account` (`provider`,`providerAccountId`);
 DROP INDEX IF EXISTS "game_name_idx";
 CREATE INDEX `game_name_idx` ON `game` (`name`);
 DROP INDEX IF EXISTS "game_name_unique";
@@ -94,24 +92,14 @@ DROP INDEX IF EXISTS "season_name_idx";
 CREATE INDEX `season_name_idx` ON `season` (`name`);
 DROP INDEX IF EXISTS "season_name_unique";
 CREATE UNIQUE INDEX `season_name_unique` ON `season` (`name`);
-DROP INDEX IF EXISTS "session_sessionToken_unique";
-CREATE UNIQUE INDEX `session_sessionToken_unique` ON `session` (`sessionToken`);
 DROP INDEX IF EXISTS "team_name_idx";
 CREATE INDEX `team_name_idx` ON `team` (`name`);
 DROP INDEX IF EXISTS "team_name_unique";
 CREATE UNIQUE INDEX `team_name_unique` ON `team` (`name`);
-DROP INDEX IF EXISTS "tshirt_order_stripe_session_id_unique";
-CREATE UNIQUE INDEX `tshirt_order_stripe_session_id_unique` ON `tshirt_order` (`stripe_session_id`);
 DROP INDEX IF EXISTS "type_name_idx";
 CREATE INDEX `type_name_idx` ON `type` (`name`);
 DROP INDEX IF EXISTS "type_name_unique";
 CREATE UNIQUE INDEX `type_name_unique` ON `type` (`name`);
-DROP INDEX IF EXISTS "user_email_unique";
-CREATE UNIQUE INDEX `user_email_unique` ON `user` (`email`);
-DROP INDEX IF EXISTS "verificationToken_identifier_token_idx";
-CREATE UNIQUE INDEX `verificationToken_identifier_token_idx` ON `verificationToken` (`identifier`,`token`);
-DROP INDEX IF EXISTS "verificationToken_token_unique";
-CREATE UNIQUE INDEX `verificationToken_token_unique` ON `verificationToken` (`token`);
 DROP INDEX IF EXISTS "wedgie_game_name_idx";
 CREATE INDEX `wedgie_game_name_idx` ON `wedgie` (`game_name`);
 DROP INDEX IF EXISTS "wedgie_player_name_idx";

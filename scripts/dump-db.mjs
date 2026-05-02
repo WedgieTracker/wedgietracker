@@ -46,7 +46,7 @@ function quote(value) {
 
 async function main() {
   const schema = await client.execute(
-    "SELECT name, sql, type FROM sqlite_schema WHERE type IN ('table','index') AND sql IS NOT NULL ORDER BY type DESC, name",
+    "SELECT name, tbl_name, sql, type FROM sqlite_schema WHERE type IN ('table','index') AND sql IS NOT NULL ORDER BY type DESC, name",
   );
 
   const lines = [
@@ -61,9 +61,11 @@ async function main() {
 
   for (const row of schema.rows) {
     const name = String(row.name);
+    const tblName = String(row.tbl_name);
     const type = String(row.type);
     if (
       SKIP_TABLES.has(name) ||
+      SKIP_TABLES.has(tblName) ||
       name.startsWith("sqlite_") ||
       name.startsWith("_litestream")
     )
