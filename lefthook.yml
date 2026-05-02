@@ -1,0 +1,12 @@
+pre-commit:
+  parallel: true
+  jobs:
+    - name: ts-lint-format
+      glob: "*.{ts,tsx}"
+      run: pnpm exec oxlint --fix {staged_files} && pnpm exec prettier --write {staged_files}
+      stage_fixed: true
+
+    - name: prettier-other
+      glob: "*.{js,jsx,cjs,mjs,json,md,mdx,yml,yaml,css}"
+      run: pnpm exec prettier --write {staged_files}
+      stage_fixed: true
