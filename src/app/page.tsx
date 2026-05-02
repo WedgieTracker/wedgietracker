@@ -64,10 +64,9 @@ async function WedgieListWrapper() {
 
 async function StandingsWrapper() {
   const standings = await api.wedgie.getTopStandings();
-  const stats = await api.wedgie.getStats();
 
   // Hide standings content when there are 0 wedgies this season
-  if (stats.currentSeasonWedgies === 0) {
+  if (!standings.hasWedgiesThisSeason) {
     return (
       <div className="flex w-full max-w-2xl flex-col items-center justify-center">
         <Link

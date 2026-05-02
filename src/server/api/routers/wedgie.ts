@@ -120,7 +120,7 @@ async function getWedgiesWithTypes(wedgieRows: { id: number }[]) {
 async function getCachedAll() {
   "use cache";
   cacheTag(CACHE_TAGS.WEDGIE_DATA);
-  cacheLife({ revalidate: 120 });
+  cacheLife({ revalidate: 3600 });
 
   const wedgies = await db
     .select()
@@ -133,7 +133,7 @@ async function getCachedAll() {
 async function getCachedBySeason(seasonName: string) {
   "use cache";
   cacheTag(CACHE_TAGS.WEDGIE_DATA);
-  cacheLife({ revalidate: 120 });
+  cacheLife({ revalidate: 3600 });
 
   const wedgies = await db
     .select()
@@ -147,7 +147,7 @@ async function getCachedBySeason(seasonName: string) {
 async function getCachedLatest() {
   "use cache";
   cacheTag(CACHE_TAGS.WEDGIE_DATA);
-  cacheLife({ revalidate: 120 });
+  cacheLife({ revalidate: 3600 });
 
   return db.query.wedgie.findFirst({
     orderBy: desc(wedgie.createdAt),
@@ -157,7 +157,7 @@ async function getCachedLatest() {
 async function getCachedLatestWedgies() {
   "use cache";
   cacheTag(CACHE_TAGS.WEDGIE_DATA);
-  cacheLife({ revalidate: 120 });
+  cacheLife({ revalidate: 3600 });
 
   const wedgies = await db
     .select()
@@ -171,7 +171,7 @@ async function getCachedLatestWedgies() {
 async function getCachedStats() {
   "use cache";
   cacheTag(CACHE_TAGS.WEDGIE_DATA);
-  cacheLife({ revalidate: 60 });
+  cacheLife({ revalidate: 3600 });
 
   const globalSettings = await db.query.global.findFirst({
     where: eq(global.id, 1),
@@ -229,7 +229,7 @@ async function getCachedStats() {
 async function getCachedTopStandings() {
   "use cache";
   cacheTag(CACHE_TAGS.WEDGIE_DATA);
-  cacheLife({ revalidate: 120 });
+  cacheLife({ revalidate: 3600 });
 
   const currentSeasonGlobal = await db.query.global.findFirst({
     where: eq(global.id, 1),
@@ -260,6 +260,7 @@ async function getCachedTopStandings() {
       count: p.count,
     })),
     teams: buildTeamStandings(wedgies, { limit: 5 }),
+    hasWedgiesThisSeason: wedgies.length > 0,
   };
 }
 
@@ -269,7 +270,7 @@ async function getCachedSeasonStandings(
 ) {
   "use cache";
   cacheTag(CACHE_TAGS.WEDGIE_DATA);
-  cacheLife({ revalidate: 120 });
+  cacheLife({ revalidate: 3600 });
 
   const whereClause = seasonFilter
     ? eq(wedgie.seasonName, seasonFilter)
@@ -304,7 +305,7 @@ async function getCachedSeasonStandings(
 async function getCachedNerdStats() {
   "use cache";
   cacheTag(CACHE_TAGS.WEDGIE_DATA);
-  cacheLife({ revalidate: 300 });
+  cacheLife({ revalidate: 3600 });
 
   const globalRow = await db.query.global.findFirst({
     where: eq(global.id, 1),
@@ -433,10 +434,87 @@ async function getCachedNerdStats() {
   };
 }
 
+async function getCachedByPlayer(playerName: string) {
+  "use cache";
+  cacheTag(CACHE_TAGS.WEDGIE_DATA);
+  cacheLife({ revalidate: 3600 });
+
+  return db.select().from(wedgie).where(eq(wedgie.playerName, playerName));
+}
+
+async function getCachedByType(typeName: string) {
+  "use cache";
+  cacheTag(CACHE_TAGS.WEDGIE_DATA);
+  cacheLife({ revalidate: 3600 });
+
+  const rows = await db
+    .select({ wedgieId: wedgieToType.wedgieId })
+    .from(wedgieToType)
+    .innerJoin(typeTable, eq(wedgieToType.typeId, typeTable.id))
+    .where(eq(typeTable.name, typeName));
+
+  if (rows.length === 0) return [];
+
+  const wedgieIds = rows.map((r) => r.wedgieId);
+  return db.select().from(wedgie).where(inArray(wedgie.id, wedgieIds));
+}
+
+async function getCachedSelfHostedVideos() {
+  "use cache";
+  cacheTag(CACHE_TAGS.WEDGIE_DATA);
+  cacheLife({ revalidate: 3600 });
+
+  const wedgies = await db
+    .select({
+      id: wedgie.id,
+      wedgieDate: wedgie.wedgieDate,
+      videoUrl: wedgie.videoUrl,
+      playerName: wedgie.playerName,
+      teamName: wedgie.teamName,
+      teamAgainstName: wedgie.teamAgainstName,
+      number: wedgie.number,
+      seasonName: wedgie.seasonName,
+    })
+    .from(wedgie)
+    .where(
+      and(
+        sql`json_extract(${wedgie.videoUrl}, '$.selfHosted') IS NOT NULL`,
+        ne(wedgie.seasonName, "GEMS"),
+      ),
+    );
+
+  return wedgies
+    .filter((w) => !(w.videoUrl as VideoUrls)?.youtube)
+    .sort(
+      (a, b) =>
+        new Date(b.wedgieDate).getTime() - new Date(a.wedgieDate).getTime(),
+    );
+}
+
+async function getCachedCloudinaryWedgies() {
+  "use cache";
+  cacheTag(CACHE_TAGS.WEDGIE_DATA);
+  cacheLife({ revalidate: 3600 });
+
+  return db
+    .select({
+      id: wedgie.id,
+      playerName: wedgie.playerName,
+      teamName: wedgie.teamName,
+      teamAgainstName: wedgie.teamAgainstName,
+      number: wedgie.number,
+      seasonName: wedgie.seasonName,
+      videoUrl: wedgie.videoUrl,
+    })
+    .from(wedgie)
+    .where(sql`json_extract(${wedgie.videoUrl}, '$.cloudinary') IS NOT NULL`)
+    .orderBy(desc(wedgie.wedgieDate));
+}
+
 async function getCachedTotalWedgies() {
   "use cache";
   cacheTag(CACHE_TAGS.WEDGIE_DATA);
-  cacheLife({ revalidate: 120 });
+  cacheLife({ revalidate: 3600 });
 
   const [result] = await db
     .select({ count: count() })
@@ -462,27 +540,11 @@ export const wedgieRouter = createTRPCRouter({
 
   getByPlayer: publicProcedure
     .input(z.object({ player: z.string().min(1) }))
-    .query(async ({ ctx, input }) => {
-      return ctx.db
-        .select()
-        .from(wedgie)
-        .where(eq(wedgie.playerName, input.player));
-    }),
+    .query(({ input }) => getCachedByPlayer(input.player)),
 
   getByType: publicProcedure
     .input(z.object({ type: z.string().min(1) }))
-    .query(async ({ ctx, input }) => {
-      const rows = await ctx.db
-        .select({ wedgieId: wedgieToType.wedgieId })
-        .from(wedgieToType)
-        .innerJoin(typeTable, eq(wedgieToType.typeId, typeTable.id))
-        .where(eq(typeTable.name, input.type));
-
-      if (rows.length === 0) return [];
-
-      const wedgieIds = rows.map((r) => r.wedgieId);
-      return ctx.db.select().from(wedgie).where(inArray(wedgie.id, wedgieIds));
-    }),
+    .query(({ input }) => getCachedByType(input.type)),
 
   getLatest: publicProcedure.query(() => getCachedLatest()),
 
@@ -512,53 +574,15 @@ export const wedgieRouter = createTRPCRouter({
       return created;
     }),
 
-  getSelfHostedVideos: publicProcedure.query(async ({ ctx }) => {
-    const wedgies = await ctx.db
-      .select({
-        id: wedgie.id,
-        wedgieDate: wedgie.wedgieDate,
-        videoUrl: wedgie.videoUrl,
-        playerName: wedgie.playerName,
-        teamName: wedgie.teamName,
-        teamAgainstName: wedgie.teamAgainstName,
-        number: wedgie.number,
-        seasonName: wedgie.seasonName,
-      })
-      .from(wedgie)
-      .where(
-        and(
-          sql`json_extract(${wedgie.videoUrl}, '$.selfHosted') IS NOT NULL`,
-          ne(wedgie.seasonName, "GEMS"),
-        ),
-      );
-
-    return wedgies
-      .filter((w) => !(w.videoUrl as VideoUrls)?.youtube)
-      .sort(
-        (a, b) =>
-          new Date(b.wedgieDate).getTime() - new Date(a.wedgieDate).getTime(),
-      );
-  }),
+  getSelfHostedVideos: publicProcedure.query(() => getCachedSelfHostedVideos()),
 
   getLatestWedgies: publicProcedure.query(() => getCachedLatestWedgies()),
 
   getStats: publicProcedure.query(() => getCachedStats()),
 
-  getCloudinaryWedgies: publicProcedure.query(async ({ ctx }) => {
-    return ctx.db
-      .select({
-        id: wedgie.id,
-        playerName: wedgie.playerName,
-        teamName: wedgie.teamName,
-        teamAgainstName: wedgie.teamAgainstName,
-        number: wedgie.number,
-        seasonName: wedgie.seasonName,
-        videoUrl: wedgie.videoUrl,
-      })
-      .from(wedgie)
-      .where(sql`json_extract(${wedgie.videoUrl}, '$.cloudinary') IS NOT NULL`)
-      .orderBy(desc(wedgie.wedgieDate));
-  }),
+  getCloudinaryWedgies: publicProcedure.query(() =>
+    getCachedCloudinaryWedgies(),
+  ),
 
   getTopStandings: publicProcedure.query(() => getCachedTopStandings()),
 
