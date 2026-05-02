@@ -6,6 +6,7 @@
   "scripts": {
     "build": "next build",
     "check": "oxlint && tsgo --noEmit && vitest run",
+    "db:dump": "node --env-file=.env scripts/dump-db.mjs",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",

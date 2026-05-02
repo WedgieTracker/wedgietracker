@@ -1,60 +1,43 @@
 #!/usr/bin/env bash
-# Use this script to start a docker container for a local development database
+# Bootstrap a local SQLite copy of the WedgieTracker database from the
+# committed seed. Use this if you don't have access to the production Turso
+# database but want to run the app locally.
+#
+# Requires: sqlite3 (preinstalled on macOS; `apt install sqlite3` on Linux).
 
-# TO RUN ON WINDOWS:
-# 1. Install WSL (Windows Subsystem for Linux) - https://learn.microsoft.com/en-us/windows/wsl/install
-# 2. Install Docker Desktop for Windows - https://docs.docker.com/docker-for-windows/install/
-# 3. Open WSL - `wsl`
-# 4. Run this script - `./start-database.sh`
+set -euo pipefail
 
-# On Linux and macOS you can run this script directly - `./start-database.sh`
+ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+SEED="$ROOT_DIR/database-backups/seed.sql"
+LOCAL_DB="$ROOT_DIR/local.db"
 
-DB_CONTAINER_NAME="wedgietracker-postgres"
-
-if ! [ -x "$(command -v docker)" ]; then
-  echo -e "Docker is not installed. Please install docker and try again.\nDocker install guide: https://docs.docker.com/engine/install/"
+if ! command -v sqlite3 >/dev/null 2>&1; then
+  echo "sqlite3 is not installed. Install it (macOS: it's preinstalled; Linux: apt install sqlite3) and try again."
   exit 1
 fi
 
-if ! docker info > /dev/null 2>&1; then
-  echo "Docker daemon is not running. Please start Docker and try again."
+if [ ! -f "$SEED" ]; then
+  echo "Seed file not found at $SEED."
+  echo "If you have access to production, run: pnpm db:dump"
+  echo "Otherwise ask a maintainer to commit a fresh seed."
   exit 1
 fi
 
-if [ "$(docker ps -q -f name=$DB_CONTAINER_NAME)" ]; then
-  echo "Database container '$DB_CONTAINER_NAME' already running"
-  exit 0
-fi
-
-if [ "$(docker ps -q -a -f name=$DB_CONTAINER_NAME)" ]; then
-  docker start "$DB_CONTAINER_NAME"
-  echo "Existing database container '$DB_CONTAINER_NAME' started"
-  exit 0
-fi
-
-# import env variables from .env
-set -a
-source .env
-
-DB_PASSWORD=$(echo "$DATABASE_URL" | awk -F':' '{print $3}' | awk -F'@' '{print $1}')
-DB_PORT=$(echo "$DATABASE_URL" | awk -F':' '{print $4}' | awk -F'\/' '{print $1}')
-
-if [ "$DB_PASSWORD" = "password" ]; then
-  echo "You are using the default database password"
-  read -p "Should we generate a random password for you? [y/N]: " -r REPLY
-  if ! [[ $REPLY =~ ^[Yy]$ ]]; then
-    echo "Please change the default password in the .env file and try again"
-    exit 1
+if [ -f "$LOCAL_DB" ]; then
+  read -r -p "$LOCAL_DB already exists. Overwrite? [y/N]: " REPLY
+  if [[ ! "$REPLY" =~ ^[Yy]$ ]]; then
+    echo "Aborted."
+    exit 0
   fi
-  # Generate a random URL-safe password
-  DB_PASSWORD=$(openssl rand -base64 12 | tr '+/' '-_')
-  sed -i -e "s#:password@#:$DB_PASSWORD@#" .env
+  rm -f "$LOCAL_DB"
 fi
 
-docker run -d \
-  --name $DB_CONTAINER_NAME \
-  -e POSTGRES_USER="postgres" \
-  -e POSTGRES_PASSWORD="$DB_PASSWORD" \
-  -e POSTGRES_DB=wedgietracker \
-  -p "$DB_PORT":5432 \
-  postgres:15.5 && echo "Database container '$DB_CONTAINER_NAME' was successfully created"
+sqlite3 "$LOCAL_DB" < "$SEED"
+
+cat <<EOF
+Local database created at $LOCAL_DB
+
+Add these to your .env (TURSO_AUTH_TOKEN can be empty for file: URLs):
+  TURSO_DATABASE_URL="file:./local.db"
+  TURSO_AUTH_TOKEN=""
+EOF

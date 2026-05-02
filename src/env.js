@@ -8,7 +8,8 @@ export const env = createEnv({
    */
   server: {
     TURSO_DATABASE_URL: z.string(),
-    TURSO_AUTH_TOKEN: z.string(),
+    // Optional: libsql `file:` URLs used for local dev don't need an auth token.
+    TURSO_AUTH_TOKEN: z.string().optional(),
     AUTH_SECRET:
       process.env.NODE_ENV === "production"
         ? z.string()
