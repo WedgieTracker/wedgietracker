@@ -60,8 +60,24 @@ async function syncIncomingGames(newGames: NewGameInput[]) {
     console.log(
       `Updating live status for ${existingGamesToUpdate.length} existing games`,
     );
-    for (const g of existingGamesToUpdate) {
-      await db.update(game).set({ live: g.live }).where(eq(game.id, g.id));
+    const liveIds = existingGamesToUpdate
+      .filter((g) => g.live)
+      .map((g) => g.id);
+    const notLiveIds = existingGamesToUpdate
+      .filter((g) => !g.live)
+      .map((g) => g.id);
+
+    if (liveIds.length > 0) {
+      await db
+        .update(game)
+        .set({ live: true })
+        .where(inArray(game.id, liveIds));
+    }
+    if (notLiveIds.length > 0) {
+      await db
+        .update(game)
+        .set({ live: false })
+        .where(inArray(game.id, notLiveIds));
     }
   }
 }
