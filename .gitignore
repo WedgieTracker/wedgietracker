@@ -55,9 +55,13 @@ yarn-error.log*
 # Ignore Google credentials
 /credentials
 
-# database backups
-/database-backups
+# database backups (everything except the committed contributor seed)
+/database-backups/*
+!/database-backups/seed.sql
 *.dump
+
+# local sqlite copy created by sh/start-database.sh
+/local.db
 
 # test databases
 test.db

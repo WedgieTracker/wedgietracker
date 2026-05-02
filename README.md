@@ -83,11 +83,26 @@ pnpm install
 cp .env.example .env
 ```
 
-4. Push the schema to your Turso database:
+4. Set up the database. Two paths depending on access:
 
-```bash
-pnpm db:push
-```
+   **Without Turso access** (recommended for new contributors). Bootstrap a local SQLite copy from the committed seed:
+
+   ```bash
+   sh/start-database.sh
+   ```
+
+   Then point `.env` at the local file:
+
+   ```
+   TURSO_DATABASE_URL="file:./local.db"
+   TURSO_AUTH_TOKEN=""
+   ```
+
+   **With Turso access**. Push the schema to your Turso database:
+
+   ```bash
+   pnpm db:push
+   ```
 
 5. Start the development server:
 
@@ -114,12 +129,13 @@ pnpm dev
 | `pnpm db:push`       | Push schema changes to database       |
 | `pnpm db:generate`   | Generate database migrations          |
 | `pnpm db:studio`     | Open Drizzle Studio                   |
+| `pnpm db:dump`       | Refresh `database-backups/seed.sql`   |
 
 ## Development Workflow
 
 ### Pre-commit Hooks
 
-This project uses [husky](https://typicode.github.io/husky/) and [lint-staged](https://github.com/lint-staged/lint-staged) to enforce code quality on every commit:
+This project uses [lefthook](https://lefthook.dev) to enforce code quality on every commit:
 
 - **TypeScript/TSX files**: oxlint auto-fix + Prettier formatting
 - **JS/JSON/MD/CSS files**: Prettier formatting
