@@ -3,18 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "lint-staged": {
-    "*.{ts,tsx}": [
-      "oxlint --fix",
-      "prettier --write"
-    ],
-    "*.{js,jsx,cjs,mjs}": [
-      "prettier --write"
-    ],
-    "*.{json,md,mdx,yml,yaml,css}": [
-      "prettier --write"
-    ]
-  },
   "scripts": {
     "build": "next build",
     "check": "oxlint && tsgo --noEmit && vitest run",
@@ -33,7 +21,7 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "typecheck": "tsgo --noEmit",
-    "prepare": "husky"
+    "prepare": "lefthook install"
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.11.2",
@@ -93,9 +81,8 @@
     "@typescript/native-preview": "^7.0.0-dev.20260501.1",
     "canvas": "^3.2.3",
     "drizzle-kit": "^0.31.10",
-    "husky": "^9.1.7",
     "jsdom": "^29.1.1",
-    "lint-staged": "^16.4.0",
+    "lefthook": "^2.1.6",
     "oauth-1.0a": "^2.2.6",
     "oxlint": "^1.62.0",
     "oxlint-tsgolint": "^0.22.1",
@@ -107,5 +94,10 @@
     "typescript": "^6.0.3",
     "vitest": "^4.1.5"
   },
-  "packageManager": "pnpm@9.15.9"
+  "packageManager": "pnpm@9.15.9",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "lefthook"
+    ]
+  }
 }
