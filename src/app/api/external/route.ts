@@ -1,11 +1,10 @@
 import { NextResponse } from "next/server";
-import { revalidateTag } from "next/cache";
 import { eq, inArray } from "drizzle-orm";
 import { db } from "~/server/db";
 import { global, season, game } from "~/server/schema";
 import { env } from "~/env";
 import { calculatePace } from "~/server/pace";
-import { CACHE_TAGS } from "~/server/cache";
+import { invalidateWedgieData } from "~/server/cache";
 
 const wedgieTrackerApiKey = env.WEDGIETRACKER_API_KEY;
 
@@ -202,7 +201,7 @@ export async function POST(request: Request) {
     await db.update(global).set(globalUpdate).where(eq(global.id, 1));
   }
 
-  revalidateTag(CACHE_TAGS.WEDGIE_DATA);
+  invalidateWedgieData();
 
   return NextResponse.json({ message: "Data updated successfully" });
 }
