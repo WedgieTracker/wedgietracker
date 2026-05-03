@@ -8,51 +8,16 @@ import {
 import { Cross2Icon } from "@radix-ui/react-icons";
 import type { Wedgie, VideoUrls } from "~/types/wedgie";
 import { useState } from "react";
-import { useToast } from "~/hooks/use-toast";
 import { ShareButtons } from "~/components/shared/ShareButtons";
-import { CourtPositionDiagram } from "./CourtPositionDiagram";
-
-type ActiveVideo = "youtube" | "cloudinary" | "youtubeNoDunks" | "instagram";
-
-function pickInitialVideo(videoUrl: VideoUrls | null): ActiveVideo | null {
-  if (videoUrl?.youtube) return "youtube";
-  if (videoUrl?.cloudinary) return "cloudinary";
-  if (videoUrl?.youtubeNoDunks) return "youtubeNoDunks";
-  if (videoUrl?.instagram) return "instagram";
-  return null;
-}
-
-function toYoutubeEmbed(url: string): string {
-  const videoIdMatch =
-    /(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?/\s]{11})/.exec(
-      url,
-    );
-  const videoId = videoIdMatch?.[1];
-
-  const timeMatch = /[?&](?:t|start)=(\d+)/.exec(url);
-  const startTime = timeMatch?.[1] ?? "";
-
-  const embedUrl = `https://www.youtube.com/embed/${videoId}`;
-  return startTime ? `${embedUrl}?start=${startTime}` : embedUrl;
-}
-
-function getVideoSrc(
-  activeVideo: ActiveVideo | null,
-  videoUrl: VideoUrls,
-): string | undefined {
-  switch (activeVideo) {
-    case "youtube":
-      return toYoutubeEmbed(videoUrl.youtube ?? "");
-    case "youtubeNoDunks":
-      return toYoutubeEmbed(videoUrl.youtubeNoDunks ?? "");
-    case "instagram":
-      return `${videoUrl.instagram}embed`;
-    case "cloudinary":
-      return videoUrl.cloudinary;
-    default:
-      return undefined;
-  }
-}
+import { WedgieVideoTabs } from "./WedgieVideoTabs";
+import { WedgieInfoPanel } from "./WedgieInfoPanel";
+import { WedgieModalNav } from "./WedgieModalNav";
+import { buildShareParams, useCopyWedgieLink } from "./useCopyWedgieLink";
+import {
+  pickInitialVideo,
+  getVideoSrc,
+  type ActiveVideo,
+} from "./wedgie-video";
 
 interface WedgieModalProps {
   wedgie: Wedgie & {
@@ -77,30 +42,10 @@ export function WedgieModal({
   hasPrevious = false,
   hasNext = false,
 }: WedgieModalProps) {
-  const { toast } = useToast();
   const [activeVideo, setActiveVideo] = useState<ActiveVideo | null>(() =>
     pickInitialVideo(wedgie.videoUrl),
   );
-
-  const handleCopyLink = async () => {
-    const baseUrl = window.location.origin;
-    const params = new URLSearchParams({
-      ws: wedgie.seasonName || "",
-      wn: wedgie.number?.toString() || "",
-    });
-
-    const fullUrl = `${baseUrl}/all-wedgies?${params.toString()}`;
-
-    try {
-      await navigator.clipboard.writeText(fullUrl);
-      toast({
-        title: "Link copied!",
-        description: "The wedgie link has been copied to your clipboard.",
-      });
-    } catch (error) {
-      console.error("Failed to copy link:", error);
-    }
-  };
+  const handleCopyLink = useCopyWedgieLink(wedgie);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -110,50 +55,11 @@ export function WedgieModal({
         </DialogClose>
 
         {wedgie.videoUrl ? (
-          <>
-            <div className="relative flex justify-start gap-2 p-2 pt-4 pb-0">
-              {(wedgie.videoUrl.youtube ?? wedgie.videoUrl.cloudinary) && (
-                <button
-                  className={`rounded-xl rounded-b-none px-2 py-1 text-xs font-black ${
-                    activeVideo === "youtube" || activeVideo === "cloudinary"
-                      ? "bg-yellow text-darkpurple"
-                      : "bg-darkpurple-lighter hover:bg-yellow/20 text-white"
-                  }`}
-                  onClick={() =>
-                    setActiveVideo(
-                      wedgie.videoUrl?.youtube ? "youtube" : "cloudinary",
-                    )
-                  }
-                >
-                  NBA Broadcast
-                </button>
-              )}
-              {wedgie.videoUrl.youtubeNoDunks && (
-                <button
-                  className={`rounded-xl rounded-b-none px-2 py-1 text-xs font-black ${
-                    activeVideo === "youtubeNoDunks"
-                      ? "bg-yellow text-darkpurple"
-                      : "bg-darkpurple-lighter hover:bg-yellow/20 text-white"
-                  }`}
-                  onClick={() => setActiveVideo("youtubeNoDunks")}
-                >
-                  NoDunks
-                </button>
-              )}
-              {/* {wedgie.videoUrl.instagram && (
-                <button
-                  className={`rounded-xl rounded-b-none px-4 py-1 text-sm font-black ${
-                    activeVideo === "instagram"
-                      ? "bg-yellow text-darkpurple"
-                      : "bg-darkpurple-lighter text-white hover:bg-yellow/20"
-                  }`}
-                  onClick={() => setActiveVideo("instagram")}
-                >
-                  Instagram
-                </button>
-              )} */}
-            </div>
-          </>
+          <WedgieVideoTabs
+            videoUrl={wedgie.videoUrl}
+            activeVideo={activeVideo}
+            onChange={setActiveVideo}
+          />
         ) : (
           <div>No video</div>
         )}
@@ -164,122 +70,43 @@ export function WedgieModal({
         </DialogTitle>
 
         <div className="border-darkpurple-lighter bg-darkpurple flex flex-col overflow-hidden rounded-xl lg:flex-row">
-          {/* Video Section - Takes full width on mobile, left half on desktop */}
           <div
             className={`w-full lg:w-[65%] ${
               activeVideo === "instagram"
-                ? "bg-darkpurple-darker aspect-video max-h-[80vh]" // Vertical video ratio with max height
-                : "aspect-video" // Standard 16:9 ratio for other videos
+                ? "bg-darkpurple-darker aspect-video max-h-[80vh]"
+                : "aspect-video"
             }`}
           >
             <div
-              className={`${
+              className={
                 activeVideo === "instagram"
-                  ? "mx-auto h-full w-full max-w-md overflow-y-auto rounded-xl py-4" // Enable scrolling for Instagram
+                  ? "mx-auto h-full w-full max-w-md overflow-y-auto rounded-xl py-4"
                   : "h-full w-full"
-              }`}
+              }
             >
               {wedgie.videoUrl && (
-                <>
-                  <iframe
-                    title="Video player"
-                    width="100%"
-                    height="100%"
-                    src={getVideoSrc(activeVideo, wedgie.videoUrl)}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    {...(activeVideo === "instagram" && {
-                      loading: "lazy",
-                      scrolling: "yes", // Enable iframe scrolling
-                      style: {
-                        border: "none",
-                        overflow: "visible",
-                        maxHeight: "80vh",
-                      },
-                    })}
-                  />
-                </>
+                <iframe
+                  title="Video player"
+                  width="100%"
+                  height="100%"
+                  src={getVideoSrc(activeVideo, wedgie.videoUrl)}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  {...(activeVideo === "instagram" && {
+                    loading: "lazy",
+                    scrolling: "yes",
+                    style: {
+                      border: "none",
+                      overflow: "visible",
+                      maxHeight: "80vh",
+                    },
+                  })}
+                />
               )}
             </div>
           </div>
 
-          {/* Info Section - Takes full width on mobile, right half on desktop */}
-          <div className="relative flex w-full flex-col justify-between p-6 px-4 sm:px-6 md:p-8 lg:w-[35%]">
-            {/* Top Info */}
-            <div className="space-y-2 sm:space-y-6">
-              <div className="sm:text-wedgie-number flex flex-row items-center justify-start gap-4 text-xl leading-none">
-                <h2 className="bg-pink text-yellow mb-2 flex h-[70px] w-[70px] flex-row items-center justify-center rounded-xl px-4 py-2 text-[1.6em] font-black">
-                  <span className="text-darkpurple mt-[.75em] text-[.5em]">
-                    #
-                  </span>
-                  {wedgie.number ?? "1"}
-                </h2>
-                <div>
-                  <p className="text-yellow text-[.9em] font-bold tracking-wider">
-                    {new Date(wedgie.wedgieDate).toLocaleDateString("de-DE", {
-                      day: "2-digit",
-                      month: "2-digit",
-                      year: "2-digit",
-                    }) === "01.01.70"
-                      ? "💎💎💎"
-                      : new Date(wedgie.wedgieDate).toLocaleDateString(
-                          "en-US",
-                          {
-                            month: "long",
-                            day: "numeric",
-                            year: "numeric",
-                          },
-                        )}
-                  </p>
-
-                  {/* season  */}
-                  {wedgie.seasonName && wedgie.seasonName !== "GEMS" && (
-                    <p className="mt-[.5em] text-[.5em] tracking-wider text-white uppercase">
-                      {wedgie.seasonName
-                        ? `${wedgie.seasonName} Season`
-                        : "Season"}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              <div
-                className="sm:text-wedgie-number grid items-baseline gap-2 text-sm sm:gap-4"
-                style={{ gridTemplateColumns: "70px 1fr" }}
-              >
-                <p className="text-right text-[.75em] font-bold tracking-wider text-white/60 uppercase">
-                  Player
-                </p>
-                <p className="text-yellow text-[1.25em] font-bold">
-                  {wedgie.playerName}
-                </p>
-
-                <p className="text-right text-[.75em] font-bold tracking-wider text-white/60 uppercase">
-                  Teams
-                </p>
-                <p className="text-[1.25em] font-bold text-white">
-                  <span className="text-pink">{wedgie.teamName}</span>{" "}
-                  {!wedgie.teamAgainstName.includes("Unknown")
-                    ? `vs ${wedgie.teamAgainstName}`
-                    : ""}
-                </p>
-
-                <p className="text-right text-[.75em] font-bold tracking-wider text-white/60 uppercase">
-                  Type
-                </p>
-                <p className="text-[1em] text-white">
-                  {wedgie.types.map((type) => type.name).join(", ")}
-                </p>
-              </div>
-            </div>
-
-            {/* Court Position Diagram - Optional */}
-            <div className="absolute right-1.5 bottom-16 w-full max-w-[80px] sm:relative sm:right-auto sm:bottom-auto sm:max-w-[150px]">
-              <CourtPositionDiagram
-                position={wedgie.position as { x: number; y: number }}
-              />
-            </div>
-          </div>
+          <WedgieInfoPanel wedgie={wedgie} />
         </div>
 
         <div className="mt-2 flex flex-row items-center justify-between pb-0.5">
@@ -303,63 +130,18 @@ export function WedgieModal({
               </svg>
               Copy Link
             </button>
-            {/* Share on social media */}
             <ShareButtons
-              url={`/all-wedgies?${new URLSearchParams({
-                ws: wedgie.seasonName || "",
-                wn: wedgie.number?.toString() || "",
-              }).toString()}`}
+              url={`/all-wedgies?${buildShareParams(wedgie).toString()}`}
               title={`Check out this wedgie by ${wedgie.playerName} - ${wedgie.teamName} vs ${wedgie.teamAgainstName} on WedgieTracker!`}
             />
           </div>
 
-          <div className="flex flex-row gap-1 sm:gap-3">
-            <button
-              {...(hasPrevious ? { onClick: onPrevious } : {})}
-              className={`border-yellow bg-darkpurple text-yellow hover:bg-yellow hover:text-darkpurple rounded-full border p-1 transition-all sm:p-2 ${
-                !hasPrevious
-                  ? "pointer-events-none cursor-not-allowed opacity-50"
-                  : ""
-              }`}
-            >
-              <svg
-                className="h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 19l-7-7 7-7"
-                />
-              </svg>
-            </button>
-
-            <button
-              {...(hasNext ? { onClick: onNext } : {})}
-              className={`border-yellow bg-darkpurple text-yellow hover:bg-yellow hover:text-darkpurple rounded-full border p-1 transition-all sm:p-2 ${
-                !hasNext
-                  ? "pointer-events-none cursor-not-allowed opacity-50"
-                  : ""
-              }`}
-            >
-              <svg
-                className="h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
-            </button>
-          </div>
+          <WedgieModalNav
+            hasPrevious={hasPrevious}
+            hasNext={hasNext}
+            onPrevious={onPrevious}
+            onNext={onNext}
+          />
         </div>
       </DialogContent>
     </Dialog>
