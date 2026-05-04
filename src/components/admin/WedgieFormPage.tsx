@@ -1,29 +1,15 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { api } from "~/trpc/react";
 import { PlayerSearchInput } from "./PlayerSearchInput";
 import { TeamSearchInput } from "./TeamSearchInput";
 import { GameSearchInput } from "./GameSearchInput";
 import { CourtPositionPicker } from "./CourtPositionPicker";
 import { TypeSearchInput } from "./TypeSearchInput";
-import type { WedgieWithTypes, VideoUrls } from "~/types/wedgie";
+import { VideoUrlInput } from "./VideoUrlInput";
+import { useWedgieForm } from "./useWedgieForm";
+import type { WedgieWithTypes } from "~/types/wedgie";
 import { WedgieSocialShareWrapper } from "~/components/admin/WedgieSocialShareWrapper";
 import { CloudinaryUpload } from "~/components/admin/CloudinaryUpload";
-
-interface WedgieFormData {
-  playerName: string;
-  teamName: string;
-  teamAgainstName: string;
-  number: number;
-  seasonName: string;
-  wedgieDate: Date;
-  position: { x: number; y: number } | null;
-  videoUrl: VideoUrls;
-  types: string[];
-  gameName: string;
-}
 
 interface WedgieFormPageProps {
   wedgie?: WedgieWithTypes;
@@ -31,68 +17,10 @@ interface WedgieFormPageProps {
 }
 
 export function WedgieFormPage({ wedgie, currentSeason }: WedgieFormPageProps) {
-  const router = useRouter();
-
-  const [formData, setFormData] = useState<WedgieFormData>({
-    playerName: wedgie?.playerName ?? "",
-    teamName: wedgie?.teamName ?? "",
-    teamAgainstName: wedgie?.teamAgainstName ?? "",
-    number: wedgie?.number ?? 0,
-    seasonName: wedgie?.seasonName ?? currentSeason ?? "",
-    wedgieDate: wedgie?.wedgieDate ? new Date(wedgie.wedgieDate) : new Date(),
-    position: wedgie?.position
-      ? (wedgie.position as { x: number; y: number })
-      : null,
-    videoUrl: {
-      cloudinary: (wedgie?.videoUrl as VideoUrls)?.cloudinary ?? "",
-      youtube: (wedgie?.videoUrl as VideoUrls)?.youtube ?? "",
-      youtubeNoDunks: (wedgie?.videoUrl as VideoUrls)?.youtubeNoDunks ?? "",
-      instagram: (wedgie?.videoUrl as VideoUrls)?.instagram ?? "",
-    },
-    types: wedgie?.types?.map((t) => t.name) ?? [],
-    gameName: wedgie?.gameName ?? "",
-  });
-
-  const createMutation = api.wedgie.create.useMutation();
-  const updateMutation = api.wedgie.update.useMutation();
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    try {
-      if (wedgie?.id) {
-        await updateMutation.mutateAsync({
-          id: wedgie.id,
-          data: {
-            ...formData,
-            position: formData.position
-              ? {
-                  x: Number(formData.position.x),
-                  y: Number(formData.position.y),
-                }
-              : null,
-          },
-        });
-      } else {
-        await createMutation.mutateAsync({
-          ...formData,
-          position: formData.position
-            ? {
-                x: Number(formData.position.x),
-                y: Number(formData.position.y),
-              }
-            : null,
-        });
-      }
-
-      // Only navigate after the mutation is complete
-      router.push("/admin/wedgies");
-      router.refresh();
-    } catch (error) {
-      console.error("Error submitting wedgie:", error);
-      // Handle error appropriately (show error message to user)
-    }
-  };
+  const { formData, setFormData, handleSubmit, router } = useWedgieForm(
+    wedgie,
+    currentSeason,
+  );
 
   return (
     <div className="mx-auto max-w-4xl">
@@ -262,10 +190,7 @@ export function WedgieFormPage({ wedgie, currentSeason }: WedgieFormPageProps) {
               <CourtPositionPicker
                 position={formData.position ?? { x: 0, y: 0 }}
                 onChange={(newPosition) =>
-                  setFormData({
-                    ...formData,
-                    position: newPosition,
-                  })
+                  setFormData({ ...formData, position: newPosition })
                 }
               />
             </div>
@@ -284,79 +209,43 @@ export function WedgieFormPage({ wedgie, currentSeason }: WedgieFormPageProps) {
                 onUploadComplete={(url) =>
                   setFormData({
                     ...formData,
-                    videoUrl: {
-                      ...formData.videoUrl,
-                      cloudinary: url,
-                    },
+                    videoUrl: { ...formData.videoUrl, cloudinary: url },
                   })
                 }
               />
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="YouTube URL"
-                  value={formData.videoUrl.youtube ?? ""}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      videoUrl: {
-                        ...formData.videoUrl,
-                        youtube: e.target.value,
-                      },
-                    })
-                  }
-                  className="block w-full rounded-md border-gray-300 bg-white/5 p-2 text-white"
-                />
-                {formData.videoUrl.youtube && (
-                  <span className="absolute top-2 right-2 rounded bg-green-500 px-2 py-1 text-xs font-bold text-black">
-                    YouTube
-                  </span>
-                )}
-              </div>
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="YouTube No Dunks URL"
-                  value={formData.videoUrl.youtubeNoDunks ?? ""}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      videoUrl: {
-                        ...formData.videoUrl,
-                        youtubeNoDunks: e.target.value,
-                      },
-                    })
-                  }
-                  className="block w-full rounded-md border-gray-300 bg-white/5 p-2 text-white"
-                />
-                {formData.videoUrl.youtubeNoDunks && (
-                  <span className="absolute top-2 right-2 rounded bg-green-500 px-2 py-1 text-xs font-bold text-black">
-                    YouTube No Dunks
-                  </span>
-                )}
-              </div>
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Instagram URL"
-                  value={formData.videoUrl.instagram ?? ""}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      videoUrl: {
-                        ...formData.videoUrl,
-                        instagram: e.target.value,
-                      },
-                    })
-                  }
-                  className="block w-full rounded-md border-gray-300 bg-white/5 p-2 text-white"
-                />
-                {formData.videoUrl.instagram && (
-                  <span className="absolute top-2 right-2 rounded bg-green-500 px-2 py-1 text-xs font-bold text-black">
-                    Instagram
-                  </span>
-                )}
-              </div>
+              <VideoUrlInput
+                placeholder="YouTube URL"
+                badge="YouTube"
+                value={formData.videoUrl.youtube ?? ""}
+                onChange={(value) =>
+                  setFormData({
+                    ...formData,
+                    videoUrl: { ...formData.videoUrl, youtube: value },
+                  })
+                }
+              />
+              <VideoUrlInput
+                placeholder="YouTube No Dunks URL"
+                badge="YouTube No Dunks"
+                value={formData.videoUrl.youtubeNoDunks ?? ""}
+                onChange={(value) =>
+                  setFormData({
+                    ...formData,
+                    videoUrl: { ...formData.videoUrl, youtubeNoDunks: value },
+                  })
+                }
+              />
+              <VideoUrlInput
+                placeholder="Instagram URL"
+                badge="Instagram"
+                value={formData.videoUrl.instagram ?? ""}
+                onChange={(value) =>
+                  setFormData({
+                    ...formData,
+                    videoUrl: { ...formData.videoUrl, instagram: value },
+                  })
+                }
+              />
             </div>
           </div>
         </div>

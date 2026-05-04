@@ -7,10 +7,9 @@ export const CACHE_TAGS = {
 } as const;
 
 export function invalidateWedgieData() {
-  // Single-arg form: blocks the next request to refetch fresh data instead of
-  // serving stale via SWR. Deprecated but the only Route-Handler-callable API
-  // that gives read-your-own-writes for the live wedgie counter.
-  revalidateTag(CACHE_TAGS.WEDGIE_DATA);
+  // expire: 0 forces the next request to refetch instead of serving stale via
+  // SWR — needed for read-your-own-writes on the live wedgie counter.
+  revalidateTag(CACHE_TAGS.WEDGIE_DATA, { expire: 0 });
 }
 
 export function invalidateStoreData() {
