@@ -100,12 +100,15 @@ export function BlogPost({ post }: BlogPostProps) {
               blockquote: ({ children, ...props }) => {
                 const node = props.node as MarkdownNode;
                 // Handle multiple tweet URLs in one blockquote
-                const tweetUrls = node?.children
-                  ?.filter((child) => child?.tagName === "a")
-                  ?.map((child) => child?.properties?.href)
-                  .filter((href): href is string => typeof href === "string");
+                const tweetUrls: string[] = [];
+                for (const child of node?.children ?? []) {
+                  const href = child?.properties?.href;
+                  if (child?.tagName === "a" && typeof href === "string") {
+                    tweetUrls.push(href);
+                  }
+                }
 
-                if (tweetUrls?.length && tweetUrls.length > 0) {
+                if (tweetUrls.length > 0) {
                   return (
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                       {tweetUrls.map((url) => {

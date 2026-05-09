@@ -59,12 +59,11 @@ async function syncIncomingGames(newGames: NewGameInput[]) {
     console.log(
       `Updating live status for ${existingGamesToUpdate.length} existing games`,
     );
-    const liveIds = existingGamesToUpdate
-      .filter((g) => g.live)
-      .map((g) => g.id);
-    const notLiveIds = existingGamesToUpdate
-      .filter((g) => !g.live)
-      .map((g) => g.id);
+    const liveIds: number[] = [];
+    const notLiveIds: number[] = [];
+    for (const g of existingGamesToUpdate) {
+      (g.live ? liveIds : notLiveIds).push(g.id);
+    }
 
     if (liveIds.length > 0) {
       await db

@@ -20,7 +20,9 @@ export function StandingsFilters({
   const { data: allWedgies } = api.wedgie.getAll.useQuery();
 
   const seasons = Array.from(
-    new Set(allWedgies?.map((w) => w.seasonName).filter(Boolean) ?? []),
+    new Set(
+      allWedgies?.flatMap((w) => (w.seasonName ? [w.seasonName] : [])) ?? [],
+    ),
   )
     .sort()
     .reverse();

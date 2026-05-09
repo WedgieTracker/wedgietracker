@@ -23,16 +23,20 @@ export function WedgieFilters({
   const { data: allWedgies, isLoading } = api.wedgie.getAll.useQuery();
 
   const seasons = Array.from(
-    new Set(allWedgies?.map((w) => w.seasonName).filter(Boolean) ?? []),
+    new Set(
+      allWedgies?.flatMap((w) => (w.seasonName ? [w.seasonName] : [])) ?? [],
+    ),
   )
     .sort()
     .reverse();
 
   const types = Array.from(
     new Set(
-      allWedgies
-        ?.flatMap((w) => w.types?.map((t: { name: string }) => t.name) ?? [])
-        .filter(Boolean) ?? [],
+      allWedgies?.flatMap(
+        (w) =>
+          w.types?.flatMap((t: { name: string }) => (t.name ? [t.name] : [])) ??
+          [],
+      ) ?? [],
     ),
   ).sort();
 

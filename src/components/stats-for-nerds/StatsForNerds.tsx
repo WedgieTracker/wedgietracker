@@ -249,9 +249,9 @@ function LeadersWrapper({ stats }: StatsForNerdsProps) {
 
   // Find all teams that share the highest wedgie count
   const maxWedgies = stats.leaders.teams[0]?.wedgies ?? 0;
-  const leadingTeams = stats.leaders.teams
-    .filter((team) => team.wedgies === maxWedgies)
-    .map((team) => team.name);
+  const leadingTeams = stats.leaders.teams.flatMap((team) =>
+    team.wedgies === maxWedgies ? [team.name] : [],
+  );
 
   return (
     <div className="flex w-full flex-col items-center justify-center">

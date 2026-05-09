@@ -295,12 +295,9 @@ async function getCachedSeasonStandings(
   ]);
 
   return {
-    players: topPlayers
-      .filter((p) => p.playerName)
-      .map((p) => ({
-        name: p.playerName,
-        count: p.count,
-      })),
+    players: topPlayers.flatMap((p) =>
+      p.playerName ? [{ name: p.playerName, count: p.count }] : [],
+    ),
     teams: buildTeamStandings(wedgies, { includeOpponents }),
   };
 }
@@ -371,13 +368,12 @@ async function getCachedNerdStats() {
     with: { wedgies: true },
   });
 
-  const seasonRates = seasons
-    .map((s) => ({
-      wedgies: s.wedgies.length,
-      games: s.totalGames,
-      rate: s.totalGames > 0 ? s.wedgies.length / s.totalGames : 0,
-    }))
-    .filter((s) => s.rate > 0);
+  const seasonRates = seasons.flatMap((s) => {
+    const rate = s.totalGames > 0 ? s.wedgies.length / s.totalGames : 0;
+    return rate > 0
+      ? [{ wedgies: s.wedgies.length, games: s.totalGames, rate }]
+      : [];
+  });
 
   const averageSeasonRate = Math.round(
     seasonRates.reduce((acc, s) => acc + s.wedgies, 0) / seasonRates.length,
