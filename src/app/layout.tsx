@@ -1,6 +1,7 @@
 import "~/styles/globals.css";
 import { Suspense } from "react";
 import { Inter } from "next/font/google";
+import Script from "next/script";
 import { TRPCReactProvider } from "~/trpc/react";
 import { Toaster } from "~/components/ui/toaster";
 import { defaultMetadata } from "~/config/metadata";
@@ -70,7 +71,11 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable}`}>
       <body className="bg-darkpurple">
-        <script dangerouslySetInnerHTML={{ __html: consentDefaultsScript }} />
+        <Script
+          id="consent-defaults"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{ __html: consentDefaultsScript }}
+        />
         <GoogleTagManager gtmId={gtmId} />
 
         <TRPCReactProvider>

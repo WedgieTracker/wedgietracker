@@ -3,6 +3,12 @@ import { connection } from "next/server";
 import Link from "next/link";
 import { PageLayout } from "~/components/layout/PageLayout";
 import { Loader } from "~/components/shared/Loader";
+import { generateMetadata } from "~/config/metadata";
+
+export const metadata = generateMetadata({
+  title: "Thank You",
+  noIndex: true,
+});
 
 interface SearchParams {
   session_id?: string;

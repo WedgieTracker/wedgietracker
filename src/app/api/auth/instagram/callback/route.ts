@@ -38,6 +38,7 @@ export async function GET(request: Request) {
           redirect_uri: INSTAGRAM_CONFIG.redirectUri,
           code,
         }),
+        cache: "no-store",
       },
     );
 
@@ -57,6 +58,7 @@ export async function GET(request: Request) {
           client_secret: INSTAGRAM_CONFIG.clientSecret,
           access_token: shortLivedData.access_token,
         }).toString(),
+      { cache: "no-store" },
     );
 
     const longLivedData =

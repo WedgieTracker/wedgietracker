@@ -105,7 +105,6 @@ const ThumbnailButton = ({
   onClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }) => (
   <button
-    key={index}
     onClick={onClick}
     className={cn(
       "relative overflow-hidden rounded-lg border-2 transition-all",
@@ -366,7 +365,7 @@ export function TShirtProduct() {
             >
               {sortedImages.map((image, index) => (
                 <ThumbnailButton
-                  key={index}
+                  key={image}
                   image={image}
                   index={index}
                   selectedImageIndex={selectedImageIndex}
@@ -434,7 +433,7 @@ export function TShirtProduct() {
                   >
                     {sortedImages.map((image, index) => (
                       <ThumbnailButton
-                        key={index}
+                        key={image}
                         image={image}
                         index={index}
                         selectedImageIndex={selectedImageIndex}

@@ -48,6 +48,7 @@ export async function POST(req: Request) {
         headers: {
           Accept: "video/mp4",
         },
+        cache: "no-store",
       });
 
       if (!response.ok) throw new Error("Failed to fetch video");
@@ -86,6 +87,7 @@ export async function POST(req: Request) {
         },
         body: response.body,
         duplex: "half",
+        cache: "no-store",
       } as CustomRequestInit);
 
       const jobStatus: VideoJobStatus =

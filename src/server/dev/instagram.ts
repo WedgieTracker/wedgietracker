@@ -16,6 +16,8 @@ interface InstagramPublishResponse {
   id: string;
 }
 
+const READY_STATES = new Set(["FINISHED", "PUBLISHED"]);
+
 // Configure Cloudinary
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -264,13 +266,13 @@ async function uploadToInstagramAPI(
     let status;
     for (let i = 0; i < 5; i++) {
       status = await checkStatus();
-      if (["FINISHED", "PUBLISHED"].includes(status)) break;
+      if (READY_STATES.has(status)) break;
       if (status === "ERROR") throw new Error("Container processing failed");
       if (status === "EXPIRED") throw new Error("Container expired");
       await new Promise((resolve) => setTimeout(resolve, 60000));
     }
 
-    if (!["FINISHED", "PUBLISHED"].includes(status ?? "")) {
+    if (!READY_STATES.has(status ?? "")) {
       throw new Error(`Container processing timeout. Last status: ${status}`);
     }
 
