@@ -183,8 +183,10 @@ export async function POST(request: Request) {
   await syncIncomingGames(newGames);
 
   // Calculate pace if we have wedgie/game data to work with
-  const wedgieCount = await resolveTotalWedgies(newWedgieCount);
-  const gameCount = await resolveTotalGames(newTotalGamesCount);
+  const [wedgieCount, gameCount] = await Promise.all([
+    resolveTotalWedgies(newWedgieCount),
+    resolveTotalGames(newTotalGamesCount),
+  ]);
 
   if (wedgieCount > 0 && gameCount > 0) {
     const pace = await calculatePace({

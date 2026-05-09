@@ -44,7 +44,10 @@ export function BlogPost({ post }: BlogPostProps) {
         <p className="m-0 mb-0 p-0 text-sm font-bold text-white/60">
           {post.author}
         </p>
-        <time className="m-0 mb-0 block p-0 text-sm text-white/60">
+        <time
+          suppressHydrationWarning
+          className="m-0 mb-0 block p-0 text-sm text-white/60"
+        >
           {new Date(post.date).toLocaleDateString("en-US", {
             year: "numeric",
             month: "long",

@@ -58,7 +58,7 @@ export function WedgieList({ seasons, currentSeason }: WedgieListProps) {
             <h3 className="text-lg font-semibold">
               #{wedgie.number} - {wedgie.playerName}
             </h3>
-            <p className="mt-1 text-sm text-gray-300">
+            <p suppressHydrationWarning className="mt-1 text-sm text-gray-300">
               {wedgie.teamName} - {wedgie.teamAgainstName} |{" "}
               {new Date(wedgie.wedgieDate).toLocaleDateString()}
             </p>

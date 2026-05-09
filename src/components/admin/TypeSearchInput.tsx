@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { api } from "~/trpc/react";
 import { AddNewEntityDialog } from "./AddNewEntityDialog";
 
@@ -11,16 +11,11 @@ interface TypeSearchInputProps {
 
 export function TypeSearchInput({ value, onChange }: TypeSearchInputProps) {
   const [search, setSearch] = useState("");
-  const [selectedTypes, setSelectedTypes] = useState<string[]>(value);
   const [isAddingNew, setIsAddingNew] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
 
   const { data: types } = api.type.getAll.useQuery();
   const createTypeMutation = api.type.create.useMutation();
-
-  useEffect(() => {
-    setSelectedTypes(value);
-  }, [value]);
 
   const filteredTypes =
     types?.filter((type) =>
@@ -30,9 +25,7 @@ export function TypeSearchInput({ value, onChange }: TypeSearchInputProps) {
   const handleAddNewType = async () => {
     try {
       const result = await createTypeMutation.mutateAsync({ name: search });
-      const newTypes = [...selectedTypes, result!.name];
-      setSelectedTypes(newTypes);
-      onChange(newTypes);
+      onChange([...value, result!.name]);
       setIsAddingNew(false);
       setShowDropdown(false);
       setSearch("");
@@ -42,19 +35,15 @@ export function TypeSearchInput({ value, onChange }: TypeSearchInputProps) {
   };
 
   const handleTypeSelect = (typeName: string) => {
-    if (!selectedTypes.includes(typeName)) {
-      const newTypes = [...selectedTypes, typeName];
-      setSelectedTypes(newTypes);
-      onChange(newTypes);
+    if (!value.includes(typeName)) {
+      onChange([...value, typeName]);
     }
     setSearch("");
     setShowDropdown(false);
   };
 
   const handleTypeRemove = (typeName: string) => {
-    const newTypes = selectedTypes.filter((t) => t !== typeName);
-    setSelectedTypes(newTypes);
-    onChange(newTypes);
+    onChange(value.filter((t) => t !== typeName));
   };
 
   return (
@@ -107,7 +96,7 @@ export function TypeSearchInput({ value, onChange }: TypeSearchInputProps) {
       </div>
 
       <div className="flex flex-wrap gap-2">
-        {selectedTypes.map((type) => (
+        {value.map((type) => (
           <div
             key={type}
             className="bg-yellow text-darkpurple flex items-center rounded px-2 py-1 text-sm"

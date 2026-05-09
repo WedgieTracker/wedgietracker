@@ -28,7 +28,10 @@ export function BlogList() {
             </div>
           )}
           <div className="space-y-2">
-            <p className="bg-darkpurple-darker inline-block rounded-md px-2 py-1 text-xs font-bold text-white uppercase">
+            <p
+              suppressHydrationWarning
+              className="bg-darkpurple-darker inline-block rounded-md px-2 py-1 text-xs font-bold text-white uppercase"
+            >
               {new Date(post.date).toLocaleDateString("en-US", {
                 month: "long",
                 day: "numeric",

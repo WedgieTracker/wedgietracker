@@ -41,7 +41,8 @@ export function Wave({
 
   useEffect(() => {
     setCurrentHeight(0);
-    setTimeout(() => setCurrentHeight(fillPercentage), 100);
+    const id = setTimeout(() => setCurrentHeight(fillPercentage), 100);
+    return () => clearTimeout(id);
   }, [fillPercentage]);
 
   return (
