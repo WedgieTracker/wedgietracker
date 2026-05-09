@@ -93,7 +93,7 @@ const ThumbnailButton = ({
   selectedImageIndex,
   selectedColor,
   currentNumber,
-  sizeClassName = "h-16 w-16",
+  sizeClassName = "size-16",
   onClick,
 }: {
   image: string;
@@ -337,7 +337,7 @@ export function TShirtProduct() {
               className="bg-darkpurple-light/80 hover:bg-pink absolute top-4 right-4 z-10 cursor-pointer rounded-full p-2 transition-all duration-300"
               onClick={() => setDialogOpen(true)}
             >
-              <Maximize2 className="h-5 w-5 text-white" />
+              <Maximize2 className="size-5 text-white" />
             </button>
             {/* Number overlay */}
             {sortedImages[selectedImageIndex]?.includes("/number-") ? (
@@ -440,7 +440,7 @@ export function TShirtProduct() {
                         selectedImageIndex={selectedImageIndex}
                         selectedColor={selectedColor}
                         currentNumber={availableQuantity.currentNumber}
-                        sizeClassName="h-10 w-10 shrink-0 sm:h-12 sm:w-12 md:h-16 md:w-16"
+                        sizeClassName="size-10 shrink-0 sm:h-12 sm:w-12 md:h-16 md:w-16"
                         onClick={() => setSelectedImageIndex(index)}
                       />
                     ))}

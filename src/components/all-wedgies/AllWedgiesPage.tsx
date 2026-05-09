@@ -93,10 +93,10 @@ export function AllWedgiesPage() {
   useEffect(() => {
     if (hasSeasonFromUrl) return;
 
-    setFilters({
-      ...filters,
+    setFilters((prev) => ({
+      ...prev,
       season: defaultSeason,
-    });
+    }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [global, hasSeasonFromUrl]);
 

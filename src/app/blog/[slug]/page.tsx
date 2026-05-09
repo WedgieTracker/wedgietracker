@@ -23,7 +23,7 @@ export default function BlogPostPage({ params }: Props) {
             variant="ghost"
             className="hover:bg-yellow hover:text-darkpurple mb-4 text-white/60"
           >
-            <ArrowLeftIcon className="mr-2 h-4 w-4" />
+            <ArrowLeftIcon className="mr-2 size-4" />
             Back to Blog
           </Button>
         </Link>

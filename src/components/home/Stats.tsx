@@ -144,8 +144,8 @@ export function Stats({ stats, isLoading }: StatsProps) {
             title="Updated every 15 minutes"
           >
             <div className="relative z-5">
-              <div className="absolute top-0 left-0 h-4 w-4 animate-ping rounded-full bg-white/50"></div>
-              <div className="h-4 w-4 animate-pulse rounded-full bg-white"></div>
+              <div className="absolute top-0 left-0 size-4 animate-ping rounded-full bg-white/50"></div>
+              <div className="size-4 animate-pulse rounded-full bg-white"></div>
             </div>
             <div className="relative z-5 text-[10px] font-bold tracking-wider text-white uppercase md:text-xs">
               Live games

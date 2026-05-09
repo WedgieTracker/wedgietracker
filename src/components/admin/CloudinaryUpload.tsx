@@ -105,7 +105,7 @@ export function CloudinaryUpload({
             {uploadedUrl ? (
               <>
                 <svg
-                  className="mx-auto h-12 w-12"
+                  className="mx-auto size-12"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -124,7 +124,7 @@ export function CloudinaryUpload({
             ) : (
               <>
                 <svg
-                  className="mx-auto h-12 w-12"
+                  className="mx-auto size-12"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"

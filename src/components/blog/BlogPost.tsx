@@ -93,7 +93,7 @@ export function BlogPost({ post }: BlogPostProps) {
                     className="inline-flex items-center gap-1 hover:opacity-80"
                   >
                     {children}
-                    {isExternal && <ExternalLink className="h-4 w-4" />}
+                    {isExternal && <ExternalLink className="size-4" />}
                   </a>
                 );
               },

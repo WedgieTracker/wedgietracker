@@ -44,13 +44,13 @@ export function CourtPositionPicker({
 
         {/* Position marker */}
         <div
-          className="bg-yellow absolute h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full shadow-lg"
+          className="bg-yellow absolute size-3 -translate-x-1/2 -translate-y-1/2 rounded-full shadow-lg"
           style={{
             left: `${position.x}%`,
             top: `${position.y}%`,
           }}
         >
-          <div className="border-darkpurple bg-yellow absolute top-1/2 left-1/2 h-[calc(100%-0.2rem)] w-[calc(100%-0.2rem)] -translate-x-1/2 -translate-y-1/2 rounded-full border" />
+          <div className="border-darkpurple bg-yellow absolute top-1/2 left-1/2 size-[calc(100%-0.2rem)] -translate-x-1/2 -translate-y-1/2 rounded-full border" />
         </div>
       </div>
 

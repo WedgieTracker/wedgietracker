@@ -51,7 +51,7 @@ export function WedgieModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-[90vw] gap-0 overflow-hidden overflow-y-auto rounded-xl border-none bg-transparent p-0 sm:max-w-lg lg:max-w-7xl lg:p-2">
         <DialogClose className="focus:ring-none border-yellow bg-yellow text-darkpurple hover:bg-darkpurple hover:text-yellow absolute top-2 right-1 z-10 rounded-full border shadow-lg transition-all duration-300 hover:opacity-100 focus:ring-offset-0 focus:outline-hidden disabled:pointer-events-none sm:top-0 lg:top-1 lg:right-4">
-          <Cross2Icon className="h-6 w-6 p-1 sm:h-8 sm:w-8" />
+          <Cross2Icon className="size-6 p-1 sm:h-8 sm:w-8" />
         </DialogClose>
 
         {wedgie.videoUrl ? (
@@ -116,7 +116,7 @@ export function WedgieModal({
               className="bg-yellow text-darkpurple hover:bg-yellow/80 flex items-center gap-1 rounded-md px-2 py-1 text-xs font-bold uppercase transition-all duration-300 sm:px-3 sm:py-2"
             >
               <svg
-                className="h-4 w-4"
+                className="size-4"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
