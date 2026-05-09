@@ -51,7 +51,7 @@ export function WedgieFormPage({ wedgie, currentSeason }: WedgieFormPageProps) {
             <PlayerSearchInput
               value={formData.playerName}
               onChange={(value) =>
-                setFormData({ ...formData, playerName: value })
+                setFormData((prev) => ({ ...prev, playerName: value }))
               }
             />
           </div>
@@ -68,7 +68,10 @@ export function WedgieFormPage({ wedgie, currentSeason }: WedgieFormPageProps) {
               type="number"
               value={formData.number}
               onChange={(e) =>
-                setFormData({ ...formData, number: parseInt(e.target.value) })
+                setFormData((prev) => ({
+                  ...prev,
+                  number: parseInt(e.target.value),
+                }))
               }
               className="mt-1 block w-full rounded-md border-gray-300 bg-white/5 p-2 text-white"
             />
@@ -84,7 +87,7 @@ export function WedgieFormPage({ wedgie, currentSeason }: WedgieFormPageProps) {
             <TeamSearchInput
               value={formData.teamName}
               onChange={(value) =>
-                setFormData({ ...formData, teamName: value })
+                setFormData((prev) => ({ ...prev, teamName: value }))
               }
             />
           </div>
@@ -99,7 +102,7 @@ export function WedgieFormPage({ wedgie, currentSeason }: WedgieFormPageProps) {
             <TeamSearchInput
               value={formData.teamAgainstName}
               onChange={(value) =>
-                setFormData({ ...formData, teamAgainstName: value })
+                setFormData((prev) => ({ ...prev, teamAgainstName: value }))
               }
             />
           </div>
@@ -116,10 +119,10 @@ export function WedgieFormPage({ wedgie, currentSeason }: WedgieFormPageProps) {
               type="date"
               value={formData.wedgieDate.toISOString().split("T")[0]}
               onChange={(e) =>
-                setFormData({
-                  ...formData,
+                setFormData((prev) => ({
+                  ...prev,
                   wedgieDate: new Date(e.target.value),
-                })
+                }))
               }
               className="mt-1 block w-full rounded-md border-gray-300 bg-white/5 p-2 text-white"
             />
@@ -137,7 +140,7 @@ export function WedgieFormPage({ wedgie, currentSeason }: WedgieFormPageProps) {
               type="text"
               value={formData.seasonName}
               onChange={(e) =>
-                setFormData({ ...formData, seasonName: e.target.value })
+                setFormData((prev) => ({ ...prev, seasonName: e.target.value }))
               }
               className="mt-1 block w-full rounded-md border-gray-300 bg-white/5 p-2 text-white"
             />
@@ -153,15 +156,15 @@ export function WedgieFormPage({ wedgie, currentSeason }: WedgieFormPageProps) {
             <GameSearchInput
               value={formData.gameName ?? ""}
               onChange={(value) =>
-                setFormData({ ...formData, gameName: value })
+                setFormData((prev) => ({ ...prev, gameName: value }))
               }
               onGameSelect={(game) => {
-                setFormData({
-                  ...formData,
+                setFormData((prev) => ({
+                  ...prev,
                   gameName: game.name,
                   wedgieDate: game.date,
                   seasonName: game.seasonName,
-                });
+                }));
               }}
             />
           </div>
@@ -175,7 +178,7 @@ export function WedgieFormPage({ wedgie, currentSeason }: WedgieFormPageProps) {
             </label>
             <TypeSearchInput
               value={formData.types}
-              onChange={(types) => setFormData({ ...formData, types })}
+              onChange={(types) => setFormData((prev) => ({ ...prev, types }))}
             />
           </div>
 
@@ -190,7 +193,7 @@ export function WedgieFormPage({ wedgie, currentSeason }: WedgieFormPageProps) {
               <CourtPositionPicker
                 position={formData.position ?? { x: 0, y: 0 }}
                 onChange={(newPosition) =>
-                  setFormData({ ...formData, position: newPosition })
+                  setFormData((prev) => ({ ...prev, position: newPosition }))
                 }
               />
             </div>
@@ -207,10 +210,10 @@ export function WedgieFormPage({ wedgie, currentSeason }: WedgieFormPageProps) {
               <CloudinaryUpload
                 initialUrl={formData.videoUrl.cloudinary}
                 onUploadComplete={(url) =>
-                  setFormData({
-                    ...formData,
-                    videoUrl: { ...formData.videoUrl, cloudinary: url },
-                  })
+                  setFormData((prev) => ({
+                    ...prev,
+                    videoUrl: { ...prev.videoUrl, cloudinary: url },
+                  }))
                 }
               />
               <VideoUrlInput
@@ -218,10 +221,10 @@ export function WedgieFormPage({ wedgie, currentSeason }: WedgieFormPageProps) {
                 badge="YouTube"
                 value={formData.videoUrl.youtube ?? ""}
                 onChange={(value) =>
-                  setFormData({
-                    ...formData,
-                    videoUrl: { ...formData.videoUrl, youtube: value },
-                  })
+                  setFormData((prev) => ({
+                    ...prev,
+                    videoUrl: { ...prev.videoUrl, youtube: value },
+                  }))
                 }
               />
               <VideoUrlInput
@@ -229,10 +232,10 @@ export function WedgieFormPage({ wedgie, currentSeason }: WedgieFormPageProps) {
                 badge="YouTube No Dunks"
                 value={formData.videoUrl.youtubeNoDunks ?? ""}
                 onChange={(value) =>
-                  setFormData({
-                    ...formData,
-                    videoUrl: { ...formData.videoUrl, youtubeNoDunks: value },
-                  })
+                  setFormData((prev) => ({
+                    ...prev,
+                    videoUrl: { ...prev.videoUrl, youtubeNoDunks: value },
+                  }))
                 }
               />
               <VideoUrlInput
@@ -240,10 +243,10 @@ export function WedgieFormPage({ wedgie, currentSeason }: WedgieFormPageProps) {
                 badge="Instagram"
                 value={formData.videoUrl.instagram ?? ""}
                 onChange={(value) =>
-                  setFormData({
-                    ...formData,
-                    videoUrl: { ...formData.videoUrl, instagram: value },
-                  })
+                  setFormData((prev) => ({
+                    ...prev,
+                    videoUrl: { ...prev.videoUrl, instagram: value },
+                  }))
                 }
               />
             </div>

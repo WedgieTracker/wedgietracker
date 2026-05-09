@@ -29,7 +29,7 @@ function FormatOption({
       }`}
     >
       <div className="flex flex-col items-center gap-1">
-        <Icon className="h-5 w-5" />
+        <Icon className="size-5" />
         <span>{label}</span>
         <span className="text-xs opacity-75">{hint}</span>
       </div>

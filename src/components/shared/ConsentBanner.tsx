@@ -5,9 +5,8 @@ import Link from "next/link";
 
 function gtag(...args: unknown[]) {
   window.dataLayer = window.dataLayer || [];
-  // GTM expects the arguments object, not an array
-  // eslint-disable-next-line prefer-rest-params
-  window.dataLayer.push(arguments);
+  // GTM reads each pushed item as an [command, target, params] tuple
+  window.dataLayer.push(args);
 }
 
 function updateConsent(granted: boolean) {

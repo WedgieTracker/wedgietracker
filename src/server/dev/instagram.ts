@@ -16,6 +16,8 @@ interface InstagramPublishResponse {
   id: string;
 }
 
+const READY_STATES = new Set(["FINISHED", "PUBLISHED"]);
+
 // Configure Cloudinary
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -264,13 +266,13 @@ async function uploadToInstagramAPI(
     let status;
     for (let i = 0; i < 5; i++) {
       status = await checkStatus();
-      if (["FINISHED", "PUBLISHED"].includes(status)) break;
+      if (READY_STATES.has(status)) break;
       if (status === "ERROR") throw new Error("Container processing failed");
       if (status === "EXPIRED") throw new Error("Container expired");
       await new Promise((resolve) => setTimeout(resolve, 60000));
     }
 
-    if (!["FINISHED", "PUBLISHED"].includes(status ?? "")) {
+    if (!READY_STATES.has(status ?? "")) {
       throw new Error(`Container processing timeout. Last status: ${status}`);
     }
 
@@ -300,44 +302,4 @@ async function uploadToInstagramAPI(
     console.error("Instagram API Error:", error);
     throw error;
   }
-}
-
-async function preprocessVideo(
-  inputPath: string,
-  outputPath: string,
-): Promise<boolean> {
-  return new Promise((resolve, reject) => {
-    const ffmpeg = spawn("ffmpeg", [
-      "-i",
-      inputPath,
-      "-c:v",
-      "libx264",
-      "-c:a",
-      "aac",
-      "-strict",
-      "experimental",
-      "-b:a",
-      "128k",
-      "-ar",
-      "44100",
-      "-pix_fmt",
-      "yuv420p", // Required for Instagram
-      "-movflags",
-      "+faststart",
-      "-y",
-      outputPath,
-    ]);
-
-    ffmpeg.stderr.on("data", (data) => {
-      console.log(`FFmpeg preprocessing: ${data}`);
-    });
-
-    ffmpeg.on("close", (code) => {
-      if (code === 0) {
-        resolve(true);
-      } else {
-        reject(new Error(`FFmpeg preprocessing failed with code ${code}`));
-      }
-    });
-  });
 }

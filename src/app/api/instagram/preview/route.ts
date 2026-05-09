@@ -20,7 +20,7 @@ export async function POST(req: Request) {
     const tempOutputPath = `/tmp/preview_${Date.now()}.mp4`;
 
     // Download the video
-    const response = await fetch(videoUrl);
+    const response = await fetch(videoUrl, { cache: "no-store" });
     const buffer = await response.arrayBuffer();
     await fs.promises.writeFile(tempInputPath, Buffer.from(buffer));
 

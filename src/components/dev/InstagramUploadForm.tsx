@@ -249,8 +249,11 @@ export function InstagramUploadForm({ wedgie }: InstagramUploadFormProps) {
               )}
 
               <div>
-                <label className="mb-2 block">Description</label>
+                <label htmlFor="ig-description" className="mb-2 block">
+                  Description
+                </label>
                 <textarea
+                  id="ig-description"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   className="w-full rounded border border-gray-600 bg-gray-700 p-2"

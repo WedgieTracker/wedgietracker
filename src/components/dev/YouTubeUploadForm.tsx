@@ -121,8 +121,11 @@ export function YouTubeUploadForm({ wedgie }: YouTubeUploadFormProps) {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium">Title</label>
+          <label htmlFor="yt-title" className="block text-sm font-medium">
+            Title
+          </label>
           <input
+            id="yt-title"
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
@@ -132,8 +135,11 @@ export function YouTubeUploadForm({ wedgie }: YouTubeUploadFormProps) {
         </div>
 
         <div>
-          <label className="block text-sm font-medium">Description</label>
+          <label htmlFor="yt-description" className="block text-sm font-medium">
+            Description
+          </label>
           <textarea
+            id="yt-description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             className="mt-1 block w-full rounded border border-gray-600 bg-gray-700 px-3 py-2"

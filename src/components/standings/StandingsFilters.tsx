@@ -20,7 +20,9 @@ export function StandingsFilters({
   const { data: allWedgies } = api.wedgie.getAll.useQuery();
 
   const seasons = Array.from(
-    new Set(allWedgies?.map((w) => w.seasonName).filter(Boolean) ?? []),
+    new Set(
+      allWedgies?.flatMap((w) => (w.seasonName ? [w.seasonName] : [])) ?? [],
+    ),
   )
     .sort()
     .reverse();
@@ -35,7 +37,7 @@ export function StandingsFilters({
         <span className="text-yellow mt-0 flex items-center gap-1 text-xs font-bold tracking-wide md:mt-2.5">
           FILTER BY
           <svg
-            className="h-3 w-3"
+            className="size-3"
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
@@ -58,7 +60,7 @@ export function StandingsFilters({
             >
               <span>Season</span>
               <span
-                className={`border-yellow relative flex h-5 w-5 items-center justify-center rounded-full border leading-none`}
+                className={`border-yellow relative flex size-5 items-center justify-center rounded-full border leading-none`}
               >
                 <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
                   +

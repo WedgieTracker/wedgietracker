@@ -12,12 +12,13 @@ async function getCachedAvailableQuantity() {
   cacheTag(CACHE_TAGS.STORE_DATA);
   cacheLife({ revalidate: 60 });
 
-  const [wedgieCount] = await db
-    .select({ count: count() })
-    .from(wedgie)
-    .where(ne(wedgie.seasonName, "GEMS"));
-
-  const [orderCount] = await db.select({ count: count() }).from(tshirtOrder);
+  const [[wedgieCount], [orderCount]] = await Promise.all([
+    db
+      .select({ count: count() })
+      .from(wedgie)
+      .where(ne(wedgie.seasonName, "GEMS")),
+    db.select({ count: count() }).from(tshirtOrder),
+  ]);
 
   const totalWedgies = wedgieCount?.count ?? 0;
   const currentOrders = orderCount?.count ?? 0;

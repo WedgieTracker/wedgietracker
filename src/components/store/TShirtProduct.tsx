@@ -47,6 +47,94 @@ const TSHIRT_IMAGES: Record<Color, string[]> = {
 // Sort resources by view type order
 const viewOrder = ["folded", "number", "open", "back", "side"];
 
+const SvgNumber = ({
+  number,
+  selectedColor,
+  position,
+}: {
+  number: number;
+  selectedColor: Color;
+  position: "number" | "back";
+}) => {
+  const numberColor = selectedColor === "Black" ? "white" : "black";
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 100 100"
+      style={{
+        position: "absolute",
+        width: "40%",
+        height: "40%",
+        top: position === "number" ? "41%" : "13%",
+        left: "50%",
+        transform: "translate(-50%, -50%)",
+      }}
+    >
+      <text
+        x="50"
+        y="50"
+        dominantBaseline="middle"
+        textAnchor="middle"
+        style={{
+          fontSize: position === "number" ? "44px" : "5px",
+        }}
+        opacity={0.8}
+        fill={numberColor}
+      >
+        {number.toString().padStart(3, "0")}
+      </text>
+    </svg>
+  );
+};
+
+const ThumbnailButton = ({
+  image,
+  index,
+  selectedImageIndex,
+  selectedColor,
+  currentNumber,
+  sizeClassName = "size-16",
+  onClick,
+}: {
+  image: string;
+  index: number;
+  selectedImageIndex: number;
+  selectedColor: Color;
+  currentNumber: number;
+  sizeClassName?: string;
+  onClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
+}) => (
+  <button
+    onClick={onClick}
+    className={cn(
+      "relative overflow-hidden rounded-lg border-2 transition-all",
+      sizeClassName,
+      selectedImageIndex === index
+        ? "border-yellow"
+        : "border-transparent hover:border-white/20",
+    )}
+  >
+    <img
+      src={image}
+      alt={`${selectedColor} T-shirt view ${index + 1}`}
+      className="h-full w-full object-cover"
+    />
+    {image.includes("/number-") ? (
+      <SvgNumber
+        number={currentNumber}
+        selectedColor={selectedColor}
+        position="number"
+      />
+    ) : image.includes("/back-") ? (
+      <SvgNumber
+        number={currentNumber}
+        selectedColor={selectedColor}
+        position="back"
+      />
+    ) : null}
+  </button>
+);
+
 export function TShirtProduct() {
   const [selectedSize, setSelectedSize] = useState<Size>("M");
   const [selectedColor, setSelectedColor] = useState<Color>("Black");
@@ -216,89 +304,6 @@ export function TShirtProduct() {
     );
   }
 
-  const SvgNumber = ({
-    number,
-    selectedColor,
-    position,
-  }: {
-    number: number;
-    selectedColor: Color;
-    position: "number" | "back";
-  }) => {
-    const numberColor = selectedColor === "Black" ? "white" : "black";
-    return (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 100 100"
-        style={{
-          position: "absolute",
-          width: "40%",
-          height: "40%",
-          top: position === "number" ? "41%" : "13%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-        }}
-      >
-        <text
-          x="50"
-          y="50"
-          dominantBaseline="middle"
-          textAnchor="middle"
-          style={{
-            fontSize: position === "number" ? "44px" : "5px",
-          }}
-          opacity={0.8}
-          fill={numberColor}
-        >
-          {number.toString().padStart(3, "0")}
-        </text>
-      </svg>
-    );
-  };
-
-  const ThumbnailButton = ({
-    image,
-    index,
-    sizeClassName = "h-16 w-16",
-    onClick,
-  }: {
-    image: string;
-    index: number;
-    sizeClassName?: string;
-    onClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
-  }) => (
-    <button
-      key={index}
-      onClick={onClick}
-      className={cn(
-        "relative overflow-hidden rounded-lg border-2 transition-all",
-        sizeClassName,
-        selectedImageIndex === index
-          ? "border-yellow"
-          : "border-transparent hover:border-white/20",
-      )}
-    >
-      <img
-        src={image}
-        alt={`${selectedColor} T-shirt view ${index + 1}`}
-        className="h-full w-full object-cover"
-      />
-      {image.includes("/number-") ? (
-        <SvgNumber
-          number={availableQuantity.currentNumber}
-          selectedColor={selectedColor}
-          position="number"
-        />
-      ) : image.includes("/back-") ? (
-        <SvgNumber
-          number={availableQuantity.currentNumber}
-          selectedColor={selectedColor}
-          position="back"
-        />
-      ) : null}
-    </button>
-  );
-
   return (
     <div
       className={cn(
@@ -331,7 +336,7 @@ export function TShirtProduct() {
               className="bg-darkpurple-light/80 hover:bg-pink absolute top-4 right-4 z-10 cursor-pointer rounded-full p-2 transition-all duration-300"
               onClick={() => setDialogOpen(true)}
             >
-              <Maximize2 className="h-5 w-5 text-white" />
+              <Maximize2 className="size-5 text-white" />
             </button>
             {/* Number overlay */}
             {sortedImages[selectedImageIndex]?.includes("/number-") ? (
@@ -360,9 +365,12 @@ export function TShirtProduct() {
             >
               {sortedImages.map((image, index) => (
                 <ThumbnailButton
-                  key={index}
+                  key={image}
                   image={image}
                   index={index}
+                  selectedImageIndex={selectedImageIndex}
+                  selectedColor={selectedColor}
+                  currentNumber={availableQuantity.currentNumber}
                   onClick={(e) => {
                     e.stopPropagation();
                     setSelectedImageIndex(index);
@@ -425,10 +433,13 @@ export function TShirtProduct() {
                   >
                     {sortedImages.map((image, index) => (
                       <ThumbnailButton
-                        key={index}
+                        key={image}
                         image={image}
                         index={index}
-                        sizeClassName="h-10 w-10 shrink-0 sm:h-12 sm:w-12 md:h-16 md:w-16"
+                        selectedImageIndex={selectedImageIndex}
+                        selectedColor={selectedColor}
+                        currentNumber={availableQuantity.currentNumber}
+                        sizeClassName="size-10 shrink-0 sm:h-12 sm:w-12 md:h-16 md:w-16"
                         onClick={() => setSelectedImageIndex(index)}
                       />
                     ))}

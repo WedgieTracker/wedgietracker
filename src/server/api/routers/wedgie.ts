@@ -182,27 +182,28 @@ async function getCachedStats() {
     throw new Error("No global settings found");
   }
 
-  const lastWedgie = await db.query.wedgie.findFirst({
-    orderBy: desc(wedgie.wedgieDate),
-    columns: { wedgieDate: true },
-  });
-
-  const [wedgieCountResult] = await db
-    .select({ count: count() })
-    .from(wedgie)
-    .where(eq(wedgie.seasonName, globalSettings.currentSeason.name));
+  const [lastWedgie, [wedgieCountResult], previousSeasonCounts] =
+    await Promise.all([
+      db.query.wedgie.findFirst({
+        orderBy: desc(wedgie.wedgieDate),
+        columns: { wedgieDate: true },
+      }),
+      db
+        .select({ count: count() })
+        .from(wedgie)
+        .where(eq(wedgie.seasonName, globalSettings.currentSeason.name)),
+      db
+        .select({ count: count() })
+        .from(wedgie)
+        .where(
+          and(
+            ne(wedgie.seasonName, globalSettings.currentSeason.name),
+            ne(wedgie.seasonName, "GEMS"),
+          ),
+        )
+        .groupBy(wedgie.seasonName),
+    ]);
   const currentSeasonWedgies = wedgieCountResult?.count ?? 0;
-
-  const previousSeasonCounts = await db
-    .select({ count: count() })
-    .from(wedgie)
-    .where(
-      and(
-        ne(wedgie.seasonName, globalSettings.currentSeason.name),
-        ne(wedgie.seasonName, "GEMS"),
-      ),
-    )
-    .groupBy(wedgie.seasonName);
   const previousRecord =
     previousSeasonCounts.length > 0
       ? Math.max(...previousSeasonCounts.map((s) => s.count))
@@ -238,21 +239,22 @@ async function getCachedTopStandings() {
 
   const currentSeason = currentSeasonGlobal?.currentSeason.name;
 
-  const topPlayers = await db
-    .select({ playerName: wedgie.playerName, count: count() })
-    .from(wedgie)
-    .where(eq(wedgie.seasonName, currentSeason!))
-    .groupBy(wedgie.playerName)
-    .orderBy(desc(count()), asc(wedgie.playerName))
-    .limit(5);
-
-  const wedgies = await db
-    .select({
-      teamName: wedgie.teamName,
-      teamAgainstName: wedgie.teamAgainstName,
-    })
-    .from(wedgie)
-    .where(eq(wedgie.seasonName, currentSeason!));
+  const [topPlayers, wedgies] = await Promise.all([
+    db
+      .select({ playerName: wedgie.playerName, count: count() })
+      .from(wedgie)
+      .where(eq(wedgie.seasonName, currentSeason!))
+      .groupBy(wedgie.playerName)
+      .orderBy(desc(count()), asc(wedgie.playerName))
+      .limit(5),
+    db
+      .select({
+        teamName: wedgie.teamName,
+        teamAgainstName: wedgie.teamAgainstName,
+      })
+      .from(wedgie)
+      .where(eq(wedgie.seasonName, currentSeason!)),
+  ]);
 
   return {
     players: topPlayers.map((p) => ({
@@ -276,28 +278,26 @@ async function getCachedSeasonStandings(
     ? eq(wedgie.seasonName, seasonFilter)
     : undefined;
 
-  const topPlayers = await db
-    .select({ playerName: wedgie.playerName, count: count() })
-    .from(wedgie)
-    .where(whereClause)
-    .groupBy(wedgie.playerName)
-    .orderBy(desc(count()), asc(wedgie.playerName));
-
-  const wedgies = await db
-    .select({
-      teamName: wedgie.teamName,
-      teamAgainstName: wedgie.teamAgainstName,
-    })
-    .from(wedgie)
-    .where(whereClause);
+  const [topPlayers, wedgies] = await Promise.all([
+    db
+      .select({ playerName: wedgie.playerName, count: count() })
+      .from(wedgie)
+      .where(whereClause)
+      .groupBy(wedgie.playerName)
+      .orderBy(desc(count()), asc(wedgie.playerName)),
+    db
+      .select({
+        teamName: wedgie.teamName,
+        teamAgainstName: wedgie.teamAgainstName,
+      })
+      .from(wedgie)
+      .where(whereClause),
+  ]);
 
   return {
-    players: topPlayers
-      .filter((p) => p.playerName)
-      .map((p) => ({
-        name: p.playerName,
-        count: p.count,
-      })),
+    players: topPlayers.flatMap((p) =>
+      p.playerName ? [{ name: p.playerName, count: p.count }] : [],
+    ),
     teams: buildTeamStandings(wedgies, { includeOpponents }),
   };
 }
@@ -368,13 +368,12 @@ async function getCachedNerdStats() {
     with: { wedgies: true },
   });
 
-  const seasonRates = seasons
-    .map((s) => ({
-      wedgies: s.wedgies.length,
-      games: s.totalGames,
-      rate: s.totalGames > 0 ? s.wedgies.length / s.totalGames : 0,
-    }))
-    .filter((s) => s.rate > 0);
+  const seasonRates = seasons.flatMap((s) => {
+    const rate = s.totalGames > 0 ? s.wedgies.length / s.totalGames : 0;
+    return rate > 0
+      ? [{ wedgies: s.wedgies.length, games: s.totalGames, rate }]
+      : [];
+  });
 
   const averageSeasonRate = Math.round(
     seasonRates.reduce((acc, s) => acc + s.wedgies, 0) / seasonRates.length,

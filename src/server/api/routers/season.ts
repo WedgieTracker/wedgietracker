@@ -31,24 +31,25 @@ async function getCachedAllWithStats() {
 
   const seasonsWithStats = await Promise.all(
     seasons.map(async (s) => {
-      const wedgies = await db
-        .select({
-          teamName: wedgie.teamName,
-          teamAgainstName: wedgie.teamAgainstName,
-        })
-        .from(wedgie)
-        .where(eq(wedgie.seasonName, s.name));
-
-      const topPlayers = await db
-        .select({
-          playerName: wedgie.playerName,
-          count: count(),
-        })
-        .from(wedgie)
-        .where(eq(wedgie.seasonName, s.name))
-        .groupBy(wedgie.playerName)
-        .orderBy(desc(count()))
-        .limit(5);
+      const [wedgies, topPlayers] = await Promise.all([
+        db
+          .select({
+            teamName: wedgie.teamName,
+            teamAgainstName: wedgie.teamAgainstName,
+          })
+          .from(wedgie)
+          .where(eq(wedgie.seasonName, s.name)),
+        db
+          .select({
+            playerName: wedgie.playerName,
+            count: count(),
+          })
+          .from(wedgie)
+          .where(eq(wedgie.seasonName, s.name))
+          .groupBy(wedgie.playerName)
+          .orderBy(desc(count()))
+          .limit(5),
+      ]);
 
       return {
         ...s,

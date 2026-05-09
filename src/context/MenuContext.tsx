@@ -16,6 +16,14 @@ interface MenuContextType {
 
 const MenuContext = createContext<MenuContextType | undefined>(undefined);
 
+const BODY_LOCKED_CLASS = "body-locked";
+const SCROLL_Y_VAR = "--scroll-y";
+
+function unlockBody() {
+  document.body.classList.remove(BODY_LOCKED_CLASS);
+  document.body.style.removeProperty(SCROLL_Y_VAR);
+}
+
 export function MenuProvider({ children }: { children: ReactNode }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const scrollPosRef = useRef(0);
@@ -23,31 +31,20 @@ export function MenuProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (isMenuOpen) {
       scrollPosRef.current = window.scrollY;
-      document.body.style.overflow = "hidden";
-      document.body.style.height = "100vh";
-      document.body.style.position = "fixed";
-      document.body.style.width = "100%";
-      document.body.style.top = `-${scrollPosRef.current}px`;
+      document.body.style.setProperty(
+        SCROLL_Y_VAR,
+        `${scrollPosRef.current}px`,
+      );
+      document.body.classList.add(BODY_LOCKED_CLASS);
     } else {
-      document.body.style.overflow = "";
-      document.body.style.height = "";
-      document.body.style.position = "";
-      document.body.style.width = "";
-      document.body.style.top = "";
-
-      if (scrollPosRef.current !== undefined) {
+      unlockBody();
+      if (scrollPosRef.current !== 0) {
         window.scrollTo(0, scrollPosRef.current);
         scrollPosRef.current = 0;
       }
     }
 
-    return () => {
-      document.body.style.overflow = "";
-      document.body.style.height = "";
-      document.body.style.position = "";
-      document.body.style.width = "";
-      document.body.style.top = "";
-    };
+    return unlockBody;
   }, [isMenuOpen]);
 
   return (

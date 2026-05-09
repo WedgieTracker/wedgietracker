@@ -99,6 +99,7 @@ export function Wedgie({
               </span>
             </div>
             <div
+              suppressHydrationWarning
               className={`text-darkpurple group-hover:text-yellow mb-2 leading-none font-black tracking-wide transition-all duration-300 ${sizes.date}`}
               style={{ fontSize: sizes.date }}
             >

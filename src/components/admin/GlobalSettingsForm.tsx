@@ -58,10 +58,10 @@ export function GlobalSettingsForm() {
             type="number"
             value={formData.currentTotalWedgies}
             onChange={(e) =>
-              setFormData({
-                ...formData,
+              setFormData((prev) => ({
+                ...prev,
                 currentTotalWedgies: parseInt(e.target.value),
-              })
+              }))
             }
             className="mt-1 block w-full rounded-md border-gray-300 bg-white/5 p-2 text-white"
           />
@@ -79,10 +79,10 @@ export function GlobalSettingsForm() {
             type="number"
             value={formData.currentTotalGames}
             onChange={(e) =>
-              setFormData({
-                ...formData,
+              setFormData((prev) => ({
+                ...prev,
                 currentTotalGames: parseInt(e.target.value),
-              })
+              }))
             }
             className="mt-1 block w-full rounded-md border-gray-300 bg-white/5 p-2 text-white"
           />
@@ -100,10 +100,10 @@ export function GlobalSettingsForm() {
             type="number"
             value={formData.currentTotalMinutes}
             onChange={(e) =>
-              setFormData({
-                ...formData,
+              setFormData((prev) => ({
+                ...prev,
                 currentTotalMinutes: parseInt(e.target.value),
-              })
+              }))
             }
             className="mt-1 block w-full rounded-md border-gray-300 bg-white/5 p-2 text-white"
           />
@@ -121,10 +121,10 @@ export function GlobalSettingsForm() {
             type="number"
             value={formData.currentTotalFGA}
             onChange={(e) =>
-              setFormData({
-                ...formData,
+              setFormData((prev) => ({
+                ...prev,
                 currentTotalFGA: parseInt(e.target.value),
-              })
+              }))
             }
             className="mt-1 block w-full rounded-md border-gray-300 bg-white/5 p-2 text-white"
           />
@@ -142,10 +142,10 @@ export function GlobalSettingsForm() {
             type="number"
             value={formData.currentTotalPoss}
             onChange={(e) =>
-              setFormData({
-                ...formData,
+              setFormData((prev) => ({
+                ...prev,
                 currentTotalPoss: parseInt(e.target.value),
-              })
+              }))
             }
             className="mt-1 block w-full rounded-md border-gray-300 bg-white/5 p-2 text-white"
           />
@@ -163,10 +163,10 @@ export function GlobalSettingsForm() {
             type="number"
             value={formData.pace}
             onChange={(e) =>
-              setFormData({
-                ...formData,
+              setFormData((prev) => ({
+                ...prev,
                 pace: parseInt(e.target.value),
-              })
+              }))
             }
             className="mt-1 block w-full rounded-md border-gray-300 bg-white/5 p-2 text-white"
           />
@@ -184,10 +184,10 @@ export function GlobalSettingsForm() {
             type="number"
             value={formData.simplePace}
             onChange={(e) =>
-              setFormData({
-                ...formData,
+              setFormData((prev) => ({
+                ...prev,
                 simplePace: parseInt(e.target.value),
-              })
+              }))
             }
             className="mt-1 block w-full rounded-md border-gray-300 bg-white/5 p-2 text-white"
           />
@@ -205,10 +205,10 @@ export function GlobalSettingsForm() {
             type="number"
             value={formData.mathPace}
             onChange={(e) =>
-              setFormData({
-                ...formData,
+              setFormData((prev) => ({
+                ...prev,
                 mathPace: parseInt(e.target.value),
-              })
+              }))
             }
             className="mt-1 block w-full rounded-md border-gray-300 bg-white/5 p-2 text-white"
           />

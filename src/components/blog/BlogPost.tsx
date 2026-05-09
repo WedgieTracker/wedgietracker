@@ -44,7 +44,10 @@ export function BlogPost({ post }: BlogPostProps) {
         <p className="m-0 mb-0 p-0 text-sm font-bold text-white/60">
           {post.author}
         </p>
-        <time className="m-0 mb-0 block p-0 text-sm text-white/60">
+        <time
+          suppressHydrationWarning
+          className="m-0 mb-0 block p-0 text-sm text-white/60"
+        >
           {new Date(post.date).toLocaleDateString("en-US", {
             year: "numeric",
             month: "long",
@@ -90,19 +93,22 @@ export function BlogPost({ post }: BlogPostProps) {
                     className="inline-flex items-center gap-1 hover:opacity-80"
                   >
                     {children}
-                    {isExternal && <ExternalLink className="h-4 w-4" />}
+                    {isExternal && <ExternalLink className="size-4" />}
                   </a>
                 );
               },
               blockquote: ({ children, ...props }) => {
                 const node = props.node as MarkdownNode;
                 // Handle multiple tweet URLs in one blockquote
-                const tweetUrls = node?.children
-                  ?.filter((child) => child?.tagName === "a")
-                  ?.map((child) => child?.properties?.href)
-                  .filter((href): href is string => typeof href === "string");
+                const tweetUrls: string[] = [];
+                for (const child of node?.children ?? []) {
+                  const href = child?.properties?.href;
+                  if (child?.tagName === "a" && typeof href === "string") {
+                    tweetUrls.push(href);
+                  }
+                }
 
-                if (tweetUrls?.length && tweetUrls.length > 0) {
+                if (tweetUrls.length > 0) {
                   return (
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                       {tweetUrls.map((url) => {
