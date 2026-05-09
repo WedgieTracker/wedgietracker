@@ -4,9 +4,11 @@ import { useEffect, useState } from "react";
 export function Counter({
   end,
   duration = 1000,
+  format,
 }: {
   end: number;
   duration?: number;
+  format?: (n: number) => string | number;
 }) {
   const [count, setCount] = useState(0);
 
@@ -30,5 +32,5 @@ export function Counter({
     return () => cancelAnimationFrame(animationFrame);
   }, [end, duration]);
 
-  return count;
+  return format ? format(count) : count;
 }

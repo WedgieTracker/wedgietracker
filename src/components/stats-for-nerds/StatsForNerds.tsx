@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { TypingStats } from "./TypingStats";
 import Link from "next/link";
 import { Cta } from "../shared/Cta";
 import { Wave } from "../home/Wave";
+import { Counter } from "../ui/Counter";
 
 interface StatsForNerdsProps {
   stats: {
@@ -80,28 +80,6 @@ function SeasonHeaderWrapper({ stats }: StatsForNerdsProps) {
 }
 
 function WedgieCounterWrapper({ stats }: StatsForNerdsProps) {
-  const [displayedCount, setDisplayedCount] = useState(0);
-
-  useEffect(() => {
-    setDisplayedCount(0);
-    const duration = 1000;
-    const steps = 60;
-    const increment = stats.wedgiesThisSeason / steps;
-    const stepDuration = duration / steps;
-
-    let current = 0;
-    const timer = setInterval(() => {
-      current += 1;
-      setDisplayedCount(Math.min(current * increment, stats.wedgiesThisSeason));
-
-      if (current >= steps) {
-        clearInterval(timer);
-      }
-    }, stepDuration);
-
-    return () => clearInterval(timer);
-  }, [stats.wedgiesThisSeason]);
-
   const fillPercentage = Math.min((stats.wedgiesThisSeason / 50) * 100, 100);
 
   return (
@@ -116,7 +94,10 @@ function WedgieCounterWrapper({ stats }: StatsForNerdsProps) {
               : "WE'RE AT"}
         </div>
         <div className="text-big-number-mobile text-yellow md:text-big-number-medium lg:text-big-number leading-none font-black whitespace-nowrap">
-          {displayedCount.toFixed(0).toLocaleString()}
+          <Counter
+            end={stats.wedgiesThisSeason}
+            format={(n) => n.toLocaleString()}
+          />
         </div>
         <div className="text-wedgies-text-mobile text-yellow md:text-wedgies-text lg:text-wedgies-text leading-none font-black">
           WEDGIES

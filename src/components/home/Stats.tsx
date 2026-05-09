@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Loader } from "../shared/Loader";
 import Link from "next/link";
 import { ShareableStatsVideo } from "./ShareableStatsVideo";
 import { Wave } from "./Wave";
+import { Counter } from "../ui/Counter";
 
 interface StatsProps {
   stats: {
@@ -19,9 +19,6 @@ interface StatsProps {
 }
 
 export function Stats({ stats, isLoading }: StatsProps) {
-  const [displayedPace, setDisplayedPace] = useState(0);
-  const [displayedTotal, setDisplayedTotal] = useState(0);
-
   // Calculate percentage of wedgies compared to target of 50
   const fillPercentage = Math.min((stats.totalWedgies / 50) * 100, 100);
 
@@ -55,52 +52,6 @@ export function Stats({ stats, isLoading }: StatsProps) {
   const daysAgo = getDaysAgo();
   const showPace = stats.currentPace !== stats.totalWedgies;
 
-  useEffect(() => {
-    // Reset to 0 when stats.currentPace changes
-    setDisplayedPace(0);
-
-    // Animate from 0 to target over 1 second
-    const duration = 1000; // 1 second
-    const steps = 60; // 60 steps (smooth animation)
-    const increment = stats.currentPace / steps;
-    const stepDuration = duration / steps;
-
-    let current = 0;
-    const timer = setInterval(() => {
-      current += 1;
-      setDisplayedPace(Math.min(current * increment, stats.currentPace));
-
-      if (current >= steps) {
-        clearInterval(timer);
-      }
-    }, stepDuration);
-
-    return () => clearInterval(timer);
-  }, [stats.currentPace]);
-
-  useEffect(() => {
-    // Reset to 0 when stats.totalWedgies changes
-    setDisplayedTotal(0);
-
-    // Animate from 0 to target over 1 second
-    const duration = 1000; // 1 second
-    const steps = 60; // 60 steps (smooth animation)
-    const increment = stats.totalWedgies / steps;
-    const stepDuration = duration / steps;
-
-    let current = 0;
-    const timer = setInterval(() => {
-      current += 1;
-      setDisplayedTotal(Math.min(current * increment, stats.totalWedgies));
-
-      if (current >= steps) {
-        clearInterval(timer);
-      }
-    }, stepDuration);
-
-    return () => clearInterval(timer);
-  }, [stats.totalWedgies]);
-
   if (isLoading) {
     return (
       <div className="flex h-full w-full items-center justify-center">
@@ -129,7 +80,10 @@ export function Stats({ stats, isLoading }: StatsProps) {
                 : "WE'RE AT"}
           </div>
           <div className="text-big-number-mobile text-yellow md:text-big-number-medium lg:text-big-number leading-none font-black whitespace-nowrap">
-            {displayedTotal.toFixed(0).toLocaleString()}
+            <Counter
+              end={stats.totalWedgies}
+              format={(n) => n.toLocaleString()}
+            />
           </div>
           <div className="text-wedgies-text-mobile text-yellow md:text-wedgies-text lg:text-wedgies-text leading-none font-black">
             WEDGIES
@@ -159,7 +113,7 @@ export function Stats({ stats, isLoading }: StatsProps) {
                 Pace
               </div>
               <div className="shadow-lg-darkpurple-light text-pace-number-mobile text-yellow md:text-pace-number mt-[-.2em] w-full leading-none font-black">
-                {displayedPace.toFixed(0)}
+                <Counter end={stats.currentPace} />
               </div>
             </div>
           )}
