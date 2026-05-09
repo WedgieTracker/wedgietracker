@@ -132,7 +132,7 @@ async function uploadVideoToTwitter(
     base64EncodedFile.match(new RegExp(`.{1,${chunkSize}}`, "g")) ?? [];
   console.log(`Uploading ${chunks.length} chunks...`);
 
-  for (let i = 0; i < chunks.length; i++) {
+  for (const [i, chunk] of chunks.entries()) {
     console.log(`Uploading chunk ${i + 1}/${chunks.length}`);
     const appendRequestData = {
       url: MEDIA_UPLOAD_URL,
@@ -141,7 +141,7 @@ async function uploadVideoToTwitter(
         command: "APPEND",
         media_id: mediaId,
         segment_index: i.toString(),
-        media_data: chunks[i]!,
+        media_data: chunk,
       },
     };
     const appendHeaders = oauth.toHeader(

@@ -4,7 +4,7 @@ export const INSTAGRAM_CONFIG = {
   redirectUri: `${process.env.NEXTAUTH_URL}/api/auth/instagram/callback`,
 };
 
-export function getInstagramAuthUrl() {
+export function getInstagramAuthUrl(state?: string) {
   const params = new URLSearchParams({
     client_id: INSTAGRAM_CONFIG.clientId,
     redirect_uri: INSTAGRAM_CONFIG.redirectUri,
@@ -16,6 +16,7 @@ export function getInstagramAuthUrl() {
     enable_fb_login: "0",
     force_authentication: "1",
   });
+  if (state) params.set("state", state);
 
   return `https://www.instagram.com/oauth/authorize?${params.toString()}`;
 }

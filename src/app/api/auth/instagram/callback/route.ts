@@ -1,9 +1,7 @@
 import { NextResponse } from "next/server";
 import { INSTAGRAM_CONFIG } from "~/server/dev/instagram-auth";
-import { cookies } from "next/headers";
 import { assertDevMode } from "~/config/dev-routes";
 
-// Add these interfaces
 interface ShortLivedTokenResponse {
   access_token: string;
   user_id: number;
@@ -22,14 +20,13 @@ export async function GET(request: Request) {
 
   const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");
-  const cookieStore = await cookies();
+  const state = searchParams.get("state");
 
   if (!code) {
     return NextResponse.redirect("/admin?error=no_code");
   }
 
   try {
-    // Step 1: Exchange code for short-lived token
     const tokenResponse = await fetch(
       "https://api.instagram.com/oauth/access_token",
       {
@@ -53,7 +50,6 @@ export async function GET(request: Request) {
       );
     }
 
-    // Step 2: Exchange for long-lived token
     const longLivedResponse = await fetch(
       "https://graph.instagram.com/access_token?" +
         new URLSearchParams({
@@ -66,19 +62,11 @@ export async function GET(request: Request) {
     const longLivedData =
       (await longLivedResponse.json()) as LongLivedTokenResponse;
 
-    // Get the stored redirect URL from cookies or fallback to /admin/instagram
-    const redirectPath =
-      cookieStore.get("instagram_redirect")?.value ?? "/admin";
+    const redirectPath = state ?? "/admin";
     const finalUrl = new URL(redirectPath, process.env.NEXTAUTH_URL ?? "");
     finalUrl.searchParams.set("instagram_token", longLivedData.access_token);
 
-    // Create the response with redirect
-    const response = NextResponse.redirect(finalUrl.toString());
-
-    // Clear the redirect cookie
-    response.cookies.delete("instagram_redirect");
-
-    return response;
+    return NextResponse.redirect(finalUrl.toString());
   } catch (error) {
     console.error("Instagram auth error:", error);
     return NextResponse.redirect(
