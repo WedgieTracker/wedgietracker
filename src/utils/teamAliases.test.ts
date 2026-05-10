@@ -62,4 +62,23 @@ describe("resolveTeamQuery", () => {
   it("partial code that is not an alias (e.g. 'MI') → null", () => {
     expect(resolveTeamQuery("MI")).toBeNull();
   });
+
+  it("'LA Lakers' resolves to LAL only (not the multi-team LA)", () => {
+    expect(resolveTeamQuery("LA Lakers")).toEqual(["LAL"]);
+  });
+
+  it("'LA Clippers' resolves to LAC only (not the multi-team LA)", () => {
+    expect(resolveTeamQuery("LA Clippers")).toEqual(["LAC"]);
+  });
+
+  it("nickname aliases resolve to the right code (Sixers, Wolves, Cavs)", () => {
+    expect(resolveTeamQuery("Sixers")).toEqual(["PHI"]);
+    expect(resolveTeamQuery("Wolves")).toEqual(["MIN"]);
+    expect(resolveTeamQuery("Cavs")).toEqual(["CLE"]);
+  });
+
+  it("legacy team cities resolve directly (e.g., 'Seattle' → ['SEA'])", () => {
+    expect(resolveTeamQuery("Seattle")).toEqual(["SEA"]);
+    expect(resolveTeamQuery("New Jersey")).toEqual(["NJ"]);
+  });
 });

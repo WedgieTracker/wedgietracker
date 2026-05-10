@@ -1,8 +1,9 @@
 /**
  * Structured NBA team records.
  * The lookup map is derived from these at module load — never hand-roll the flat map.
- * Historical teams (historical: true) skip city/nickname auto-registration to avoid
- * collisions with the current franchise that inherited the nickname (e.g. Nets → BKN).
+ * When a relocated franchise shares a nickname with the legacy team (e.g. Brooklyn Nets
+ * vs. New Jersey Nets), disambiguate the legacy team's `nickname` field with the city
+ * prefix (e.g. "NJ Nets") so the bare nickname routes to the current franchise.
  */
 
 export interface TeamRecord {
@@ -11,7 +12,6 @@ export interface TeamRecord {
   nickname: string;
   fullName: string;
   aliases?: string[];
-  historical?: boolean;
 }
 
 /**
@@ -207,18 +207,15 @@ export const TEAMS: TeamRecord[] = [
   {
     code: "NJ",
     city: "New Jersey",
-    nickname: "Nets",
+    nickname: "NJ Nets",
     fullName: "New Jersey Nets",
-    aliases: ["nj", "nj nets", "new jersey nets"],
-    historical: true,
   },
   {
     code: "SEA",
     city: "Seattle",
     nickname: "SuperSonics",
     fullName: "Seattle SuperSonics",
-    aliases: ["sonics", "supersonics", "seattle supersonics"],
-    historical: true,
+    aliases: ["sonics"],
   },
 ];
 
@@ -229,17 +226,11 @@ function buildLookup(
   const map = new Map<string, string[]>(Object.entries(multiAliases));
 
   for (const team of teams) {
-    const autoKeys: string[] = team.historical
-      ? [team.code.toLowerCase(), team.fullName.toLowerCase()]
-      : [
-          team.code.toLowerCase(),
-          team.city.toLowerCase(),
-          team.nickname.toLowerCase(),
-          team.fullName.toLowerCase(),
-        ];
-
     const keys = new Set([
-      ...autoKeys,
+      team.code.toLowerCase(),
+      team.city.toLowerCase(),
+      team.nickname.toLowerCase(),
+      team.fullName.toLowerCase(),
       ...(team.aliases ?? []).map((a) => a.toLowerCase()),
     ]);
 

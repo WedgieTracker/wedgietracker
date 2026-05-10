@@ -56,6 +56,11 @@ describe("matchesPlayerOrTeam", () => {
     });
     expect(matchesPlayerOrTeam(wedgie, "Hawkins")).toBe(true);
   });
+
+  it("nickname query 'Bucks' resolves to MIL and matches a MIL wedgie", () => {
+    const wedgie = makeWedgie({ teamName: "MIL", teamAgainstName: "BOS" });
+    expect(matchesPlayerOrTeam(wedgie, "Bucks")).toBe(true);
+  });
 });
 
 describe("matchesFilter", () => {
