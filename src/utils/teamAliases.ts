@@ -1,130 +1,275 @@
 /**
- * Maps city names, nicknames, and full names to NBA team codes.
- * Used by the search filter to resolve human-readable queries to 3-letter codes.
+ * Structured NBA team records.
+ * The lookup map is derived from these at module load — never hand-roll the flat map.
+ * Historical teams (historical: true) skip city/nickname auto-registration to avoid
+ * collisions with the current franchise that inherited the nickname (e.g. Nets → BKN).
  */
 
-const TEAM_ALIASES: Record<string, string[]> = {
-  // Eastern Conference
-  atlanta: ["ATL"],
-  hawks: ["ATL"],
-  "atlanta hawks": ["ATL"],
-  brooklyn: ["BKN"],
-  nets: ["BKN"],
-  "brooklyn nets": ["BKN"],
-  boston: ["BOS"],
-  celtics: ["BOS"],
-  "boston celtics": ["BOS"],
-  charlotte: ["CHA"],
-  hornets: ["CHA"],
-  "charlotte hornets": ["CHA"],
-  chicago: ["CHI"],
-  bulls: ["CHI"],
-  "chicago bulls": ["CHI"],
-  cleveland: ["CLE"],
-  cavaliers: ["CLE"],
-  "cleveland cavaliers": ["CLE"],
-  cavs: ["CLE"],
-  detroit: ["DET"],
-  pistons: ["DET"],
-  "detroit pistons": ["DET"],
-  indiana: ["IND"],
-  pacers: ["IND"],
-  "indiana pacers": ["IND"],
-  miami: ["MIA"],
-  heat: ["MIA"],
-  "miami heat": ["MIA"],
-  milwaukee: ["MIL"],
-  bucks: ["MIL"],
-  "milwaukee bucks": ["MIL"],
-  "new york": ["NYK"],
-  knicks: ["NYK"],
-  "new york knicks": ["NYK"],
-  knickerbockers: ["NYK"],
-  orlando: ["ORL"],
-  magic: ["ORL"],
-  "orlando magic": ["ORL"],
-  philadelphia: ["PHI"],
-  "76ers": ["PHI"],
-  sixers: ["PHI"],
-  "philadelphia 76ers": ["PHI"],
-  philly: ["PHI"],
-  toronto: ["TOR"],
-  raptors: ["TOR"],
-  "toronto raptors": ["TOR"],
-  raps: ["TOR"],
-  washington: ["WAS"],
-  wizards: ["WAS"],
-  "washington wizards": ["WAS"],
+export interface TeamRecord {
+  code: string;
+  city: string;
+  nickname: string;
+  fullName: string;
+  aliases?: string[];
+  historical?: boolean;
+}
 
-  // Western Conference
-  dallas: ["DAL"],
-  mavericks: ["DAL"],
-  "dallas mavericks": ["DAL"],
-  mavs: ["DAL"],
-  denver: ["DEN"],
-  nuggets: ["DEN"],
-  "denver nuggets": ["DEN"],
-  "golden state": ["GSW"],
-  warriors: ["GSW"],
-  "golden state warriors": ["GSW"],
-  dubs: ["GSW"],
-  houston: ["HOU"],
-  rockets: ["HOU"],
-  "houston rockets": ["HOU"],
+/**
+ * Explicitly ambiguous keys that map to more than one team.
+ * These are seeded into the lookup first; subsequent per-team processing
+ * skips any key already present here.
+ */
+const MULTI_TEAM_ALIASES: Record<string, string[]> = {
   la: ["LAL", "LAC"],
   "los angeles": ["LAL", "LAC"],
-  clippers: ["LAC"],
-  "la clippers": ["LAC"],
-  "los angeles clippers": ["LAC"],
-  clips: ["LAC"],
-  lakers: ["LAL"],
-  "la lakers": ["LAL"],
-  "los angeles lakers": ["LAL"],
-  memphis: ["MEM"],
-  grizzlies: ["MEM"],
-  "memphis grizzlies": ["MEM"],
-  grizz: ["MEM"],
-  minnesota: ["MIN"],
-  timberwolves: ["MIN"],
-  "minnesota timberwolves": ["MIN"],
-  wolves: ["MIN"],
-  "new orleans": ["NOP"],
-  pelicans: ["NOP"],
-  "new orleans pelicans": ["NOP"],
-  pels: ["NOP"],
-  "oklahoma city": ["OKC"],
-  thunder: ["OKC"],
-  "oklahoma city thunder": ["OKC"],
-  okc: ["OKC"],
-  phoenix: ["PHX"],
-  suns: ["PHX"],
-  "phoenix suns": ["PHX"],
-  portland: ["POR"],
-  "trail blazers": ["POR"],
-  "portland trail blazers": ["POR"],
-  blazers: ["POR"],
-  sacramento: ["SAC"],
-  kings: ["SAC"],
-  "sacramento kings": ["SAC"],
-  "san antonio": ["SAS"],
-  spurs: ["SAS"],
-  "san antonio spurs": ["SAS"],
-  utah: ["UTA"],
-  jazz: ["UTA"],
-  "utah jazz": ["UTA"],
-
-  // Legacy / Historic
-  "new jersey": ["NJ"],
-  nj: ["NJ"],
-  "new jersey nets": ["NJ"],
-  seattle: ["SEA"],
-  supersonics: ["SEA"],
-  "seattle supersonics": ["SEA"],
-  sonics: ["SEA"],
 };
 
+export const TEAMS: TeamRecord[] = [
+  {
+    code: "ATL",
+    city: "Atlanta",
+    nickname: "Hawks",
+    fullName: "Atlanta Hawks",
+  },
+  {
+    code: "BKN",
+    city: "Brooklyn",
+    nickname: "Nets",
+    fullName: "Brooklyn Nets",
+  },
+  {
+    code: "BOS",
+    city: "Boston",
+    nickname: "Celtics",
+    fullName: "Boston Celtics",
+  },
+  {
+    code: "CHA",
+    city: "Charlotte",
+    nickname: "Hornets",
+    fullName: "Charlotte Hornets",
+  },
+  {
+    code: "CHI",
+    city: "Chicago",
+    nickname: "Bulls",
+    fullName: "Chicago Bulls",
+  },
+  {
+    code: "CLE",
+    city: "Cleveland",
+    nickname: "Cavaliers",
+    fullName: "Cleveland Cavaliers",
+    aliases: ["cavs"],
+  },
+  {
+    code: "DET",
+    city: "Detroit",
+    nickname: "Pistons",
+    fullName: "Detroit Pistons",
+  },
+  {
+    code: "IND",
+    city: "Indiana",
+    nickname: "Pacers",
+    fullName: "Indiana Pacers",
+  },
+  { code: "MIA", city: "Miami", nickname: "Heat", fullName: "Miami Heat" },
+  {
+    code: "MIL",
+    city: "Milwaukee",
+    nickname: "Bucks",
+    fullName: "Milwaukee Bucks",
+  },
+  {
+    code: "NYK",
+    city: "New York",
+    nickname: "Knicks",
+    fullName: "New York Knicks",
+    aliases: ["knickerbockers"],
+  },
+  {
+    code: "ORL",
+    city: "Orlando",
+    nickname: "Magic",
+    fullName: "Orlando Magic",
+  },
+  {
+    code: "PHI",
+    city: "Philadelphia",
+    nickname: "76ers",
+    fullName: "Philadelphia 76ers",
+    aliases: ["sixers", "philly"],
+  },
+  {
+    code: "TOR",
+    city: "Toronto",
+    nickname: "Raptors",
+    fullName: "Toronto Raptors",
+    aliases: ["raps"],
+  },
+  {
+    code: "WAS",
+    city: "Washington",
+    nickname: "Wizards",
+    fullName: "Washington Wizards",
+  },
+
+  {
+    code: "DAL",
+    city: "Dallas",
+    nickname: "Mavericks",
+    fullName: "Dallas Mavericks",
+    aliases: ["mavs"],
+  },
+  {
+    code: "DEN",
+    city: "Denver",
+    nickname: "Nuggets",
+    fullName: "Denver Nuggets",
+  },
+  {
+    code: "GSW",
+    city: "Golden State",
+    nickname: "Warriors",
+    fullName: "Golden State Warriors",
+    aliases: ["dubs"],
+  },
+  {
+    code: "HOU",
+    city: "Houston",
+    nickname: "Rockets",
+    fullName: "Houston Rockets",
+  },
+  {
+    code: "LAC",
+    city: "Los Angeles",
+    nickname: "Clippers",
+    fullName: "Los Angeles Clippers",
+    aliases: ["la clippers", "clips"],
+  },
+  {
+    code: "LAL",
+    city: "Los Angeles",
+    nickname: "Lakers",
+    fullName: "Los Angeles Lakers",
+    aliases: ["la lakers"],
+  },
+  {
+    code: "MEM",
+    city: "Memphis",
+    nickname: "Grizzlies",
+    fullName: "Memphis Grizzlies",
+    aliases: ["grizz"],
+  },
+  {
+    code: "MIN",
+    city: "Minnesota",
+    nickname: "Timberwolves",
+    fullName: "Minnesota Timberwolves",
+    aliases: ["wolves"],
+  },
+  {
+    code: "NOP",
+    city: "New Orleans",
+    nickname: "Pelicans",
+    fullName: "New Orleans Pelicans",
+    aliases: ["pels"],
+  },
+  {
+    code: "OKC",
+    city: "Oklahoma City",
+    nickname: "Thunder",
+    fullName: "Oklahoma City Thunder",
+  },
+  { code: "PHX", city: "Phoenix", nickname: "Suns", fullName: "Phoenix Suns" },
+  {
+    code: "POR",
+    city: "Portland",
+    nickname: "Trail Blazers",
+    fullName: "Portland Trail Blazers",
+    aliases: ["blazers"],
+  },
+  {
+    code: "SAC",
+    city: "Sacramento",
+    nickname: "Kings",
+    fullName: "Sacramento Kings",
+  },
+  {
+    code: "SAS",
+    city: "San Antonio",
+    nickname: "Spurs",
+    fullName: "San Antonio Spurs",
+  },
+  { code: "UTA", city: "Utah", nickname: "Jazz", fullName: "Utah Jazz" },
+
+  {
+    code: "NJ",
+    city: "New Jersey",
+    nickname: "Nets",
+    fullName: "New Jersey Nets",
+    aliases: ["nj", "nj nets", "new jersey nets"],
+    historical: true,
+  },
+  {
+    code: "SEA",
+    city: "Seattle",
+    nickname: "SuperSonics",
+    fullName: "Seattle SuperSonics",
+    aliases: ["sonics", "supersonics", "seattle supersonics"],
+    historical: true,
+  },
+];
+
+function buildLookup(
+  teams: TeamRecord[],
+  multiAliases: Record<string, string[]>,
+): Map<string, string[]> {
+  const map = new Map<string, string[]>(Object.entries(multiAliases));
+
+  for (const team of teams) {
+    const autoKeys: string[] = team.historical
+      ? [team.code.toLowerCase(), team.fullName.toLowerCase()]
+      : [
+          team.code.toLowerCase(),
+          team.city.toLowerCase(),
+          team.nickname.toLowerCase(),
+          team.fullName.toLowerCase(),
+        ];
+
+    const keys = new Set([
+      ...autoKeys,
+      ...(team.aliases ?? []).map((a) => a.toLowerCase()),
+    ]);
+
+    for (const key of keys) {
+      const existing = map.get(key);
+      if (existing !== undefined) {
+        if (existing.includes(team.code)) continue;
+        throw new Error(
+          `[teamAliases] Collision on key "${key}": already mapped to ${JSON.stringify(existing)}, cannot also map to "${team.code}". ` +
+            `Add it to MULTI_TEAM_ALIASES if intentional.`,
+        );
+      }
+      map.set(key, [team.code]);
+    }
+  }
+
+  return map;
+}
+
+const LOOKUP = buildLookup(TEAMS, MULTI_TEAM_ALIASES);
+
+/**
+ * Resolves a free-text query to a list of team codes.
+ *
+ * - Exact match (case-insensitive) on code, city, nickname, fullName, or alias → [code]
+ * - Ambiguous location (e.g. "LA") → ["LAL", "LAC"]
+ * - Unknown / whitespace-only → null (caller should fall back to substring search)
+ */
 export function resolveTeamQuery(query: string): string[] | null {
   const normalised = query.trim().toLowerCase();
   if (!normalised) return null;
-  return TEAM_ALIASES[normalised] ?? null;
+  return LOOKUP.get(normalised) ?? null;
 }

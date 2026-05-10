@@ -3,47 +3,63 @@ import { resolveTeamQuery } from "./teamAliases";
 
 describe("resolveTeamQuery", () => {
   it('maps "bucks" to ["MIL"]', () => {
-    const result = resolveTeamQuery("bucks");
-    expect(result).toEqual(["MIL"]);
+    expect(resolveTeamQuery("bucks")).toEqual(["MIL"]);
   });
 
   it("handles case insensitivity (e.g., 'Milwaukee' → ['MIL'])", () => {
-    const result = resolveTeamQuery("Milwaukee");
-    expect(result).toEqual(["MIL"]);
+    expect(resolveTeamQuery("Milwaukee")).toEqual(["MIL"]);
   });
 
   it("handles multi-word aliases (e.g., 'milwaukee bucks')", () => {
-    const result = resolveTeamQuery("milwaukee bucks");
-    expect(result).toEqual(["MIL"]);
+    expect(resolveTeamQuery("milwaukee bucks")).toEqual(["MIL"]);
   });
 
   it("returns multiple teams for ambiguous locations (e.g., 'LA' → ['LAL', 'LAC'])", () => {
-    const result = resolveTeamQuery("LA");
-    expect(result).toEqual(["LAL", "LAC"]);
+    expect(resolveTeamQuery("LA")).toEqual(["LAL", "LAC"]);
   });
 
   it("returns multiple teams for 'los angeles'", () => {
-    const result = resolveTeamQuery("los angeles");
-    expect(result).toEqual(["LAL", "LAC"]);
+    expect(resolveTeamQuery("los angeles")).toEqual(["LAL", "LAC"]);
   });
 
   it("resolves legacy/historic teams (e.g., 'sonics' → ['SEA'])", () => {
-    const result = resolveTeamQuery("sonics");
-    expect(result).toEqual(["SEA"]);
+    expect(resolveTeamQuery("sonics")).toEqual(["SEA"]);
   });
 
   it("returns null for unknown terms (e.g., 'hawkins')", () => {
-    const result = resolveTeamQuery("hawkins");
-    expect(result).toBeNull();
+    expect(resolveTeamQuery("hawkins")).toBeNull();
   });
 
   it("returns null for an empty string", () => {
-    const result = resolveTeamQuery("");
-    expect(result).toBeNull();
+    expect(resolveTeamQuery("")).toBeNull();
   });
 
   it("handles strings with leading/trailing whitespace", () => {
-    const result = resolveTeamQuery("  bulls  ");
-    expect(result).toEqual(["CHI"]);
+    expect(resolveTeamQuery(" bulls ")).toEqual(["CHI"]);
+  });
+
+  it("resolves 3-letter codes directly (e.g., 'MIL' → ['MIL'])", () => {
+    expect(resolveTeamQuery("MIL")).toEqual(["MIL"]);
+  });
+
+  it("resolves 3-letter codes for other teams (BOS, LAL)", () => {
+    expect(resolveTeamQuery("BOS")).toEqual(["BOS"]);
+    expect(resolveTeamQuery("LAL")).toEqual(["LAL"]);
+  });
+
+  it("'Nets' defaults to current franchise → ['BKN']", () => {
+    expect(resolveTeamQuery("Nets")).toEqual(["BKN"]);
+  });
+
+  it("'NJ Nets' resolves to legacy team → ['NJ']", () => {
+    expect(resolveTeamQuery("NJ Nets")).toEqual(["NJ"]);
+  });
+
+  it("whitespace-only string → null", () => {
+    expect(resolveTeamQuery("   ")).toBeNull();
+  });
+
+  it("partial code that is not an alias (e.g. 'MI') → null", () => {
+    expect(resolveTeamQuery("MI")).toBeNull();
   });
 });
