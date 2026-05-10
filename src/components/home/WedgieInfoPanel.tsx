@@ -30,7 +30,7 @@ export function WedgieInfoPanel({ wedgie }: WedgieInfoPanelProps) {
     <div className="relative flex w-full flex-col justify-between p-6 px-4 sm:px-6 md:p-8 lg:w-[35%]">
       <div className="space-y-2 sm:space-y-6">
         <div className="sm:text-wedgie-number flex flex-row items-center justify-start gap-4 text-xl leading-none">
-          <h2 className="bg-pink text-yellow mb-2 flex h-[70px] w-[70px] flex-row items-center justify-center rounded-xl px-4 py-2 text-[1.6em] font-black">
+          <h2 className="bg-pink text-yellow mb-2 flex size-[70px] flex-row items-center justify-center rounded-xl px-4 py-2 text-[1.6em] font-black">
             <span className="text-darkpurple mt-[.75em] text-[.5em]">#</span>
             {wedgie.number ?? "1"}
           </h2>

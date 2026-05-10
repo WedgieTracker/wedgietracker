@@ -33,6 +33,7 @@ interface TwitterErrorResponse {
 }
 
 const MEDIA_UPLOAD_URL = "https://upload.twitter.com/1.1/media/upload.json";
+const PENDING_STATES = new Set(["pending", "in_progress"]);
 
 async function pollMediaProcessing(
   oauth: OAuth,
@@ -43,7 +44,7 @@ async function pollMediaProcessing(
   let processingInfo = initialInfo;
   console.log("Processing state:", processingInfo.state);
 
-  while (["pending", "in_progress"].includes(processingInfo.state)) {
+  while (PENDING_STATES.has(processingInfo.state)) {
     const waitTime = (processingInfo.check_after_secs ?? 1) * 1000;
     console.log(`Waiting ${waitTime}ms before checking status...`);
     await new Promise((resolve) => setTimeout(resolve, waitTime));
@@ -132,7 +133,7 @@ async function uploadVideoToTwitter(
     base64EncodedFile.match(new RegExp(`.{1,${chunkSize}}`, "g")) ?? [];
   console.log(`Uploading ${chunks.length} chunks...`);
 
-  for (let i = 0; i < chunks.length; i++) {
+  for (const [i, chunk] of chunks.entries()) {
     console.log(`Uploading chunk ${i + 1}/${chunks.length}`);
     const appendRequestData = {
       url: MEDIA_UPLOAD_URL,
@@ -141,7 +142,7 @@ async function uploadVideoToTwitter(
         command: "APPEND",
         media_id: mediaId,
         segment_index: i.toString(),
-        media_data: chunks[i]!,
+        media_data: chunk,
       },
     };
     const appendHeaders = oauth.toHeader(

@@ -1,7 +1,7 @@
 "use client";
 
 import { api } from "~/trpc/react";
-import { useState } from "react";
+import { useState, type Dispatch, type SetStateAction } from "react";
 import { Counter } from "../ui/Counter";
 
 interface FiltersProps {
@@ -10,7 +10,7 @@ interface FiltersProps {
     type: string;
     playerOrTeam: string;
   };
-  setFilters: (filters: FiltersProps["filters"]) => void;
+  setFilters: Dispatch<SetStateAction<FiltersProps["filters"]>>;
   visibleWedgies: number;
 }
 
@@ -23,16 +23,20 @@ export function WedgieFilters({
   const { data: allWedgies, isLoading } = api.wedgie.getAll.useQuery();
 
   const seasons = Array.from(
-    new Set(allWedgies?.map((w) => w.seasonName).filter(Boolean) ?? []),
+    new Set(
+      allWedgies?.flatMap((w) => (w.seasonName ? [w.seasonName] : [])) ?? [],
+    ),
   )
     .sort()
     .reverse();
 
   const types = Array.from(
     new Set(
-      allWedgies
-        ?.flatMap((w) => w.types?.map((t: { name: string }) => t.name) ?? [])
-        .filter(Boolean) ?? [],
+      allWedgies?.flatMap(
+        (w) =>
+          w.types?.flatMap((t: { name: string }) => (t.name ? [t.name] : [])) ??
+          [],
+      ) ?? [],
     ),
   ).sort();
 
@@ -50,7 +54,7 @@ export function WedgieFilters({
           <span className="text-yellow mt-2.5 flex items-center gap-1 text-xs font-bold tracking-wide whitespace-nowrap">
             FILTER BY
             <svg
-              className="h-3 w-3"
+              className="size-3"
               viewBox="0 0 24 24"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
@@ -73,7 +77,7 @@ export function WedgieFilters({
               >
                 <span>Season</span>
                 <span
-                  className={`border-yellow relative flex h-5 w-5 items-center justify-center rounded-full border leading-none`}
+                  className={`border-yellow relative flex size-5 items-center justify-center rounded-full border leading-none`}
                 >
                   <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
                     +
@@ -94,7 +98,7 @@ export function WedgieFilters({
                 className="absolute inset-0 w-full cursor-pointer opacity-0"
                 value={filters.season}
                 onChange={(e) =>
-                  setFilters({ ...filters, season: e.target.value })
+                  setFilters((prev) => ({ ...prev, season: e.target.value }))
                 }
               >
                 <option value="">All Seasons</option>
@@ -119,7 +123,7 @@ export function WedgieFilters({
               >
                 <span>Type</span>
                 <span
-                  className={`relative flex h-5 w-5 items-center justify-center rounded-full border leading-none ${
+                  className={`relative flex size-5 items-center justify-center rounded-full border leading-none ${
                     filters.type ? "border-yellow" : "border-pink"
                   }`}
                 >
@@ -141,7 +145,7 @@ export function WedgieFilters({
                 className="absolute inset-0 w-full cursor-pointer opacity-0"
                 value={filters.type}
                 onChange={(e) =>
-                  setFilters({ ...filters, type: e.target.value })
+                  setFilters((prev) => ({ ...prev, type: e.target.value }))
                 }
               >
                 <option value="">All Types</option>
@@ -169,7 +173,7 @@ export function WedgieFilters({
               >
                 <span>Team/Player</span>
                 <span
-                  className={`relative flex h-5 w-5 items-center justify-center rounded-full border ${
+                  className={`relative flex size-5 items-center justify-center rounded-full border ${
                     isActive || filters.playerOrTeam
                       ? "border-yellow"
                       : "border-pink"
@@ -192,10 +196,10 @@ export function WedgieFilters({
                     value={filters.playerOrTeam || ""}
                     onChange={(e) => {
                       const value = e.target.value;
-                      setFilters({
-                        ...filters,
+                      setFilters((prev) => ({
+                        ...prev,
                         playerOrTeam: value,
-                      });
+                      }));
                     }}
                     placeholder="Search teams or players..."
                     // eslint-disable-next-line jsx-a11y/no-autofocus

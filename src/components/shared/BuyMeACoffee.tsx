@@ -40,7 +40,7 @@ export function BuyMeACoffee() {
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-0">
           <button
-            onClick={() => setQuantity(Math.max(1, quantity - 1))}
+            onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
             className="bg-pink/20 text-pink hover:bg-pink/30 rounded-l-lg px-2 py-1"
             disabled={quantity <= 1}
           >
@@ -51,7 +51,7 @@ export function BuyMeACoffee() {
             {quantity}
           </span>
           <button
-            onClick={() => setQuantity(quantity + 1)}
+            onClick={() => setQuantity((prev) => prev + 1)}
             className="bg-pink/20 text-pink hover:bg-pink/30 rounded-r-lg px-2 py-1"
           >
             +

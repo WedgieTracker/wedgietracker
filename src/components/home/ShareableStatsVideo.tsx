@@ -42,8 +42,8 @@ export function ShareableStatsVideo({ stats }: ShareableStatsVideoProps) {
         <TooltipProvider>
           <Tooltip delayDuration={0}>
             <TooltipTrigger asChild>
-              <div className="border-pink bg-pink text-darkpurple hover:bg-darkpurple hover:text-pink absolute right-4 bottom-4 z-10 hidden h-10 w-10 rounded-full border-2 p-2 text-center font-bold opacity-30 transition-all duration-300 hover:opacity-100 md:block">
-                <MonitorDown className="h-5 w-5" />
+              <div className="border-pink bg-pink text-darkpurple hover:bg-darkpurple hover:text-pink absolute right-4 bottom-4 z-10 hidden size-10 rounded-full border-2 p-2 text-center font-bold opacity-30 transition-all duration-300 hover:opacity-100 md:block">
+                <MonitorDown className="size-5" />
                 <span className="sr-only">Share Stats Video</span>
               </div>
             </TooltipTrigger>

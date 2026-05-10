@@ -104,6 +104,13 @@
   body {
     @apply bg-background text-foreground;
   }
+  body.body-locked {
+    overflow: hidden;
+    height: 100vh;
+    position: fixed;
+    width: 100%;
+    top: calc(var(--scroll-y, 0px) * -1);
+  }
 }
 
 /* selection color */

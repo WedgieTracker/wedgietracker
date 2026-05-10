@@ -110,10 +110,14 @@ export function SocialPostForm({
           )}
 
         <div>
-          <label className="mb-2 block text-sm font-medium text-white">
+          <label
+            htmlFor="social-custom-message"
+            className="mb-2 block text-sm font-medium text-white"
+          >
             Custom Message (optional)
           </label>
           <textarea
+            id="social-custom-message"
             className="w-full rounded-md border border-white/10 p-2 text-black focus:border-indigo-500 focus:ring-indigo-500"
             placeholder="Enter your custom message"
             value={customMessage}

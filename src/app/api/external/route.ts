@@ -59,12 +59,11 @@ async function syncIncomingGames(newGames: NewGameInput[]) {
     console.log(
       `Updating live status for ${existingGamesToUpdate.length} existing games`,
     );
-    const liveIds = existingGamesToUpdate
-      .filter((g) => g.live)
-      .map((g) => g.id);
-    const notLiveIds = existingGamesToUpdate
-      .filter((g) => !g.live)
-      .map((g) => g.id);
+    const liveIds: number[] = [];
+    const notLiveIds: number[] = [];
+    for (const g of existingGamesToUpdate) {
+      (g.live ? liveIds : notLiveIds).push(g.id);
+    }
 
     if (liveIds.length > 0) {
       await db
@@ -183,8 +182,10 @@ export async function POST(request: Request) {
   await syncIncomingGames(newGames);
 
   // Calculate pace if we have wedgie/game data to work with
-  const wedgieCount = await resolveTotalWedgies(newWedgieCount);
-  const gameCount = await resolveTotalGames(newTotalGamesCount);
+  const [wedgieCount, gameCount] = await Promise.all([
+    resolveTotalWedgies(newWedgieCount),
+    resolveTotalGames(newTotalGamesCount),
+  ]);
 
   if (wedgieCount > 0 && gameCount > 0) {
     const pace = await calculatePace({

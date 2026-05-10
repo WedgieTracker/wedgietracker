@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import { PageLayout } from "~/components/layout/PageLayout";
 import { BlogPost } from "~/components/blog/BlogPost";
 import { api } from "~/trpc/server";
@@ -7,11 +8,23 @@ import Link from "next/link";
 import { Button } from "~/components/ui/button";
 import { ArrowLeftIcon } from "lucide-react";
 import { Loader } from "~/components/shared/Loader";
+import { generateMetadata as buildMetadata } from "~/config/metadata";
 
 interface Props {
   params: Promise<{
     slug: string;
   }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const post = await api.blog.getBySlug({ slug });
+  if (!post) return buildMetadata({ title: "Post not found" });
+  return buildMetadata({
+    title: post.title,
+    description: post.excerpt,
+    image: post.coverImage ?? undefined,
+  });
 }
 
 export default function BlogPostPage({ params }: Props) {
@@ -23,7 +36,7 @@ export default function BlogPostPage({ params }: Props) {
             variant="ghost"
             className="hover:bg-yellow hover:text-darkpurple mb-4 text-white/60"
           >
-            <ArrowLeftIcon className="mr-2 h-4 w-4" />
+            <ArrowLeftIcon className="mr-2 size-4" />
             Back to Blog
           </Button>
         </Link>

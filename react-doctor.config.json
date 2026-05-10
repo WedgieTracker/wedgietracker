@@ -1,0 +1,51 @@
+{
+  "ignore": {
+    "rules": [
+      "react-doctor/nextjs-no-img-element",
+      "react-doctor/design-no-bold-heading",
+      "react-doctor/design-no-space-on-flex-children",
+      "react-doctor/design-no-three-period-ellipsis"
+    ],
+    "overrides": [
+      {
+        "files": [
+          "src/components/admin/**",
+          "src/components/dev/**",
+          "src/app/admin/**"
+        ],
+        "rules": ["react-doctor/design-no-default-tailwind-palette"]
+      },
+      {
+        "files": ["src/components/ui/**"],
+        "rules": ["react-doctor/no-react19-deprecated-apis"]
+      },
+      {
+        "files": ["src/components/dev/**", "src/server/dev/**"],
+        "rules": [
+          "typescript/no-unsafe-member-access",
+          "typescript/no-unsafe-assignment",
+          "typescript/no-unsafe-call",
+          "typescript/no-unsafe-argument"
+        ]
+      },
+      {
+        "files": ["src/app/api/auth/instagram/callback/route.ts"],
+        "rules": ["react-doctor/nextjs-no-side-effect-in-get-handler"]
+      },
+      {
+        "files": [
+          "src/app/api/instagram/thumbnail/route.ts",
+          "src/app/api/youtube/download/route.ts"
+        ],
+        "rules": ["react-doctor/server-hoist-static-io"]
+      },
+      {
+        "files": [
+          "src/components/admin/GameSearchInput.tsx",
+          "src/components/admin/WedgieFormPage.tsx"
+        ],
+        "rules": ["react-doctor/rendering-hydration-mismatch-time"]
+      }
+    ]
+  }
+}
