@@ -9,6 +9,7 @@ import type { WedgieWithTypes } from "~/types/wedgie";
 import { Cta } from "~/components/shared/Cta";
 import { api } from "~/trpc/react";
 import { useSeasonFallback } from "~/hooks/use-season-fallback";
+import { matchesFilter } from "~/utils/wedgieFilter";
 
 export function AllWedgiesPage() {
   const searchParams = useSearchParams();
@@ -123,25 +124,7 @@ export function AllWedgiesPage() {
 
   // Apply remaining filters
   const filteredWedgies = wedgies.filter((wedgie) => {
-    const matchesType =
-      !filters.type ||
-      wedgie.types?.some(
-        (t: { name: string }) =>
-          t.name.toLowerCase() === filters.type.toLowerCase(),
-      );
-    const matchesPlayerOrTeam =
-      !filters.playerOrTeam ||
-      wedgie.playerName
-        ?.toLowerCase()
-        .includes(filters.playerOrTeam.toLowerCase()) ||
-      wedgie.teamName
-        ?.toLowerCase()
-        .includes(filters.playerOrTeam.toLowerCase()) ||
-      wedgie.teamAgainstName
-        ?.toLowerCase()
-        .includes(filters.playerOrTeam.toLowerCase());
-
-    return matchesType && matchesPlayerOrTeam;
+    return matchesFilter(wedgie, filters);
   });
 
   return (
