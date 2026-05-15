@@ -113,7 +113,7 @@ export function Stats({ stats, isLoading }: StatsProps) {
         >
           <div
             className={`flex flex-col items-center justify-center text-center ${
-              showPace ? "w-[100px] md:w-[135px]" : "w-auto"
+              showPace ? "w-[100px] md:w-[135px]" : "w-auto md:w-[140px]"
             }`}
           >
             <div
