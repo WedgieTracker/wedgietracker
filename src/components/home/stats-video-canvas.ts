@@ -153,6 +153,21 @@ function drawLogoAndUrlBadge(
   ctx.fillText(urlText, width / 2, buttonY + 34);
 }
 
+function fitNumberFont(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  maxFontSize: number,
+  maxWidth: number,
+): number {
+  let size = maxFontSize;
+  ctx.font = `900 ${size}px Inter`;
+  while (ctx.measureText(text).width > maxWidth && size > 40) {
+    size -= 8;
+    ctx.font = `900 ${size}px Inter`;
+  }
+  return size;
+}
+
 function setupFrame(
   frame: FrameContext,
   progress: number,
@@ -272,10 +287,20 @@ export function drawFrame(
     ctx.fillStyle = "#EAFF00";
     ctx.fillText(currentPaceValue.toString(), width * 0.25, bottomY + 120);
   } else {
-    ctx.font = "900 120px Inter";
     ctx.fillStyle = "#EAFF00";
     ctx.textAlign = "center";
-    ctx.fillText(currentGamesValue.toString(), width * 0.25, bottomY + 116);
+    const size = fitNumberFont(
+      ctx,
+      stats.gamesPlayed.toString(),
+      120,
+      statBoxWidth - 32,
+    );
+    const yShift = (120 - size) * 0.35;
+    ctx.fillText(
+      currentGamesValue.toString(),
+      width * 0.25,
+      bottomY + 116 - yShift,
+    );
     ctx.font = "700 28px Inter";
     ctx.fillStyle = "#FF00FF";
     ctx.fillText("GAMES", width * 0.25, bottomY + 152);
@@ -376,10 +401,20 @@ export function drawVerticalFrame(
     ctx.fillStyle = "#EAFF00";
     ctx.fillText(currentPaceValue.toString(), width * 0.32, bottomY + 155);
   } else {
-    ctx.font = "900 140px Inter";
     ctx.fillStyle = "#EAFF00";
     ctx.textAlign = "center";
-    ctx.fillText(currentGamesValue.toString(), width * 0.32, bottomY + 140);
+    const size = fitNumberFont(
+      ctx,
+      stats.gamesPlayed.toString(),
+      140,
+      statBoxWidth - 40,
+    );
+    const yShift = (140 - size) * 0.35;
+    ctx.fillText(
+      currentGamesValue.toString(),
+      width * 0.32,
+      bottomY + 140 - yShift,
+    );
     ctx.font = "700 36px Inter";
     ctx.fillStyle = "#FF00FF";
     ctx.fillText("GAMES", width * 0.32, bottomY + 185);
