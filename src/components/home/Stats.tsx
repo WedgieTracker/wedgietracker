@@ -91,7 +91,7 @@ export function Stats({ stats, isLoading }: StatsProps) {
         </div>
       </div>
 
-      <div className="bg-darkpurple relative flex min-h-[12em] flex-1 flex-col justify-center p-8 md:min-h-[14em]">
+      <div className="bg-darkpurple relative flex min-h-[12em] flex-1 flex-col justify-center px-8 py-12 md:min-h-[14em] md:py-8">
         {stats.liveGames && (
           <div
             className="absolute bottom-2 left-4 z-10 z-50 flex flex-row items-center justify-center gap-2 rounded-full border border-red-500 bg-red-500/90 px-2 py-1 md:bottom-4 md:px-2 md:py-2"
@@ -106,24 +106,44 @@ export function Stats({ stats, isLoading }: StatsProps) {
             </div>
           </div>
         )}
-        <div className="flex flex-row items-center justify-center gap-5">
-          {showPace && (
-            <div className="flex w-[100px] flex-col items-center justify-center text-center md:w-[135px]">
-              <div className="text-pace-text-mobile text-pink md:text-pace-text w-full leading-none font-black tracking-wider uppercase">
-                Pace
-              </div>
-              <div className="shadow-lg-darkpurple-light text-pace-number-mobile text-yellow md:text-pace-number mt-[-.2em] w-full leading-none font-black">
-                <Counter end={stats.currentPace} />
-              </div>
+        <div
+          className={`flex items-center justify-center gap-2 md:flex-row md:gap-5 ${
+            showPace ? "flex-row" : "flex-col"
+          }`}
+        >
+          <div
+            className={`flex flex-col items-center justify-center text-center ${
+              showPace ? "w-[100px] md:w-[135px]" : "w-auto md:w-[140px]"
+            }`}
+          >
+            <div
+              className={`text-pink w-full leading-none font-black tracking-wider uppercase ${
+                showPace ? "text-pace-text-mobile md:text-pace-text" : "text-xl"
+              }`}
+            >
+              {showPace ? "Pace" : "Games"}
             </div>
-          )}
+            <div
+              className={`shadow-lg-darkpurple-light text-yellow mt-[-.2em] w-full leading-none font-black ${
+                showPace
+                  ? "text-pace-number-mobile md:text-pace-number"
+                  : "text-5xl"
+              }`}
+            >
+              <Counter end={showPace ? stats.currentPace : stats.gamesPlayed} />
+            </div>
+          </div>
 
           {daysAgo && daysAgo > 0 ? (
             <div
-              className={`flex w-[140px] flex-row items-center justify-center gap-3 ${showPace ? "ml-2" : ""}`}
+              className={`flex w-[140px] flex-row items-center justify-center gap-3 md:ml-2 ${
+                showPace ? "ml-2" : ""
+              }`}
             >
               <div
-                className={`text-center uppercase ${showPace ? "pl-2" : ""}`}
+                className={`text-center uppercase md:pl-2 ${
+                  showPace ? "pl-2" : ""
+                }`}
               >
                 <div className="shadow-lg-darkpurple-light text-yellow text-5xl leading-none font-black">
                   {daysAgo}
@@ -138,10 +158,14 @@ export function Stats({ stats, isLoading }: StatsProps) {
             </div>
           ) : (
             <div
-              className={`flex w-[140px] flex-col items-start justify-start ${showPace ? "ml-2" : ""}`}
+              className={`flex w-[140px] flex-col items-start justify-start md:ml-2 ${
+                showPace ? "ml-2" : ""
+              }`}
             >
               <div
-                className={`text-center text-4xl uppercase ${showPace ? "pl-4" : ""}`}
+                className={`text-center text-4xl uppercase md:pl-4 ${
+                  showPace ? "pl-4" : ""
+                }`}
               >
                 <div className="shadow-lg-darkpurple-light animate-color-shift text-pink leading-none font-black">
                   New
