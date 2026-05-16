@@ -91,7 +91,7 @@ export function Stats({ stats, isLoading }: StatsProps) {
         </div>
       </div>
 
-      <div className="bg-darkpurple relative flex min-h-[12em] flex-1 flex-col justify-center p-8 md:min-h-[14em]">
+      <div className="bg-darkpurple relative flex min-h-[12em] flex-1 flex-col justify-center px-8 pt-12 pb-4 md:min-h-[14em] md:p-8">
         {stats.liveGames && (
           <div
             className="absolute bottom-2 left-4 z-10 z-50 flex flex-row items-center justify-center gap-2 rounded-full border border-red-500 bg-red-500/90 px-2 py-1 md:bottom-4 md:px-2 md:py-2"

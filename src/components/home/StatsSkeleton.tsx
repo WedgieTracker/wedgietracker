@@ -26,7 +26,7 @@ export function StatsSkeleton() {
         </div>
       </div>
 
-      <div className="bg-darkpurple relative flex min-h-[12em] flex-1 flex-col justify-center p-8 md:min-h-[14em]">
+      <div className="bg-darkpurple relative flex min-h-[12em] flex-1 flex-col justify-center px-8 pt-12 pb-4 md:min-h-[14em] md:p-8">
         {/* cta */}
         <div className="absolute top-0 left-[50%] z-10 translate-x-[-50%] translate-y-[-50%]">
           <Link
