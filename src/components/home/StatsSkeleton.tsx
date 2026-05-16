@@ -27,18 +27,6 @@ export function StatsSkeleton() {
       </div>
 
       <div className="bg-darkpurple relative flex min-h-[12em] flex-1 flex-col justify-center p-8 md:min-h-[14em]">
-        <div className="flex flex-row items-center justify-center gap-5">
-          <div className="flex w-[100px] flex-col items-center justify-center text-center md:w-[135px]">
-            <div className="text-pace-text-mobile text-pink md:text-pace-text w-full leading-none font-black tracking-wider uppercase">
-              Pace
-            </div>
-            <div className="shadow-lg-darkpurple-light text-pace-number-mobile text-yellow md:text-pace-number mt-[-.2em] w-full leading-none font-black">
-              0
-            </div>
-          </div>
-
-          <div className="ml-2 flex w-[140px] flex-col items-start justify-start"></div>
-        </div>
         {/* cta */}
         <div className="absolute top-0 left-[50%] z-10 translate-x-[-50%] translate-y-[-50%]">
           <Link
