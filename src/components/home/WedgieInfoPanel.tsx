@@ -1,4 +1,5 @@
 import type { Wedgie } from "~/types/wedgie";
+import { GEMS_EMOJI, isGemsDate } from "~/utils/formatDate";
 import { CourtPositionDiagram } from "./CourtPositionDiagram";
 
 interface WedgieInfoPanelProps {
@@ -9,14 +10,8 @@ interface WedgieInfoPanelProps {
 
 function formatDate(date: string | Date) {
   const d = new Date(date);
-  if (
-    d.toLocaleDateString("de-DE", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "2-digit",
-    }) === "01.01.70"
-  ) {
-    return "💎💎💎";
+  if (isGemsDate(d)) {
+    return GEMS_EMOJI;
   }
   return d.toLocaleDateString("en-US", {
     month: "long",
