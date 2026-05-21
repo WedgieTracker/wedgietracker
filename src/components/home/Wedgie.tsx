@@ -4,6 +4,7 @@ import { useState } from "react";
 import { WedgieModal } from "./WedgieModal";
 import { CourtPositionDiagram } from "./CourtPositionDiagram";
 import type { WedgieWithTypes } from "~/types/wedgie";
+import { GEMS_EMOJI, isGemsDate } from "~/utils/formatDate";
 
 interface WedgieProps {
   wedgie: WedgieWithTypes;
@@ -103,12 +104,8 @@ export function Wedgie({
               className={`text-darkpurple group-hover:text-yellow mb-2 leading-none font-black tracking-wide transition-all duration-300 ${sizes.date}`}
               style={{ fontSize: sizes.date }}
             >
-              {new Date(wedgie.wedgieDate).toLocaleDateString("de-DE", {
-                day: "2-digit",
-                month: "2-digit",
-                year: "2-digit",
-              }) === "01.01.70"
-                ? "💎💎💎"
+              {isGemsDate(new Date(wedgie.wedgieDate))
+                ? GEMS_EMOJI
                 : new Date(wedgie.wedgieDate).toLocaleDateString("de-DE", {
                     day: "2-digit",
                     month: "2-digit",
