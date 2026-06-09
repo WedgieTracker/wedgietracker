@@ -113,7 +113,7 @@ export function Stats({ stats, isLoading }: StatsProps) {
         >
           <div
             className={`flex flex-col items-center justify-center text-center ${
-              showPace ? "w-[100px] md:w-[135px]" : "w-auto md:w-[140px]"
+              showPace ? "w-[130px] md:w-[135px]" : "w-auto md:w-[140px]"
             }`}
           >
             <div
@@ -163,7 +163,7 @@ export function Stats({ stats, isLoading }: StatsProps) {
               }`}
             >
               <div
-                className={`text-center text-4xl uppercase md:pl-4 ${
+                className={`mx-auto text-center text-4xl uppercase md:pl-4 ${
                   showPace ? "pl-4" : ""
                 }`}
               >
