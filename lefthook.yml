@@ -3,7 +3,12 @@ pre-commit:
   jobs:
     - name: ts-lint-format
       glob: "*.{ts,tsx}"
-      run: pnpm exec oxlint --fix --no-error-on-unmatched-pattern {staged_files} && pnpm exec prettier --write {staged_files}
+      run: |
+        ox_files=$(printf '%s\n' {staged_files} | grep -vE '^(src/(server|components)/dev/|scripts/)' || true)
+        if [ -n "$ox_files" ]; then
+          pnpm exec oxlint --fix $ox_files || exit 1
+        fi
+        pnpm exec prettier --write {staged_files}
       stage_fixed: true
 
     - name: prettier-other

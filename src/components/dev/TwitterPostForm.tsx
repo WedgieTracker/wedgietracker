@@ -11,7 +11,7 @@ export function TwitterPostForm({ wedgie }: { wedgie: WedgieWithTypes }) {
       wedgie={wedgie}
       platformName="Twitter"
       endpoint="/api/twitter/upload"
-      previewSuffix="\n\nWedgieTracker.com"
+      previewSuffix={"\n\nWedgieTracker.com"}
       headerExtra={<TwitterAuth />}
       preflight={() => {
         const hasCredentials =

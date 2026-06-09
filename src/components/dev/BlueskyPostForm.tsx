@@ -9,7 +9,7 @@ export function BlueskyPostForm({ wedgie }: { wedgie: WedgieWithTypes }) {
       wedgie={wedgie}
       platformName="Bluesky"
       endpoint="/api/bluesky/post"
-      previewSuffix="\n\n#WeAreWedgie\n\nWedgieTracker.com"
+      previewSuffix={"\n\n#WeAreWedgie\n\nWedgieTracker.com"}
     />
   );
 }
