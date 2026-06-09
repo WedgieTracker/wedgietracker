@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { Preview } from "../admin/Preview";
-import Link from "next/link";
 import type { WedgieWithTypes } from "~/types/wedgie";
 import { usePathname, useSearchParams } from "next/navigation";
 
@@ -222,13 +221,13 @@ export function InstagramUploadForm({ wedgie }: InstagramUploadFormProps) {
 
       {!instagramToken ? (
         <div className="mb-4">
-          <Link
-            href="/api/auth/instagram"
+          <button
+            type="button"
             onClick={handleInstagramConnect}
             className="block w-full rounded bg-blue-500 px-4 py-2 text-center font-bold text-white hover:bg-blue-600"
           >
             Connect Instagram Account
-          </Link>
+          </button>
         </div>
       ) : (
         <div className="space-y-4">
