@@ -118,7 +118,7 @@ export async function POST(req: Request) {
         if (status.jobStatus.blob) {
           videoBlob = {
             $type: "blob",
-            ref: status.jobStatus.blob.ref as { $link: string },
+            ref: status.jobStatus.blob.ref as unknown as { $link: string },
             mimeType: status.jobStatus.blob.mimeType,
             size: status.jobStatus.blob.size,
           } as VideoBlob;
