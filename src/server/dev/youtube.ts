@@ -1,10 +1,16 @@
 import { google } from "googleapis";
-import type { Auth } from "googleapis";
 import path from "path";
 import * as fs from "fs";
 import { type Session } from "next-auth";
 import { spawn } from "child_process";
 import { createBackground } from "./createBackground";
+
+// Use the OAuth2 client type that google.auth.OAuth2 actually produces, which
+// is the same one google.youtube() expects. The googleapis `Auth` namespace
+// resolves to a different google-auth-library copy (googleapis bundles 10.7.0
+// while googleapis-common uses 10.5.0), so annotating with Auth.OAuth2Client
+// would clash with the runtime instances.
+type OAuth2Client = InstanceType<typeof google.auth.OAuth2>;
 
 async function createShort(
   inputPath: string,
@@ -69,7 +75,7 @@ async function uploadVideo(
   title: string,
   description: string,
   tags: string[],
-  oauth2Client: Auth.OAuth2Client,
+  oauth2Client: OAuth2Client,
   isShort = false,
 ) {
   const youtube = google.youtube({ version: "v3", auth: oauth2Client });
@@ -102,7 +108,7 @@ async function uploadVideo(
 }
 
 async function refreshAccessToken(
-  oauth2Client: Auth.OAuth2Client,
+  oauth2Client: OAuth2Client,
   refreshToken: string,
 ): Promise<string | null> {
   oauth2Client.setCredentials({

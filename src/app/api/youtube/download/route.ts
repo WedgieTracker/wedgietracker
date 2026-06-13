@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import path from "path";
 import fs from "fs";
-import archiver from "archiver";
+import { ZipArchive } from "archiver";
 import { assertDevMode } from "~/config/dev-routes";
 const BATCH_DIR = path.join(process.cwd(), "tmp", "batch-videos");
 
@@ -9,7 +9,7 @@ export async function GET() {
   const blocked = assertDevMode();
   if (blocked) return blocked;
 
-  const archive = archiver("zip");
+  const archive = new ZipArchive();
   const zipPath = path.join(BATCH_DIR, "videos.zip");
   const output = fs.createWriteStream(zipPath);
 
