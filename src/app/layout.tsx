@@ -1,7 +1,6 @@
 import "~/styles/globals.css";
 import { Suspense } from "react";
 import { Inter } from "next/font/google";
-import Script from "next/script";
 import { TRPCReactProvider } from "~/trpc/react";
 import { Toaster } from "~/components/ui/toaster";
 import { defaultMetadata } from "~/config/metadata";
@@ -67,16 +66,35 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   const gtmId = process.env.NEXT_PUBLIC_GA_ID!;
+  // Only fire analytics on the production Vercel deployment. VERCEL_ENV is a
+  // server-only deploy constant ("production" | "preview" | "development") that
+  // is undefined locally, so localhost admin work (which talks to the remote
+  // prod DB) and preview deploys stop polluting the production GA4 property.
+  // Do NOT gate on NODE_ENV — it is pinned to "production" in .env.local.
+  const analyticsEnabled = process.env.VERCEL_ENV === "production";
 
   return (
     <html lang="en" className={`${inter.variable}`}>
       <body className="bg-darkpurple">
-        <Script
-          id="consent-defaults"
-          strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{ __html: consentDefaultsScript }}
-        />
-        <GoogleTagManager gtmId={gtmId} />
+        {analyticsEnabled && (
+          <>
+            {/*
+              DO NOT convert this to next/script `beforeInteractive`. That path
+              routes the inline script through the runtime __next_s injection
+              queue / <head>, which crashes Safari with HierarchyRequestError
+              (blank page) under Next 16 streaming metadata + cacheComponents
+              (vercel/next.js#43383). React 19 does not hoist inline (non-src)
+              scripts, so this plain <script> is emitted inline in <body> and
+              runs during HTML parse — before GTM's afterInteractive gtm.js —
+              preserving consent-before-GTM ordering. See #86/#89; #108 reverted
+              this and is what this restores.
+            */}
+            <script
+              dangerouslySetInnerHTML={{ __html: consentDefaultsScript }}
+            />
+            <GoogleTagManager gtmId={gtmId} />
+          </>
+        )}
 
         <TRPCReactProvider>
           {children}
