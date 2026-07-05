@@ -121,7 +121,7 @@ export async function POST(req: Request) {
             ref: status.jobStatus.blob.ref as unknown as { $link: string },
             mimeType: status.jobStatus.blob.mimeType,
             size: status.jobStatus.blob.size,
-          } as VideoBlob;
+          };
         }
       }
 

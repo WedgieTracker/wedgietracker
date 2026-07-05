@@ -158,7 +158,7 @@ export function Wedgie({
               className={`absolute top-1/2 right-2 -translate-y-1/2 overflow-visible ${variant === "small" ? "w-20 md:w-20" : "w-20 md:w-24"}`}
             >
               <CourtPositionDiagram
-                position={wedgie.position as { x: number; y: number }}
+                position={wedgie.position}
                 dotClassName="h-2 w-2 md:h-3 md:w-3"
               />
             </div>

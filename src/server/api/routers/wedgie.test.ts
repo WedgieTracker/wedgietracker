@@ -88,14 +88,14 @@ function authedCaller() {
         user: { id: "u1", email: "admin@test" },
         expires: "2099-01-01",
       }),
-  } as never);
+  });
 }
 
 function anonCaller() {
   return createCaller({
     db: fakeDb as never,
     getSession: () => Promise.resolve(null),
-  } as never);
+  });
 }
 
 const sampleInput = {
