@@ -30,9 +30,7 @@ function initialFormData(
     number: wedgie?.number ?? 0,
     seasonName: wedgie?.seasonName ?? currentSeason ?? "",
     wedgieDate: wedgie?.wedgieDate ? new Date(wedgie.wedgieDate) : new Date(),
-    position: wedgie?.position
-      ? (wedgie.position as { x: number; y: number })
-      : null,
+    position: wedgie?.position ?? null,
     videoUrl: {
       cloudinary: video.cloudinary ?? "",
       youtube: video.youtube ?? "",

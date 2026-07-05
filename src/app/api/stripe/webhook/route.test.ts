@@ -232,7 +232,7 @@ describe("POST /api/stripe/webhook", () => {
       const session = tshirtSession({
         customer_details: null,
         collected_information: null,
-      } as unknown as Partial<Stripe.Checkout.Session>);
+      });
       constructEvent.mockReturnValue(checkoutCompletedEvent(session));
 
       const res = await POST(makeRequest());

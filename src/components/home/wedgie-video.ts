@@ -1,10 +1,7 @@
 import type { VideoUrls } from "~/types/wedgie";
 
 export type ActiveVideo =
-  | "youtube"
-  | "cloudinary"
-  | "youtubeNoDunks"
-  | "instagram";
+  "youtube" | "cloudinary" | "youtubeNoDunks" | "instagram";
 
 export function pickInitialVideo(
   videoUrl: VideoUrls | null,

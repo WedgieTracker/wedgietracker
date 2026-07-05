@@ -46,7 +46,7 @@ describe("WedgieModal", () => {
     setClipboard(() => Promise.resolve());
     Object.defineProperty(window, "location", {
       writable: true,
-      value: { origin: "https://wedgietracker.test" } as Location,
+      value: { origin: "https://wedgietracker.test" },
     });
   });
 
