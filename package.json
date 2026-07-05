@@ -76,7 +76,7 @@
     "@testing-library/user-event": "^14.6.1",
     "@types/archiver": "^8.0.0",
     "@types/mailchimp__mailchimp_marketing": "^3.0.22",
-    "@types/node": "^25.9.2",
+    "@types/node": "^26.0.1",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@typescript/native-preview": "^7.0.0-dev.20260705.1",
