@@ -72,9 +72,7 @@ export function WedgieInfoPanel({ wedgie }: WedgieInfoPanelProps) {
       </div>
 
       <div className="absolute right-1.5 bottom-16 w-full max-w-[80px] sm:relative sm:right-auto sm:bottom-auto sm:max-w-[150px]">
-        <CourtPositionDiagram
-          position={wedgie.position as { x: number; y: number }}
-        />
+        <CourtPositionDiagram position={wedgie.position} />
       </div>
     </div>
   );
