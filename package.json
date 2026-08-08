@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "next build",
-    "check": "oxlint && tsgo --noEmit && vitest run",
+    "check": "oxlint && tsc --noEmit && vitest run",
     "db:dump": "node --env-file=.env scripts/dump-db.mjs",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
@@ -21,7 +21,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "typecheck": "tsgo --noEmit",
+    "typecheck": "tsc --noEmit",
     "prepare": "lefthook install"
   },
   "dependencies": {
@@ -79,7 +79,6 @@
     "@types/node": "^26.1.2",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
-    "@typescript/native-preview": "^7.0.0-dev.20260707.2",
     "canvas": "^3.2.3",
     "drizzle-kit": "^0.31.10",
     "jsdom": "^30.0.1",

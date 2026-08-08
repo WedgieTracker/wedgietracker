@@ -15,8 +15,7 @@ A modern web application for tracking basketball wedgies.
 - [Turso](https://turso.tech) - SQLite database
 - [Tailwind CSS](https://tailwindcss.com) 4 - Styling
 - [tRPC](https://trpc.io) 11 - Type-safe API
-- [TypeScript](https://www.typescriptlang.org/) 6 - Type safety
-- [tsgo](https://github.com/nicolo-ribaudo/tc39-proposal-structs) (TypeScript native) - Fast type checking
+- [TypeScript](https://www.typescriptlang.org/) 7 - Type safety, native (Go) compiler
 - [oxlint](https://oxc.rs) - Fast linting (Rust-based)
 - [Vitest](https://vitest.dev) - Testing
 - [Vercel](https://vercel.com) - Deployment
@@ -119,13 +118,13 @@ pnpm dev
 | `pnpm start`         | Start production server               |
 | `pnpm lint`          | Run oxlint                            |
 | `pnpm lint:fix`      | Run oxlint with auto-fix              |
-| `pnpm typecheck`     | Run type checking with tsgo (native)  |
+| `pnpm typecheck`     | Run type checking with tsc (native)   |
 | `pnpm format:check`  | Check Prettier formatting             |
 | `pnpm format:write`  | Fix Prettier formatting               |
 | `pnpm test`          | Run tests once                        |
 | `pnpm test:watch`    | Run tests in watch mode               |
 | `pnpm test:coverage` | Run tests with coverage               |
-| `pnpm check`         | Run oxlint + tsgo + tests             |
+| `pnpm check`         | Run oxlint + tsc + tests              |
 | `pnpm db:push`       | Push schema changes to database       |
 | `pnpm db:generate`   | Generate database migrations          |
 | `pnpm db:studio`     | Open Drizzle Studio                   |
