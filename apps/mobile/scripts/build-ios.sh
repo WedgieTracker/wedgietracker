@@ -2,11 +2,13 @@
 #
 # Build the iOS app on EAS.
 #
-# Usage:  ./scripts/build-ios.sh [profile]     (default: production)
+# Usage:  ./scripts/build-ios.sh [profile] [extra eas flags...]
+#         profile defaults to production.
 #
 set -euo pipefail
 
 PROFILE="${1:-production}"
+[ $# -gt 0 ] && shift
 
 # shellcheck source=scripts/asc-env.sh
 source "$(dirname "$0")/asc-env.sh"
@@ -16,4 +18,4 @@ source "$(dirname "$0")/asc-env.sh"
 cd "$(dirname "$0")/.."
 
 echo "Building profile '$PROFILE' for team $EXPO_APPLE_TEAM_ID using ASC key $EXPO_ASC_KEY_ID"
-exec eas build --platform ios --profile "$PROFILE"
+exec eas build --platform ios --profile "$PROFILE" "$@"
