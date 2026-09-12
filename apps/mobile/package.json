@@ -4,13 +4,15 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start": "expo start",
-    "ios": "expo start --ios",
     "android": "expo start --android",
-    "web": "expo start --web",
+    "build:ios": "eas build --platform ios --profile production",
+    "check": "oxlint && pnpm run typecheck",
+    "ios": "expo start --ios",
     "lint": "oxlint",
+    "start": "expo start",
+    "submit:ios": "eas submit --platform ios",
     "typecheck": "pnpm --filter @wedgietracker/web types:build && tsgo --noEmit",
-    "check": "oxlint && pnpm run typecheck"
+    "web": "expo start --web"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.101.2",
