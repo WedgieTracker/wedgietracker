@@ -44,10 +44,11 @@ export function SectionLabel({ children }: { children: string }) {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.darkpurple },
+  // The site's inner pages sit on the darker column colour.
+  safe: { flex: 1, backgroundColor: colors.darkpurpleDark },
   content: { padding: space.lg, paddingBottom: space.xxl * 2 },
   header: { marginBottom: space.xl },
-  title: { ...type.title, color: colors.white },
+  title: { ...type.title, color: colors.yellow },
   subtitle: { ...type.body, color: colors.muted, marginTop: space.xs },
   sectionLabel: {
     ...type.section,

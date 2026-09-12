@@ -1,22 +1,27 @@
-import { RefreshControl, StyleSheet, Text, View } from "react-native";
+import { RefreshControl, StyleSheet, View } from "react-native";
 
-import { Screen, SectionLabel } from "@/components/Screen";
+import { Screen } from "@/components/Screen";
+import { StandingsList } from "@/components/StandingsList";
 import { Empty, ErrorState, Loading } from "@/components/States";
 import { api } from "@/lib/api";
-import { colors, radius, space, type } from "@/lib/theme";
+import { colors, radius, space } from "@/lib/theme";
 
+/**
+ * The standings card from the home page, given the whole screen - PLAYERS and
+ * TEAMS side by side, same 3/2 split as apps/web/src/components/home/Standings.tsx.
+ */
 export default function StandingsScreen() {
   const standings = api.wedgie.getTopStandings.useQuery();
 
   return (
     <Screen
-      title="Standings"
+      title="STANDINGS"
       subtitle="Current season leaders"
       refreshControl={
         <RefreshControl
           refreshing={standings.isRefetching}
           onRefresh={() => void standings.refetch()}
-          tintColor="#EAFF00"
+          tintColor={colors.yellow}
         />
       }
     >
@@ -26,74 +31,31 @@ export default function StandingsScreen() {
       ) : null}
 
       {standings.data ? (
-        <>
-          <SectionLabel>Top players</SectionLabel>
-          {standings.data.players.length === 0 ? (
-            <Empty label="No players ranked yet." />
-          ) : (
-            standings.data.players.map((player, index) => (
-              <Row
-                key={player.name ?? index}
-                rank={index + 1}
-                name={player.name ?? "Unknown"}
-                count={player.count}
-              />
-            ))
-          )}
-
-          <SectionLabel>Top teams</SectionLabel>
-          {standings.data.teams.length === 0 ? (
-            <Empty label="No teams ranked yet." />
-          ) : (
-            standings.data.teams.map((team, index) => (
-              <Row
-                key={team.name ?? index}
-                rank={index + 1}
-                name={team.name ?? "Unknown"}
-                count={team.count}
-              />
-            ))
-          )}
-        </>
+        standings.data.hasWedgiesThisSeason ? (
+          <View style={styles.card}>
+            <View style={styles.players}>
+              <StandingsList title="PLAYERS" items={standings.data.players} />
+            </View>
+            <View style={styles.teams}>
+              <StandingsList title="TEAMS" items={standings.data.teams} />
+            </View>
+          </View>
+        ) : (
+          <Empty label="No wedgies yet this season." />
+        )
       ) : null}
     </Screen>
   );
 }
 
-function Row({
-  rank,
-  name,
-  count,
-}: {
-  rank: number;
-  name: string;
-  count: number;
-}) {
-  return (
-    <View style={styles.row}>
-      <Text style={styles.rank}>{rank}</Text>
-      <Text style={styles.name} numberOfLines={1}>
-        {name}
-      </Text>
-      <Text style={styles.count}>{count}</Text>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
-  row: {
+  card: {
     flexDirection: "row",
-    alignItems: "center",
-    gap: space.md,
-    paddingVertical: space.md,
-    paddingHorizontal: space.lg,
-    marginBottom: space.sm,
-    borderRadius: radius.md,
-    backgroundColor: colors.darkpurpleLight,
-    borderWidth: 1,
-    borderColor: colors.hairline,
+    gap: space.xl,
+    backgroundColor: colors.rowIdle,
+    borderRadius: radius.sm,
+    padding: space.md,
   },
-  rank: { ...type.label, width: 22, color: colors.faint },
-  name: { flex: 1, fontSize: 16, fontWeight: "800", color: colors.white },
-  count: { fontSize: 18, fontWeight: "900", color: colors.yellow },
+  players: { flex: 3 },
+  teams: { flex: 2 },
 });

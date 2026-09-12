@@ -12,7 +12,7 @@ export default function StatsScreen() {
 
   return (
     <Screen
-      title="Stats"
+      title="STATS"
       subtitle="Season totals and pace"
       refreshControl={
         <RefreshControl

@@ -3,14 +3,14 @@ import { RefreshControl, StyleSheet, Text, View } from "react-native";
 import { Screen } from "@/components/Screen";
 import { Empty, ErrorState, Loading } from "@/components/States";
 import { api } from "@/lib/api";
-import { colors, radius, space, type } from "@/lib/theme";
+import { colors, fonts, radius, space, type } from "@/lib/theme";
 
 export default function SeasonsScreen() {
   const seasons = api.season.getAllWithStats.useQuery();
 
   return (
     <Screen
-      title="Seasons"
+      title="SEASONS"
       subtitle="Every season on record"
       refreshControl={
         <RefreshControl
@@ -57,9 +57,7 @@ const styles = StyleSheet.create({
     padding: space.lg,
     marginBottom: space.md,
     borderRadius: radius.lg,
-    backgroundColor: colors.darkpurpleLight,
-    borderWidth: 1,
-    borderColor: colors.hairline,
+    backgroundColor: colors.rowIdle,
     gap: space.md,
   },
   cardHeader: {
@@ -67,10 +65,10 @@ const styles = StyleSheet.create({
     alignItems: "baseline",
     justifyContent: "space-between",
   },
-  seasonName: { fontSize: 20, fontWeight: "900", color: colors.white },
+  seasonName: { ...type.title, fontSize: 22, color: colors.white },
   total: { ...type.stat, color: colors.yellow },
   list: { gap: space.xs },
   listLabel: { ...type.label, fontSize: 10, color: colors.faint },
   listItem: { ...type.body, color: colors.muted },
-  listCount: { fontWeight: "900", color: colors.pink },
+  listCount: { fontFamily: fonts.black, color: colors.pink },
 });

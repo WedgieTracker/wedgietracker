@@ -52,7 +52,9 @@ export default function WedgieDetailScreen() {
       <View style={styles.metaBlock}>
         <Meta label="Season" value={wedgie.seasonName} />
         <Meta label="Date" value={formatDate(wedgie.wedgieDate)} />
-        {wedgie.gameName ? <Meta label="Game" value={wedgie.gameName} /> : null}
+        {wedgie.gameName ? (
+          <Meta label="Game" value={formatGameName(wedgie.gameName)} />
+        ) : null}
         {wedgie.types.length > 0 ? (
           <Meta
             label="Types"
@@ -71,6 +73,14 @@ function Meta({ label, value }: { label: string; value: string }) {
       <Text style={styles.metaValue}>{value}</Text>
     </View>
   );
+}
+
+/**
+ * Game names are stored as "AWAY @ HOME - <ISO timestamp>". The Date row above
+ * already shows the date, so drop the timestamp and keep the matchup.
+ */
+function formatGameName(value: string): string {
+  return value.replace(/\s*-\s*\d{4}-\d{2}-\d{2}T[\d:.]+Z?$/, "").trim();
 }
 
 function formatDate(value: string): string {
