@@ -58,7 +58,9 @@ export default function SeasonsScreen() {
           />
         }
       >
-        {seasons.error ? <ErrorState message={seasons.error.message} /> : null}
+        {seasons.error ? (
+          <ErrorState onRetry={() => void seasons.refetch()} />
+        ) : null}
         {seasons.data && withWedgies.length === 0 ? (
           <Empty label="No seasons with wedgies yet." />
         ) : null}

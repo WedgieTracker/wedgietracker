@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
 import { Loader } from "@/components/Loader";
+import { PillButton } from "@/components/PillButton";
 import { colors, radius, space, type } from "@/lib/theme";
 
 export function Loading({ label = "Loading" }: { label?: string }) {
@@ -36,12 +37,27 @@ export function ScreenLoading() {
 /** Long enough to swallow a cached or quick response, short enough to feel prompt. */
 const LOADER_DELAY_MS = 250;
 
-export function ErrorState({ message }: { message: string }) {
+/**
+ * What a failed load says. The raw error goes to the crash reporter, not the
+ * screen: "fetch failed: UnexpectedException" means nothing to a person, and
+ * "pull down to retry" did nothing on screens that cannot be pulled.
+ */
+export function ErrorState({
+  message = "Check your connection and try again.",
+  onRetry,
+}: {
+  message?: string;
+  onRetry?: () => void;
+}) {
   return (
     <View style={styles.error}>
       <Text style={styles.errorTitle}>Could not load</Text>
       <Text style={styles.muted}>{message}</Text>
-      <Text style={styles.hint}>Pull down to retry.</Text>
+      {onRetry ? (
+        <View style={styles.retry}>
+          <PillButton label="RETRY" onPress={onRetry} />
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -79,5 +95,5 @@ const styles = StyleSheet.create({
     gap: space.xs,
   },
   errorTitle: { ...type.label, color: colors.pink },
-  hint: { ...type.label, color: colors.faint, marginTop: space.xs },
+  retry: { marginTop: space.sm, alignItems: "flex-start" },
 });

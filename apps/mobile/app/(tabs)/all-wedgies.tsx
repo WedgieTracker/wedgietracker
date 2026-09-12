@@ -246,8 +246,14 @@ export default function AllWedgiesScreen() {
               ) : null}
             </View>
 
-            {error ? <ErrorState message={error.message} /> : null}
-            {wedgies.length === 0 ? (
+            {/* A failed load is not an empty result, so never show both. */}
+            {error ? (
+              <ErrorState
+                onRetry={() =>
+                  void (season ? bySeason.refetch() : all.refetch())
+                }
+              />
+            ) : wedgies.length === 0 ? (
               <Empty label="No wedgies match those filters." />
             ) : null}
           </View>

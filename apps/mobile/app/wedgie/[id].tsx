@@ -56,7 +56,7 @@ export default function WedgieDetailScreen() {
   if (all.error) {
     return (
       <View style={styles.padded}>
-        <ErrorState message={all.error.message} />
+        <ErrorState onRetry={() => void all.refetch()} />
       </View>
     );
   }

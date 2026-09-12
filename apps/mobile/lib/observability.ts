@@ -142,7 +142,12 @@ export const posthog = POSTHOG_KEY
     })
   : undefined;
 
-posthog?.register({ app: "wedgietracker" });
+posthog?.register({
+  app: "wedgietracker",
+  // PostHog otherwise resolves every event's IP to a city. That is location
+  // data the App Privacy label does not declare and the app has no use for.
+  $geoip_disable: true,
+});
 
 /**
  * Four events, deliberately. Screen views arrive as `$screen` already, so

@@ -9,8 +9,6 @@ import type { ActiveVideo } from "@wedgietracker/core/utils/wedgieVideo";
  * Port of apps/web/src/components/home/WedgieVideoTabs.tsx - switch between the
  * broadcast clip and the NoDunks cut.
  *
- * The broadcast tab resolves to the Cloudinary mp4 when there is one, since
- * that plays in the native player rather than a WebView.
  */
 export function WedgieVideoTabs({
   videoUrl,
@@ -37,7 +35,7 @@ export function WedgieVideoTabs({
     <View style={styles.tabs}>
       {hasBroadcast ? (
         <Tab
-          label="NBA Broadcast"
+          label="Clip"
           active={broadcastActive}
           onPress={() => switchTo("youtube")}
         />

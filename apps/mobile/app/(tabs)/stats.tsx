@@ -44,11 +44,16 @@ export default function StatsScreen() {
       >
         {nerd.error ? (
           <View style={styles.padded}>
-            <ErrorState message={nerd.error.message} />
+            <ErrorState onRetry={() => void nerd.refetch()} />
           </View>
         ) : null}
 
         {nerd.data ? <NerdContent stats={nerd.data} /> : null}
+
+        <Text style={styles.disclaimer} allowFontScaling={false}>
+          WedgieTracker is an independent fan project, not affiliated with or
+          endorsed by the NBA or its teams.
+        </Text>
       </ScrollView>
     </SafeAreaView>
   );
@@ -325,6 +330,15 @@ function Chip({ label }: { label: string }) {
 }
 
 const styles = StyleSheet.create({
+  disclaimer: {
+    fontFamily: fonts.bold,
+    color: colors.muted,
+    fontSize: 11,
+    lineHeight: 15,
+    textAlign: "center",
+    paddingHorizontal: space.xl,
+    paddingTop: space.lg,
+  },
   safe: { flex: 1, backgroundColor: colors.darkpurple },
   content: {},
   padded: { padding: space.lg },

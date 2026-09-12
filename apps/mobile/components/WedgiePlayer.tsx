@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from "react-native";
+import { Linking, StyleSheet, Text, View } from "react-native";
 import { WebView } from "react-native-webview";
 
 import { getApiBaseUrl } from "@/lib/api";
@@ -97,6 +97,19 @@ function EmbeddedVideo({ src }: { src: string }) {
         // The iframe fills the frame, so let the surrounding ScrollView keep
         // control of vertical drags.
         scrollEnabled={false}
+        // The player's title, logo and "Watch on YouTube" navigate the frame to
+        // youtube.com. Left alone that loads the whole site inside a 16:9
+        // box; hand those links to iOS instead, which opens the YouTube app
+        // or Safari. The document itself and the embed load as normal.
+        onOpenWindow={({ nativeEvent }) =>
+          void Linking.openURL(nativeEvent.targetUrl)
+        }
+        onShouldStartLoadWithRequest={(request) => {
+          if (request.isTopFrame === false) return true;
+          if (isEmbedDocument(request.url, origin)) return true;
+          void Linking.openURL(request.url);
+          return false;
+        }}
         // YouTube reports its own 150/152/153 inside the iframe, so these only
         // catch the WebView failing outright. Still the difference between a
         // black frame and knowing why.
@@ -111,6 +124,17 @@ function EmbeddedVideo({ src }: { src: string }) {
         }
       />
     </View>
+  );
+}
+
+/** The HTML shell and the player itself; anything else leaves the app. */
+function isEmbedDocument(url: string, origin: string): boolean {
+  return (
+    url === "about:blank" ||
+    url.startsWith("data:") ||
+    url.startsWith(origin) ||
+    url.startsWith("https://www.youtube.com/embed/") ||
+    url.startsWith("https://www.youtube-nocookie.com/embed/")
   );
 }
 
