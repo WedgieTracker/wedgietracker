@@ -74,9 +74,9 @@ export default function SupportPage() {
                 Who runs WedgieTracker
               </h2>
               <p className="mb-4">
-                WedgieTracker is an independent fan project, inspired by No
-                Dunks. It is not affiliated with, endorsed by or sponsored by
-                the NBA or its teams.
+                WedgieTracker is an independent fan project. It is not
+                affiliated with, endorsed by or sponsored by the NBA or its
+                teams.
               </p>
               <p>
                 The WedgieTracker iOS app is published by ZOKE.GG LTD, a company

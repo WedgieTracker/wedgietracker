@@ -39,29 +39,16 @@ A basketball gets stuck between the rim and the backboard more often than you wo
 ```
 A wedgie is what happens when a basketball gets stuck between the rim and the backboard. It is rare, it is stupid, and somebody had to count them.
 
-WedgieTracker has been counting since the 2014/15 season: 621 NBA wedgies across twelve seasons, plus a handful of historic gems. Who did it, which teams were on the floor, where on the court it happened, and a clip of the moment where one exists.
+WedgieTracker has counted every NBA wedgie since the 2014/15 season, plus a handful of historic gems. Each one has the player, the game, the spot on the court and the clip.
 
-WATCH THE WEDGIES
-Newest first, opening on the current season, with every season a tap away. Filter by season or by type, or search for a player or a team.
-
-THE COUNT
-The total for the current season and how it compares to the all-time record. During the season, the pace it is on against the average of the past 11 seasons.
-
-STANDINGS
-Which players have the most wedgies in a season, and which teams. Tap any of them to see their wedgies.
-
-STATS FOR NERDS
-One wedgie every how many possessions? How many field goal attempts? How many minutes of basketball? The numbers behind the count.
-
-SEASONS HISTORY
-Twelve seasons of totals and leaders, all the way back to 2014/15.
+Browse the wedgies season by season, or search for a player or a team. Follow this season's count against the record, and see who leads the standings and how every past season compares.
 
 No account. No sign-up. Open it and the count is there.
 
-Inspired by No Dunks, who often feature our clips. WedgieTracker is an independent fan project, not affiliated with or endorsed by the NBA or its teams.
+WedgieTracker is an independent fan project, not affiliated with or endorsed by the NBA or its teams.
 ```
 
-[1,260/4000]
+[667/4000]
 
 ## Keywords, 100 char limit
 
@@ -183,7 +170,7 @@ Worth being able to defend:
 YouTube sets its own cookies inside its embedded player. That is not data we
 collect, and the privacy policy says so.
 
-## App Review notes, 2,569 / 4,000 chars
+## App Review notes, 2,354 / 4,000 chars
 
 Paste into App Store Connect under the version, "App Review Information" then
 "Notes". **They do not carry over between versions**, so copy them forward
@@ -196,7 +183,7 @@ the question a reviewer is going to ask before they ask it.
 ```
 WHAT THE APP IS
 
-A "wedgie" in basketball is when the ball wedges between the rim and the backboard and stays there. The name refers only to that event. WedgieTracker counts every NBA wedgie since 2014/15: 621 across twelve seasons, plus 14 historic entries under "GEMS".
+A "wedgie" in basketball is when the ball wedges between the rim and the backboard and stays there. The name refers only to that event. WedgieTracker counts every NBA wedgie since 2014/15, plus a handful of historic entries under "GEMS".
 
 Nothing is gated. No accounts, sign-in, purchases or permission prompts. Every feature is available on first launch, so no demo account is needed.
 
@@ -216,7 +203,7 @@ If there is no connection, screens show "Could not load" with a Retry button.
 
 ABOUT THE VIDEO
 
-Clips play in YouTube's standard embedded player. The app does not download, cache or store video. By uploader: 359 are short excerpts on WedgieTracker's own YouTube channel, 216 are on the official NBA channel and 54 on the No Dunks channel. 122 wedgies also have a No Dunks cut in a second tab. WedgieTracker is an independent fan project, not affiliated with or endorsed by the NBA or its teams, which the app states at the foot of the Stats tab and the support page repeats.
+Clips play in YouTube's standard embedded player. The app does not download, cache or store video. WedgieTracker is an independent fan project, not affiliated with or endorsed by the NBA or its teams, which the app states at the foot of the Stats tab and the support page repeats.
 
 WEB ACCESS
 
