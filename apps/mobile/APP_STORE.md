@@ -39,41 +39,41 @@ A basketball gets stuck between the rim and the backboard more often than you wo
 ```
 A wedgie is what happens when a basketball gets stuck between the rim and the backboard. It is rare, it is stupid, and somebody had to count them.
 
-WedgieTracker has been counting since the 2014/15 season. Every wedgie, who did it, which teams were on the floor, where on the court it happened, and the video to prove it.
+WedgieTracker has been counting since the 2014/15 season: 621 NBA wedgies across twelve seasons, plus a handful of historic gems. Who did it, which teams were on the floor, where on the court it happened, and a clip of the moment where one exists.
 
-WATCH EVERY WEDGIE
-Every wedgie ever recorded, newest first, with the clip attached. Filter by season, by type, or search for a player or a team.
+WATCH THE WEDGIES
+Newest first, opening on the current season, with every season a tap away. Filter by season or by type, or search for a player or a team.
 
-THE COUNT, LIVE
-The running total for the current season, the pace it is on, and how that compares to the all-time record. When the season goes past the record, you will know.
+THE COUNT
+The total for the current season and how it compares to the all-time record. During the season, the pace it is on against the average of the past 11 seasons.
 
 STANDINGS
-Which players have the most wedgies this season, and which teams. Tap any of them to see their wedgies.
+Which players have the most wedgies in a season, and which teams. Tap any of them to see their wedgies.
 
 STATS FOR NERDS
 One wedgie every how many possessions? How many field goal attempts? How many minutes of basketball? The numbers behind the count.
 
 SEASONS HISTORY
-Twelve seasons of totals, leaders and records, all the way back to 2014/15.
+Twelve seasons of totals and leaders, all the way back to 2014/15.
 
 No account. No sign-up. Open it and the count is there.
 
-Inspired by NoDunks.
+Inspired by No Dunks, who often feature our clips. WedgieTracker is an independent fan project, not affiliated with or endorsed by the NBA or its teams.
 ```
 
-[~1,050/4000]
+[1,260/4000]
 
 ## Keywords, 100 char limit
 
-Comma separated, no spaces after commas. Deliberately avoids repeating words
-already in the app name and subtitle, because Apple indexes those separately
-and repeating them wastes the allowance.
+Comma separated, no spaces after commas. Avoids words already in the name and
+subtitle, which Apple indexes separately. No third-party brands: "nodunks" was
+removed under 2.3.7, and "boxscore" named a feature the app does not have.
 
 ```
-basketball,stats,nodunks,rim,backboard,highlights,hoops,standings,boxscore,bball,dunk,swish
+basketball,stats,rim,backboard,highlights,hoops,standings,bball,dunk,blooper,fails,clips,record
 ```
 
-[91/100]
+[95/100]
 
 ## App Store Connect record
 
@@ -100,7 +100,7 @@ needed the login.
 
 | Field          | Value                                   |
 | -------------- | --------------------------------------- |
-| Support URL    | `https://www.wedgietracker.com`         |
+| Support URL    | `https://www.wedgietracker.com/support` |
 | Marketing URL  | `https://www.wedgietracker.com`         |
 | Privacy Policy | `https://www.wedgietracker.com/privacy` |
 
@@ -108,74 +108,82 @@ needed the login.
 
 **4+.** No objectionable content: basketball clips and numbers.
 
-One question in the rating questionnaire needs thought: **Unrestricted Web
-Access**. The app embeds YouTube clips in a WebView. It only ever loads
-specific embed URLs, not a browser, so the honest answer is **No**, but the
-YouTube player's own "Watch on YouTube" control can hand off to the YouTube app
-or Safari. If review pushes back, that is the reason why.
+Answer **No** to Unrestricted Web Access. The app has no browser and no address
+bar; its only web view plays one YouTube embed. Links inside YouTube's player
+(its logo, the video title, "Watch on YouTube") open in the YouTube app or
+Safari, outside WedgieTracker, and the app never loads any other page itself.
 
-## Video provenance, and why the app prefers YouTube
+## Video provenance
 
-The clips are NBA broadcast footage. The website plays whichever source it has;
-the app originally preferred our own Cloudinary copy because it plays in the
-native player rather than a WebView.
+Every clip plays in YouTube's standard embedded player. The app does not
+download, cache or store video, and has no other playback path.
 
-**That preference was reversed on 12 Sep 2026.** The app now uses the same
-`pickInitialVideo` ordering as the site, which puts YouTube first, so playback
-happens in the rights holder's own embed rather than serving a re-hosted copy.
-Measured against all 635 wedgies:
+Primary clip for each of the 635 entries, by uploader, verified with YouTube
+oEmbed on 12 Sep 2026:
 
-| Source now used   | Wedgies     |
-| ----------------- | ----------- |
-| YouTube           | 359 (56.5%) |
-| YouTube (NoDunks) | 273 (43.0%) |
-| No video shown    | 3 (0.5%)    |
+| Uploader                    | Entries |
+| --------------------------- | ------- |
+| WedgieTracker (our channel) | 359     |
+| NBA (official channel)      | 216     |
+| No Dunks                    | 54      |
+| Removed from YouTube        | 3       |
+| No clip                     | 3       |
 
-**The app has no Cloudinary playback path at all.** The three wedgies with no
-YouTube URL show "No video for this wedgie" rather than falling back to our
-own mp4, so there is no route by which the app serves a re-hosted broadcast
-clip. `pickVideoForApp` in `components/WedgiePlayer.tsx` is the website's
-ordering minus Cloudinary, and the broadcast tab resolves to YouTube only.
+122 entries also carry a second cut, shown in a "NoDunks" tab: 119 are No
+Dunks uploads, 1 is the NBA's, and 2 are broken (below).
 
-expo-video was removed with it: nothing in the app plays a file any more, so
-the native player, its custom controls and the dependency all went.
+**The 359 are short excerpts of broadcast footage on our own channel, and we
+hold no licence for them.** That is disclosed to App Review rather than
+described as the rights holder's player. The app and `/support` say it is an
+independent fan project not affiliated with the NBA or its teams,
+and the first tab is labelled "Clip" rather than "NBA Broadcast". If review
+asks for proof of rights, the options are permission from the NBA, or showing
+"No clip" for those 359.
 
-Review treats third-party content in an app more strictly than on a website,
-and leaving every clip in the rights holder's own player is a materially
-better position than distributing our own copy.
+**Broken clips to fix in the site admin before submitting:**
 
-Related: screenshot `03-detail.png` shows broadcast footage inside a marketing
-asset, which is a separate exposure from in-app content and a separate
-decision.
+| id  | Entry       | Field       | Problem                        |
+| --- | ----------- | ----------- | ------------------------------ |
+| 360 | #32 2017/18 | primary     | removed (404)                  |
+| 361 | #33 2017/18 | primary     | removed (404)                  |
+| 409 | #41 2016/17 | primary     | private (403)                  |
+| 227 | #49 2020/21 | NoDunks tab | removed (404)                  |
+| 34  | #21 2023/24 | NoDunks tab | a /clip/ link with no video id |
+
+Replace each with a live URL or clear it. Id 34 already shows "No video" in
+build 12 rather than a broken embed.
 
 ## App Privacy ("Data Collection")
 
-The app reports crashes to Sentry and anonymous usage to PostHog, both hosted
-in the EU. It has no accounts, so nothing it collects is tied to a person.
+Crash reports and anonymous usage, both processed in the EU. No accounts, so
+nothing collected is tied to a person.
 
-Declare three categories, each **Not Linked to You** and **Not Used for
-Tracking**:
+Declare, each **Not Linked to You** and **Not Used for Tracking**:
 
-| Category        | Type                | Purpose           | Source                          |
-| --------------- | ------------------- | ----------------- | ------------------------------- |
-| **Diagnostics** | Crash Data          | App Functionality | Sentry                          |
-| **Usage Data**  | Product Interaction | Analytics         | PostHog                         |
-| **Identifiers** | Device ID           | Analytics         | PostHog's anonymous distinct_id |
+| Category        | Type                  | Purpose                      |
+| --------------- | --------------------- | ---------------------------- |
+| **Diagnostics** | Crash Data            | App Functionality            |
+| **Diagnostics** | Other Diagnostic Data | App Functionality            |
+| **Usage Data**  | Product Interaction   | Analytics                    |
+| **Identifiers** | Device ID             | Analytics, App Functionality |
 
-Three things worth being able to defend if review asks:
+Worth being able to defend:
 
-- **No performance data.** Sentry tracing, profiling and replay are all off,
-  set explicitly in `lib/observability.ts` rather than left to a default, so
-  Crash Data is the whole of the Diagnostics answer.
-- **No IP address.** `sendDefaultPii: false`, so Sentry does not record it.
-- **Device ID is not the IDFA.** PostHog generates a random id on first launch
-  and it never leaves the install. Nothing asks for tracking permission,
-  because nothing tracks.
+- **No location.** Build 12 registers `$geoip_disable` with the analytics
+  provider, which otherwise resolved every event's IP to a city. Builds before
+  12 did collect city-level location, but only on TestFlight.
+- **No IP address stored** by either provider. `sendDefaultPii: false` for the
+  crash reporter; the analytics project stores no `$ip`.
+- **No performance data.** Tracing, profiling and replay are off, set in
+  `lib/observability.ts`.
+- **Device ID is not the IDFA.** A random id made on first launch, plus the
+  crash reporter's own installation id, hence the second purpose. Nothing asks
+  for tracking permission because nothing tracks.
 
-YouTube embeds set their own cookies inside the WebView. That is not data we
-collect, so it does not change the answers, but the privacy policy says so.
+YouTube sets its own cookies inside its embedded player. That is not data we
+collect, and the privacy policy says so.
 
-## App Review notes, 3,175 / 4,000 chars
+## App Review notes, 2,569 / 4,000 chars
 
 Paste into App Store Connect under the version, "App Review Information" then
 "Notes". **They do not carry over between versions**, so copy them forward
@@ -188,112 +196,71 @@ the question a reviewer is going to ask before they ask it.
 ```
 WHAT THE APP IS
 
-A "wedgie" in basketball is when the ball wedges between the rim and the
-backboard and stays there. It is a rare, harmless, slightly absurd event.
-WedgieTracker has counted every one in the NBA since the 2014/15 season: 635
-so far. That is the whole app. The name refers only to the basketball event.
+A "wedgie" in basketball is when the ball wedges between the rim and the backboard and stays there. The name refers only to that event. WedgieTracker counts every NBA wedgie since 2014/15: 621 across twelve seasons, plus 14 historic entries under "GEMS".
 
-Nothing is gated. There are no accounts, no sign-in, no purchases, no
-subscriptions and no permission prompts of any kind. Open the app and every
-feature is available immediately. There is no demo account because there is
-nothing to log in to.
+Nothing is gated. No accounts, sign-in, purchases or permission prompts. Every feature is available on first launch, so no demo account is needed.
 
-HOW TO SEE EVERYTHING, IN ORDER
+HOW TO SEE EVERYTHING
 
-Home. The running count for the current season, with a wave that fills as the
-count rises and passes the all-time record, plus the most recent wedgies.
-"SEASONS HISTORY" at the foot opens twelve seasons of totals.
+Home. The NBA season is over until late October, so Home shows the final 2025/26 total (74, a new record), games played and days since the last wedgie. During the season it shows the live count, the pace and "NEW WEDGIE", as in screenshot 1.
 
-Wedgies tab. All 635, newest first. Filter by season or type, or search for a
-player or a team. "RESET FILTERS" appears once anything is filtered.
+Wedgies tab. Opens on the current season; "All Seasons" is in the Season filter. Filter by type or search a player or team. "RESET FILTERS" appears once anything is filtered.
 
-Tap any row. A sheet opens with the clip, the date, the player, the two teams,
-the type, and a court diagram showing where on the floor it happened. The two
-chevrons top left step to the newer or older wedgie.
+Tap any row. A sheet opens with the clip, details and a court diagram. The chevrons top left step to the newer or older wedgie. Rows marked "NO CLIP" have no video, for example #64 in 2025/26.
 
-Standings tab. Players and teams ranked by count for a chosen season. Tapping
-any name opens that player's or team's wedgies.
+Standings tab. Players and teams by season; tap a name to see their wedgies.
 
-Stats tab. One wedgie every how many possessions, field goal attempts and
-minutes, plus the pace against the record.
+Stats tab. Wedgies per possession, field goal attempt and minute, and Seasons History.
+
+If there is no connection, screens show "Could not load" with a Retry button.
 
 ABOUT THE VIDEO
 
-Every clip plays in YouTube's own embedded player. The app does not host,
-download, cache or redistribute any footage: the embed is the publisher's
-player, and playback, controls and cookies are all YouTube's. Some wedgies
-also have a second cut published by the NoDunks channel, which is why a few
-show two source tabs.
-
-Three of the 635 wedgies have no YouTube source. They deliberately display "No
-video for this wedgie" rather than playing anything else.
+Clips play in YouTube's standard embedded player. The app does not download, cache or store video. By uploader: 359 are short excerpts on WedgieTracker's own YouTube channel, 216 are on the official NBA channel and 54 on the No Dunks channel. 122 wedgies also have a No Dunks cut in a second tab. WedgieTracker is an independent fan project, not affiliated with or endorsed by the NBA or its teams, which the app states at the foot of the Stats tab and the support page repeats.
 
 WEB ACCESS
 
-We have answered "No" to unrestricted web access. The app contains no browser
-and no address bar. The only web content is the YouTube embed described above,
-loaded at a fixed URL per clip. We note for completeness that YouTube's own
-player includes a "Watch on YouTube" control, which can hand off to the
-YouTube app or Safari. That control is YouTube's, not ours.
+Answered "No". There is no browser or address bar; the only web view plays one YouTube embed. Tapping YouTube's logo, the title or "Watch on YouTube" opens the YouTube app or Safari, outside WedgieTracker.
 
 DATA COLLECTION
 
-The App Privacy answers are Diagnostics (Crash Data), Usage Data (Product
-Interaction) and Identifiers (Device ID), all "Not Linked to You" and "Not
-Used for Tracking". Concretely: crash reports, and which screens and filters
-are used. IP address collection is switched off, performance tracing and
-session recording are not enabled, and the identifier is a random value
-generated on the device that is not derived from any hardware identifier.
-There are no accounts, so nothing can be linked to a person. Both providers
-process in the EU.
-
-The privacy policy at https://www.wedgietracker.com/privacy has a section
-describing exactly this.
+App Privacy: Diagnostics, Usage Data and Identifiers, all Not Linked to You and Not Used for Tracking. In practice, crash reports and which screens and filters are used. Neither provider stores IP addresses, location lookup is switched off, and there is no tracing or session recording. The identifier is random and made on the device. Both providers process in the EU. Policy: https://www.wedgietracker.com/privacy
 
 OTHER
 
-iPhone only, portrait only. iPad is not supported and is not declared.
-The app makes HTTPS requests and uses no non-exempt encryption.
-Content is basketball clips and numbers, rated 4+.
-Support and marketing: https://www.wedgietracker.com
+iPhone only, portrait only. No non-exempt encryption. Rated 4+. Support: https://www.wedgietracker.com/support
 ```
 
-Three deliberate inclusions:
+What changed from the first draft, after the readiness review on 12 Sep 2026:
 
-- **What a wedgie is, in the first line.** The word has an unrelated everyday
-  meaning, and a reviewer who reads it that way is starting from the wrong
-  place on a 4+ rating.
-- **That the app hosts no footage.** It is the strongest true statement
-  available about third-party content, and it only became true when the
-  Cloudinary playback path was removed.
-- **The Unrestricted Web Access answer and its caveat.** Volunteering the
-  "Watch on YouTube" hand-off is better than having it found.
-
----
+- The video section now says who uploaded the clips. The first draft called
+  the embed "the rights holder's player", which was false for 359 of them.
+- "Watch on YouTube" is described as opening outside the app, which build 12
+  makes true. Before it, the link loaded youtube.com inside the player.
+- "IP address collection is switched off" was true of the crash reporter
+  only. Build 12 also turns off the analytics provider's location lookup.
+- Home's offseason state is explained, since it does not match screenshot 1
+  until the season starts.
 
 # Still needed before submission
 
-- [x] Privacy policy updated to cover the app. `apps/web/src/app/privacy/page.tsx`
-      now carries a WedgieTracker iOS App section naming both processors.
-      **It has to be deployed before submitting**, since Apple fetches the URL.
-- [x] Screenshots. Five 6.9" tiles in `store/screenshots/ios-6.9/`. No iPad set
-      is needed: `supportsTablet` is false.
-- [x] A build uploaded. Build 4 (0.1.0) delivered 12 Sep 2026, delivery UUID
-      `4d215288-e7b1-4e6c-8157-bfbe346b7481`.
-
-      **Upload with `./scripts/submit-ios.sh`, not `eas submit`.** Every path
-                                                      through eas submit ends at an Apple ID login: it needs one to create the
-                                                      app record, and another to register an ASC API key against the project
-                                                      ("Only user authentication is supported"). That login fails here with
-                                                      "iTunes service key is empty", so the key never gets used. altool takes
-                                                      the key directly and never touches the Developer Portal.
-
-- [x] Export compliance. `ITSAppUsesNonExemptEncryption: false` answers it at
-      upload; the API confirms `usesNonExemptEncryption: false` on build 4, so
-      there is nothing to click.
-- [x] On TestFlight. Build 4 is `processingState: VALID` and internal testers
-      receive every build automatically, so no Beta App Review was involved.
-- [ ] Copyright holder and contact details in App Store Connect
-- [ ] Paste the review notes above into the version in App Store Connect
-- [ ] Deploy the site. The privacy policy change is committed but not live, and
-      Apple fetches that URL during review.
+- [x] Privacy policy covers the app, with retention, deletion and publisher (#140).
+- [x] Support page at `/support` with a contact email (#140). **Merge and
+      deploy #140 first**: Apple fetches both URLs during review.
+- [x] Copyright `2026 ZOKE.GG LTD` and review contact, set via the API.
+- [x] Version 1.0 in `app.json`, matching the App Store Connect version.
+- [ ] Build 12 uploaded, processed and attached to version 1.0. Upload with
+      `./scripts/submit-ios.sh`; `eas submit` cannot use the API key.
+- [ ] Fix the five broken clips in the site admin (Video provenance, above).
+- [ ] Listing: subtitle, description, keywords, promotional text, URLs,
+      category, from the sections above.
+- [ ] Age rating questionnaire, all None or No, giving 4+.
+- [ ] Content rights: contains third-party content.
+- [ ] Pricing Free, and territories.
+- [ ] App Privacy label, published, per the table above. The API cannot do
+      this one; it is done in the App Store Connect UI.
+- [ ] Review notes pasted from the section above.
+- [ ] Screenshots uploaded to the 6.9" set, with `03-detail.png` recaptured
+      without broadcast graphics in the player.
+- [ ] Next version: copy the review notes and promotional text forward, since
+      neither carries over.

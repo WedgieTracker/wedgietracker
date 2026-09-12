@@ -13,12 +13,14 @@ export function pickInitialVideo(
   return null;
 }
 
-function toYoutubeEmbed(url: string): string {
+/** Undefined when no video id can be read, rather than an embed of "undefined". */
+function toYoutubeEmbed(url: string): string | undefined {
   const videoIdMatch =
     /(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?/\s]{11})/.exec(
       url,
     );
   const videoId = videoIdMatch?.[1];
+  if (!videoId) return undefined;
 
   const timeMatch = /[?&](?:t|start)=(\d+)/.exec(url);
   const startTime = timeMatch?.[1] ?? "";

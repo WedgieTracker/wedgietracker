@@ -53,6 +53,10 @@ export default function HomeScreen() {
     void total.refetch();
   };
 
+  // Any of the four failing leaves a hole in the page, not only the hero.
+  const loadError =
+    stats.error ?? latest.error ?? standings.error ?? total.error;
+
   // The hero, the list and the tables arrive from four queries; showing the
   // page before they are all in means three separate reflows.
   if (
@@ -87,9 +91,9 @@ export default function HomeScreen() {
           pointerEvents="none"
         />
 
-        {stats.error ? (
+        {loadError ? (
           <View style={styles.errorWrap}>
-            <ErrorState message={stats.error.message} />
+            <ErrorState onRetry={refetchAll} />
           </View>
         ) : null}
 

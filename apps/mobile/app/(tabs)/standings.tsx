@@ -143,7 +143,7 @@ export default function StandingsScreen() {
       </View>
 
       {standings.error ? (
-        <ErrorState message={standings.error.message} />
+        <ErrorState onRetry={() => void standings.refetch()} />
       ) : null}
 
       {standings.data ? (

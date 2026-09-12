@@ -1,8 +1,10 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { CourtPositionDiagram } from "@/components/CourtPositionDiagram";
+import { pickVideoForApp } from "@/components/WedgiePlayer";
 import { useFluidType } from "@/lib/fluid";
 import { colors, fonts, radius, space } from "@/lib/theme";
+import type { VideoUrls } from "@wedgietracker/core/types/wedgie";
 import { GEMS_EMOJI, isGemsDate } from "@wedgietracker/core/utils/formatDate";
 
 export interface WedgieRowData {
@@ -14,6 +16,7 @@ export interface WedgieRowData {
   wedgieDate: string;
   position: { x: number; y: number };
   types: { name: string }[];
+  videoUrl: VideoUrls | null;
 }
 
 const TILE_WIDTH = 74;
@@ -100,7 +103,7 @@ export function WedgieRow({
             style={[styles.watchText, tight(t.watch)]}
             allowFontScaling={false}
           >
-            WATCH
+            {pickVideoForApp(wedgie.videoUrl) ? "WATCH" : "NO CLIP"}
           </Text>
         </View>
       </View>
