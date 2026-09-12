@@ -15,6 +15,9 @@ set -euo pipefail
 PROFILE="${1:-production}"
 ASC_ENV="$HOME/.private_keys/asc.env"
 APPLE_TEAM_ID="67PVL34QP4"
+# ZOKE.GG LTD, an organization enrollment. The App Store Connect API does not
+# expose the team type, so without this eas-cli asks on every single build.
+APPLE_TEAM_TYPE="COMPANY_OR_ORGANIZATION"
 
 if [ ! -r "$ASC_ENV" ]; then
   echo "error: $ASC_ENV not found." >&2
@@ -43,6 +46,7 @@ export EXPO_ASC_API_KEY_PATH="$ASC_KEY_PATH"
 export EXPO_ASC_KEY_ID="$ASC_KEY_ID"
 export EXPO_ASC_ISSUER_ID="$ASC_ISSUER_ID"
 export EXPO_APPLE_TEAM_ID="$APPLE_TEAM_ID"
+export EXPO_APPLE_TEAM_TYPE="$APPLE_TEAM_TYPE"
 
 # The app is the Expo project, not the workspace root. Running eas from the
 # repo root makes it scaffold a second, wrong project.
