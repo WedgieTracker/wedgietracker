@@ -5,7 +5,8 @@
   "private": true,
   "scripts": {
     "android": "expo start --android",
-    "build:ios": "eas build --platform ios --profile production",
+    "build:ios": "./scripts/build-ios.sh production",
+    "build:preview": "./scripts/build-ios.sh preview",
     "check": "oxlint && pnpm run typecheck",
     "icons": "node scripts/generate-icons.mjs",
     "ios": "expo start --ios",
