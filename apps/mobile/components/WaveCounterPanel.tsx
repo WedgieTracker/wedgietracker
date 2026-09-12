@@ -51,11 +51,6 @@ export function WaveCounterPanel({
     >
       <Wave fillPercentage={fillPercentage} />
 
-      {/* The web celebrates once the wave tops out. */}
-      {fillPercentage >= 100 ? (
-        <Confetti width={box.width} height={box.height} />
-      ) : null}
-
       <View style={[styles.card, { width: clampRem(16, 13, 16, 28, width) }]}>
         <Text style={styles.headline} allowFontScaling={false}>
           {headline}
@@ -74,6 +69,16 @@ export function WaveCounterPanel({
           WEDGIES
         </Text>
       </View>
+
+      {/*
+        The web celebrates once the wave tops out. It renders the confetti
+        behind the translucent counter card; here it sits in front, because at
+        50% opacity the pieces showing through the card read as smudges on the
+        numeral rather than as confetti.
+      */}
+      {fillPercentage >= 100 ? (
+        <Confetti width={box.width} height={box.height} />
+      ) : null}
     </View>
   );
 }

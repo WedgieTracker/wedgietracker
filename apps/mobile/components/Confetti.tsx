@@ -2,6 +2,7 @@ import { useEffect, useMemo } from "react";
 import { StyleSheet, View } from "react-native";
 import Animated, {
   Easing,
+  interpolate,
   useAnimatedStyle,
   useSharedValue,
   withDelay,
@@ -9,15 +10,22 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
-import { confettiColors } from "@/lib/theme";
-
 /**
  * Stand-in for react-confetti, which the web hero fires when the wave tops out.
- * Same palette and circular pieces; the count is lower because each piece is a
- * real view here rather than a canvas draw.
+ *
+ * The web draws flat circles on a canvas with `gravity: 0.05`. Reproducing that
+ * literally on native looked like static speckle, so each piece here also
+ * accelerates as it falls, sways, and tumbles end-over-end.
  */
-const PIECE_COUNT = 70;
-const RADIUS = 4;
+const PIECE_COUNT = 90;
+
+/**
+ * The web palette (Wave.tsx). The two dark values are unreadable as foreground
+ * pieces against a full pink wave, so they are used only for the small, slow,
+ * translucent pieces where they read as depth rather than dirt.
+ */
+const NEAR_COLORS = ["#eaff00", "#ff03ff", "#efff40", "#ffffff"] as const;
+const FAR_COLORS = ["#542299", "#180138"] as const;
 
 interface Piece {
   key: number;
@@ -25,23 +33,37 @@ interface Piece {
   color: string;
   delay: number;
   duration: number;
-  drift: number;
   size: number;
+  sway: number;
+  swayFreq: number;
+  phase: number;
+  spin: number;
+  opacity: number;
 }
 
 export function Confetti({ width, height }: { width: number; height: number }) {
   const pieces = useMemo<Piece[]>(() => {
-    // Deterministic enough; regenerated only when the box resizes.
-    return Array.from({ length: PIECE_COUNT }, (_, i) => ({
-      key: i,
-      x: Math.random() * width,
-      color: confettiColors[i % confettiColors.length] ?? "#eaff00",
-      delay: Math.random() * 4000,
-      // The web uses gravity 0.05, i.e. a slow drift downward.
-      duration: 6000 + Math.random() * 5000,
-      drift: (Math.random() - 0.5) * 80,
-      size: RADIUS * 2 * (0.7 + Math.random() * 0.6),
-    }));
+    return Array.from({ length: PIECE_COUNT }, (_, i) => {
+      // 0 = far (small, slow, dim), 1 = near (large, fast, bright)
+      const depth = Math.random();
+      const near = depth > 0.3;
+      const palette = near ? NEAR_COLORS : FAR_COLORS;
+
+      return {
+        key: i,
+        x: Math.random() * width,
+        color: palette[i % palette.length] ?? "#eaff00",
+        // Spread starts across a full cycle so nothing resets in unison.
+        delay: Math.random() * 7000,
+        duration: 9000 - depth * 4500,
+        size: 4 + depth * 6,
+        sway: 10 + depth * 45,
+        swayFreq: 0.6 + Math.random() * 1.4,
+        phase: Math.random() * Math.PI * 2,
+        spin: 1 + Math.random() * 3,
+        opacity: near ? 0.75 + depth * 0.25 : 0.35 + depth * 0.5,
+      };
+    });
   }, [width]);
 
   if (width <= 0 || height <= 0) return null;
@@ -58,9 +80,7 @@ export function Confetti({ width, height }: { width: number; height: number }) {
 function Flake({ piece, height }: { piece: Piece; height: number }) {
   const progress = useSharedValue(0);
 
-  // Start immediately; the shared value drives both fall and drift.
-  // Must start from an effect: Reanimated forbids writing a shared value
-  // during render.
+  // Reanimated forbids writing a shared value during render.
   useEffect(() => {
     progress.value = withDelay(
       piece.delay,
@@ -72,13 +92,29 @@ function Flake({ piece, height }: { piece: Piece; height: number }) {
     );
   }, [piece.delay, piece.duration, progress]);
 
-  const style = useAnimatedStyle(() => ({
-    transform: [
-      { translateY: -RADIUS * 4 + progress.value * (height + RADIUS * 8) },
-      { translateX: Math.sin(progress.value * Math.PI * 2) * piece.drift },
-    ],
-    opacity: progress.value > 0.92 ? (1 - progress.value) / 0.08 : 1,
-  }));
+  const travel = height + piece.size * 4;
+
+  const style = useAnimatedStyle(() => {
+    const t = progress.value;
+
+    // Mostly quadratic, so pieces visibly pick up speed on the way down.
+    const fall = t * t * 0.82 + t * 0.18;
+    const sway =
+      Math.sin(t * piece.swayFreq * Math.PI * 2 + piece.phase) * piece.sway;
+
+    // Squashing the disc edge-on reads as tumbling without needing a sprite.
+    const tumble = Math.abs(Math.cos(t * piece.spin * Math.PI * 2));
+
+    return {
+      transform: [
+        { translateY: -piece.size * 2 + fall * travel },
+        { translateX: sway },
+        { scaleY: 0.2 + tumble * 0.8 },
+      ],
+      // Fade at both ends so the loop point is never visible.
+      opacity: interpolate(t, [0, 0.06, 0.88, 1], [0, 1, 1, 0]) * piece.opacity,
+    };
+  });
 
   return (
     <Animated.View
