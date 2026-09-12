@@ -178,8 +178,7 @@ export default function PrivacyPage() {
               <h2 className="text-pink mb-4 text-2xl font-bold">Contact Us</h2>
               <p className="mb-4">
                 The WedgieTracker iOS app is published by ZOKE.GG LTD,
-                registered in England and Wales, company number 16383692,
-                registered office 124-128 City Road, London EC1V 2NX.
+                registered in England and Wales.
               </p>
               <p>
                 For any privacy-related questions or concerns, please contact us

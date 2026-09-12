@@ -69,9 +69,7 @@
       [
         "@sentry/react-native",
         {
-          "url": "https://de.sentry.io/",
-          "organization": "zokegg-ltd",
-          "project": "wedgietracker-ios"
+          "url": "https://de.sentry.io/"
         }
       ],
       "expo-localization"
@@ -81,10 +79,7 @@
     },
     "extra": {
       "apiUrl": "https://www.wedgietracker.com",
-      "router": {},
-      "eas": {
-        "projectId": "23d9d8e5-8a35-40b2-9a36-d15775b1952d"
-      }
+      "router": {}
     },
     "owner": "gek0z"
   }
