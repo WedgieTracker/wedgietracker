@@ -104,13 +104,18 @@ function SeasonComparison({ stats }: { stats: NerdStats }) {
       {showPace ? (
         <View style={styles.centered}>
           <Text
-            style={[styles.paceLabel, { fontSize: t.paceText }]}
+            style={[styles.paceLabel, tight(t.paceText)]}
             allowFontScaling={false}
           >
             PACE
           </Text>
           <Text
-            style={[styles.paceNumber, { fontSize: t.paceNumber }]}
+            style={[
+              styles.paceNumber,
+              tight(t.paceNumber),
+              // `mt-[-.2em]` on the web - the number tucks into the label
+              { marginTop: -0.2 * t.paceNumber },
+            ]}
             allowFontScaling={false}
           >
             {stats.pace.toFixed(0)}
@@ -119,13 +124,18 @@ function SeasonComparison({ stats }: { stats: NerdStats }) {
       ) : isMatchingAverage ? null : (
         <View style={styles.centered}>
           <Text
-            style={[styles.paceNumber, { fontSize: t.paceNumber }]}
+            style={[styles.paceNumber, tight(t.paceNumber)]}
             allowFontScaling={false}
           >
             {diff}
           </Text>
           <Text
-            style={[styles.paceLabel, { fontSize: t.paceText }]}
+            style={[
+              styles.paceLabel,
+              tight(t.paceText),
+              // `mt-[-.6em]` on the web
+              { marginTop: -0.6 * t.paceText },
+            ]}
             allowFontScaling={false}
           >
             {isMore ? "MORE" : "LESS"}
@@ -259,6 +269,11 @@ function SeasonTotals({ stats }: { stats: NerdStats }) {
       </Text>
     </View>
   );
+}
+
+/** `leading-none`, so the labels can overlap the numbers as they do on the site. */
+function tight(fontSize: number) {
+  return { fontSize, lineHeight: fontSize };
 }
 
 /** The pink rounded team/player token used throughout the page. */

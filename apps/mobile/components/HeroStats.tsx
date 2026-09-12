@@ -54,6 +54,9 @@ function PaceBlock({
   );
   const daysAgo = daysSince(stats.lastWedgie);
 
+  const labelSize = showPace ? t.paceText : 20;
+  const numberSize = showPace ? t.paceNumber : 48;
+
   return (
     <View style={styles.pacePanel}>
       <View style={styles.moreStatsWrap}>
@@ -63,10 +66,7 @@ function PaceBlock({
       <View style={[styles.paceRow, !showPace && styles.paceRowStacked]}>
         <View style={[styles.paceColumn, !showPace && styles.paceColumnWide]}>
           <Text
-            style={[
-              styles.paceLabel,
-              showPace ? { fontSize: t.paceText } : styles.paceLabelSmall,
-            ]}
+            style={[styles.paceLabel, tight(labelSize)]}
             allowFontScaling={false}
           >
             {showPace ? "PACE" : "GAMES"}
@@ -74,7 +74,10 @@ function PaceBlock({
           <Text
             style={[
               styles.paceNumber,
-              showPace ? { fontSize: t.paceNumber } : styles.paceNumberSmall,
+              tight(numberSize),
+              // `mt-[-.2em]` on the web: the number rides up into the label,
+              // the same overlap the wordmark uses.
+              { marginTop: -0.2 * numberSize },
             ]}
             allowFontScaling={false}
           >
@@ -85,23 +88,47 @@ function PaceBlock({
         {daysAgo !== null && daysAgo > 0 ? (
           <View style={styles.droughtRow}>
             <View style={styles.droughtCount}>
-              <Text style={styles.droughtNumber} allowFontScaling={false}>
+              <Text
+                style={[styles.droughtNumber, tight(DROUGHT_NUMBER)]}
+                allowFontScaling={false}
+              >
                 {daysAgo}
               </Text>
-              <Text style={styles.droughtUnit} allowFontScaling={false}>
-                {daysAgo === 1 ? "day" : "days"}
+              <Text
+                style={[
+                  styles.droughtUnit,
+                  tight(DROUGHT_UNIT),
+                  // `mt-[-.6em]` on the web
+                  { marginTop: -0.6 * DROUGHT_UNIT },
+                ]}
+                allowFontScaling={false}
+              >
+                {daysAgo === 1 ? "DAY" : "DAYS"}
               </Text>
             </View>
-            <Text style={styles.droughtLabel} allowFontScaling={false}>
+            <Text
+              style={[styles.droughtLabel, tight(14)]}
+              allowFontScaling={false}
+            >
               WITHOUT{"\n"}WEDGIES
             </Text>
           </View>
         ) : (
           <View style={styles.freshRow}>
-            <Text style={styles.freshNew} allowFontScaling={false}>
+            <Text
+              style={[styles.freshNew, tight(FRESH_NEW)]}
+              allowFontScaling={false}
+            >
               NEW
             </Text>
-            <Text style={styles.freshWedgie} allowFontScaling={false}>
+            <Text
+              style={[
+                styles.freshWedgie,
+                tight(FRESH_WEDGIE),
+                { marginTop: -0.3 * FRESH_WEDGIE },
+              ]}
+              allowFontScaling={false}
+            >
               WEDGIE
             </Text>
           </View>
@@ -118,6 +145,20 @@ function PaceBlock({
       ) : null}
     </View>
   );
+}
+
+const DROUGHT_NUMBER = 48;
+const DROUGHT_UNIT = 14;
+const FRESH_NEW = 36;
+const FRESH_WEDGIE = 29;
+
+/**
+ * `leading-none` - a line box exactly as tall as the type. Without it React
+ * Native's default leading pads each line and the labels cannot overlap the
+ * numbers the way they do on the site.
+ */
+function tight(fontSize: number) {
+  return { fontSize, lineHeight: fontSize };
 }
 
 const NY_DATE = new Intl.DateTimeFormat("en-US", {
@@ -184,13 +225,11 @@ const styles = StyleSheet.create({
     letterSpacing: 1.5,
     textAlign: "center",
   },
-  paceLabelSmall: { fontSize: 20 },
   paceNumber: {
     fontFamily: fonts.black,
     color: colors.yellow,
     textAlign: "center",
   },
-  paceNumberSmall: { fontSize: 48 },
 
   droughtRow: {
     width: 150,
@@ -199,32 +238,17 @@ const styles = StyleSheet.create({
     gap: space.md,
   },
   droughtCount: { alignItems: "center" },
-  droughtNumber: {
-    fontFamily: fonts.black,
-    color: colors.yellow,
-    fontSize: 48,
-  },
-  droughtUnit: {
-    fontFamily: fonts.black,
-    color: colors.pink,
-    fontSize: 14,
-    marginTop: -6,
-  },
+  droughtNumber: { fontFamily: fonts.black, color: colors.yellow },
+  droughtUnit: { fontFamily: fonts.black, color: colors.pink },
   droughtLabel: {
     fontFamily: fonts.bold,
     color: colors.white,
     letterSpacing: 0.8,
-    fontSize: 14,
   },
 
   freshRow: { width: 140, alignItems: "center" },
-  freshNew: { fontFamily: fonts.black, color: colors.pink, fontSize: 36 },
-  freshWedgie: {
-    fontFamily: fonts.black,
-    color: colors.yellow,
-    fontSize: 29,
-    marginTop: -8,
-  },
+  freshNew: { fontFamily: fonts.black, color: colors.pink },
+  freshWedgie: { fontFamily: fonts.black, color: colors.yellow },
 
   liveBadge: {
     position: "absolute",
