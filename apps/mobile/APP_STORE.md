@@ -154,13 +154,17 @@ collect, so it does not change the answers, but the privacy policy says so.
       `4d215288-e7b1-4e6c-8157-bfbe346b7481`.
 
       **Upload with `./scripts/submit-ios.sh`, not `eas submit`.** Every path
-              through eas submit ends at an Apple ID login: it needs one to create the
-              app record, and another to register an ASC API key against the project
-              ("Only user authentication is supported"). That login fails here with
-              "iTunes service key is empty", so the key never gets used. altool takes
-              the key directly and never touches the Developer Portal.
+                      through eas submit ends at an Apple ID login: it needs one to create the
+                      app record, and another to register an ASC API key against the project
+                      ("Only user authentication is supported"). That login fails here with
+                      "iTunes service key is empty", so the key never gets used. altool takes
+                      the key directly and never touches the Developer Portal.
 
-- [ ] Export compliance answer. The app makes HTTPS requests and nothing more,
-      so it qualifies for the standard exemption, but the question must be
-      answered at upload.
+- [x] Export compliance. `ITSAppUsesNonExemptEncryption: false` answers it at
+      upload; the API confirms `usesNonExemptEncryption: false` on build 4, so
+      there is nothing to click.
+- [x] On TestFlight. Build 4 is `processingState: VALID` and internal testers
+      receive every build automatically, so no Beta App Review was involved.
 - [ ] Copyright holder and contact details in App Store Connect
+- [ ] Deploy the site. The privacy policy change is committed but not live, and
+      Apple fetches that URL during review.
