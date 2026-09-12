@@ -19,52 +19,63 @@ export interface WedgieRowData {
 const TILE_WIDTH = 74;
 const COURT_WIDTH = 68;
 
+/** Tailwind's `rounded-xl`, which the web rows use. */
+const XL = 12;
+
 /**
- * Port of apps/web/src/components/home/Wedgie.tsx (the "default" variant):
- * a pink number tile with the date and a WATCH bar, the player and matchup,
- * and the court position on the right.
+ * Port of apps/web/src/components/home/Wedgie.tsx.
+ *
+ * `default` is the home list, where the rows butt together and only the outer
+ * corners of the stack round. `small` is the all-wedgies grid, where every
+ * card is rounded on its own.
  */
 export function WedgieRow({
   wedgie,
+  variant = "default",
   first = false,
   last = false,
   onPress,
 }: {
   wedgie: WedgieRowData;
+  variant?: "default" | "small";
   first?: boolean;
   last?: boolean;
   onPress: () => void;
 }) {
   const t = useFluidType();
+  const small = variant === "small";
 
-  const cornerStyle = [first && styles.firstRow, last && styles.lastRow].filter(
-    Boolean,
-  );
+  const rowShape = small
+    ? [styles.rowSmall]
+    : [first && styles.rowFirst, last && styles.rowLast];
 
-  const tileCorners = [
-    first && styles.tileFirst,
-    last && styles.tileLast,
-  ].filter(Boolean);
+  const tileShape = small
+    ? [styles.tileSmall]
+    : [styles.tileDefault, first && styles.tileFirst, last && styles.tileLast];
 
   return (
     <Pressable
       onPress={onPress}
       style={({ pressed }) => [
         styles.row,
-        ...cornerStyle,
+        ...rowShape,
         pressed && styles.rowPressed,
       ]}
     >
-      <View style={[styles.tile, ...tileCorners]}>
+      <View style={[styles.tile, ...tileShape]}>
+        {/*
+          The web renders the hash and the number as inline spans, so they
+          share a baseline and the small hash sits at the number's foot.
+        */}
         <View style={styles.tileTop}>
           <Text
-            style={[styles.hash, { fontSize: t.wedgieHash }]}
+            style={[styles.hash, tight(t.wedgieHash)]}
             allowFontScaling={false}
           >
             #
           </Text>
           <Text
-            style={[styles.number, { fontSize: t.wedgieNumber }]}
+            style={[styles.number, tight(t.wedgieNumber)]}
             allowFontScaling={false}
           >
             {wedgie.number ?? 1}
@@ -72,15 +83,15 @@ export function WedgieRow({
         </View>
 
         <Text
-          style={[styles.date, { fontSize: t.wedgieDate }]}
+          style={[styles.date, tight(t.wedgieDate)]}
           allowFontScaling={false}
         >
           {formatTileDate(wedgie.wedgieDate)}
         </Text>
 
-        <View style={[styles.watchBar, last && styles.watchBarLast]}>
+        <View style={styles.watchBar}>
           <Text
-            style={[styles.watchText, { fontSize: t.watch }]}
+            style={[styles.watchText, tight(t.watch)]}
             allowFontScaling={false}
           >
             WATCH
@@ -89,10 +100,7 @@ export function WedgieRow({
       </View>
 
       <View style={styles.body}>
-        <Text
-          numberOfLines={1}
-          style={[styles.player, { fontSize: t.playerName }]}
-        >
+        <Text numberOfLines={1} style={[styles.player, tight(t.playerName)]}>
           {wedgie.playerName}
         </Text>
 
@@ -124,6 +132,11 @@ export function WedgieRow({
   );
 }
 
+/** `leading-none`, so the hash and number share a predictable baseline. */
+function tight(fontSize: number) {
+  return { fontSize, lineHeight: fontSize };
+}
+
 /** The web tile shows a GEMS emoji on those dates, otherwise de-DE dd.mm.yy. */
 function formatTileDate(value: string): string {
   const date = new Date(value);
@@ -145,12 +158,15 @@ const styles = StyleSheet.create({
     backgroundColor: colors.rowIdle,
   },
   rowPressed: { backgroundColor: colors.rowActive },
-  firstRow: { borderTopLeftRadius: radius.xl, borderTopRightRadius: radius.xl },
-  lastRow: {
+  // default: only the outer corners of the stack round
+  rowFirst: { borderTopLeftRadius: XL, borderTopRightRadius: XL },
+  rowLast: {
     marginBottom: 0,
-    borderBottomLeftRadius: radius.xl,
-    borderBottomRightRadius: radius.xl,
+    borderBottomLeftRadius: XL,
+    borderBottomRightRadius: XL,
   },
+  // small: every card stands on its own
+  rowSmall: { borderRadius: XL, marginBottom: space.md },
 
   tile: {
     width: TILE_WIDTH,
@@ -159,13 +175,16 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.darkpurple,
     backgroundColor: colors.pink,
-    borderRadius: radius.xs,
   },
-  tileFirst: { borderTopLeftRadius: radius.xl },
-  tileLast: { borderBottomLeftRadius: radius.xl },
+  tileDefault: { borderRadius: radius.xs },
+  tileFirst: { borderTopLeftRadius: XL },
+  tileLast: { borderBottomLeftRadius: XL },
+  tileSmall: { borderRadius: XL },
+
   tileTop: {
     flexDirection: "row",
-    alignItems: "flex-start",
+    // Shared baseline, as with the web's inline spans.
+    alignItems: "baseline",
     marginTop: space.xs,
   },
   hash: {
@@ -178,6 +197,7 @@ const styles = StyleSheet.create({
     fontFamily: fonts.black,
     color: colors.darkpurple,
     letterSpacing: 0.5,
+    marginTop: space.xs,
     marginBottom: space.sm,
   },
   watchBar: {
@@ -185,21 +205,20 @@ const styles = StyleSheet.create({
     backgroundColor: colors.yellow,
     borderTopWidth: 1,
     borderTopColor: colors.yellow,
-    paddingVertical: 2,
+    paddingVertical: 3,
     alignItems: "center",
   },
-  watchBarLast: { borderBottomLeftRadius: radius.xl },
   watchText: { fontFamily: fonts.bold, color: colors.darkpurple },
 
   body: { flex: 1, minWidth: 0, paddingHorizontal: space.sm },
-  player: { fontFamily: fonts.bold, color: colors.yellow, paddingBottom: 2 },
+  player: { fontFamily: fonts.bold, color: colors.yellow, paddingBottom: 3 },
   team: { fontFamily: fonts.bold, color: colors.white },
   teamName: { color: colors.pink },
   types: {
     fontFamily: fonts.bold,
     color: colors.white60,
     letterSpacing: 0.5,
-    marginTop: 1,
+    marginTop: 2,
   },
 
   court: { width: COURT_WIDTH, paddingRight: space.xs },

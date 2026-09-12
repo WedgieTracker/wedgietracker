@@ -171,11 +171,10 @@ export default function AllWedgiesScreen() {
           ) : null}
         </View>
       }
-      renderItem={({ item, index }) => (
+      renderItem={({ item }) => (
         <WedgieRow
           wedgie={item}
-          first={index === 0}
-          last={index === wedgies.length - 1}
+          variant="small"
           onPress={() => router.push(`/wedgie/${item.id}`)}
         />
       )}

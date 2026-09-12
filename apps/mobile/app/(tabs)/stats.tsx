@@ -113,8 +113,8 @@ function SeasonComparison({ stats }: { stats: NerdStats }) {
             style={[
               styles.paceNumber,
               tight(t.paceNumber),
-              // `mt-[-.2em]` on the web - the number tucks into the label
-              { marginTop: -0.2 * t.paceNumber },
+              // Matches the home hero's slightly eased overlap
+              { marginTop: -0.12 * t.paceNumber },
             ]}
             allowFontScaling={false}
           >

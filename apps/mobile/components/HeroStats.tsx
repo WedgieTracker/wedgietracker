@@ -75,9 +75,9 @@ function PaceBlock({
             style={[
               styles.paceNumber,
               tight(numberSize),
-              // `mt-[-.2em]` on the web: the number rides up into the label,
-              // the same overlap the wordmark uses.
-              { marginTop: -0.2 * numberSize },
+              // The web uses `mt-[-.2em]`; a touch less overlap here, which
+              // reads better at the sizes the label actually renders at.
+              { marginTop: -0.12 * numberSize },
             ]}
             allowFontScaling={false}
           >
