@@ -1,3 +1,4 @@
+import { keepPreviousData } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -77,7 +78,7 @@ export default function AllWedgiesScreen() {
   const all = api.wedgie.getAll.useQuery();
   const bySeason = api.wedgie.getBySeason.useQuery(
     { season },
-    { enabled: !!season },
+    { enabled: !!season, placeholderData: keepPreviousData },
   );
 
   const source = season ? bySeason.data : all.data;

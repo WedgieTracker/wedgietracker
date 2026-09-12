@@ -39,20 +39,20 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="standings"
-        options={{
-          title: "Standings",
-          tabBarIcon: ({ color }) => (
-            <TabIcon name="list.number" color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="all-wedgies"
         options={{
           title: "Wedgies",
           tabBarIcon: ({ color }) => (
             <TabIcon name="play.rectangle.fill" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="standings"
+        options={{
+          title: "Standings",
+          tabBarIcon: ({ color }) => (
+            <TabIcon name="list.number" color={color} />
           ),
         }}
       />

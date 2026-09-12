@@ -30,7 +30,14 @@ export function Empty({ label }: { label: string }) {
 }
 
 const styles = StyleSheet.create({
-  centered: { paddingVertical: space.xxl, alignItems: "center", gap: space.md },
+  centered: {
+    // Reserve a stable block so replacing the loader with content does not
+    // shift everything below it.
+    minHeight: 220,
+    justifyContent: "center",
+    alignItems: "center",
+    gap: space.md,
+  },
   muted: { ...type.body, color: colors.muted, textAlign: "center" },
   error: {
     padding: space.lg,

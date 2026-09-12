@@ -36,6 +36,13 @@ export default function HomeScreen() {
     standings.isRefetching ||
     total.isRefetching;
 
+  // What the top of the hero is actually painted with, so the status-bar strip
+  // and the pull-to-refresh overscroll match it instead of showing a dark seam.
+  const heroTop =
+    stats.data && stats.data.totalWedgies / 50 >= 1
+      ? colors.pink
+      : colors.darkpurpleLight;
+
   const refetchAll = () => {
     void stats.refetch();
     void latest.refetch();
@@ -44,8 +51,12 @@ export default function HomeScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safe} edges={["top"]}>
+    <SafeAreaView
+      style={[styles.safe, { backgroundColor: heroTop }]}
+      edges={["top"]}
+    >
       <ScrollView
+        style={styles.scroll}
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
         refreshControl={
@@ -56,6 +67,12 @@ export default function HomeScreen() {
           />
         }
       >
+        {/* Fills the rubber-band area above the content when pulled down. */}
+        <View
+          style={[styles.overscroll, { backgroundColor: heroTop }]}
+          pointerEvents="none"
+        />
+
         {stats.isPending ? (
           <View style={styles.heroFallback}>
             <Loading label="Loading wedgies" />
@@ -187,8 +204,16 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.darkpurple },
+  safe: { flex: 1 },
+  scroll: { backgroundColor: colors.darkpurpleDark },
   content: { paddingBottom: space.xxl },
+  overscroll: {
+    position: "absolute",
+    top: -900,
+    left: 0,
+    right: 0,
+    height: 900,
+  },
   heroFallback: {
     minHeight: 400,
     backgroundColor: colors.darkpurpleLight,

@@ -2,6 +2,7 @@ import { useVideoPlayer, VideoView } from "expo-video";
 import { StyleSheet, Text, View } from "react-native";
 import { WebView } from "react-native-webview";
 
+import { getApiBaseUrl } from "@/lib/api";
 import { colors, radius, space, type } from "@/lib/theme";
 import type { VideoUrls } from "@wedgietracker/core/types/wedgie";
 import {
@@ -15,8 +16,13 @@ import {
  * Cloudinary and self-hosted files are real mp4s, so they get a native player;
  * YouTube and Instagram only offer embeds, so those stay in a WebView.
  */
-export function WedgiePlayer({ videoUrl }: { videoUrl: VideoUrls | null }) {
-  const active = pickVideoForNative(videoUrl);
+export function WedgiePlayer({
+  videoUrl,
+  active,
+}: {
+  videoUrl: VideoUrls | null;
+  active: ActiveVideo | null;
+}) {
   const src = active && videoUrl ? getVideoSrc(active, videoUrl) : undefined;
 
   if (!active || !src) {
@@ -40,7 +46,9 @@ export function WedgiePlayer({ videoUrl }: { videoUrl: VideoUrls | null }) {
  * avoids the WebView entirely. Falls back to the shared web ordering when
  * there is no mp4.
  */
-function pickVideoForNative(videoUrl: VideoUrls | null): ActiveVideo | null {
+export function pickVideoForNative(
+  videoUrl: VideoUrls | null,
+): ActiveVideo | null {
   if (videoUrl?.cloudinary) return "cloudinary";
   return pickInitialVideo(videoUrl);
 }
@@ -65,11 +73,17 @@ function NativeVideo({ uri }: { uri: string }) {
 }
 
 /**
- * Loading an embed URL straight into a WebView makes YouTube reject playback
- * with "Error 153" - the embed needs a real page origin. Wrapping it in a
- * document with a matching `baseUrl` gives it one.
+ * YouTube refuses to play an embed that has no legitimate page origin - "Error
+ * 153" with none at all, "Error 152" when the origin is not one the video
+ * allows. The site embeds these clips successfully, so present the site as the
+ * embedding page: the document is served under its origin and passes the same
+ * `origin` parameter a browser would.
  */
 function EmbeddedVideo({ src }: { src: string }) {
+  const origin = getApiBaseUrl();
+  const separator = src.includes("?") ? "&" : "?";
+  const embedSrc = `${src}${separator}origin=${encodeURIComponent(origin)}&playsinline=1`;
+
   const html = `<!DOCTYPE html>
 <html>
   <head>
@@ -81,7 +95,7 @@ function EmbeddedVideo({ src }: { src: string }) {
   </head>
   <body>
     <iframe
-      src="${src}"
+      src="${embedSrc}"
       allow="autoplay; encrypted-media; picture-in-picture"
       allowfullscreen
     ></iframe>
@@ -92,7 +106,7 @@ function EmbeddedVideo({ src }: { src: string }) {
     <View style={styles.frame}>
       <WebView
         originWhitelist={["*"]}
-        source={{ html, baseUrl: originOf(src) }}
+        source={{ html, baseUrl: origin }}
         style={styles.surface}
         allowsInlineMediaPlayback
         mediaPlaybackRequiresUserAction={false}
@@ -103,11 +117,6 @@ function EmbeddedVideo({ src }: { src: string }) {
       />
     </View>
   );
-}
-
-function originOf(url: string): string {
-  const match = /^(https?:\/\/[^/]+)/.exec(url);
-  return match?.[1] ?? "https://www.youtube.com";
 }
 
 const styles = StyleSheet.create({

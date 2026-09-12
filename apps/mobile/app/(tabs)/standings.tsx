@@ -1,3 +1,4 @@
+import { keepPreviousData } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { RefreshControl, StyleSheet, Switch, Text, View } from "react-native";
@@ -37,10 +38,12 @@ export default function StandingsScreen() {
     }
   }, [shouldShowPreviousSeason, previousSeason, global?.currentSeason?.name]);
 
-  const standings = api.wedgie.getSeasonStandings.useQuery({
-    season: selectedSeason,
-    includeOpponents,
-  });
+  const standings = api.wedgie.getSeasonStandings.useQuery(
+    { season: selectedSeason, includeOpponents },
+    // Changing a filter makes a new query key; without this the table blanks
+    // and everything below it jumps while the next one loads.
+    { placeholderData: keepPreviousData },
+  );
 
   const seasonNames = (seasons ?? [])
     .map((s) => s.name)
