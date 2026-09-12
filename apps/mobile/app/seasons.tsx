@@ -1,3 +1,4 @@
+import { Stack, useLocalSearchParams } from "expo-router";
 import { RefreshControl, StyleSheet, Text, View } from "react-native";
 
 import { PageHeading } from "@/components/PageHeading";
@@ -16,65 +17,82 @@ interface Ranked {
  * its totals and top five players and teams.
  */
 export default function SeasonsScreen() {
+  // Reachable from the Home hero and from Stats, so the back label has to name
+  // whichever one pushed it rather than being fixed in the layout.
+  const { from } = useLocalSearchParams<{ from?: string }>();
   const seasons = api.season.getAllWithStats.useQuery();
 
   const withWedgies = (seasons.data ?? []).filter((s) => s.totalWedgies > 0);
 
-  if (seasons.isPending) return <ScreenLoading />;
+  const backTitle = (
+    <Stack.Screen options={{ headerBackTitle: from ?? "Back" }} />
+  );
+
+  // The header still needs its label while the first data is loading.
+  if (seasons.isPending)
+    return (
+      <>
+        {backTitle}
+        <ScreenLoading />
+      </>
+    );
 
   return (
-    <Screen
-      heading={
-        <PageHeading
-          top="Seasons"
-          bottom="History"
-          base={36}
-          bottomScale={1.1}
-          liftEm={0.3}
-        />
-      }
-      refreshControl={
-        <RefreshControl
-          refreshing={seasons.isRefetching}
-          onRefresh={() => void seasons.refetch()}
-          tintColor={colors.yellow}
-        />
-      }
-    >
-      {seasons.error ? <ErrorState message={seasons.error.message} /> : null}
-      {seasons.data && withWedgies.length === 0 ? (
-        <Empty label="No seasons with wedgies yet." />
-      ) : null}
+    <>
+      {backTitle}
+      <Screen
+        heading={
+          <PageHeading
+            top="Seasons"
+            bottom="History"
+            base={36}
+            bottomScale={1.1}
+            liftEm={0.3}
+          />
+        }
+        refreshControl={
+          <RefreshControl
+            refreshing={seasons.isRefetching}
+            onRefresh={() => void seasons.refetch()}
+            tintColor={colors.yellow}
+          />
+        }
+      >
+        {seasons.error ? <ErrorState message={seasons.error.message} /> : null}
+        {seasons.data && withWedgies.length === 0 ? (
+          <Empty label="No seasons with wedgies yet." />
+        ) : null}
 
-      {withWedgies.map((season) => (
-        <View key={season.name} style={styles.card}>
-          <View style={styles.headerRow}>
-            <Text style={styles.seasonName} allowFontScaling={false}>
-              {season.name}
-            </Text>
-            <View style={styles.badge}>
-              <Text style={styles.badgeText} allowFontScaling={false}>
-                SEASON
+        {withWedgies.map((season) => (
+          <View key={season.name} style={styles.card}>
+            <View style={styles.headerRow}>
+              <Text style={styles.seasonName} allowFontScaling={false}>
+                {season.name}
               </Text>
+              <View style={styles.badge}>
+                <Text style={styles.badgeText} allowFontScaling={false}>
+                  SEASON
+                </Text>
+              </View>
             </View>
-          </View>
 
-          <View style={styles.totals}>
-            <Totals value={season.totalWedgies} label="Total Wedgies" />
-            <Totals value={season.totalGames} label="Games Played" />
-          </View>
+            <View style={styles.totals}>
+              <Totals value={season.totalWedgies} label="Total Wedgies" />
+              <Totals value={season.totalGames} label="Games Played" />
+            </View>
 
-          <View style={styles.grid}>
-            <View style={styles.players}>
-              <RankedList title="PLAYERS" items={season.topPlayers} />
-            </View>
-            <View style={styles.teams}>
-              <RankedList title="TEAMS" items={season.topTeams} />
+            <View style={styles.grid}>
+              <View style={styles.players}>
+                <RankedList title="PLAYERS" items={season.topPlayers} />
+              </View>
+              <View style={styles.teams}>
+                <RankedList title="TEAMS" items={season.topTeams} />
+              </View>
             </View>
           </View>
-        </View>
-      ))}
-    </Screen>
+        ))}
+      </Screen>
+    </>
   );
 }
 

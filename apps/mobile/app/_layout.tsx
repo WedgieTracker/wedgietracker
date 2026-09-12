@@ -57,10 +57,12 @@ function RootLayout() {
         }}
       >
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="seasons"
-          options={{ title: "SEASONS HISTORY", headerBackTitle: "Stats" }}
-        />
+        {/*
+          No headerBackTitle here: this screen opens from both Home and Stats,
+          so the label belongs to whoever pushed it. seasons.tsx sets it from
+          the `from` param.
+        */}
+        <Stack.Screen name="seasons" options={{ title: "SEASONS HISTORY" }} />
         {/*
           A sheet sized to its content rather than a full-height modal, and no
           header: the title said nothing the screen does not already show.

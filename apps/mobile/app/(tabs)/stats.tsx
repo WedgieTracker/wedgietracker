@@ -102,7 +102,7 @@ function NerdContent({ stats }: { stats: NerdStats }) {
         <Leaders stats={stats} onStandings={() => router.push("/standings")} />
         <SeasonTotals
           stats={stats}
-          onSeasonsHistory={() => router.push("/seasons")}
+          onSeasonsHistory={() => router.push("/seasons?from=Stats")}
         />
       </View>
     </>

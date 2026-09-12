@@ -200,7 +200,7 @@ export default function HomeScreen() {
               </View>
               <PillButton
                 label="SEASONS HISTORY"
-                onPress={() => router.push("/seasons")}
+                onPress={() => router.push("/seasons?from=Home")}
               />
             </View>
           ) : null}
