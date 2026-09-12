@@ -1,10 +1,10 @@
-# App Store listing — draft
+# App Store listing (draft)
 
 Field limits are Apple's; the counts in brackets are what the draft uses.
 
 ---
 
-## App Name — 30 char limit
+## App Name, 30 char limit
 
 ```
 WedgieTracker
@@ -12,7 +12,7 @@ WedgieTracker
 
 [13/30]
 
-## Subtitle — 30 char limit
+## Subtitle, 30 char limit
 
 ```
 Every NBA wedgie, counted
@@ -23,7 +23,7 @@ Every NBA wedgie, counted
 Shown under the name in search results and on the product page. It carries real
 search weight, so it says what the app is rather than repeating the name.
 
-## Promotional Text — 170 char limit
+## Promotional Text, 170 char limit
 
 Editable without submitting a new build, so this is the line to change when a
 record falls.
@@ -34,7 +34,7 @@ A basketball gets stuck between the rim and the backboard more often than you wo
 
 [116/170]
 
-## Description — 4000 char limit
+## Description, 4000 char limit
 
 ```
 A wedgie is what happens when a basketball gets stuck between the rim and the backboard. It is rare, it is stupid, and somebody had to count them.
@@ -63,11 +63,11 @@ Inspired by NoDunks.
 
 [~1,050/4000]
 
-## Keywords — 100 char limit
+## Keywords, 100 char limit
 
 Comma separated, no spaces after commas. Deliberately avoids repeating words
-already in the app name and subtitle — Apple indexes those separately, so
-repeating them wastes the allowance.
+already in the app name and subtitle, because Apple indexes those separately
+and repeating them wastes the allowance.
 
 ```
 basketball,stats,nodunks,rim,backboard,highlights,hoops,standings,boxscore,bball,dunk,swish
@@ -88,7 +88,7 @@ basketball,stats,nodunks,rim,backboard,highlights,hoops,standings,boxscore,bball
 | Marketing URL  | `https://www.wedgietracker.com`         |
 | Privacy Policy | `https://www.wedgietracker.com/privacy` |
 
-**The privacy URL is the problem — see below.**
+**The privacy URL is the problem. See below.**
 
 ## Age Rating
 
@@ -96,7 +96,7 @@ basketball,stats,nodunks,rim,backboard,highlights,hoops,standings,boxscore,bball
 
 One question in the rating questionnaire needs thought: **Unrestricted Web
 Access**. The app embeds YouTube clips in a WebView. It only ever loads
-specific embed URLs, not a browser, so the honest answer is **No** — but the
+specific embed URLs, not a browser, so the honest answer is **No**, but the
 YouTube player's own "Watch on YouTube" control can hand off to the YouTube app
 or Safari. If review pushes back, that is the reason why.
 
@@ -122,7 +122,7 @@ covers "our website (wedgietracker.com)" and describes collecting:
 - Google Analytics 4 usage data
 
 **The app does none of these.** There is no newsletter, no store, and no
-analytics in it — those were deliberately left out of the mobile build.
+analytics in it, because those were deliberately left out of the mobile build.
 
 So the App Privacy answers and the linked policy would contradict each other:
 one says nothing is collected, the other describes collecting three categories.
@@ -145,7 +145,7 @@ fetches the URL during review.
 # Still needed before submission
 
 - [ ] Privacy policy updated to cover the app (above)
-- [ ] Screenshots — being generated separately
+- [ ] Screenshots, being generated separately
 - [ ] A build uploaded: `eas build --profile production --platform ios`
 - [ ] Export compliance answer. The app makes HTTPS requests and nothing more,
       so it qualifies for the standard exemption, but the question must be
