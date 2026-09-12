@@ -150,7 +150,16 @@ collect, so it does not change the answers, but the privacy policy says so.
       **It has to be deployed before submitting**, since Apple fetches the URL.
 - [x] Screenshots. Five 6.9" tiles in `store/screenshots/ios-6.9/`. No iPad set
       is needed: `supportsTablet` is false.
-- [ ] A build uploaded: `./scripts/build-ios.sh`
+- [x] A build uploaded. Build 4 (0.1.0) delivered 12 Sep 2026, delivery UUID
+      `4d215288-e7b1-4e6c-8157-bfbe346b7481`.
+
+      **Upload with `./scripts/submit-ios.sh`, not `eas submit`.** Every path
+              through eas submit ends at an Apple ID login: it needs one to create the
+              app record, and another to register an ASC API key against the project
+              ("Only user authentication is supported"). That login fails here with
+              "iTunes service key is empty", so the key never gets used. altool takes
+              the key directly and never touches the Developer Portal.
+
 - [ ] Export compliance answer. The app makes HTTPS requests and nothing more,
       so it qualifies for the standard exemption, but the question must be
       answered at upload.

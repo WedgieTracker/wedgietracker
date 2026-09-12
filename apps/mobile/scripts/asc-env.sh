@@ -37,8 +37,10 @@ if [ ! -r "$ASC_KEY_PATH" ]; then
   return 1
 fi
 
-# The names eas-cli actually reads. They are not the same as the ASC_* names
-# above, which is why this maps rather than exporting the file directly.
+# The names eas-cli actually reads, for `eas build`. They are not the same as
+# the ASC_* names above, which is why this maps rather than exporting the file
+# directly. `eas submit` ignores them and wants an Apple ID login instead,
+# which is why submit-ios.sh uses altool and reads ASC_* straight from here.
 export EXPO_ASC_API_KEY_PATH="$ASC_KEY_PATH"
 export EXPO_ASC_KEY_ID="$ASC_KEY_ID"
 export EXPO_ASC_ISSUER_ID="$ASC_ISSUER_ID"
