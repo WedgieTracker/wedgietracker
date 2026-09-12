@@ -75,6 +75,22 @@ basketball,stats,nodunks,rim,backboard,highlights,hoops,standings,boxscore,bball
 
 [91/100]
 
+## App Store Connect record
+
+Created by hand on 12 Sep 2026. Apple does not allow app records to be created
+through the App Store Connect API, by any client, which is why `eas submit`
+tried a cookie login and failed until this existed.
+
+| Field     | Value                   |
+| --------- | ----------------------- |
+| Apple ID  | `6811376841`            |
+| Bundle ID | `com.wedgietracker.app` |
+| SKU       | `wedgietracker-ios`     |
+| Locale    | `en-US`                 |
+
+The Apple ID is in `eas.json` as `ascAppId`, so submit skips the lookup that
+needed the login.
+
 ## Category
 
 - Primary: **Sports**
