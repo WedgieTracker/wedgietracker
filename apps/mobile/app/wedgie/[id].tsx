@@ -1,6 +1,12 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import {
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  useWindowDimensions,
+} from "react-native";
 import Svg, { Path } from "react-native-svg";
 
 import { CourtPositionDiagram } from "@/components/CourtPositionDiagram";
@@ -100,9 +106,15 @@ function WedgieDetail({
   onNext: () => void;
   onClose: () => void;
 }) {
+  const { height } = useWindowDimensions();
   const [active, setActive] = useState<ActiveVideo | null>(() =>
     pickVideoForNative(wedgie.videoUrl),
   );
+
+  // The sheet is sized to its content, so on a shorter screen the court is the
+  // piece that gives way - everything above it carries information the court
+  // only illustrates.
+  const courtWidth = height >= 820 ? 124 : height >= 720 ? 104 : 84;
 
   // Reset the chosen source when stepping to another wedgie.
   useEffect(() => {
@@ -203,8 +215,8 @@ function WedgieDetail({
         <View style={styles.courtWrap}>
           <CourtPositionDiagram
             position={wedgie.position}
-            width={150}
-            dotSize={14}
+            width={courtWidth}
+            dotSize={Math.max(9, Math.round(courtWidth * 0.09))}
           />
         </View>
       </View>
@@ -327,8 +339,17 @@ const styles = StyleSheet.create({
     // own view, so they travel with it as it slides rather than sitting still
     // behind it.
     backgroundColor: colors.darkpurpleDark,
-    borderTopWidth: 1,
-    borderTopColor: "rgba(234, 255, 0, 0.22)",
+    // A solid yellow edge, the same 2px rule the site puts on its buttons and
+    // bars. A faint hairline was lost against pages that are nearly the same
+    // colour as the sheet.
+    borderTopWidth: 2,
+    borderTopColor: colors.yellow,
+    // Casts the sheet over whatever is behind it, so the boundary reads even
+    // where the yellow rule is off screen.
+    shadowColor: "#000",
+    shadowOpacity: 0.6,
+    shadowRadius: 24,
+    shadowOffset: { width: 0, height: -10 },
     borderTopLeftRadius: SHEET_RADIUS,
     borderTopRightRadius: SHEET_RADIUS,
     overflow: "hidden",
