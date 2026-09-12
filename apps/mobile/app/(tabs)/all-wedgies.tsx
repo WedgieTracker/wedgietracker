@@ -12,7 +12,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useCountUp } from "@/components/Counter";
-import { FilterSelect } from "@/components/FilterSelect";
+import { ClearFilters, FilterSelect } from "@/components/FilterSelect";
 import { PageHeading } from "@/components/PageHeading";
 import { Empty, ErrorState, ScreenLoading } from "@/components/States";
 import { WedgieRow } from "@/components/WedgieRow";
@@ -52,17 +52,22 @@ export default function AllWedgiesScreen() {
   const [playerOrTeam, setPlayerOrTeam] = useState(
     params.wp ?? params.wt ?? "",
   );
+  // Once the season has been chosen by hand, or cleared, the default-season
+  // effect below must stop reasserting itself. Keyed off a flag rather than
+  // the current value, because "" is a legitimate choice meaning all seasons.
+  const [seasonTouched, setSeasonTouched] = useState(hasSeasonFromUrl);
 
   // Re-apply whenever we are navigated to with a new filter.
   useEffect(() => {
     setPlayerOrTeam(params.wp ?? params.wt ?? "");
     if (params.ws !== undefined) {
       setSeason(params.ws === "all" ? "" : params.ws);
+      setSeasonTouched(true);
     }
   }, [params.wp, params.wt, params.ws]);
 
   useEffect(() => {
-    if (hasSeasonFromUrl) return;
+    if (seasonTouched) return;
     if (shouldShowPreviousSeason && previousSeason) {
       setSeason(previousSeason.name);
     } else if (global?.currentSeason?.name) {
@@ -72,8 +77,18 @@ export default function AllWedgiesScreen() {
     shouldShowPreviousSeason,
     previousSeason,
     global?.currentSeason?.name,
-    hasSeasonFromUrl,
+    seasonTouched,
   ]);
+
+  // Arriving from a player or team tap counts as a deliberate filter.
+  const isFiltered = season !== "" || type !== "" || playerOrTeam !== "";
+
+  const clearFilters = () => {
+    setSeasonTouched(true);
+    setSeason("");
+    setType("");
+    setPlayerOrTeam("");
+  };
 
   // The web app queries by season when one is picked, and everything otherwise.
   const all = api.wedgie.getAll.useQuery();
@@ -184,7 +199,10 @@ export default function AllWedgiesScreen() {
                     { value: "", label: "All Seasons" },
                     ...seasons.map((name) => ({ value: name, label: name })),
                   ]}
-                  onSelect={setSeason}
+                  onSelect={(next) => {
+                    setSeasonTouched(true);
+                    setSeason(next);
+                  }}
                 />
                 <FilterSelect
                   label="Type"
@@ -209,6 +227,10 @@ export default function AllWedgiesScreen() {
                 returnKeyType="search"
                 clearButtonMode="while-editing"
               />
+
+              {isFiltered ? (
+                <ClearFilters label="CLEAR FILTERS" onPress={clearFilters} />
+              ) : null}
             </View>
 
             {error ? <ErrorState message={error.message} /> : null}

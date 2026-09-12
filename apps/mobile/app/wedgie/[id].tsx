@@ -74,8 +74,6 @@ export default function WedgieDetailScreen() {
       wedgie={wedgie}
       hasPrevious={index > 0}
       hasNext={index < ordered.length - 1}
-      previousNumber={ordered[index - 1]?.number}
-      nextNumber={ordered[index + 1]?.number}
       onClose={() => router.back()}
       onPrevious={() => {
         const prev = ordered[index - 1];
@@ -93,8 +91,6 @@ function WedgieDetail({
   wedgie,
   hasPrevious,
   hasNext,
-  previousNumber,
-  nextNumber,
   onPrevious,
   onNext,
   onClose,
@@ -102,8 +98,6 @@ function WedgieDetail({
   wedgie: Wedgie;
   hasPrevious: boolean;
   hasNext: boolean;
-  previousNumber?: number | undefined;
-  nextNumber?: number | undefined;
   onPrevious: () => void;
   onNext: () => void;
   onClose: () => void;
@@ -144,16 +138,11 @@ function WedgieDetail({
         <View style={styles.navGroup}>
           <NavButton
             direction="previous"
-            label={previousNumber}
             enabled={hasPrevious}
             onPress={onPrevious}
           />
-          <NavButton
-            direction="next"
-            label={nextNumber}
-            enabled={hasNext}
-            onPress={onNext}
-          />
+          <View style={styles.navDivider} />
+          <NavButton direction="next" enabled={hasNext} onPress={onNext} />
         </View>
         <CloseButton onPress={onClose} />
       </View>
@@ -262,41 +251,39 @@ function Fact({
  * A labelled step control rather than a bare chevron: it names the wedgie you
  * are moving to, so you know whether it is worth the tap.
  */
+/**
+ * Half of a joined two-part control, the way Safari draws back and forward.
+ *
+ * It carried "NEWER"/"OLDER" over a "#31" before, which meant two lines of
+ * 8pt type inside a small pill, twice, beside the plain yellow close circle.
+ * The number was already the largest thing on the screen in the pink badge,
+ * and a pair of chevrons does not need the words spelling out, so both went.
+ */
 function NavButton({
   direction,
-  label,
   enabled,
   onPress,
 }: {
   direction: "previous" | "next";
-  label?: number | undefined;
   enabled: boolean;
   onPress: () => void;
 }) {
-  const previous = direction === "previous";
-
   return (
     <Pressable
       onPress={enabled ? onPress : undefined}
       disabled={!enabled}
+      accessibilityRole="button"
+      accessibilityLabel={
+        direction === "previous" ? "Newer wedgie" : "Older wedgie"
+      }
+      accessibilityState={{ disabled: !enabled }}
       style={({ pressed }) => [
         styles.navButton,
         !enabled && styles.navButtonDisabled,
         pressed && enabled && styles.navButtonPressed,
       ]}
     >
-      {previous ? <Chevron direction="previous" /> : null}
-      <View style={previous ? styles.navTextStart : styles.navTextEnd}>
-        <Text style={styles.navCaption} allowFontScaling={false}>
-          {previous ? "NEWER" : "OLDER"}
-        </Text>
-        {label !== undefined ? (
-          <Text style={styles.navLabel} allowFontScaling={false}>
-            #{label}
-          </Text>
-        ) : null}
-      </View>
-      {previous ? null : <Chevron direction="next" />}
+      <Chevron direction={direction} />
     </Pressable>
   );
 }
@@ -306,10 +293,10 @@ const NEXT_PATH = "M9 5l7 7-7 7";
 
 function Chevron({ direction }: { direction: "previous" | "next" }) {
   return (
-    <Svg width={15} height={15} viewBox="0 0 24 24" fill="none">
+    <Svg width={17} height={17} viewBox="0 0 24 24" fill="none">
       <Path
         d={direction === "previous" ? PREVIOUS_PATH : NEXT_PATH}
-        stroke={colors.darkpurple}
+        stroke={colors.yellow}
         strokeWidth={3}
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -369,7 +356,15 @@ const styles = StyleSheet.create({
     paddingBottom: space.md,
     gap: space.sm,
   },
-  navGroup: { flexDirection: "row", gap: space.sm },
+  navGroup: {
+    flexDirection: "row",
+    alignItems: "stretch",
+    height: 30,
+    borderRadius: radius.pill,
+    backgroundColor: colors.darkpurpleLighter,
+    overflow: "hidden",
+  },
+  navDivider: { width: 1, backgroundColor: colors.hairline },
   close: {
     width: 30,
     height: 30,
@@ -428,27 +423,12 @@ const styles = StyleSheet.create({
   courtWrap: { alignItems: "center" },
 
   navButton: {
-    flexDirection: "row",
+    width: 42,
     alignItems: "center",
-    gap: 2,
-    backgroundColor: colors.yellow,
-    borderRadius: radius.pill,
-    paddingVertical: 6,
-    paddingHorizontal: space.md,
+    justifyContent: "center",
   },
-  navButtonDisabled: { opacity: 0.25 },
-  navButtonPressed: { opacity: 0.75 },
-  navTextStart: { alignItems: "flex-start" },
-  navTextEnd: { alignItems: "flex-end" },
-  navCaption: {
-    fontFamily: fonts.bold,
-    color: "rgba(18, 0, 46, 0.6)",
-    fontSize: 8,
-    letterSpacing: 0.8,
-  },
-  navLabel: {
-    fontFamily: fonts.black,
-    color: colors.darkpurple,
-    fontSize: 13,
-  },
+  // Only the chevron dims: the container keeps its shape at either end of the
+  // list, so the control never looks half-missing.
+  navButtonDisabled: { opacity: 0.28 },
+  navButtonPressed: { backgroundColor: colors.darkpurple },
 });

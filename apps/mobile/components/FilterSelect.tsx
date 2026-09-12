@@ -168,7 +168,57 @@ function Chevron({ color }: { color: string }) {
   );
 }
 
+/**
+ * Shown only while something is actually filtered, so it never sits there as
+ * a dead control. Both screens defaulted to a season, which meant the only way
+ * back to everything was opening each dropdown and finding "All" in it.
+ */
+export function ClearFilters({
+  label,
+  onPress,
+}: {
+  label: string;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      onPress={onPress}
+      hitSlop={10}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      style={({ pressed }) => [styles.clear, pressed && styles.clearPressed]}
+    >
+      <Svg width={11} height={11} viewBox="0 0 24 24">
+        <Path
+          d="M6 6L18 18M18 6L6 18"
+          stroke={colors.yellow}
+          strokeWidth={4}
+          strokeLinecap="round"
+        />
+      </Svg>
+      <Text style={styles.clearText} allowFontScaling={false}>
+        {label}
+      </Text>
+    </Pressable>
+  );
+}
+
 const styles = StyleSheet.create({
+  clear: {
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "flex-end",
+    gap: 6,
+    paddingVertical: 4,
+    paddingHorizontal: 2,
+  },
+  clearPressed: { opacity: 0.6 },
+  clearText: {
+    fontFamily: fonts.black,
+    color: colors.yellow,
+    fontSize: 11,
+    letterSpacing: 1,
+  },
   field: {
     flex: 1,
     backgroundColor: "rgba(234, 255, 0, 0.12)",

@@ -3,7 +3,7 @@ import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { RefreshControl, StyleSheet, Switch, Text, View } from "react-native";
 
-import { FilterSelect } from "@/components/FilterSelect";
+import { ClearFilters, FilterSelect } from "@/components/FilterSelect";
 import { PageHeading } from "@/components/PageHeading";
 import { Screen } from "@/components/Screen";
 import { StandingsList } from "@/components/StandingsList";
@@ -29,14 +29,29 @@ export default function StandingsScreen() {
 
   const [selectedSeason, setSelectedSeason] = useState(defaultSeason);
   const [includeOpponents, setIncludeOpponents] = useState(true);
+  // A hand-picked season has to survive the effect below, which otherwise
+  // reasserts the default every time the season data settles.
+  const [seasonTouched, setSeasonTouched] = useState(false);
+
+  // There is no "all seasons" option here, so the season the page opens on is
+  // the thing reset returns to, and both this and reset read it from one place.
+  const initialSeason =
+    (shouldShowPreviousSeason ? previousSeason?.name : undefined) ??
+    global?.currentSeason?.name ??
+    defaultSeason;
 
   useEffect(() => {
-    if (shouldShowPreviousSeason && previousSeason) {
-      setSelectedSeason(previousSeason.name);
-    } else if (global?.currentSeason?.name) {
-      setSelectedSeason(global.currentSeason.name);
-    }
-  }, [shouldShowPreviousSeason, previousSeason, global?.currentSeason?.name]);
+    if (seasonTouched) return;
+    setSelectedSeason(initialSeason);
+  }, [initialSeason, seasonTouched]);
+
+  const isFiltered = selectedSeason !== initialSeason || !includeOpponents;
+
+  const resetFilters = () => {
+    setSeasonTouched(false);
+    setSelectedSeason(initialSeason);
+    setIncludeOpponents(true);
+  };
 
   const standings = api.wedgie.getSeasonStandings.useQuery(
     { season: selectedSeason, includeOpponents },
@@ -91,7 +106,10 @@ export default function StandingsScreen() {
             label="Season"
             value={selectedSeason}
             options={seasonNames.map((name) => ({ value: name, label: name }))}
-            onSelect={setSelectedSeason}
+            onSelect={(next) => {
+              setSeasonTouched(true);
+              setSelectedSeason(next);
+            }}
           />
 
           <View style={styles.toggleCard}>
@@ -118,6 +136,10 @@ export default function StandingsScreen() {
             </View>
           </View>
         </View>
+
+        {isFiltered ? (
+          <ClearFilters label="RESET" onPress={resetFilters} />
+        ) : null}
       </View>
 
       {standings.error ? (
