@@ -65,6 +65,7 @@ export default function WedgieDetailScreen() {
       hasNext={index < ordered.length - 1}
       previousNumber={ordered[index - 1]?.number}
       nextNumber={ordered[index + 1]?.number}
+      onClose={() => router.back()}
       onPrevious={() => {
         const prev = ordered[index - 1];
         if (prev) router.setParams({ id: String(prev.id) });
@@ -85,6 +86,7 @@ function WedgieDetail({
   nextNumber,
   onPrevious,
   onNext,
+  onClose,
 }: {
   wedgie: Wedgie;
   hasPrevious: boolean;
@@ -93,6 +95,7 @@ function WedgieDetail({
   nextNumber?: number | undefined;
   onPrevious: () => void;
   onNext: () => void;
+  onClose: () => void;
 }) {
   const [active, setActive] = useState<ActiveVideo | null>(() =>
     pickVideoForNative(wedgie.videoUrl),
@@ -104,7 +107,25 @@ function WedgieDetail({
   }, [wedgie.id, wedgie.videoUrl]);
 
   return (
-    <View style={styles.content}>
+    <View style={styles.sheet}>
+      <View style={styles.topBar}>
+        <View style={styles.navGroup}>
+          <NavButton
+            direction="previous"
+            label={previousNumber}
+            enabled={hasPrevious}
+            onPress={onPrevious}
+          />
+          <NavButton
+            direction="next"
+            label={nextNumber}
+            enabled={hasNext}
+            onPress={onNext}
+          />
+        </View>
+        <CloseButton onPress={onClose} />
+      </View>
+
       {wedgie.videoUrl ? (
         <WedgieVideoTabs
           videoUrl={wedgie.videoUrl}
@@ -115,87 +136,74 @@ function WedgieDetail({
 
       <WedgiePlayer videoUrl={wedgie.videoUrl} active={active} />
 
-      {/* Number badge beside the date and season, as the info panel has it. */}
-      <View style={styles.headerRow}>
-        <View style={styles.badge}>
-          <Text
-            style={[
-              styles.badgeHash,
-              {
-                fontSize: BADGE_HASH,
-                lineHeight: BADGE_HASH,
-                // `mt-[.75em]` on the web, dropping the hash to the numeral's foot
-                marginTop: BADGE_HASH * 0.75,
-              },
-            ]}
-            allowFontScaling={false}
-          >
-            #
-          </Text>
-          <Text
-            style={[
-              styles.badgeNumber,
-              { fontSize: BADGE_NUMBER, lineHeight: BADGE_NUMBER },
-            ]}
-            allowFontScaling={false}
-          >
-            {wedgie.number ?? 1}
-          </Text>
-        </View>
-        <View style={styles.headerText}>
-          <Text style={styles.date} allowFontScaling={false}>
-            {formatDate(wedgie.wedgieDate)}
-          </Text>
-          {wedgie.seasonName && wedgie.seasonName !== "GEMS" ? (
-            <Text style={styles.season} allowFontScaling={false}>
-              {wedgie.seasonName} SEASON
+      <View style={styles.body}>
+        {/* Number badge beside the date and season, as the info panel has it. */}
+        <View style={styles.headerRow}>
+          <View style={styles.badge}>
+            <Text
+              style={[
+                styles.badgeHash,
+                {
+                  fontSize: BADGE_HASH,
+                  lineHeight: BADGE_HASH,
+                  // `mt-[.75em]` on the web, dropping the hash to the numeral's foot
+                  marginTop: BADGE_HASH * 0.75,
+                },
+              ]}
+              allowFontScaling={false}
+            >
+              #
             </Text>
-          ) : null}
+            <Text
+              style={[
+                styles.badgeNumber,
+                { fontSize: BADGE_NUMBER, lineHeight: BADGE_NUMBER },
+              ]}
+              allowFontScaling={false}
+            >
+              {wedgie.number ?? 1}
+            </Text>
+          </View>
+          <View style={styles.headerText}>
+            <Text style={styles.date} allowFontScaling={false}>
+              {formatDate(wedgie.wedgieDate)}
+            </Text>
+            {wedgie.seasonName && wedgie.seasonName !== "GEMS" ? (
+              <Text style={styles.season} allowFontScaling={false}>
+                {wedgie.seasonName} SEASON
+              </Text>
+            ) : null}
+          </View>
         </View>
-      </View>
 
-      <View style={styles.facts}>
-        <Fact label="Player">
-          <Text style={styles.player}>{wedgie.playerName}</Text>
-        </Fact>
-        <Fact label="Teams">
-          <Text style={styles.teams}>
-            <Text style={styles.teamName}>{wedgie.teamName}</Text>
-            {wedgie.teamAgainstName.includes("Unknown")
-              ? ""
-              : ` vs ${wedgie.teamAgainstName}`}
-          </Text>
-        </Fact>
-        {wedgie.types.length > 0 ? (
-          <Fact label="Type">
-            <Text style={styles.types}>
-              {wedgie.types.map((t) => t.name).join(", ")}
+        <View style={styles.facts}>
+          <Fact label="Player">
+            <Text style={styles.player}>{wedgie.playerName}</Text>
+          </Fact>
+          <Fact label="Teams">
+            <Text style={styles.teams}>
+              <Text style={styles.teamName}>{wedgie.teamName}</Text>
+              {wedgie.teamAgainstName.includes("Unknown")
+                ? ""
+                : ` vs ${wedgie.teamAgainstName}`}
             </Text>
           </Fact>
-        ) : null}
-      </View>
+          {wedgie.types.length > 0 ? (
+            <Fact label="Type">
+              <Text style={styles.types}>
+                {wedgie.types.map((t) => t.name).join(", ")}
+              </Text>
+            </Fact>
+          ) : null}
+        </View>
 
-      <View style={styles.courtWrap}>
-        <CourtPositionDiagram
-          position={wedgie.position}
-          width={150}
-          dotSize={14}
-        />
-      </View>
-
-      <View style={styles.nav}>
-        <NavButton
-          direction="previous"
-          label={previousNumber}
-          enabled={hasPrevious}
-          onPress={onPrevious}
-        />
-        <NavButton
-          direction="next"
-          label={nextNumber}
-          enabled={hasNext}
-          onPress={onNext}
-        />
+        <View style={styles.courtWrap}>
+          <CourtPositionDiagram
+            position={wedgie.position}
+            width={150}
+            dotSize={14}
+          />
+        </View>
       </View>
     </View>
   );
@@ -278,6 +286,25 @@ function Chevron({ direction }: { direction: "previous" | "next" }) {
   );
 }
 
+function CloseButton({ onPress }: { onPress: () => void }) {
+  return (
+    <Pressable
+      onPress={onPress}
+      hitSlop={10}
+      style={({ pressed }) => [styles.close, pressed && styles.closePressed]}
+    >
+      <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+        <Path
+          d="M6 6L18 18M18 6L6 18"
+          stroke={colors.darkpurple}
+          strokeWidth={3.5}
+          strokeLinecap="round"
+        />
+      </Svg>
+    </Pressable>
+  );
+}
+
 /** The info panel shows a long en-US date, or the GEMS emoji on those days. */
 function formatDate(value: string): string {
   const date = new Date(value);
@@ -291,12 +318,28 @@ function formatDate(value: string): string {
 }
 
 const styles = StyleSheet.create({
-  content: {
-    backgroundColor: colors.darkpurple,
-    padding: space.lg,
-    gap: space.md,
-    paddingBottom: space.lg,
+  sheet: { backgroundColor: colors.darkpurple, paddingBottom: space.lg },
+  topBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: space.lg,
+    paddingTop: space.sm,
+    paddingBottom: space.md,
+    gap: space.sm,
   },
+  navGroup: { flexDirection: "row", gap: space.sm },
+  close: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: colors.yellow,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  closePressed: { opacity: 0.7 },
+  // Everything under the full-bleed video keeps the page gutter.
+  body: { padding: space.lg, gap: space.md },
   padded: { flex: 1, padding: space.lg, backgroundColor: colors.darkpurple },
 
   headerRow: { flexDirection: "row", alignItems: "center", gap: space.lg },
@@ -343,11 +386,6 @@ const styles = StyleSheet.create({
 
   courtWrap: { alignItems: "center" },
 
-  nav: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    gap: space.sm,
-  },
   navButton: {
     flexDirection: "row",
     alignItems: "center",

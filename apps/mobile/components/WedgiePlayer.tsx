@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from "react-native";
 import { WebView } from "react-native-webview";
 
 import { getApiBaseUrl } from "@/lib/api";
-import { colors, radius, space, type } from "@/lib/theme";
+import { colors, space, type } from "@/lib/theme";
 import type { VideoUrls } from "@wedgietracker/core/types/wedgie";
 import {
   getVideoSrc,
@@ -122,14 +122,12 @@ function EmbeddedVideo({ src }: { src: string }) {
 const styles = StyleSheet.create({
   frame: {
     aspectRatio: 16 / 9,
-    borderRadius: radius.lg,
     overflow: "hidden",
     backgroundColor: "#000",
   },
   surface: { flex: 1, backgroundColor: "#000" },
   placeholder: {
     aspectRatio: 16 / 9,
-    borderRadius: radius.lg,
     backgroundColor: colors.darkpurpleLight,
     borderWidth: 1,
     borderColor: colors.hairline,
