@@ -96,7 +96,7 @@ export default function PrivacyPage() {
                   Usage Data
                 </h3>
                 <p>
-                  We use Google Analytics 4 (GA4) to collect standard internet
+                  We use a web analytics provider to collect standard internet
                   log information and details of visitor behavior patterns. This
                   includes:
                 </p>
@@ -129,11 +129,12 @@ export default function PrivacyPage() {
               </h2>
               <p className="mb-4">We use the following third-party services:</p>
               <ul className="list-inside list-disc space-y-2">
-                <li>Google Analytics 4 for website analytics</li>
-                <li>Stripe for payment processing</li>
-                <li>Mailchimp for newsletter management</li>
-                <li>Printful for order fulfillment</li>
-                <li>A media host for images and video</li>
+                <li>A web analytics provider, for how the site is used</li>
+                <li>A payment processor, for checkout</li>
+                <li>A newsletter provider, for subscriptions</li>
+                <li>An email provider, for order and donation confirmations</li>
+                <li>A print and fulfilment partner, for orders</li>
+                <li>A media host, for images and video</li>
               </ul>
             </section>
 
@@ -144,7 +145,7 @@ export default function PrivacyPage() {
               <p>
                 We store your data securely using industry-standard practices.
                 Your payment information is never stored on our servers and is
-                handled directly by Stripe.
+                handled directly by our payment processor.
               </p>
             </section>
 
