@@ -126,13 +126,9 @@ export function report(
 /* -------------------------------------------------------------------------- */
 
 /**
- * This project is shared with another app on the same account, because PostHog Cloud
- * gates extra projects behind a paid add-on. The two are told apart by the
- * `app` property registered below, which rides on every event including the
- * SDK's own `$screen` and `Application Opened`.
- *
- * Custom events are prefixed `wt_` for the same reason: the other app's are
- * unprefixed, so nothing can collide in the event list.
+ * Every event carries an `app` property, registered below, including the
+ * SDK's own `$screen` and `Application Opened`, and custom events are
+ * prefixed `wt_`, so they stay identifiable in a PostHog project.
  */
 export const posthog = POSTHOG_KEY
   ? new PostHog(POSTHOG_KEY, {

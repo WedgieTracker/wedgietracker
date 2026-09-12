@@ -80,8 +80,7 @@ export default function SupportPage() {
               </p>
               <p>
                 The WedgieTracker iOS app is published by ZOKE.GG LTD, a company
-                registered in England and Wales, company number 16383692,
-                registered office 124-128 City Road, London EC1V 2NX.
+                registered in England and Wales.
               </p>
             </section>
           </div>

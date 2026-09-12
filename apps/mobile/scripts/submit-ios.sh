@@ -8,8 +8,7 @@
 # supported. Reauthenticating as user..."). On this machine that login fails
 # with "iTunes service key is empty", so the key can never get used.
 #
-# altool takes the key directly and never touches the Developer Portal. It is
-# also what ships the other app from this machine.
+# altool takes the key directly and never touches the Developer Portal.
 #
 # Usage:  ./scripts/submit-ios.sh [build-id]
 #         With no argument, takes the most recent finished iOS build.
