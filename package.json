@@ -30,6 +30,7 @@
   "packageManager": "pnpm@9.15.9",
   "pnpm": {
     "onlyBuiltDependencies": [
+      "canvas",
       "lefthook"
     ]
   }
