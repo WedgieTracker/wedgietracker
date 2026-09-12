@@ -1,0 +1,41 @@
+# NOTE: when this file exists, EAS uses it INSTEAD of .gitignore when deciding
+# what to upload to the build servers, so it has to repeat those rules too.
+
+# dependencies and build output
+node_modules/
+.pnp
+.pnp.js
+coverage/
+.next/
+out/
+build/
+ios/
+android/
+.expo/
+.expo-shared/
+*.tsbuildinfo
+apps/web/dist-types/
+
+# secrets and credentials - the iOS build needs none of them
+.env
+.env.*
+!.env.example
+*.pem
+certificates/
+credentials/
+
+# databases and dumps
+*.db
+*.dump
+local.db
+apps/web/database-backups/
+
+# large web-only assets the app bundle never reads
+apps/web/public/fonts/
+apps/web/public/*-template*.png
+
+# local tooling caches
+.fallow/
+.claude/
+.idea/
+.DS_Store

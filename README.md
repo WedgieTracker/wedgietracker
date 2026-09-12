@@ -1,11 +1,11 @@
 <p align="center">
   <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="public/github-logo-dark.svg">
-  <img src="public/github-logo-light.svg" width="200" alt="Logo for WedgieTracker">
+  <source media="(prefers-color-scheme: dark)" srcset="apps/web/public/github-logo-dark.svg">
+  <img src="apps/web/public/github-logo-light.svg" width="200" alt="Logo for WedgieTracker">
 </picture>
 </p>
 
-A modern web application for tracking basketball wedgies.
+A modern application for tracking basketball wedgies, on the web and on iOS.
 
 ## Tech Stack
 
@@ -18,6 +18,7 @@ A modern web application for tracking basketball wedgies.
 - [TypeScript](https://www.typescriptlang.org/) 7 - Type safety, native (Go) compiler
 - [oxlint](https://oxc.rs) - Fast linting (Rust-based)
 - [Vitest](https://vitest.dev) - Testing
+- [Expo](https://expo.dev) 57 / React Native - iOS app
 - [Vercel](https://vercel.com) - Deployment
 
 ## Features
@@ -34,32 +35,50 @@ A modern web application for tracking basketball wedgies.
 
 ## Project Structure
 
+A pnpm workspace. The web app and the iOS app share domain logic through
+`packages/core`, and the iOS app types its API client against the web app's
+tRPC router, so the two cannot drift apart silently.
+
 ```
-src/
-├── app/                    # Next.js App Router pages
-│   ├── admin/              # Admin dashboard pages
-│   ├── api/                # API routes (stripe, social media, etc.)
-│   ├── blog/               # Blog pages
-│   ├── store/              # Store pages
-│   └── ...                 # Public pages (standings, all-wedgies, etc.)
-├── components/
-│   ├── admin/              # Admin-specific components
-│   ├── home/               # Homepage components (Stats, Wave, WedgieList)
-│   ├── layout/             # Layout components (Header, Footer, PageLayout)
-│   ├── shared/             # Shared reusable components (Loader, Cta, etc.)
-│   ├── standings/          # Standings page components
-│   └── ui/                 # shadcn/ui components
-├── config/                 # App configuration (metadata, dev routes)
-├── context/                # React context providers
-├── hooks/                  # Custom React hooks
-├── server/
-│   ├── api/                # tRPC routers and configuration
-│   ├── auth/               # Auth.js configuration
-│   ├── services/           # External service clients (Stripe, Cloudinary, etc.)
-│   └── ...                 # DB, schema, cache, helpers
-├── types/                  # Shared TypeScript types
-└── utils/                  # Pure utility functions
+apps/
+├── web/                    # Next.js 16 app (the site, the API, the admin)
+│   ├── src/app/            # App Router pages + API routes
+│   ├── src/components/     # admin, home, layout, shared, standings, ui
+│   ├── src/server/
+│   │   ├── api/            # tRPC routers; types.ts is the client-facing type
+│   │   ├── auth/           # Auth.js configuration
+│   │   └── services/       # Stripe, Cloudinary, Printful, email, ...
+│   └── src/config|context|hooks|lib|trpc/
+└── mobile/                 # Expo app (iOS)
+    ├── app/                # expo-router routes
+    │   ├── (tabs)/         # Feed, Standings, Seasons, Stats
+    │   └── wedgie/[id]     # Wedgie detail + video player
+    ├── components/         # WedgieCard, WedgiePlayer, StatTile, Screen
+    └── lib/                # tRPC client, provider, theme
+
+packages/
+└── core/                   # Shared, client-agnostic code
+    ├── src/schema.ts       # Drizzle schema (single source of truth)
+    ├── src/types/          # Domain types derived from the schema
+    └── src/utils/          # Pure helpers (pace, filters, team aliases, video)
 ```
+
+### How the iOS app talks to the API
+
+The mobile app calls the same public tRPC procedures the website uses - there
+is no second backend. It imports `AppRouter` as a **type only**, from
+declarations that `apps/web` emits:
+
+```bash
+pnpm --filter @wedgietracker/web types:build
+```
+
+That runs automatically as part of `pnpm typecheck`. Because the import is
+type-only, none of the server's dependencies (Next.js, Drizzle, Stripe,
+Auth.js) reach the app bundle - only the shape of the API does.
+
+Point the app at a different backend with `EXPO_PUBLIC_API_URL`; it otherwise
+uses the production site.
 
 ## Local Development Setup
 
@@ -76,10 +95,10 @@ cd wedgietracker
 pnpm install
 ```
 
-3. Create a `.env` file based on `.env.example` and add your environment variables:
+3. Create `apps/web/.env` from the example and add your environment variables:
 
 ```bash
-cp .env.example .env
+cp apps/web/.env.example apps/web/.env
 ```
 
 4. Set up the database. Two paths depending on access:
@@ -87,10 +106,10 @@ cp .env.example .env
    **Without Turso access** (recommended for new contributors). Bootstrap a local SQLite copy from the committed seed:
 
    ```bash
-   sh/start-database.sh
+   apps/web/sh/start-database.sh
    ```
 
-   Then point `.env` at the local file:
+   Then point `apps/web/.env` at the local file:
 
    ```
    TURSO_DATABASE_URL="file:./local.db"
@@ -108,6 +127,17 @@ cp .env.example .env
 ```bash
 pnpm dev
 ```
+
+6. Optionally, run the iOS app against production data (needs Xcode and the
+   iOS Simulator):
+
+```bash
+pnpm mobile:ios
+```
+
+To run it against your local `pnpm dev` instead, set
+`EXPO_PUBLIC_API_URL` in `apps/mobile/.env.local`. Use your machine's LAN
+IP rather than `localhost` if you are testing on a physical device.
 
 ## Available Scripts
 
@@ -129,6 +159,12 @@ pnpm dev
 | `pnpm db:generate`   | Generate database migrations          |
 | `pnpm db:studio`     | Open Drizzle Studio                   |
 | `pnpm db:dump`       | Refresh `database-backups/seed.sql`   |
+| `pnpm mobile`        | Start the Expo dev server             |
+| `pnpm mobile:ios`    | Open the iOS app in the Simulator     |
+
+Scripts at the root delegate to the workspace packages. To target one package
+directly, use `pnpm --filter @wedgietracker/web <script>` (or `.../core`,
+`.../mobile`).
 
 ## Development Workflow
 

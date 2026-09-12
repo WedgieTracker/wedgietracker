@@ -6,47 +6,47 @@ docs:
   - changed-files:
       - any-glob-to-any-file:
           - "*.md"
-          - "content/**"
+          - "apps/web/content/**"
 
 dependencies:
   - changed-files:
       - any-glob-to-any-file:
-          - "package.json"
+          - "**/package.json"
           - "pnpm-lock.yaml"
 
 tests:
   - changed-files:
       - any-glob-to-any-file:
-          - "src/**/*.test.{ts,tsx}"
-          - "vitest.config.ts"
-          - "src/test/**"
+          - "apps/web/src/**/*.test.{ts,tsx}"
+          - "apps/web/vitest.config.ts"
+          - "apps/web/src/test/**"
 
 admin:
   - changed-files:
       - any-glob-to-any-file:
-          - "src/app/admin/**"
-          - "src/components/admin/**"
+          - "apps/web/src/app/admin/**"
+          - "apps/web/src/components/admin/**"
 
 api:
   - changed-files:
-      - any-glob-to-any-file: "src/app/api/**"
+      - any-glob-to-any-file: "apps/web/src/app/api/**"
 
 components:
   - changed-files:
-      - any-glob-to-any-file: "src/components/**"
+      - any-glob-to-any-file: "apps/web/src/components/**"
 
 server:
   - changed-files:
       - any-glob-to-any-file:
-          - "src/server/**"
-          - "src/lib/**"
+          - "apps/web/src/server/**"
+          - "apps/web/src/lib/**"
 
 config:
   - changed-files:
       - any-glob-to-any-file:
-          - "src/config/**"
-          - "src/env.js"
-          - "tsconfig.json"
-          - "tailwind.config.ts"
-          - "next.config.js"
-          - "drizzle.config.ts"
+          - "apps/web/src/config/**"
+          - "apps/web/src/env.js"
+          - "apps/web/tsconfig.json"
+          - "apps/web/tailwind.config.ts"
+          - "apps/web/next.config.js"
+          - "apps/web/drizzle.config.ts"

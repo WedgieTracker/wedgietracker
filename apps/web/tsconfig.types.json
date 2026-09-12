@@ -1,0 +1,18 @@
+{
+  // Emits declaration files for the API surface only, so apps/mobile can type
+  // its tRPC client against AppRouter without compiling the web server tree
+  // (and without needing next, stripe, googleapis et al as dependencies).
+  // Value-only imports such as `next/cache` do not survive into .d.ts output.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "declarationDir": "./dist-types",
+    "rootDir": "./src",
+    "incremental": false,
+    "plugins": []
+  },
+  "include": ["src/server/api/types.ts"],
+  "exclude": ["node_modules"]
+}

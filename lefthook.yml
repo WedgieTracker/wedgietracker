@@ -4,10 +4,22 @@ pre-commit:
     - name: ts-lint-format
       glob: "*.{ts,tsx}"
       run: |
-        ox_files=$(printf '%s\n' {staged_files} | grep -vE '^(src/(server|components)/dev/|scripts/)' || true)
-        if [ -n "$ox_files" ]; then
-          pnpm exec oxlint --fix $ox_files || exit 1
-        fi
+        staged=$(printf '%s\n' {staged_files})
+
+        # Each package owns its own oxlint config, so lint from inside the
+        # package with paths relative to it.
+        for pkg in apps/web packages/core apps/mobile; do
+          [ -f "$pkg/.oxlintrc.json" ] || continue
+          files=$(printf '%s\n' "$staged" | grep "^$pkg/" | sed "s|^$pkg/||" || true)
+          if [ "$pkg" = "apps/web" ]; then
+            files=$(printf '%s\n' "$files" | grep -vE '^(src/(server|components)/dev/|scripts/)' || true)
+          fi
+          files=$(printf '%s\n' "$files" | grep -v '^$' || true)
+          if [ -n "$files" ]; then
+            (cd "$pkg" && pnpm exec oxlint --fix $files) || exit 1
+          fi
+        done
+
         pnpm exec prettier --write {staged_files}
       stage_fixed: true
 
