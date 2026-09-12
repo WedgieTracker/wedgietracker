@@ -32,24 +32,37 @@ const LAYERS = [
  * Port of the web app's Wave: a pink fill that rises to `fillPercentage` of the
  * container, topped by a parallax wave crest.
  */
-export function Wave({ fillPercentage }: { fillPercentage: number }) {
+export function Wave({
+  fillPercentage,
+  containerHeight,
+}: {
+  fillPercentage: number;
+  containerHeight: number;
+}) {
   const height = useSharedValue(0);
 
   useEffect(() => {
+    if (containerHeight <= 0) return;
+
     // The web version resets to 0 then animates up, so the fill always reads
     // as filling rather than appearing.
     height.value = 0;
     const id = setTimeout(() => {
-      height.value = withTiming(fillPercentage, {
+      height.value = withTiming((fillPercentage / 100) * containerHeight, {
         duration: 1000,
         easing: Easing.out(Easing.cubic),
       });
     }, 100);
     return () => clearTimeout(id);
-  }, [fillPercentage, height]);
+  }, [fillPercentage, containerHeight, height]);
 
+  // Driven in pixels rather than as a percentage: the panel is sized by
+  // minHeight, so a percentage height has no definite parent to resolve
+  // against and stops short of the top. At 100% the fill must reach the very
+  // top so the crest is pushed out of the clipped panel entirely - past the
+  // target the tank has overflowed and there is no surface left to see.
   const fillStyle = useAnimatedStyle(() => ({
-    height: `${height.value}%`,
+    height: height.value,
   }));
 
   return (

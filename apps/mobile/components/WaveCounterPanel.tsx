@@ -49,7 +49,7 @@ export function WaveCounterPanel({
       style={[styles.panel, { minHeight }, style]}
       onLayout={(e) => setBox(e.nativeEvent.layout)}
     >
-      <Wave fillPercentage={fillPercentage} />
+      <Wave fillPercentage={fillPercentage} containerHeight={box.height} />
 
       <View style={[styles.card, { width: clampRem(16, 13, 16, 28, width) }]}>
         <Text style={styles.headline} allowFontScaling={false}>
