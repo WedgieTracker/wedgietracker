@@ -181,10 +181,9 @@ Paste into App Store Connect under the version, "App Review Information" then
 "Notes". **They do not carry over between versions**, so copy them forward
 each time and update anything that changed.
 
-The shape follows what got London Garden through its 4 September rejection:
+The shape follows what got a previous app on this account through review:
 name the tap path to every feature, say why each capability exists, and answer
-the question a reviewer is going to ask before they ask it. See
-`~/Documents/Sandbox/html/expo-ios-app-store-gotchas/app-review-rejections.md`.
+the question a reviewer is going to ask before they ask it.
 
 ```
 WHAT THE APP IS
@@ -283,11 +282,11 @@ Three deliberate inclusions:
       `4d215288-e7b1-4e6c-8157-bfbe346b7481`.
 
       **Upload with `./scripts/submit-ios.sh`, not `eas submit`.** Every path
-                                              through eas submit ends at an Apple ID login: it needs one to create the
-                                              app record, and another to register an ASC API key against the project
-                                              ("Only user authentication is supported"). That login fails here with
-                                              "iTunes service key is empty", so the key never gets used. altool takes
-                                              the key directly and never touches the Developer Portal.
+                                                      through eas submit ends at an Apple ID login: it needs one to create the
+                                                      app record, and another to register an ASC API key against the project
+                                                      ("Only user authentication is supported"). That login fails here with
+                                                      "iTunes service key is empty", so the key never gets used. altool takes
+                                                      the key directly and never touches the Developer Portal.
 
 - [x] Export compliance. `ITSAppUsesNonExemptEncryption: false` answers it at
       upload; the API confirms `usesNonExemptEncryption: false` on build 4, so

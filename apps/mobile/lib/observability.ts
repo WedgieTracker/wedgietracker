@@ -126,12 +126,12 @@ export function report(
 /* -------------------------------------------------------------------------- */
 
 /**
- * This project is shared with the London Garden app, because PostHog Cloud
+ * This project is shared with another app on the same account, because PostHog Cloud
  * gates extra projects behind a paid add-on. The two are told apart by the
  * `app` property registered below, which rides on every event including the
  * SDK's own `$screen` and `Application Opened`.
  *
- * Custom events are prefixed `wt_` for the same reason: London Garden's are
+ * Custom events are prefixed `wt_` for the same reason: the other app's are
  * unprefixed, so nothing can collide in the event list.
  */
 export const posthog = POSTHOG_KEY
@@ -167,9 +167,8 @@ export function track(event: TrackedEvent, properties?: TrackProperties): void {
 
 /**
  * PostHog's screen autocapture does not support React Navigation 7, which is
- * what expo-router runs on, so screens are captured by hand. London Garden
- * learned this the expensive way: 828 autocaptured `$screen` events there
- * carried three names, all of them framework internals.
+ * what expo-router runs on, so screens are captured by hand. Trusting it gives
+ * `$screen` events named after framework internals rather than routes.
  *
  * The same pathname also becomes a Sentry tag and breadcrumb, which is how a
  * crash report answers "what were they looking at" without tracing turned on.

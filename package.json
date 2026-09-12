@@ -23,9 +23,9 @@
     "prepare": "lefthook install"
   },
   "devDependencies": {
-    "lefthook": "^2.1.9",
-    "prettier": "^3.9.4",
-    "prettier-plugin-tailwindcss": "^0.8.0"
+    "lefthook": "^2.1.10",
+    "prettier": "^3.9.6",
+    "prettier-plugin-tailwindcss": "^0.8.1"
   },
   "packageManager": "pnpm@9.15.9",
   "pnpm": {
