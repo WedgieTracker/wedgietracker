@@ -6,11 +6,11 @@ import {
   Text,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 import { PageHeading } from "@/components/PageHeading";
 import { PillButton } from "@/components/PillButton";
 import { ErrorState, ScreenLoading } from "@/components/States";
+import { TopSafeArea } from "@/components/TopSafeArea";
 import { TypingStats } from "@/components/TypingStats";
 import { WaveCounterPanel } from "@/components/WaveCounterPanel";
 import { useFluidType } from "@/lib/fluid";
@@ -30,7 +30,7 @@ export default function StatsScreen() {
   if (nerd.isPending) return <ScreenLoading />;
 
   return (
-    <SafeAreaView style={styles.safe} edges={["top"]}>
+    <TopSafeArea style={styles.safe}>
       <ScrollView
         contentContainerStyle={[styles.content, { paddingBottom: tabBar }]}
         showsVerticalScrollIndicator={false}
@@ -55,7 +55,7 @@ export default function StatsScreen() {
           endorsed by the NBA or its teams.
         </Text>
       </ScrollView>
-    </SafeAreaView>
+    </TopSafeArea>
   );
 }
 

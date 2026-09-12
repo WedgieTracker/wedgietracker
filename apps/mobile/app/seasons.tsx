@@ -41,6 +41,7 @@ export default function SeasonsScreen() {
     <>
       {backTitle}
       <Screen
+        underHeader
         heading={
           <PageHeading
             top="Seasons"

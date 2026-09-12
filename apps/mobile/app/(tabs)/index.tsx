@@ -6,12 +6,12 @@ import {
   Text,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 import { HeroStats } from "@/components/HeroStats";
 import { PillButton } from "@/components/PillButton";
 import { StandingsList } from "@/components/StandingsList";
 import { ErrorState, ScreenLoading } from "@/components/States";
+import { TopSafeArea } from "@/components/TopSafeArea";
 import { WedgieRow } from "@/components/WedgieRow";
 import { useFluidType } from "@/lib/fluid";
 import { useTabBarClearance } from "@/lib/layout";
@@ -69,10 +69,7 @@ export default function HomeScreen() {
   }
 
   return (
-    <SafeAreaView
-      style={[styles.safe, { backgroundColor: heroTop }]}
-      edges={["top"]}
-    >
+    <TopSafeArea style={[styles.safe, { backgroundColor: heroTop }]}>
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={[styles.content, { paddingBottom: tabBar }]}
@@ -213,7 +210,7 @@ export default function HomeScreen() {
           ) : null}
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </TopSafeArea>
   );
 }
 
