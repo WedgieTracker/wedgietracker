@@ -1,0 +1,28 @@
+{
+  "name": "@wedgietracker/core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./schema": "./src/schema.ts",
+    "./types/*": "./src/types/*.ts",
+    "./utils/*": "./src/utils/*.ts"
+  },
+  "scripts": {
+    "typecheck": "tsgo --noEmit",
+    "test": "vitest run",
+    "check": "oxlint && tsgo --noEmit && vitest run",
+    "lint": "oxlint"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.45.2",
+    "@paralleldrive/cuid2": "^3.3.0"
+  },
+  "devDependencies": {
+    "@typescript/native-preview": "^7.0.0-dev.20260705.1",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.9",
+    "oxlint": "^1.72.0"
+  }
+}

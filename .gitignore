@@ -1,12 +1,12 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-/node_modules
+node_modules/
 /.pnp
 .pnp.js
 
 # testing
-/coverage
+coverage/
 
 # database
 /prisma/db.sqlite
@@ -14,12 +14,16 @@
 db.sqlite
 
 # next.js
-/.next/
-/out/
+.next/
+.expo/
+.expo-shared/
+out/
 next-env.d.ts
 
 # production
-/build
+build/
+ios/
+android/
 
 # misc
 .DS_Store
@@ -44,7 +48,7 @@ yarn-error.log*
 
 # idea files
 .idea
-/certificates
+certificates/
 
 # claude code
 .claude/
@@ -53,18 +57,19 @@ yarn-error.log*
 .fallow/
 
 # Ignore Google credentials
-/credentials
+credentials/
 
 # database backups (everything except the committed contributor seed)
-/database-backups/*
-!/database-backups/seed.sql
+apps/web/database-backups/*
+!apps/web/database-backups/seed.sql
 *.dump
 
 # local sqlite copy created by sh/start-database.sh
-/local.db
+local.db
 
 # test databases
 test.db
 
-# sh scripts
-/sh
+# sh scripts (except the committed contributor helper)
+apps/web/sh/*
+!apps/web/sh/start-database.sh
