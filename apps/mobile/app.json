@@ -42,7 +42,12 @@
       "typedRoutes": true
     },
     "extra": {
-      "apiUrl": "https://www.wedgietracker.com"
-    }
+      "apiUrl": "https://www.wedgietracker.com",
+      "router": {},
+      "eas": {
+        "projectId": "23d9d8e5-8a35-40b2-9a36-d15775b1952d"
+      }
+    },
+    "owner": "gek0z"
   }
 }
