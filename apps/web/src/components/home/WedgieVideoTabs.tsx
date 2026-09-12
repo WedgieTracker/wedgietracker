@@ -1,5 +1,5 @@
 import type { VideoUrls } from "@wedgietracker/core/types/wedgie";
-import type { ActiveVideo } from "./wedgie-video";
+import type { ActiveVideo } from "@wedgietracker/core/utils/wedgieVideo";
 
 interface WedgieVideoTabsProps {
   videoUrl: VideoUrls;

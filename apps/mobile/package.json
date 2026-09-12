@@ -1,0 +1,47 @@
+{
+  "name": "@wedgietracker/mobile",
+  "main": "expo-router/entry",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "expo start",
+    "ios": "expo start --ios",
+    "android": "expo start --android",
+    "web": "expo start --web",
+    "lint": "oxlint",
+    "typecheck": "pnpm --filter @wedgietracker/web types:build && tsgo --noEmit",
+    "check": "oxlint && pnpm run typecheck"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5.101.2",
+    "@trpc/client": "^11.18.0",
+    "@trpc/react-query": "^11.18.0",
+    "@trpc/server": "^11.18.0",
+    "@wedgietracker/core": "workspace:*",
+    "expo": "~57.0.22",
+    "expo-constants": "~57.0.18",
+    "expo-linking": "~57.0.10",
+    "expo-router": "~57.0.21",
+    "expo-splash-screen": "~57.0.9",
+    "expo-status-bar": "~57.0.1",
+    "expo-symbols": "~57.0.3",
+    "expo-video": "~57.0.4",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "react-native": "0.86.3",
+    "react-native-reanimated": "4.5.1",
+    "react-native-safe-area-context": "~5.7.0",
+    "react-native-screens": "~4.26.0",
+    "react-native-web": "~0.21.0",
+    "react-native-webview": "14.0.1",
+    "react-native-worklets": "0.10.1",
+    "superjson": "^2.2.6"
+  },
+  "devDependencies": {
+    "@types/react": "~19.2.2",
+    "@typescript/native-preview": "^7.0.0-dev.20260705.1",
+    "@wedgietracker/web": "workspace:*",
+    "oxlint": "^1.72.0",
+    "typescript": "~6.0.3"
+  }
+}

@@ -5,7 +5,7 @@ interface PaceInput {
   seasonRates: number[];
 }
 
-interface PaceResult {
+export interface PaceResult {
   simplePace: number;
   rmPace: number;
   medianPace: number;

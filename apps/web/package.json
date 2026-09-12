@@ -19,9 +19,10 @@
     "preview": "next build && next start",
     "start": "next start",
     "test": "vitest run",
-    "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "typecheck": "tsgo --noEmit"
+    "test:watch": "vitest",
+    "typecheck": "tsgo --noEmit",
+    "types:build": "tsgo -p tsconfig.types.json"
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.11.2",
@@ -94,5 +95,8 @@
     "tw-animate-css": "^1.4.0",
     "typescript": "^6.0.3",
     "vitest": "^4.1.9"
+  },
+  "exports": {
+    "./api": "./dist-types/server/api/types.d.ts"
   }
 }

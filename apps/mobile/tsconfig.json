@@ -1,0 +1,17 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "paths": {
+      // This app's own modules.
+      "@/*": ["./*"],
+      // The web app's emitted declarations keep their `~/*` specifiers, so map
+      // them at the declaration tree rather than at web's source. Run
+      // `pnpm --filter @wedgietracker/web types:build` after changing a router.
+      "~/*": ["../web/dist-types/*"]
+    }
+  },
+  "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"],
+  "exclude": ["node_modules"]
+}

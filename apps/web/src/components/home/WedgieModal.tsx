@@ -17,7 +17,7 @@ import {
   pickInitialVideo,
   getVideoSrc,
   type ActiveVideo,
-} from "./wedgie-video";
+} from "@wedgietracker/core/utils/wedgieVideo";
 
 interface WedgieModalProps {
   wedgie: Wedgie & {

@@ -73,3 +73,5 @@ test.db
 # sh scripts (except the committed contributor helper)
 apps/web/sh/*
 !apps/web/sh/start-database.sh
+# generated API declarations consumed by apps/mobile
+apps/web/dist-types/

@@ -6,3 +6,4 @@ export * from "./utils/formatDate";
 export * from "./utils/paceCalculator";
 export * from "./utils/teamAliases";
 export * from "./utils/wedgieFilter";
+export * from "./utils/wedgieVideo";

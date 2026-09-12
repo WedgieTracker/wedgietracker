@@ -12,7 +12,7 @@ import { CACHE_TAGS } from "~/server/cache";
 const postsDirectory = path.join(process.cwd(), "content/blog");
 
 // Add these interfaces at the top of the file
-interface BlogPostData {
+export interface BlogPostData {
   title: string;
   date: string;
   excerpt: string;
@@ -20,7 +20,7 @@ interface BlogPostData {
   author: string;
 }
 
-interface BlogPost extends BlogPostData {
+export interface BlogPost extends BlogPostData {
   slug: string;
   content: string;
 }
