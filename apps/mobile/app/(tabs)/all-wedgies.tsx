@@ -80,12 +80,25 @@ export default function AllWedgiesScreen() {
     seasonTouched,
   ]);
 
-  // Arriving from a player or team tap counts as a deliberate filter.
-  const isFiltered = season !== "" || type !== "" || playerOrTeam !== "";
+  /**
+   * The season the page opens on, which is what "unfiltered" means here. This
+   * page defaults to a season rather than to nothing, so comparing against ""
+   * would mark the default view as filtered and show the reset control on a
+   * screen nobody has touched.
+   */
+  const openingSeason =
+    (shouldShowPreviousSeason ? previousSeason?.name : undefined) ??
+    global?.currentSeason?.name ??
+    defaultSeason;
 
-  const clearFilters = () => {
-    setSeasonTouched(true);
-    setSeason("");
+  const isFiltered =
+    season !== openingSeason || type !== "" || playerOrTeam !== "";
+
+  // Back to how the page opened, so the control disappears once used. "All
+  // Seasons" is still a choice in the dropdown, it is just not the default.
+  const resetFilters = () => {
+    setSeasonTouched(false);
+    setSeason(openingSeason);
     setType("");
     setPlayerOrTeam("");
   };
@@ -229,7 +242,7 @@ export default function AllWedgiesScreen() {
               />
 
               {isFiltered ? (
-                <ClearFilters label="CLEAR FILTERS" onPress={clearFilters} />
+                <ClearFilters label="RESET FILTERS" onPress={resetFilters} />
               ) : null}
             </View>
 

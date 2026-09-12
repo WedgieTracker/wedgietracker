@@ -41,7 +41,13 @@ export function FilterSelect({
 }) {
   const [open, setOpen] = useState(false);
   const active = value !== "";
-  const current = options.find((o) => o.value === value) ?? options[0];
+  // Falling back to options[0] was wrong while the option list is still
+  // loading: a real season would display as "All Seasons", claiming a filter
+  // that is not the one applied. Show the value itself until its option
+  // arrives, and only fall back for the genuinely empty case.
+  const matched = options.find((o) => o.value === value);
+  const currentLabel =
+    matched?.label ?? (value !== "" ? value : (options[0]?.label ?? ""));
 
   return (
     <>
@@ -77,7 +83,7 @@ export function FilterSelect({
             style={[styles.valueText, !active && styles.valueTextEmpty]}
             numberOfLines={1}
           >
-            {current?.label ?? ""}
+            {currentLabel}
           </Text>
         </View>
       </Pressable>

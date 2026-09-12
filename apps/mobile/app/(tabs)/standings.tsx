@@ -138,7 +138,7 @@ export default function StandingsScreen() {
         </View>
 
         {isFiltered ? (
-          <ClearFilters label="RESET" onPress={resetFilters} />
+          <ClearFilters label="RESET FILTERS" onPress={resetFilters} />
         ) : null}
       </View>
 
