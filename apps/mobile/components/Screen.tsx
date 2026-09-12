@@ -2,10 +2,11 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  View,
   type RefreshControlProps,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
+import { TopSafeArea } from "@/components/TopSafeArea";
 import { useTabBarClearance } from "@/lib/layout";
 import { colors, space, type } from "@/lib/theme";
 
@@ -13,22 +14,33 @@ interface ScreenProps {
   heading: React.ReactNode;
   children: React.ReactNode;
   refreshControl?: React.ReactElement<RefreshControlProps>;
+  /** A stack screen whose navigation header already clears the status bar. */
+  underHeader?: boolean;
 }
 
-export function Screen({ heading, children, refreshControl }: ScreenProps) {
+export function Screen({
+  heading,
+  children,
+  refreshControl,
+  underHeader = false,
+}: ScreenProps) {
   const tabBar = useTabBarClearance();
 
-  return (
-    <SafeAreaView style={styles.safe} edges={["top"]}>
-      <ScrollView
-        contentContainerStyle={[styles.content, { paddingBottom: tabBar }]}
-        refreshControl={refreshControl}
-        showsVerticalScrollIndicator={false}
-      >
-        {heading}
-        {children}
-      </ScrollView>
-    </SafeAreaView>
+  const scroll = (
+    <ScrollView
+      contentContainerStyle={[styles.content, { paddingBottom: tabBar }]}
+      refreshControl={refreshControl}
+      showsVerticalScrollIndicator={false}
+    >
+      {heading}
+      {children}
+    </ScrollView>
+  );
+
+  return underHeader ? (
+    <View style={styles.safe}>{scroll}</View>
+  ) : (
+    <TopSafeArea style={styles.safe}>{scroll}</TopSafeArea>
   );
 }
 

@@ -9,12 +9,12 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useCountUp } from "@/components/Counter";
 import { ClearFilters, FilterSelect } from "@/components/FilterSelect";
 import { PageHeading } from "@/components/PageHeading";
 import { Empty, ErrorState, ScreenLoading } from "@/components/States";
+import { TopSafeArea } from "@/components/TopSafeArea";
 import { WedgieRow } from "@/components/WedgieRow";
 import { api } from "@/lib/api";
 import { useTabBarClearance } from "@/lib/layout";
@@ -154,7 +154,7 @@ export default function AllWedgiesScreen() {
   if (isPending || isLoadingSeasonData) return <ScreenLoading />;
 
   return (
-    <SafeAreaView style={styles.safe} edges={["top"]}>
+    <TopSafeArea style={styles.safe}>
       <FlatList
         style={styles.screen}
         contentContainerStyle={[styles.content, { paddingBottom: tabBar }]}
@@ -266,7 +266,7 @@ export default function AllWedgiesScreen() {
           />
         )}
       />
-    </SafeAreaView>
+    </TopSafeArea>
   );
 }
 
