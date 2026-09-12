@@ -19,7 +19,7 @@
   "dependencies": {
     "@expo-google-fonts/inter": "^0.4.2",
     "@sentry/react-native": "~7.11.0",
-    "@tanstack/react-query": "^5.101.2",
+    "@tanstack/react-query": "^5.102.8",
     "@trpc/client": "^11.18.0",
     "@trpc/react-query": "^11.18.0",
     "@trpc/server": "^11.18.0",
@@ -38,24 +38,24 @@
     "expo-status-bar": "~57.0.1",
     "expo-symbols": "~57.0.3",
     "posthog-react-native": "^4.71.0",
-    "react": "19.2.3",
-    "react-dom": "19.2.3",
-    "react-native": "0.86.3",
-    "react-native-reanimated": "4.5.1",
-    "react-native-safe-area-context": "~5.7.0",
-    "react-native-screens": "~4.26.0",
-    "react-native-svg": "15.15.4",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "react-native": "0.87.1",
+    "react-native-reanimated": "4.6.0",
+    "react-native-safe-area-context": "~5.9.1",
+    "react-native-screens": "~4.27.0",
+    "react-native-svg": "15.15.5",
     "react-native-web": "~0.21.0",
     "react-native-webview": "13.16.1",
-    "react-native-worklets": "0.10.1",
+    "react-native-worklets": "0.12.2",
     "superjson": "^2.2.6"
   },
   "devDependencies": {
     "@sentry/cli": "2.58.4",
-    "@types/react": "~19.2.2",
+    "@types/react": "~19.3.0",
     "@typescript/native-preview": "^7.0.0-dev.20260705.1",
     "@wedgietracker/web": "workspace:*",
-    "oxlint": "^1.72.0",
+    "oxlint": "^1.82.0",
     "typescript": "~6.0.3"
   }
 }
