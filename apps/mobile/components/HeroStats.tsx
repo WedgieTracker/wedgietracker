@@ -199,6 +199,13 @@ function daysSince(value: Date | string | null): number | null {
 const COLOR_SHIFT_HALF_MS = 500;
 
 /**
+ * Blend the way a browser animates CSS colour. Reanimated gamma-corrects by
+ * default (2.2), which lifts the halfway point between yellow and pink to a
+ * pale, almost white wash, so the words flashed white on every swap.
+ */
+const PLAIN_SRGB = { gamma: 1 } as const;
+
+/**
  * Port of the web's `animate-color-shift` / `animate-color-shift-delayed` pair:
  * NEW and WEDGIE swap between yellow and pink, always opposite each other.
  *
@@ -214,7 +221,8 @@ function FreshWedgie() {
     shift.value = withRepeat(
       withTiming(1, {
         duration: COLOR_SHIFT_HALF_MS,
-        easing: Easing.inOut(Easing.ease),
+        // CSS's default `ease` timing function.
+        easing: Easing.bezier(0.25, 0.1, 0.25, 1),
       }),
       -1,
       true,
@@ -223,10 +231,22 @@ function FreshWedgie() {
   }, [reduceMotion, shift]);
 
   const newStyle = useAnimatedStyle(() => ({
-    color: interpolateColor(shift.value, [0, 1], [colors.yellow, colors.pink]),
+    color: interpolateColor(
+      shift.value,
+      [0, 1],
+      [colors.yellow, colors.pink],
+      "RGB",
+      PLAIN_SRGB,
+    ),
   }));
   const wedgieStyle = useAnimatedStyle(() => ({
-    color: interpolateColor(shift.value, [0, 1], [colors.pink, colors.yellow]),
+    color: interpolateColor(
+      shift.value,
+      [0, 1],
+      [colors.pink, colors.yellow],
+      "RGB",
+      PLAIN_SRGB,
+    ),
   }));
 
   return (
