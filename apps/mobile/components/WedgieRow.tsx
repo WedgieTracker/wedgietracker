@@ -83,7 +83,13 @@ export function WedgieRow({
         </View>
 
         <Text
-          style={[styles.date, tight(t.wedgieDate)]}
+          style={[
+            styles.date,
+            tight(t.wedgieDate),
+            // Numerals have no descenders, so the space the font reserves
+            // below the baseline reads as a gap. Pull the date back up into it.
+            { marginTop: -0.12 * t.wedgieNumber },
+          ]}
           allowFontScaling={false}
         >
           {formatTileDate(wedgie.wedgieDate)}
@@ -185,7 +191,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     // Shared baseline, as with the web's inline spans.
     alignItems: "baseline",
-    marginTop: space.xs,
+    marginTop: space.sm,
   },
   hash: {
     fontFamily: fonts.bold,
@@ -197,8 +203,7 @@ const styles = StyleSheet.create({
     fontFamily: fonts.black,
     color: colors.darkpurple,
     letterSpacing: 0.5,
-    marginTop: space.xs,
-    marginBottom: space.sm,
+    marginBottom: space.xs,
   },
   watchBar: {
     width: "100%",
