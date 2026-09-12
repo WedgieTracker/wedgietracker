@@ -188,6 +188,14 @@ function daysSince(value: Date | string | null): number | null {
   const last = new Date(value);
   if (Number.isNaN(last.getTime())) return null;
 
+  // Store screenshots only. Captured in the offseason, the panel would read
+  // "96 days without wedgies", which is true that day and a strange first
+  // impression of an app that spends the season announcing new ones. This
+  // pins today to the last wedgie so the capture shows the in-season state.
+  // `__DEV__` is false in release builds and the whole branch is stripped, so
+  // it cannot reach anyone who installs the app.
+  if (__DEV__ && process.env.EXPO_PUBLIC_SCREENSHOT_MODE === "1") return 0;
+
   const diff = easternDay(new Date()) - easternDay(last);
   return Math.round(diff / (1000 * 60 * 60 * 24));
 }
