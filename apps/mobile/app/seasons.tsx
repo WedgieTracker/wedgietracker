@@ -1,5 +1,6 @@
 import { RefreshControl, StyleSheet, Text, View } from "react-native";
 
+import { PageHeading } from "@/components/PageHeading";
 import { Screen } from "@/components/Screen";
 import { Empty, ErrorState, Loading } from "@/components/States";
 import { api } from "@/lib/api";
@@ -21,7 +22,15 @@ export default function SeasonsScreen() {
 
   return (
     <Screen
-      title="SEASONS HISTORY"
+      heading={
+        <PageHeading
+          top="Seasons"
+          bottom="History"
+          base={36}
+          bottomScale={1.1}
+          liftEm={0.3}
+        />
+      }
       refreshControl={
         <RefreshControl
           refreshing={seasons.isRefetching}

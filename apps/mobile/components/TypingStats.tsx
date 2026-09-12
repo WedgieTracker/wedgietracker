@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
-import { colors, fonts, radius, space } from "@/lib/theme";
+import { colors, fonts, space } from "@/lib/theme";
 
 export interface StatsPerWedgie {
   fga: number;
@@ -99,8 +99,6 @@ const styles = StyleSheet.create({
   panel: {
     width: "100%",
     backgroundColor: colors.darkpurpleLighter,
-    borderBottomLeftRadius: radius.md,
-    borderBottomRightRadius: radius.md,
     minHeight: 84,
     alignItems: "center",
     justifyContent: "center",

@@ -17,7 +17,10 @@ import Animated, {
  * literally on native looked like static speckle, so each piece here also
  * accelerates as it falls, sways, and tumbles end-over-end.
  */
-const PIECE_COUNT = 90;
+/** Scaled to the panel so a small one is not as dense as a full-height hero. */
+function pieceCount(width: number, height: number): number {
+  return Math.round(Math.min(100, Math.max(40, (width * height) / 2000)));
+}
 
 /**
  * The web palette (Wave.tsx). The two dark values are unreadable as foreground
@@ -43,7 +46,7 @@ interface Piece {
 
 export function Confetti({ width, height }: { width: number; height: number }) {
   const pieces = useMemo<Piece[]>(() => {
-    return Array.from({ length: PIECE_COUNT }, (_, i) => {
+    return Array.from({ length: pieceCount(width, height) }, (_, i) => {
       // 0 = far (small, slow, dim), 1 = near (large, fast, bright)
       const depth = Math.random();
       const near = depth > 0.3;
@@ -64,7 +67,7 @@ export function Confetti({ width, height }: { width: number; height: number }) {
         opacity: near ? 0.75 + depth * 0.25 : 0.35 + depth * 0.5,
       };
     });
-  }, [width]);
+  }, [width, height]);
 
   if (width <= 0 || height <= 0) return null;
 

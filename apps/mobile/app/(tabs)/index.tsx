@@ -106,10 +106,25 @@ export default function HomeScreen() {
                     <StandingsList
                       title="PLAYERS"
                       items={standings.data.players}
+                      onPressItem={(name) =>
+                        router.push({
+                          pathname: "/all-wedgies",
+                          params: { wp: name },
+                        })
+                      }
                     />
                   </View>
                   <View style={styles.standingsTeams}>
-                    <StandingsList title="TEAMS" items={standings.data.teams} />
+                    <StandingsList
+                      title="TEAMS"
+                      items={standings.data.teams}
+                      onPressItem={(name) =>
+                        router.push({
+                          pathname: "/all-wedgies",
+                          params: { wt: name },
+                        })
+                      }
+                    />
                   </View>
                 </View>
                 <PillButton

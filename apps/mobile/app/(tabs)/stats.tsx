@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { PageHeading } from "@/components/PageHeading";
 import { PillButton } from "@/components/PillButton";
 import { ErrorState, Loading } from "@/components/States";
 import { TypingStats } from "@/components/TypingStats";
@@ -55,6 +56,16 @@ function NerdContent({ stats }: { stats: NerdStats }) {
 
   return (
     <>
+      <View style={styles.headingWrap}>
+        <PageHeading
+          top="Stats"
+          bottom="For Nerds"
+          base={60}
+          bottomScale={0.6}
+          liftEm={0.4}
+        />
+      </View>
+
       <View style={styles.seasonHeader}>
         <Text style={styles.seasonHeaderText} allowFontScaling={false}>
           IN THE{" "}
@@ -70,23 +81,26 @@ function NerdContent({ stats }: { stats: NerdStats }) {
         </Text>
       </View>
 
-      <WaveCounterPanel
-        value={stats.wedgiesThisSeason}
-        previousRecord={stats.previousRecord}
-        minHeight={320}
-        style={styles.counter}
-      />
-
-      <TypingStats stats={stats.statsPerWedgie} />
-
       <View style={styles.blocks}>
+        <View style={styles.counterGroup}>
+          <WaveCounterPanel
+            value={stats.wedgiesThisSeason}
+            previousRecord={stats.previousRecord}
+            minHeight={300}
+          />
+          <TypingStats stats={stats.statsPerWedgie} />
+        </View>
+
         <SeasonComparison stats={stats} />
         <LastWedgie
           stats={stats}
           onViewAll={() => router.push("/all-wedgies")}
         />
         <Leaders stats={stats} onStandings={() => router.push("/standings")} />
-        <SeasonTotals stats={stats} />
+        <SeasonTotals
+          stats={stats}
+          onSeasonsHistory={() => router.push("/seasons")}
+        />
       </View>
     </>
   );
@@ -252,21 +266,38 @@ function Leaders({
   );
 }
 
-function SeasonTotals({ stats }: { stats: NerdStats }) {
+function SeasonTotals({
+  stats,
+  onSeasonsHistory,
+}: {
+  stats: NerdStats;
+  onSeasonsHistory: () => void;
+}) {
   return (
-    <View style={styles.block}>
-      <Text style={styles.sentence}>
-        ACROSS <Text style={styles.pinkBold}>{stats.totalSeasonsOverall}</Text>{" "}
-        SEASONS WE HAVE COUNTED{" "}
-        <Text style={styles.pinkBold}>
-          {stats.totalWedgiesOverall.toLocaleString()}
-        </Text>{" "}
-        WEDGIES IN{" "}
-        <Text style={styles.pinkBold}>
-          {stats.totalGamesOverall.toLocaleString()}
-        </Text>{" "}
-        GAMES
-      </Text>
+    <View style={styles.group}>
+      <View style={styles.groupBody}>
+        {/* Three lines, as the web breaks them. */}
+        <Text style={styles.sentence}>
+          <Text style={styles.pink}>{stats.totalWedgiesOverall}</Text> TOTAL
+          WEDGIES
+        </Text>
+        <Text style={styles.sentence}>
+          TRACKED OVER{" "}
+          <Text style={styles.pink}>{stats.totalSeasonsOverall}</Text> SEASONS
+        </Text>
+        <Text style={styles.sentence}>
+          OR{" "}
+          <Text style={styles.pink}>
+            {stats.totalGamesOverall.toLocaleString()}
+          </Text>{" "}
+          GAMES
+        </Text>
+      </View>
+      <PillButton
+        label="SEE SEASONS HISTORY"
+        variant="bar"
+        onPress={onSeasonsHistory}
+      />
     </View>
   );
 }
@@ -292,6 +323,7 @@ const styles = StyleSheet.create({
   content: { paddingBottom: space.xxl * 2 },
   padded: { padding: space.lg },
 
+  headingWrap: { paddingTop: space.lg },
   seasonHeader: {
     flexDirection: "row",
     alignItems: "center",
@@ -316,11 +348,8 @@ const styles = StyleSheet.create({
     fontSize: 17,
   },
 
-  counter: {
-    borderTopLeftRadius: radius.xl,
-    borderTopRightRadius: radius.xl,
-    marginHorizontal: space.lg,
-  },
+  // The counter and the typewriter read as one card, clipped together.
+  counterGroup: { borderRadius: radius.xl, overflow: "hidden" },
 
   blocks: { padding: space.lg, gap: space.xl },
   block: {

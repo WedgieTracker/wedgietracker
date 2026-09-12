@@ -48,10 +48,12 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="seasons"
+        name="all-wedgies"
         options={{
-          title: "Seasons",
-          tabBarIcon: ({ color }) => <TabIcon name="calendar" color={color} />,
+          title: "Wedgies",
+          tabBarIcon: ({ color }) => (
+            <TabIcon name="play.rectangle.fill" color={color} />
+          ),
         }}
       />
       <Tabs.Screen

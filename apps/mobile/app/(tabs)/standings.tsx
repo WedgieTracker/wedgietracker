@@ -1,14 +1,9 @@
+import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import {
-  Pressable,
-  RefreshControl,
-  ScrollView,
-  StyleSheet,
-  Switch,
-  Text,
-  View,
-} from "react-native";
+import { RefreshControl, StyleSheet, Switch, Text, View } from "react-native";
 
+import { FilterSelect } from "@/components/FilterSelect";
+import { PageHeading } from "@/components/PageHeading";
 import { Screen } from "@/components/Screen";
 import { StandingsList } from "@/components/StandingsList";
 import { Empty, ErrorState, Loading } from "@/components/States";
@@ -21,6 +16,7 @@ import { colors, fonts, radius, space } from "@/lib/theme";
  * the opponent-counting switch, and the full PLAYERS / TEAMS tables.
  */
 export default function StandingsScreen() {
+  const router = useRouter();
   const {
     global,
     seasons,
@@ -53,7 +49,15 @@ export default function StandingsScreen() {
 
   return (
     <Screen
-      title="STANDINGS"
+      heading={
+        <PageHeading
+          top="Players/Teams"
+          bottom="Standings"
+          base={24}
+          bottomScale={1.5}
+          liftEm={0.25}
+        />
+      }
       refreshControl={
         <RefreshControl
           refreshing={standings.isRefetching}
@@ -74,43 +78,38 @@ export default function StandingsScreen() {
       <View style={styles.filters}>
         <Text style={styles.filterLabel}>FILTER BY ›</Text>
 
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.seasonRow}
-        >
-          {seasonNames.map((name) => {
-            const active = name === selectedSeason;
-            return (
-              <Pressable
-                key={name}
-                onPress={() => setSelectedSeason(name)}
-                style={[styles.chip, active && styles.chipActive]}
-              >
-                <Text
-                  style={[styles.chipText, active && styles.chipTextActive]}
-                >
-                  {name}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </ScrollView>
-
-        <View style={styles.toggleRow}>
-          <Switch
-            value={includeOpponents}
-            onValueChange={setIncludeOpponents}
-            trackColor={{
-              false: colors.darkpurpleLighter,
-              true: colors.darkpurpleLighter,
-            }}
-            thumbColor={includeOpponents ? colors.yellow : colors.pink}
-            ios_backgroundColor={colors.darkpurpleLighter}
+        {/* Side by side, as the two filter cards sit on the web. */}
+        <View style={styles.filterRow}>
+          <FilterSelect
+            label="Season"
+            value={selectedSeason}
+            options={seasonNames.map((name) => ({ value: name, label: name }))}
+            onSelect={setSelectedSeason}
           />
-          <Text style={styles.toggleText}>
-            {includeOpponents ? "INCLUDING OPPONENTS" : "PLAYER'S TEAM ONLY"}
-          </Text>
+
+          <View style={styles.toggleCard}>
+            <Text style={styles.toggleLabel} allowFontScaling={false}>
+              Team Counting
+            </Text>
+            <View style={styles.toggleRow}>
+              <Switch
+                value={includeOpponents}
+                onValueChange={setIncludeOpponents}
+                trackColor={{
+                  false: colors.darkpurpleLighter,
+                  true: colors.darkpurpleLighter,
+                }}
+                thumbColor={includeOpponents ? colors.yellow : colors.pink}
+                ios_backgroundColor={colors.darkpurpleLighter}
+                style={styles.switch}
+              />
+              <Text style={styles.toggleText}>
+                {includeOpponents
+                  ? "INCLUDING OPPONENTS"
+                  : "PLAYER'S TEAM ONLY"}
+              </Text>
+            </View>
+          </View>
         </View>
       </View>
 
@@ -127,10 +126,28 @@ export default function StandingsScreen() {
         ) : (
           <View style={styles.grid}>
             <View style={styles.players}>
-              <StandingsList title="PLAYERS" items={standings.data.players} />
+              <StandingsList
+                title="PLAYERS"
+                items={standings.data.players}
+                onPressItem={(name) =>
+                  router.push({
+                    pathname: "/all-wedgies",
+                    params: { wp: name, ws: selectedSeason || "all" },
+                  })
+                }
+              />
             </View>
             <View style={styles.teams}>
-              <StandingsList title="TEAMS" items={standings.data.teams} />
+              <StandingsList
+                title="TEAMS"
+                items={standings.data.teams}
+                onPressItem={(name) =>
+                  router.push({
+                    pathname: "/all-wedgies",
+                    params: { wt: name, ws: selectedSeason || "all" },
+                  })
+                }
+              />
             </View>
           </View>
         )
@@ -168,23 +185,32 @@ const styles = StyleSheet.create({
     fontSize: 12,
     letterSpacing: 1.2,
   },
-  seasonRow: { gap: space.sm, paddingRight: space.lg },
-  chip: {
-    paddingHorizontal: space.md,
-    paddingVertical: 6,
-    borderRadius: radius.sm,
-    backgroundColor: "rgba(234, 255, 0, 0.12)",
-  },
-  chipActive: { backgroundColor: colors.yellow },
-  chipText: { fontFamily: fonts.black, color: colors.yellow, fontSize: 13 },
-  chipTextActive: { color: colors.darkpurple },
 
-  toggleRow: { flexDirection: "row", alignItems: "center", gap: space.md },
+  filterRow: { flexDirection: "row", gap: space.sm, alignItems: "stretch" },
+  // Mirrors FilterSelect's card so the pair reads as one control group.
+  toggleCard: {
+    flex: 1,
+    backgroundColor: "rgba(234, 255, 0, 0.12)",
+    borderRadius: radius.sm,
+    padding: space.sm,
+    gap: space.sm,
+    justifyContent: "space-between",
+  },
+  toggleLabel: {
+    fontFamily: fonts.bold,
+    color: colors.yellow,
+    fontSize: 13,
+    letterSpacing: 0.4,
+  },
+  toggleRow: { flexDirection: "row", alignItems: "center", gap: space.sm },
+  switch: { transform: [{ scale: 0.8 }] },
   toggleText: {
+    // Wraps rather than clipping, like the web's fixed-width `w-16` label.
+    flex: 1,
     fontFamily: fonts.bold,
     color: colors.white,
     fontSize: 10,
-    letterSpacing: 0.6,
+    letterSpacing: 0.4,
   },
 
   grid: { flexDirection: "row", gap: space.lg },

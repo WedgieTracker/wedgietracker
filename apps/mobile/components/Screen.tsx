@@ -2,7 +2,6 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  View,
   type RefreshControlProps,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -10,18 +9,12 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { colors, space, type } from "@/lib/theme";
 
 interface ScreenProps {
-  title: string;
-  subtitle?: string;
+  heading: React.ReactNode;
   children: React.ReactNode;
   refreshControl?: React.ReactElement<RefreshControlProps>;
 }
 
-export function Screen({
-  title,
-  subtitle,
-  children,
-  refreshControl,
-}: ScreenProps) {
+export function Screen({ heading, children, refreshControl }: ScreenProps) {
   return (
     <SafeAreaView style={styles.safe} edges={["top"]}>
       <ScrollView
@@ -29,10 +22,7 @@ export function Screen({
         refreshControl={refreshControl}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.header}>
-          <Text style={styles.title}>{title}</Text>
-          {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
-        </View>
+        {heading}
         {children}
       </ScrollView>
     </SafeAreaView>
@@ -47,9 +37,6 @@ const styles = StyleSheet.create({
   // The site's inner pages sit on the darker column colour.
   safe: { flex: 1, backgroundColor: colors.darkpurpleDark },
   content: { padding: space.lg, paddingBottom: space.xxl * 2 },
-  header: { marginBottom: space.xl },
-  title: { ...type.title, color: colors.yellow },
-  subtitle: { ...type.body, color: colors.muted, marginTop: space.xs },
   sectionLabel: {
     ...type.section,
     color: colors.yellow,

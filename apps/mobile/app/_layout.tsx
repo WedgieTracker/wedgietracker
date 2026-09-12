@@ -48,8 +48,8 @@ export default function RootLayout() {
       >
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen
-          name="all-wedgies"
-          options={{ title: "ALL WEDGIES", headerBackTitle: "Home" }}
+          name="seasons"
+          options={{ title: "SEASONS HISTORY", headerBackTitle: "Stats" }}
         />
         <Stack.Screen
           name="wedgie/[id]"
