@@ -9,7 +9,12 @@
     "userInterfaceStyle": "dark",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.wedgietracker.app"
+      "bundleIdentifier": "com.wedgietracker.app",
+      "icon": {
+        "light": "./assets/images/icon.png",
+        "dark": "./assets/images/ios-dark.png",
+        "tinted": "./assets/images/ios-tinted.png"
+      }
     },
     "android": {
       "package": "com.wedgietracker.app",

@@ -11,7 +11,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { HeroStats } from "@/components/HeroStats";
 import { PillButton } from "@/components/PillButton";
 import { StandingsList } from "@/components/StandingsList";
-import { ErrorState, Loading } from "@/components/States";
+import { ErrorState, ScreenLoading } from "@/components/States";
 import { WedgieRow } from "@/components/WedgieRow";
 import { useFluidType } from "@/lib/fluid";
 import { api } from "@/lib/api";
@@ -50,6 +50,17 @@ export default function HomeScreen() {
     void total.refetch();
   };
 
+  // The hero, the list and the tables arrive from four queries; showing the
+  // page before they are all in means three separate reflows.
+  if (
+    stats.isPending ||
+    latest.isPending ||
+    standings.isPending ||
+    total.isPending
+  ) {
+    return <ScreenLoading />;
+  }
+
   return (
     <SafeAreaView
       style={[styles.safe, { backgroundColor: heroTop }]}
@@ -72,12 +83,6 @@ export default function HomeScreen() {
           style={[styles.overscroll, { backgroundColor: heroTop }]}
           pointerEvents="none"
         />
-
-        {stats.isPending ? (
-          <View style={styles.heroFallback}>
-            <Loading label="Loading wedgies" />
-          </View>
-        ) : null}
 
         {stats.error ? (
           <View style={styles.errorWrap}>

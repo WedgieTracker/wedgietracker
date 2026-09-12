@@ -7,6 +7,7 @@
     "android": "expo start --android",
     "build:ios": "eas build --platform ios --profile production",
     "check": "oxlint && pnpm run typecheck",
+    "icons": "node scripts/generate-icons.mjs",
     "ios": "expo start --ios",
     "lint": "oxlint",
     "start": "expo start",

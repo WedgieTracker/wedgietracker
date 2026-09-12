@@ -10,7 +10,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { PageHeading } from "@/components/PageHeading";
 import { PillButton } from "@/components/PillButton";
-import { ErrorState, Loading } from "@/components/States";
+import { ErrorState, ScreenLoading } from "@/components/States";
 import { TypingStats } from "@/components/TypingStats";
 import { WaveCounterPanel } from "@/components/WaveCounterPanel";
 import { useFluidType } from "@/lib/fluid";
@@ -25,6 +25,8 @@ type NerdStats = RouterOutputs["wedgie"]["getNerdStats"];
 export default function StatsScreen() {
   const nerd = api.wedgie.getNerdStats.useQuery();
 
+  if (nerd.isPending) return <ScreenLoading />;
+
   return (
     <SafeAreaView style={styles.safe} edges={["top"]}>
       <ScrollView
@@ -38,7 +40,6 @@ export default function StatsScreen() {
           />
         }
       >
-        {nerd.isPending ? <Loading label="Loading stats" /> : null}
         {nerd.error ? (
           <View style={styles.padded}>
             <ErrorState message={nerd.error.message} />

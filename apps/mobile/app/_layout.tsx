@@ -60,9 +60,15 @@ export default function RootLayout() {
           options={{
             presentation: "formSheet",
             headerShown: false,
-            sheetAllowedDetents: "fitToContents",
+            // A fixed detent rather than "fitToContents": the latter silently
+            // turns off the system dimming behind the sheet, and a clear
+            // backdrop matters more here than shrink-wrapping the content.
+            // The content scrolls, so a slight over- or under-shoot is safe.
+            sheetAllowedDetents: [0.78],
             sheetCornerRadius: 24,
             sheetGrabberVisible: true,
+            // No detent is left undimmed, so the page behind is always dimmed.
+            sheetLargestUndimmedDetentIndex: "none",
           }}
         />
       </Stack>

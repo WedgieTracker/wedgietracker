@@ -2,6 +2,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import {
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -122,7 +123,11 @@ function WedgieDetail({
   }, [wedgie.id, wedgie.videoUrl]);
 
   return (
-    <View style={styles.sheet}>
+    <ScrollView
+      style={styles.sheet}
+      contentContainerStyle={styles.sheetContent}
+      showsVerticalScrollIndicator={false}
+    >
       <View style={styles.topBar}>
         <View style={styles.navGroup}>
           <NavButton
@@ -220,7 +225,7 @@ function WedgieDetail({
           />
         </View>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -334,27 +339,15 @@ function formatDate(value: string): string {
 
 const styles = StyleSheet.create({
   sheet: {
-    // A shade darker than the pages behind it, with a hairline along the top
-    // edge, so the sheet reads as a separate layer. Both belong to the sheet's
-    // own view, so they travel with it as it slides rather than sitting still
-    // behind it.
+    // No shadow here: on iOS a shadow on a view that also clips its children
+    // casts each child's silhouette onto the content below it. Separation
+    // comes from the dimmed backdrop (see the route's sheet options) and from
+    // this being a shade darker than the pages it opens over.
     backgroundColor: colors.darkpurpleDark,
-    // A solid yellow edge, the same 2px rule the site puts on its buttons and
-    // bars. A faint hairline was lost against pages that are nearly the same
-    // colour as the sheet.
-    borderTopWidth: 2,
-    borderTopColor: colors.yellow,
-    // Casts the sheet over whatever is behind it, so the boundary reads even
-    // where the yellow rule is off screen.
-    shadowColor: "#000",
-    shadowOpacity: 0.6,
-    shadowRadius: 24,
-    shadowOffset: { width: 0, height: -10 },
     borderTopLeftRadius: SHEET_RADIUS,
     borderTopRightRadius: SHEET_RADIUS,
-    overflow: "hidden",
-    paddingBottom: space.lg,
   },
+  sheetContent: { paddingBottom: space.xl },
   topBar: {
     flexDirection: "row",
     alignItems: "center",

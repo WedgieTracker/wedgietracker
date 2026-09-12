@@ -7,7 +7,7 @@ import { FilterSelect } from "@/components/FilterSelect";
 import { PageHeading } from "@/components/PageHeading";
 import { Screen } from "@/components/Screen";
 import { StandingsList } from "@/components/StandingsList";
-import { Empty, ErrorState, Loading } from "@/components/States";
+import { Empty, ErrorState, ScreenLoading } from "@/components/States";
 import { api } from "@/lib/api";
 import { useSeasonFallback } from "@/lib/use-season-fallback";
 import { colors, fonts, radius, space } from "@/lib/theme";
@@ -49,6 +49,10 @@ export default function StandingsScreen() {
     .map((s) => s.name)
     .sort()
     .reverse();
+
+  // Nothing renders until the first table is ready, so the filters do not
+  // appear over an empty page and then shove it down.
+  if (standings.isPending || isLoadingSeasonData) return <ScreenLoading />;
 
   return (
     <Screen
@@ -116,9 +120,6 @@ export default function StandingsScreen() {
         </View>
       </View>
 
-      {standings.isPending || isLoadingSeasonData ? (
-        <Loading label="Loading standings" />
-      ) : null}
       {standings.error ? (
         <ErrorState message={standings.error.message} />
       ) : null}

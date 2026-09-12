@@ -2,7 +2,7 @@ import { RefreshControl, StyleSheet, Text, View } from "react-native";
 
 import { PageHeading } from "@/components/PageHeading";
 import { Screen } from "@/components/Screen";
-import { Empty, ErrorState, Loading } from "@/components/States";
+import { Empty, ErrorState, ScreenLoading } from "@/components/States";
 import { api } from "@/lib/api";
 import { colors, fonts, radius, space } from "@/lib/theme";
 
@@ -19,6 +19,8 @@ export default function SeasonsScreen() {
   const seasons = api.season.getAllWithStats.useQuery();
 
   const withWedgies = (seasons.data ?? []).filter((s) => s.totalWedgies > 0);
+
+  if (seasons.isPending) return <ScreenLoading />;
 
   return (
     <Screen
@@ -39,7 +41,6 @@ export default function SeasonsScreen() {
         />
       }
     >
-      {seasons.isPending ? <Loading label="Loading seasons" /> : null}
       {seasons.error ? <ErrorState message={seasons.error.message} /> : null}
       {seasons.data && withWedgies.length === 0 ? (
         <Empty label="No seasons with wedgies yet." />

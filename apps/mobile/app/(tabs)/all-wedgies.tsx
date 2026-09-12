@@ -14,7 +14,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useCountUp } from "@/components/Counter";
 import { FilterSelect } from "@/components/FilterSelect";
 import { PageHeading } from "@/components/PageHeading";
-import { Empty, ErrorState, Loading } from "@/components/States";
+import { Empty, ErrorState, ScreenLoading } from "@/components/States";
 import { WedgieRow } from "@/components/WedgieRow";
 import { api } from "@/lib/api";
 import { useSeasonFallback } from "@/lib/use-season-fallback";
@@ -121,6 +121,8 @@ export default function AllWedgiesScreen() {
 
   const visible = useCountUp(wedgies.length, 200);
 
+  if (isPending || isLoadingSeasonData) return <ScreenLoading />;
+
   return (
     <SafeAreaView style={styles.safe} edges={["top"]}>
       <FlatList
@@ -207,11 +209,8 @@ export default function AllWedgiesScreen() {
               />
             </View>
 
-            {isPending || isLoadingSeasonData ? (
-              <Loading label="Loading wedgies" />
-            ) : null}
             {error ? <ErrorState message={error.message} /> : null}
-            {!isPending && wedgies.length === 0 ? (
+            {wedgies.length === 0 ? (
               <Empty label="No wedgies match those filters." />
             ) : null}
           </View>
