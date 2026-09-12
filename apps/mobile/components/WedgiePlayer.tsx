@@ -97,7 +97,7 @@ function NativeVideo({ uri }: { uri: string }) {
           <View style={styles.playOverlay}>
             <View style={styles.playBadge}>
               <Svg width={30} height={30} viewBox="0 0 24 24">
-                <Path d="M8 5v14l11-7z" fill={colors.darkpurple} />
+                <Path d={PLAY_TRIANGLE} fill={colors.darkpurple} />
               </Svg>
             </View>
           </View>
@@ -132,6 +132,14 @@ function NativeVideo({ uri }: { uri: string }) {
     </View>
   );
 }
+
+/**
+ * Sized so the triangle's centroid lands on the viewBox centre (2a + b = 36
+ * for a shape 10 wide). A play glyph centred on its bounding box reads as
+ * sitting too far left, which is why this is solved rather than eyeballed -
+ * and why the badge needs no nudge of its own.
+ */
+const PLAY_TRIANGLE = "M8.67 6v12l10-6z";
 
 const SPEAKER_BODY = "M4 9v6h3l5 4V5L7 9H4z";
 const SPEAKER_WAVES = "M16 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12";
@@ -202,8 +210,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.yellow,
     alignItems: "center",
     justifyContent: "center",
-    // nudged right so the triangle looks centred
-    paddingLeft: 4,
   },
   soundButton: {
     position: "absolute",
