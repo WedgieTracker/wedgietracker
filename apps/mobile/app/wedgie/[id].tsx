@@ -14,6 +14,9 @@ import type { ActiveVideo } from "@wedgietracker/core/utils/wedgieVideo";
 
 type Wedgie = RouterOutputs["wedgie"]["getAll"][number];
 
+/** Matches `sheetCornerRadius` in the route's options. */
+const SHEET_RADIUS = 24;
+
 /** The web badge is `text-[1.6em]` with a `text-[.5em]` hash. */
 const BADGE_NUMBER = 32;
 const BADGE_HASH = BADGE_NUMBER * 0.5;
@@ -318,7 +321,19 @@ function formatDate(value: string): string {
 }
 
 const styles = StyleSheet.create({
-  sheet: { backgroundColor: colors.darkpurple, paddingBottom: space.lg },
+  sheet: {
+    // A shade darker than the pages behind it, with a hairline along the top
+    // edge, so the sheet reads as a separate layer. Both belong to the sheet's
+    // own view, so they travel with it as it slides rather than sitting still
+    // behind it.
+    backgroundColor: colors.darkpurpleDark,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(234, 255, 0, 0.22)",
+    borderTopLeftRadius: SHEET_RADIUS,
+    borderTopRightRadius: SHEET_RADIUS,
+    overflow: "hidden",
+    paddingBottom: space.lg,
+  },
   topBar: {
     flexDirection: "row",
     alignItems: "center",
