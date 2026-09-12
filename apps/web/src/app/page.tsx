@@ -15,7 +15,7 @@ import { generateMetadata } from "~/config/metadata";
 export const metadata = generateMetadata({
   title: "NBA Wedgie Tracker | Count, pace and history",
   description:
-    "NBA original WedgieTracker. We count how many times a basketball gets stuck between the backboard and the rim. NoDunks Inspired.",
+    "The original NBA wedgie tracker. We count how many times a basketball gets stuck between the backboard and the rim. NoDunks Inspired.",
 });
 
 export default async function Home() {
