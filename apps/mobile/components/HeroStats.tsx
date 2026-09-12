@@ -1,9 +1,9 @@
-import { StyleSheet, Text, View, useWindowDimensions } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
 import { useCountUp } from "@/components/Counter";
 import { PillButton } from "@/components/PillButton";
-import { Wave } from "@/components/Wave";
-import { clampRem, useFluidType } from "@/lib/fluid";
+import { WaveCounterPanel } from "@/components/WaveCounterPanel";
+import { useFluidType } from "@/lib/fluid";
 import { colors, fonts, radius, space } from "@/lib/theme";
 
 export interface HeroStatsData {
@@ -26,46 +26,12 @@ export function HeroStats({
   stats: HeroStatsData;
   onMoreStats: () => void;
 }) {
-  const { width } = useWindowDimensions();
-  const t = useFluidType();
-
-  // Same target of 50 the web app fills toward.
-  const fillPercentage = Math.min((stats.totalWedgies / 50) * 100, 100);
-  const total = useCountUp(stats.totalWedgies);
-
-  const headline =
-    stats.totalWedgies > stats.previousRecord
-      ? "NEW ALL-TIME RECORD"
-      : stats.totalWedgies === stats.previousRecord
-        ? "ALL-TIME RECORD TIED"
-        : "WE'RE AT";
-
-  const cardWidth = clampRem(16, 13, 16, 28, width);
-
   return (
     <View>
-      <View style={styles.hero}>
-        <Wave fillPercentage={fillPercentage} />
-
-        <View style={[styles.heroCard, { width: cardWidth }]}>
-          <Text style={styles.headline} allowFontScaling={false}>
-            {headline}
-          </Text>
-          <Text
-            style={[styles.bigNumber, { fontSize: t.bigNumber }]}
-            numberOfLines={1}
-            allowFontScaling={false}
-          >
-            {total.toLocaleString()}
-          </Text>
-          <Text
-            style={[styles.wedgiesLabel, { fontSize: t.wedgiesText }]}
-            allowFontScaling={false}
-          >
-            WEDGIES
-          </Text>
-        </View>
-      </View>
+      <WaveCounterPanel
+        value={stats.totalWedgies}
+        previousRecord={stats.previousRecord}
+      />
 
       <PaceBlock stats={stats} onMoreStats={onMoreStats} />
     </View>
@@ -186,34 +152,6 @@ function daysSince(value: Date | string | null): number | null {
 }
 
 const styles = StyleSheet.create({
-  hero: {
-    minHeight: 400,
-    backgroundColor: colors.darkpurpleLight,
-    overflow: "hidden",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: space.xl,
-  },
-  heroCard: {
-    backgroundColor: "rgba(31, 0, 77, 0.5)",
-    borderRadius: radius.md,
-    padding: space.lg,
-    alignItems: "center",
-  },
-  headline: {
-    fontFamily: fonts.bold,
-    color: colors.yellow,
-    fontSize: 14,
-  },
-  bigNumber: {
-    fontFamily: fonts.black,
-    color: colors.yellow,
-    // leading-none
-    lineHeight: undefined,
-    includeFontPadding: false,
-  },
-  wedgiesLabel: { fontFamily: fonts.black, color: colors.yellow },
-
   pacePanel: {
     minHeight: 192,
     backgroundColor: colors.darkpurple,

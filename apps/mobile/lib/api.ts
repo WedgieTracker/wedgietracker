@@ -1,5 +1,6 @@
 import Constants from "expo-constants";
 import { createTRPCReact } from "@trpc/react-query";
+import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 import type { AppRouter } from "@wedgietracker/web/api";
 
 /**
@@ -7,6 +8,10 @@ import type { AppRouter } from "@wedgietracker/web/api";
  * bundled here - only its shape, which keeps the client honest at compile time.
  */
 export const api = createTRPCReact<AppRouter>();
+
+/** Inferred shapes of every procedure, so screens never restate the API. */
+export type RouterInputs = inferRouterInputs<AppRouter>;
+export type RouterOutputs = inferRouterOutputs<AppRouter>;
 
 /**
  * Where the tRPC endpoint lives. Override with EXPO_PUBLIC_API_URL when
