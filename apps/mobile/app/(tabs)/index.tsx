@@ -14,6 +14,7 @@ import { StandingsList } from "@/components/StandingsList";
 import { ErrorState, ScreenLoading } from "@/components/States";
 import { WedgieRow } from "@/components/WedgieRow";
 import { useFluidType } from "@/lib/fluid";
+import { useTabBarClearance } from "@/lib/layout";
 import { api } from "@/lib/api";
 import { colors, fonts, radius, space } from "@/lib/theme";
 
@@ -24,6 +25,7 @@ import { colors, fonts, radius, space } from "@/lib/theme";
 export default function HomeScreen() {
   const router = useRouter();
   const t = useFluidType();
+  const tabBar = useTabBarClearance();
 
   const stats = api.wedgie.getStats.useQuery();
   const latest = api.wedgie.getLatestWedgies.useQuery();
@@ -68,7 +70,7 @@ export default function HomeScreen() {
     >
       <ScrollView
         style={styles.scroll}
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[styles.content, { paddingBottom: tabBar }]}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
@@ -211,7 +213,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1 },
   scroll: { backgroundColor: colors.darkpurpleDark },
-  content: { paddingBottom: space.xxl },
+  content: {},
   overscroll: {
     position: "absolute",
     top: -900,

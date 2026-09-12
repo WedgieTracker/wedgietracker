@@ -17,6 +17,7 @@ import { PageHeading } from "@/components/PageHeading";
 import { Empty, ErrorState, ScreenLoading } from "@/components/States";
 import { WedgieRow } from "@/components/WedgieRow";
 import { api } from "@/lib/api";
+import { useTabBarClearance } from "@/lib/layout";
 import { useSeasonFallback } from "@/lib/use-season-fallback";
 import { colors, fonts, radius, space } from "@/lib/theme";
 import { matchesFilter } from "@wedgietracker/core/utils/wedgieFilter";
@@ -120,6 +121,7 @@ export default function AllWedgiesScreen() {
   }, [source, type, playerOrTeam]);
 
   const visible = useCountUp(wedgies.length, 200);
+  const tabBar = useTabBarClearance();
 
   if (isPending || isLoadingSeasonData) return <ScreenLoading />;
 
@@ -127,7 +129,7 @@ export default function AllWedgiesScreen() {
     <SafeAreaView style={styles.safe} edges={["top"]}>
       <FlatList
         style={styles.screen}
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[styles.content, { paddingBottom: tabBar }]}
         data={wedgies}
         keyExtractor={(w) => String(w.id)}
         showsVerticalScrollIndicator={false}
@@ -230,7 +232,7 @@ export default function AllWedgiesScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.darkpurpleDark },
   screen: { flex: 1, backgroundColor: colors.darkpurpleDark },
-  content: { padding: space.lg, paddingBottom: space.xxl },
+  content: { padding: space.lg },
 
   notice: {
     borderWidth: 1,

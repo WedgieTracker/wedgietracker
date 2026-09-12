@@ -14,6 +14,7 @@ import { ErrorState, ScreenLoading } from "@/components/States";
 import { TypingStats } from "@/components/TypingStats";
 import { WaveCounterPanel } from "@/components/WaveCounterPanel";
 import { useFluidType } from "@/lib/fluid";
+import { useTabBarClearance } from "@/lib/layout";
 import { api, type RouterOutputs } from "@/lib/api";
 import { colors, fonts, radius, space } from "@/lib/theme";
 
@@ -24,13 +25,14 @@ type NerdStats = RouterOutputs["wedgie"]["getNerdStats"];
  */
 export default function StatsScreen() {
   const nerd = api.wedgie.getNerdStats.useQuery();
+  const tabBar = useTabBarClearance();
 
   if (nerd.isPending) return <ScreenLoading />;
 
   return (
     <SafeAreaView style={styles.safe} edges={["top"]}>
       <ScrollView
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[styles.content, { paddingBottom: tabBar }]}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
@@ -321,7 +323,7 @@ function Chip({ label }: { label: string }) {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.darkpurple },
-  content: { paddingBottom: space.xxl * 2 },
+  content: {},
   padded: { padding: space.lg },
 
   headingWrap: { paddingTop: space.lg },
