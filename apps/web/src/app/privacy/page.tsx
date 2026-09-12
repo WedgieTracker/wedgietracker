@@ -37,40 +37,45 @@ export default function PrivacyPage() {
                 The WedgieTracker iOS App
               </h2>
               <p className="mb-4">
-                The iOS app has no accounts, no newsletter, and no store, so
-                none of the personal information described above is collected
-                through it. We never learn your name, your email address, or
-                anything you have not chosen to tell us elsewhere.
+                There are no accounts, no newsletter and no store in the app, so
+                none of the personal information described below is collected
+                through it. We never learn your name or your email address, and
+                there is nothing to sign in to.
               </p>
-              <p className="mb-4">
-                The app does collect two things, both anonymous, and both
-                processed in the European Union:
-              </p>
+              <p className="mb-4">What leaves the phone:</p>
               <ul className="list-inside list-disc space-y-2">
                 <li>
-                  <strong>Crash and error reports</strong>, through Sentry, so
-                  we can find out when something breaks. These contain the
-                  fault, the device model, and the iOS version. They do not
-                  contain your IP address.
+                  <strong>Wedgie data</strong>, read from our own API when a
+                  screen opens. Read-only, and it carries no identifier.
                 </li>
                 <li>
-                  <strong>Anonymous usage analytics</strong>, through PostHog,
-                  such as which screens are opened and which filters are used.
-                  These are tied to a random identifier generated on your
-                  device, not to you.
+                  <strong>Video</strong>, played in YouTube&apos;s embedded
+                  player. YouTube therefore sees this phone&apos;s address and
+                  which clip was opened, sets its own cookies inside that
+                  player, and its privacy policy governs all of it rather than
+                  this one.
+                </li>
+                <li>
+                  <strong>A crash or an error</strong>, to a crash reporter,
+                  automatically when one happens. It carries what went wrong and
+                  where in our own code, the app version and the phone model. No
+                  IP address, and every error is reduced to its type and code
+                  first, so nothing can ride along inside one.
+                </li>
+                <li>
+                  <strong>Which screens get opened</strong>, to an analytics
+                  provider, automatically. Which part of the app was used and
+                  which filters were picked. Never what you typed.
                 </li>
               </ul>
-              <p className="mt-4 mb-4">
-                Neither is used to track you across other apps or websites, and
-                neither is sold or shared with data brokers or advertisers.
-                Deleting the app ends the collection, and the random identifier
-                goes with it.
-              </p>
-              <p>
-                Clips play in YouTube&apos;s own embedded player. YouTube sets
-                its own cookies inside that player and its privacy policy
-                governs them, not this one. Images, such as the court diagrams,
-                are served from Cloudinary.
+              <p className="mt-4">
+                Both of those last two process your data in the European Union.
+                They are tied to a random identifier made on the device on first
+                launch, not to you, and it is not derived from any hardware
+                identifier. Neither is used to track you across other apps or
+                websites, and neither is sold or shared with data brokers or
+                advertisers. Deleting the app ends the collection and takes the
+                identifier with it.
               </p>
             </section>
 
@@ -128,7 +133,7 @@ export default function PrivacyPage() {
                 <li>Stripe for payment processing</li>
                 <li>Mailchimp for newsletter management</li>
                 <li>Printful for order fulfillment</li>
-                <li>Cloudinary for media storage</li>
+                <li>A media host for images and video</li>
               </ul>
             </section>
 
