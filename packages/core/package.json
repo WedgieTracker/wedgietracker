@@ -23,6 +23,6 @@
     "@typescript/native-preview": "^7.0.0-dev.20260705.1",
     "typescript": "^6.0.3",
     "vitest": "^4.1.9",
-    "oxlint": "^1.72.0"
+    "oxlint": "^1.82.0"
   }
 }
