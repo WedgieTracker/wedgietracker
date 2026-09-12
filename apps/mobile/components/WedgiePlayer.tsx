@@ -56,7 +56,11 @@ export function pickVideoForNative(
 function NativeVideo({ uri }: { uri: string }) {
   const player = useVideoPlayer(uri, (p) => {
     p.loop = true;
-    p.muted = false;
+    // Muted so opening a wedgie never blares audio, and playing straight away:
+    // you tapped a clip, and a paused player just sits there showing its
+    // controls over the frame. The controls are still there to unmute.
+    p.muted = true;
+    p.play();
   });
 
   return (

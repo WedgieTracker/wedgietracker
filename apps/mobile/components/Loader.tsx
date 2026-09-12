@@ -38,6 +38,19 @@ const BALL_BOX = { left: 0.38, top: 0.29, size: 0.28 };
 const RIM_BOX = { left: 0.14, top: 0.4, width: 0.38, height: 0.31 };
 
 /**
+ * The hoop occupies the left two thirds of the artwork, so centring the square
+ * leaves the hoop sitting left of centre with the ball's approach cramped
+ * against the right edge.
+ *
+ * `RUN_UP` widens the box to the right to give the ball somewhere to fly in
+ * from, and `HOOP_CENTRE` is where the hoop actually balances within the
+ * artwork - the two together let the layout centre the hoop rather than the
+ * box.
+ */
+const RUN_UP = 0.24;
+const HOOP_CENTRE = (BACKBOARD_BOX.left + BACKBOARD_BOX.width) / 2;
+
+/**
  * The web SVGs carry the colours the artwork was exported with. Two of them are
  * the brand tokens give or take a digit - #dfff00 against yellow, #17002d
  * against darkpurple - so those come from the theme; the other three have no
@@ -179,9 +192,20 @@ export function Loader({ size = 96 }: { size?: number }) {
     };
   });
 
+  // Pull the box left of its own centre by however far the hoop sits from it,
+  // so what lands in the middle of the layout is the hoop and not the artwork.
+  const offset = (size * (1 + RUN_UP)) / 2 - HOOP_CENTRE * size;
+
   return (
     <View
-      style={[styles.court, { width: size, height: size }]}
+      style={[
+        styles.court,
+        {
+          width: size * (1 + RUN_UP),
+          height: size,
+          marginRight: -2 * offset,
+        },
+      ]}
       pointerEvents="none"
       accessible={false}
     >
