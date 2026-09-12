@@ -96,6 +96,11 @@ export function report(
 
   Sentry.withScope((scope) => {
     scope.setTag("where", where);
+    // Sentry titles an issue from the exception, so ten procedures failing on
+    // the same network error produced ten issues with identical headlines and
+    // a culprit of TRPCClientError#constructor. The transaction name is what
+    // the issue list shows as the culprit, so put the site there.
+    scope.setTransactionName(where);
     scope.setTag("error.kind", shape.kind);
     if (shape.code) scope.setTag("trpc.code", shape.code);
     if (shape.status !== undefined) {
