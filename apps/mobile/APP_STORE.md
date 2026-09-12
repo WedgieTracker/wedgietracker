@@ -114,6 +114,34 @@ specific embed URLs, not a browser, so the honest answer is **No**, but the
 YouTube player's own "Watch on YouTube" control can hand off to the YouTube app
 or Safari. If review pushes back, that is the reason why.
 
+## Video provenance, and why the app prefers YouTube
+
+The clips are NBA broadcast footage. The website plays whichever source it has;
+the app originally preferred our own Cloudinary copy because it plays in the
+native player rather than a WebView.
+
+**That preference was reversed on 12 Sep 2026.** The app now uses the same
+`pickInitialVideo` ordering as the site, which puts YouTube first, so playback
+happens in the rights holder's own embed rather than serving a re-hosted copy.
+Measured against all 635 wedgies:
+
+| Source now used   | Wedgies     |
+| ----------------- | ----------- |
+| YouTube           | 359 (56.5%) |
+| YouTube (NoDunks) | 273 (43.0%) |
+| Cloudinary mp4    | 3 (0.5%)    |
+
+Three wedgies have no YouTube URL at all and still play the mp4.
+
+Review treats third-party content in an app more strictly than on a website,
+and embedding the rights holder's player is a materially better position than
+distributing our own copy. The three remaining mp4s are worth mentioning in
+the review notes rather than hiding.
+
+Related: screenshot `03-detail.png` shows broadcast footage inside a marketing
+asset, which is a separate exposure from in-app content and a separate
+decision.
+
 ## App Privacy ("Data Collection")
 
 The app reports crashes to Sentry and anonymous usage to PostHog, both hosted
@@ -154,11 +182,11 @@ collect, so it does not change the answers, but the privacy policy says so.
       `4d215288-e7b1-4e6c-8157-bfbe346b7481`.
 
       **Upload with `./scripts/submit-ios.sh`, not `eas submit`.** Every path
-                      through eas submit ends at an Apple ID login: it needs one to create the
-                      app record, and another to register an ASC API key against the project
-                      ("Only user authentication is supported"). That login fails here with
-                      "iTunes service key is empty", so the key never gets used. altool takes
-                      the key directly and never touches the Developer Portal.
+                              through eas submit ends at an Apple ID login: it needs one to create the
+                              app record, and another to register an ASC API key against the project
+                              ("Only user authentication is supported"). That login fails here with
+                              "iTunes service key is empty", so the key never gets used. altool takes
+                              the key directly and never touches the Developer Portal.
 
 - [x] Export compliance. `ITSAppUsesNonExemptEncryption: false` answers it at
       upload; the API confirms `usesNonExemptEncryption: false` on build 4, so

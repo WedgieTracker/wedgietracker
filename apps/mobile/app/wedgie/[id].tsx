@@ -12,13 +12,16 @@ import Svg, { Path } from "react-native-svg";
 
 import { CourtPositionDiagram } from "@/components/CourtPositionDiagram";
 import { ErrorState, Loading } from "@/components/States";
-import { WedgiePlayer, pickVideoForNative } from "@/components/WedgiePlayer";
+import { WedgiePlayer } from "@/components/WedgiePlayer";
 import { WedgieVideoTabs } from "@/components/WedgieVideoTabs";
 import { api, type RouterOutputs } from "@/lib/api";
 import { track } from "@/lib/observability";
 import { colors, fonts, radius, space } from "@/lib/theme";
 import { GEMS_EMOJI, isGemsDate } from "@wedgietracker/core/utils/formatDate";
-import type { ActiveVideo } from "@wedgietracker/core/utils/wedgieVideo";
+import {
+  pickInitialVideo,
+  type ActiveVideo,
+} from "@wedgietracker/core/utils/wedgieVideo";
 
 type Wedgie = RouterOutputs["wedgie"]["getAll"][number];
 
@@ -104,7 +107,7 @@ function WedgieDetail({
 }) {
   const { height } = useWindowDimensions();
   const [active, setActive] = useState<ActiveVideo | null>(() =>
-    pickVideoForNative(wedgie.videoUrl),
+    pickInitialVideo(wedgie.videoUrl),
   );
 
   // The sheet is sized to its content, so on a shorter screen the court is the
@@ -114,7 +117,7 @@ function WedgieDetail({
 
   // Reset the chosen source when stepping to another wedgie.
   useEffect(() => {
-    setActive(pickVideoForNative(wedgie.videoUrl));
+    setActive(pickInitialVideo(wedgie.videoUrl));
   }, [wedgie.id, wedgie.videoUrl]);
 
   // Which wedgies get watched, and which source served them. The source is the
@@ -124,7 +127,7 @@ function WedgieDetail({
     track("wt_wedgie_opened", {
       number: wedgie.number,
       season: wedgie.seasonName,
-      source: pickVideoForNative(wedgie.videoUrl),
+      source: pickInitialVideo(wedgie.videoUrl),
     });
   }, [wedgie.id, wedgie.number, wedgie.seasonName, wedgie.videoUrl]);
 

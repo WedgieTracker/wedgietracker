@@ -10,14 +10,18 @@ import { colors, space, type } from "@/lib/theme";
 import type { VideoUrls } from "@wedgietracker/core/types/wedgie";
 import {
   getVideoSrc,
-  pickInitialVideo,
   type ActiveVideo,
 } from "@wedgietracker/core/utils/wedgieVideo";
 
 /**
- * The web app renders every source in an <iframe>. On iOS we split them:
- * Cloudinary and self-hosted files are real mp4s, so they get a native player;
- * YouTube and Instagram only offer embeds, so those stay in a WebView.
+ * Sources are picked by the shared `pickInitialVideo`, exactly as the website
+ * picks them, which means YouTube first. Only 3 of 635 wedgies have no YouTube
+ * URL, so the native mp4 player below is now the rare path rather than the
+ * common one.
+ *
+ * That is deliberate. Playing a broadcast clip through YouTube's own embed
+ * leaves it with the rights holder's player rather than serving our re-hosted
+ * copy of it, which matters more for an app than it does for the site.
  */
 export function WedgiePlayer({
   videoUrl,
@@ -41,18 +45,6 @@ export function WedgiePlayer({
   }
 
   return <EmbeddedVideo src={src} />;
-}
-
-/**
- * Unlike the web app, prefer the Cloudinary mp4 over the YouTube embed: it
- * plays in the native player and avoids the WebView entirely. Falls back to
- * the shared web ordering when there is no mp4.
- */
-export function pickVideoForNative(
-  videoUrl: VideoUrls | null,
-): ActiveVideo | null {
-  if (videoUrl?.cloudinary) return "cloudinary";
-  return pickInitialVideo(videoUrl);
 }
 
 function NativeVideo({ uri }: { uri: string }) {
@@ -165,7 +157,10 @@ const SPEAKER_WAVES = "M16 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12";
 function EmbeddedVideo({ src }: { src: string }) {
   const origin = getApiBaseUrl();
   const separator = src.includes("?") ? "&" : "?";
-  const embedSrc = `${src}${separator}origin=${encodeURIComponent(origin)}&playsinline=1`;
+  // autoplay and mute keep the behaviour the Cloudinary player had: you tapped
+  // a clip, so it starts, and opening a wedgie never blares audio. YouTube
+  // permits autoplay only while muted, so the two go together.
+  const embedSrc = `${src}${separator}origin=${encodeURIComponent(origin)}&playsinline=1&autoplay=1&mute=1`;
 
   const html = `<!DOCTYPE html>
 <html>
