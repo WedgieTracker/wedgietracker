@@ -26,10 +26,9 @@ export function WedgieVideoTabs({
     onChange(next);
   };
 
-  const hasBroadcast = Boolean(videoUrl.cloudinary ?? videoUrl.youtube);
+  const hasBroadcast = Boolean(videoUrl.youtube);
   const hasNoDunks = Boolean(videoUrl.youtubeNoDunks);
-  const broadcastActive =
-    activeVideo === "youtube" || activeVideo === "cloudinary";
+  const broadcastActive = activeVideo === "youtube";
 
   // Nothing to switch between, so the tab is just a label taking up space.
   if (!hasBroadcast || !hasNoDunks) return null;
@@ -40,9 +39,7 @@ export function WedgieVideoTabs({
         <Tab
           label="NBA Broadcast"
           active={broadcastActive}
-          onPress={() =>
-            switchTo(videoUrl.cloudinary ? "cloudinary" : "youtube")
-          }
+          onPress={() => switchTo("youtube")}
         />
       ) : null}
 

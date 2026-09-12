@@ -129,14 +129,20 @@ Measured against all 635 wedgies:
 | ----------------- | ----------- |
 | YouTube           | 359 (56.5%) |
 | YouTube (NoDunks) | 273 (43.0%) |
-| Cloudinary mp4    | 3 (0.5%)    |
+| No video shown    | 3 (0.5%)    |
 
-Three wedgies have no YouTube URL at all and still play the mp4.
+**The app has no Cloudinary playback path at all.** The three wedgies with no
+YouTube URL show "No video for this wedgie" rather than falling back to our
+own mp4, so there is no route by which the app serves a re-hosted broadcast
+clip. `pickVideoForApp` in `components/WedgiePlayer.tsx` is the website's
+ordering minus Cloudinary, and the broadcast tab resolves to YouTube only.
+
+expo-video was removed with it: nothing in the app plays a file any more, so
+the native player, its custom controls and the dependency all went.
 
 Review treats third-party content in an app more strictly than on a website,
-and embedding the rights holder's player is a materially better position than
-distributing our own copy. The three remaining mp4s are worth mentioning in
-the review notes rather than hiding.
+and leaving every clip in the rights holder's own player is a materially
+better position than distributing our own copy.
 
 Related: screenshot `03-detail.png` shows broadcast footage inside a marketing
 asset, which is a separate exposure from in-app content and a separate
@@ -182,11 +188,11 @@ collect, so it does not change the answers, but the privacy policy says so.
       `4d215288-e7b1-4e6c-8157-bfbe346b7481`.
 
       **Upload with `./scripts/submit-ios.sh`, not `eas submit`.** Every path
-                              through eas submit ends at an Apple ID login: it needs one to create the
-                              app record, and another to register an ASC API key against the project
-                              ("Only user authentication is supported"). That login fails here with
-                              "iTunes service key is empty", so the key never gets used. altool takes
-                              the key directly and never touches the Developer Portal.
+                                      through eas submit ends at an Apple ID login: it needs one to create the
+                                      app record, and another to register an ASC API key against the project
+                                      ("Only user authentication is supported"). That login fails here with
+                                      "iTunes service key is empty", so the key never gets used. altool takes
+                                      the key directly and never touches the Developer Portal.
 
 - [x] Export compliance. `ITSAppUsesNonExemptEncryption: false` answers it at
       upload; the API confirms `usesNonExemptEncryption: false` on build 4, so
