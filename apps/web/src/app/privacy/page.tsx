@@ -58,24 +58,38 @@ export default function PrivacyPage() {
                 <li>
                   <strong>A crash or an error</strong>, to a crash reporter,
                   automatically when one happens. It carries what went wrong and
-                  where in our own code, the app version and the phone model. No
-                  IP address, and every error is reduced to its type and code
-                  first, so nothing can ride along inside one.
+                  where in our own code, the app version, the iOS version and
+                  the phone model. Every error is reduced to its type and code
+                  first, so nothing personal can ride along inside one.
                 </li>
                 <li>
                   <strong>Which screens get opened</strong>, to an analytics
                   provider, automatically. Which part of the app was used and
-                  which filters were picked. Never what you typed.
+                  which filters were picked. Never what you typed, and not your
+                  location.
                 </li>
               </ul>
-              <p className="mt-4">
-                Both of those last two process your data in the European Union.
-                They are tied to a random identifier made on the device on first
-                launch, not to you, and it is not derived from any hardware
-                identifier. Neither is used to track you across other apps or
-                websites, and neither is sold or shared with data brokers or
-                advertisers. Deleting the app ends the collection and takes the
-                identifier with it.
+              <p className="mt-4 mb-4">
+                Both of those last two process your data in the European Union
+                and neither stores your IP address. They are tied to a random
+                identifier made on the device on first launch, not to you, and
+                it is not derived from any hardware identifier. Neither is used
+                to track you across other apps or websites, and neither is sold
+                or shared with data brokers or advertisers.
+              </p>
+              <p className="mb-4">
+                Crash reports are deleted automatically within 90 days. Usage
+                analytics are kept for no more than 12 months and then deleted.
+                Both providers act only on our instructions and are bound by
+                data processing terms that protect your data at least as well as
+                this policy does.
+              </p>
+              <p>
+                Deleting the app stops all collection and removes the
+                identifier. To have the data already collected from your phone
+                deleted sooner, email us at the address below. Because none of
+                it is linked to your name, tell us roughly when you used the app
+                and we will remove what we can match.
               </p>
             </section>
 
@@ -162,6 +176,11 @@ export default function PrivacyPage() {
 
             <section>
               <h2 className="text-pink mb-4 text-2xl font-bold">Contact Us</h2>
+              <p className="mb-4">
+                The WedgieTracker iOS app is published by ZOKE.GG LTD,
+                registered in England and Wales, company number 16383692,
+                registered office 124-128 City Road, London EC1V 2NX.
+              </p>
               <p>
                 For any privacy-related questions or concerns, please contact us
                 at:{" "}

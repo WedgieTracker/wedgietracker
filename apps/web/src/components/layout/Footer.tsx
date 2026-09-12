@@ -40,6 +40,12 @@ export function Footer() {
           >
             Privacy
           </Link>
+          <Link
+            href="/support"
+            className="ml-3 text-xs text-white/50 underline transition-all duration-300 hover:text-white"
+          >
+            Support
+          </Link>
         </div>
         <div className="flex flex-col items-center gap-2 sm:items-end lg:flex-row lg:items-center lg:gap-8">
           <span className="text-xs text-white/50">

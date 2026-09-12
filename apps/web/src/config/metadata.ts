@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 const APP_NAME = "WedgieTracker";
 const APP_DESCRIPTION =
-  "NBA original WedgieTracker. We count how many times a basketball gets stuck between the rim and the backboard. NoDunks Inspired.";
+  "The original NBA wedgie tracker. We count how many times a basketball gets stuck between the rim and the backboard. NoDunks Inspired.";
 const APP_URL =
   process.env.NEXT_PUBLIC_APP_URL ?? "https://www.wedgietracker.com";
 const DEFAULT_SOCIAL_IMAGE =
