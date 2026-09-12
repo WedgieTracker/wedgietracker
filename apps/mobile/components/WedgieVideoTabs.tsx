@@ -21,10 +21,12 @@ export function WedgieVideoTabs({
   onChange: (next: ActiveVideo) => void;
 }) {
   const hasBroadcast = Boolean(videoUrl.cloudinary ?? videoUrl.youtube);
+  const hasNoDunks = Boolean(videoUrl.youtubeNoDunks);
   const broadcastActive =
     activeVideo === "youtube" || activeVideo === "cloudinary";
 
-  if (!hasBroadcast && !videoUrl.youtubeNoDunks) return null;
+  // Nothing to switch between, so the tab is just a label taking up space.
+  if (!hasBroadcast || !hasNoDunks) return null;
 
   return (
     <View style={styles.tabs}>
@@ -38,13 +40,11 @@ export function WedgieVideoTabs({
         />
       ) : null}
 
-      {videoUrl.youtubeNoDunks ? (
-        <Tab
-          label="NoDunks"
-          active={activeVideo === "youtubeNoDunks"}
-          onPress={() => onChange("youtubeNoDunks")}
-        />
-      ) : null}
+      <Tab
+        label="NoDunks"
+        active={activeVideo === "youtubeNoDunks"}
+        onPress={() => onChange("youtubeNoDunks")}
+      />
     </View>
   );
 }
@@ -74,7 +74,9 @@ function Tab({
 }
 
 const styles = StyleSheet.create({
-  tabs: { flexDirection: "row", gap: space.sm },
+  // Indented so the tabs sit over the video's rounded top corner rather than
+  // hanging off its left edge.
+  tabs: { flexDirection: "row", gap: space.sm, paddingLeft: space.md },
   tab: {
     paddingHorizontal: space.sm,
     paddingVertical: 5,

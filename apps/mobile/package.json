@@ -22,7 +22,6 @@
     "@trpc/server": "^11.18.0",
     "@wedgietracker/core": "workspace:*",
     "expo": "~57.0.22",
-    "expo-clipboard": "~57.0.2",
     "expo-constants": "~57.0.18",
     "expo-font": "~57.0.4",
     "expo-image": "~57.0.5",

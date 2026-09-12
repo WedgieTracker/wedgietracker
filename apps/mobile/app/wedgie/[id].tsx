@@ -1,26 +1,22 @@
-import * as Clipboard from "expo-clipboard";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
-import {
-  Pressable,
-  ScrollView,
-  Share,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import Svg, { Path } from "react-native-svg";
 
 import { CourtPositionDiagram } from "@/components/CourtPositionDiagram";
 import { ErrorState, Loading } from "@/components/States";
 import { WedgiePlayer, pickVideoForNative } from "@/components/WedgiePlayer";
 import { WedgieVideoTabs } from "@/components/WedgieVideoTabs";
-import { api, getApiBaseUrl, type RouterOutputs } from "@/lib/api";
+import { api, type RouterOutputs } from "@/lib/api";
 import { colors, fonts, radius, space } from "@/lib/theme";
 import { GEMS_EMOJI, isGemsDate } from "@wedgietracker/core/utils/formatDate";
 import type { ActiveVideo } from "@wedgietracker/core/utils/wedgieVideo";
 
 type Wedgie = RouterOutputs["wedgie"]["getAll"][number];
+
+/** The web badge is `text-[1.6em]` with a `text-[.5em]` hash. */
+const BADGE_NUMBER = 32;
+const BADGE_HASH = BADGE_NUMBER * 0.5;
 
 /**
  * Port of apps/web/src/components/home/WedgieModal.tsx and WedgieInfoPanel.
@@ -67,6 +63,8 @@ export default function WedgieDetailScreen() {
       wedgie={wedgie}
       hasPrevious={index > 0}
       hasNext={index < ordered.length - 1}
+      previousNumber={ordered[index - 1]?.number}
+      nextNumber={ordered[index + 1]?.number}
       onPrevious={() => {
         const prev = ordered[index - 1];
         if (prev) router.setParams({ id: String(prev.id) });
@@ -83,47 +81,30 @@ function WedgieDetail({
   wedgie,
   hasPrevious,
   hasNext,
+  previousNumber,
+  nextNumber,
   onPrevious,
   onNext,
 }: {
   wedgie: Wedgie;
   hasPrevious: boolean;
   hasNext: boolean;
+  previousNumber?: number | undefined;
+  nextNumber?: number | undefined;
   onPrevious: () => void;
   onNext: () => void;
 }) {
   const [active, setActive] = useState<ActiveVideo | null>(() =>
     pickVideoForNative(wedgie.videoUrl),
   );
-  const [copied, setCopied] = useState(false);
 
   // Reset the chosen source when stepping to another wedgie.
   useEffect(() => {
     setActive(pickVideoForNative(wedgie.videoUrl));
   }, [wedgie.id, wedgie.videoUrl]);
 
-  const shareUrl = `${getApiBaseUrl()}/all-wedgies?ws=${encodeURIComponent(
-    wedgie.seasonName ?? "",
-  )}&wn=${wedgie.number ?? ""}`;
-
-  const onCopy = async () => {
-    await Clipboard.setStringAsync(shareUrl);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1600);
-  };
-
-  const onShare = () =>
-    Share.share({
-      message: `Check out this wedgie by ${wedgie.playerName} - ${wedgie.teamName} vs ${wedgie.teamAgainstName} on WedgieTracker! ${shareUrl}`,
-      url: shareUrl,
-    });
-
   return (
-    <ScrollView
-      style={styles.screen}
-      contentContainerStyle={styles.content}
-      showsVerticalScrollIndicator={false}
-    >
+    <View style={styles.content}>
       {wedgie.videoUrl ? (
         <WedgieVideoTabs
           videoUrl={wedgie.videoUrl}
@@ -137,10 +118,27 @@ function WedgieDetail({
       {/* Number badge beside the date and season, as the info panel has it. */}
       <View style={styles.headerRow}>
         <View style={styles.badge}>
-          <Text style={styles.badgeHash} allowFontScaling={false}>
+          <Text
+            style={[
+              styles.badgeHash,
+              {
+                fontSize: BADGE_HASH,
+                lineHeight: BADGE_HASH,
+                // `mt-[.75em]` on the web, dropping the hash to the numeral's foot
+                marginTop: BADGE_HASH * 0.75,
+              },
+            ]}
+            allowFontScaling={false}
+          >
             #
           </Text>
-          <Text style={styles.badgeNumber} allowFontScaling={false}>
+          <Text
+            style={[
+              styles.badgeNumber,
+              { fontSize: BADGE_NUMBER, lineHeight: BADGE_NUMBER },
+            ]}
+            allowFontScaling={false}
+          >
             {wedgie.number ?? 1}
           </Text>
         </View>
@@ -185,36 +183,21 @@ function WedgieDetail({
         />
       </View>
 
-      <View style={styles.actions}>
-        <View style={styles.actionButtons}>
-          <Pressable
-            onPress={() => void onCopy()}
-            style={({ pressed }) => [styles.action, pressed && styles.pressed]}
-          >
-            <Text style={styles.actionText} allowFontScaling={false}>
-              {copied ? "COPIED!" : "COPY LINK"}
-            </Text>
-          </Pressable>
-          <Pressable
-            onPress={() => void onShare()}
-            style={({ pressed }) => [styles.action, pressed && styles.pressed]}
-          >
-            <Text style={styles.actionText} allowFontScaling={false}>
-              SHARE
-            </Text>
-          </Pressable>
-        </View>
-
-        <View style={styles.nav}>
-          <NavArrow
-            direction="previous"
-            enabled={hasPrevious}
-            onPress={onPrevious}
-          />
-          <NavArrow direction="next" enabled={hasNext} onPress={onNext} />
-        </View>
+      <View style={styles.nav}>
+        <NavButton
+          direction="previous"
+          label={previousNumber}
+          enabled={hasPrevious}
+          onPress={onPrevious}
+        />
+        <NavButton
+          direction="next"
+          label={nextNumber}
+          enabled={hasNext}
+          onPress={onNext}
+        />
       </View>
-    </ScrollView>
+    </View>
   );
 }
 
@@ -235,38 +218,63 @@ function Fact({
   );
 }
 
-const PREVIOUS_PATH = "M15 19l-7-7 7-7";
-const NEXT_PATH = "M9 5l7 7-7 7";
-
-function NavArrow({
+/**
+ * A labelled step control rather than a bare chevron: it names the wedgie you
+ * are moving to, so you know whether it is worth the tap.
+ */
+function NavButton({
   direction,
+  label,
   enabled,
   onPress,
 }: {
   direction: "previous" | "next";
+  label?: number | undefined;
   enabled: boolean;
   onPress: () => void;
 }) {
+  const previous = direction === "previous";
+
   return (
     <Pressable
       onPress={enabled ? onPress : undefined}
       disabled={!enabled}
       style={({ pressed }) => [
-        styles.navArrow,
-        !enabled && styles.navArrowDisabled,
-        pressed && enabled && styles.navArrowPressed,
+        styles.navButton,
+        !enabled && styles.navButtonDisabled,
+        pressed && enabled && styles.navButtonPressed,
       ]}
     >
-      <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-        <Path
-          d={direction === "previous" ? PREVIOUS_PATH : NEXT_PATH}
-          stroke={colors.yellow}
-          strokeWidth={2.5}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </Svg>
+      {previous ? <Chevron direction="previous" /> : null}
+      <View style={previous ? styles.navTextStart : styles.navTextEnd}>
+        <Text style={styles.navCaption} allowFontScaling={false}>
+          {previous ? "NEWER" : "OLDER"}
+        </Text>
+        {label !== undefined ? (
+          <Text style={styles.navLabel} allowFontScaling={false}>
+            #{label}
+          </Text>
+        ) : null}
+      </View>
+      {previous ? null : <Chevron direction="next" />}
     </Pressable>
+  );
+}
+
+const PREVIOUS_PATH = "M15 19l-7-7 7-7";
+const NEXT_PATH = "M9 5l7 7-7 7";
+
+function Chevron({ direction }: { direction: "previous" | "next" }) {
+  return (
+    <Svg width={15} height={15} viewBox="0 0 24 24" fill="none">
+      <Path
+        d={direction === "previous" ? PREVIOUS_PATH : NEXT_PATH}
+        stroke={colors.darkpurple}
+        strokeWidth={3}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
   );
 }
 
@@ -283,8 +291,12 @@ function formatDate(value: string): string {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.darkpurple },
-  content: { padding: space.lg, gap: space.lg, paddingBottom: space.xxl },
+  content: {
+    backgroundColor: colors.darkpurple,
+    padding: space.lg,
+    gap: space.md,
+    paddingBottom: space.lg,
+  },
   padded: { flex: 1, padding: space.lg, backgroundColor: colors.darkpurple },
 
   headerRow: { flexDirection: "row", alignItems: "center", gap: space.lg },
@@ -294,22 +306,11 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     backgroundColor: colors.pink,
     flexDirection: "row",
-    alignItems: "flex-start",
+    alignItems: "center",
     justifyContent: "center",
-    paddingTop: space.md,
   },
-  badgeHash: {
-    fontFamily: fonts.black,
-    color: colors.darkpurple,
-    fontSize: 14,
-    marginTop: 10,
-  },
-  badgeNumber: {
-    fontFamily: fonts.black,
-    color: colors.yellow,
-    fontSize: 32,
-    lineHeight: 32,
-  },
+  badgeHash: { fontFamily: fonts.black, color: colors.darkpurple },
+  badgeNumber: { fontFamily: fonts.black, color: colors.yellow },
   headerText: { flex: 1, gap: 4 },
   date: {
     fontFamily: fonts.bold,
@@ -340,39 +341,35 @@ const styles = StyleSheet.create({
   teamName: { color: colors.pink },
   types: { fontFamily: fonts.bold, color: colors.white, fontSize: 16 },
 
-  courtWrap: { alignItems: "center", paddingVertical: space.sm },
+  courtWrap: { alignItems: "center" },
 
-  actions: {
+  nav: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: space.sm,
+  },
+  navButton: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    gap: space.md,
-  },
-  actionButtons: { flexDirection: "row", gap: space.sm },
-  action: {
+    gap: 2,
     backgroundColor: colors.yellow,
-    borderRadius: radius.sm,
+    borderRadius: radius.pill,
+    paddingVertical: 6,
     paddingHorizontal: space.md,
-    paddingVertical: space.sm,
   },
-  pressed: { opacity: 0.75 },
-  actionText: {
+  navButtonDisabled: { opacity: 0.25 },
+  navButtonPressed: { opacity: 0.75 },
+  navTextStart: { alignItems: "flex-start" },
+  navTextEnd: { alignItems: "flex-end" },
+  navCaption: {
+    fontFamily: fonts.bold,
+    color: "rgba(18, 0, 46, 0.6)",
+    fontSize: 8,
+    letterSpacing: 0.8,
+  },
+  navLabel: {
     fontFamily: fonts.black,
     color: colors.darkpurple,
-    fontSize: 12,
+    fontSize: 13,
   },
-
-  nav: { flexDirection: "row", gap: space.sm },
-  navArrow: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    borderWidth: 1,
-    borderColor: colors.yellow,
-    backgroundColor: colors.darkpurple,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  navArrowDisabled: { opacity: 0.4 },
-  navArrowPressed: { backgroundColor: colors.darkpurpleLighter },
 });

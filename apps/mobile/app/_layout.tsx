@@ -51,9 +51,19 @@ export default function RootLayout() {
           name="seasons"
           options={{ title: "SEASONS HISTORY", headerBackTitle: "Stats" }}
         />
+        {/*
+          A sheet sized to its content rather than a full-height modal, and no
+          header: the title said nothing the screen does not already show.
+        */}
         <Stack.Screen
           name="wedgie/[id]"
-          options={{ title: "WEDGIE", presentation: "modal" }}
+          options={{
+            presentation: "formSheet",
+            headerShown: false,
+            sheetAllowedDetents: "fitToContents",
+            sheetCornerRadius: 24,
+            sheetGrabberVisible: true,
+          }}
         />
       </Stack>
     </ApiProvider>
