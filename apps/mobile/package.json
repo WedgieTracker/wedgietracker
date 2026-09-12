@@ -12,7 +12,7 @@
     "ios": "expo start --ios",
     "lint": "oxlint",
     "start": "expo start",
-    "submit:ios": "eas submit --platform ios",
+    "submit:ios": "./scripts/submit-ios.sh production",
     "typecheck": "pnpm --filter @wedgietracker/web types:build && tsgo --noEmit",
     "web": "expo start --web"
   },
