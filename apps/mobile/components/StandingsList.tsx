@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { useFluidType } from "@/lib/fluid";
+import { track } from "@/lib/observability";
 import { colors, fonts, radius, space } from "@/lib/theme";
 
 export interface StandingsItem {
@@ -54,7 +55,14 @@ export function StandingsList({
           return (
             <Pressable
               key={item.name}
-              onPress={onPressItem ? () => onPressItem(item.name) : undefined}
+              onPress={
+                onPressItem
+                  ? () => {
+                      track("wt_standings_tapped", { list: title });
+                      onPressItem(item.name);
+                    }
+                  : undefined
+              }
               style={({ pressed }) => [
                 styles.row,
                 pressed && styles.rowPressed,

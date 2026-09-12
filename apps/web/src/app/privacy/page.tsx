@@ -26,7 +26,51 @@ export default function PrivacyPage() {
                 This Privacy Policy explains how WedgieTracker (&quot;we&quot;,
                 &quot;us&quot;, or &quot;our&quot;) collects, uses, and protects
                 your personal information when you use our website
-                (wedgietracker.com).
+                (wedgietracker.com) and our iOS app. The two collect different
+                things, and the app section below says exactly what the app
+                does.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="text-pink mb-4 text-2xl font-bold">
+                The WedgieTracker iOS App
+              </h2>
+              <p className="mb-4">
+                The iOS app has no accounts, no newsletter, and no store, so
+                none of the personal information described above is collected
+                through it. We never learn your name, your email address, or
+                anything you have not chosen to tell us elsewhere.
+              </p>
+              <p className="mb-4">
+                The app does collect two things, both anonymous, and both
+                processed in the European Union:
+              </p>
+              <ul className="list-inside list-disc space-y-2">
+                <li>
+                  <strong>Crash and error reports</strong>, through Sentry, so
+                  we can find out when something breaks. These contain the
+                  fault, the device model, and the iOS version. They do not
+                  contain your IP address.
+                </li>
+                <li>
+                  <strong>Anonymous usage analytics</strong>, through PostHog,
+                  such as which screens are opened and which filters are used.
+                  These are tied to a random identifier generated on your
+                  device, not to you.
+                </li>
+              </ul>
+              <p className="mt-4 mb-4">
+                Neither is used to track you across other apps or websites, and
+                neither is sold or shared with data brokers or advertisers.
+                Deleting the app ends the collection, and the random identifier
+                goes with it.
+              </p>
+              <p>
+                The app plays video hosted by Cloudinary and, for some clips,
+                embedded from YouTube. YouTube sets its own cookies inside the
+                embedded player and its privacy policy governs that, not this
+                one.
               </p>
             </section>
 
@@ -132,7 +176,7 @@ export default function PrivacyPage() {
                 We may update this Privacy Policy from time to time. The latest
                 version will always be posted on this page.
               </p>
-              <p className="mt-2 text-sm">Last updated: 01/24/2025</p>
+              <p className="mt-2 text-sm">Last updated: 09/12/2026</p>
             </section>
           </div>
         </div>

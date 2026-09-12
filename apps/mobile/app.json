@@ -44,7 +44,16 @@
           "resizeMode": "contain",
           "backgroundColor": "#12002E"
         }
-      ]
+      ],
+      [
+        "@sentry/react-native",
+        {
+          "url": "https://de.sentry.io/",
+          "organization": "zokegg-ltd",
+          "project": "wedgietracker-ios"
+        }
+      ],
+      "expo-localization"
     ],
     "experiments": {
       "typedRoutes": true

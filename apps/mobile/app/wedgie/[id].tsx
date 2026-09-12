@@ -15,6 +15,7 @@ import { ErrorState, Loading } from "@/components/States";
 import { WedgiePlayer, pickVideoForNative } from "@/components/WedgiePlayer";
 import { WedgieVideoTabs } from "@/components/WedgieVideoTabs";
 import { api, type RouterOutputs } from "@/lib/api";
+import { track } from "@/lib/observability";
 import { colors, fonts, radius, space } from "@/lib/theme";
 import { GEMS_EMOJI, isGemsDate } from "@wedgietracker/core/utils/formatDate";
 import type { ActiveVideo } from "@wedgietracker/core/utils/wedgieVideo";
@@ -121,6 +122,17 @@ function WedgieDetail({
   useEffect(() => {
     setActive(pickVideoForNative(wedgie.videoUrl));
   }, [wedgie.id, wedgie.videoUrl]);
+
+  // Which wedgies get watched, and which source served them. The source is the
+  // useful half: the app prefers the Cloudinary mp4, and this is how we find
+  // out how often it falls through to a WebView instead.
+  useEffect(() => {
+    track("wt_wedgie_opened", {
+      number: wedgie.number,
+      season: wedgie.seasonName,
+      source: pickVideoForNative(wedgie.videoUrl),
+    });
+  }, [wedgie.id, wedgie.number, wedgie.seasonName, wedgie.videoUrl]);
 
   return (
     <ScrollView

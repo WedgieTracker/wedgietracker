@@ -1,10 +1,11 @@
 import { useVideoPlayer, VideoView } from "expo-video";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { WebView } from "react-native-webview";
 import Svg, { Path } from "react-native-svg";
 
 import { getApiBaseUrl } from "@/lib/api";
+import { report } from "@/lib/observability";
 import { colors, space, type } from "@/lib/theme";
 import type { VideoUrls } from "@wedgietracker/core/types/wedgie";
 import {
@@ -65,6 +66,16 @@ function NativeVideo({ uri }: { uri: string }) {
 
   const [playing, setPlaying] = useState(true);
   const [muted, setMuted] = useState(true);
+
+  // A clip that will not load shows a black frame and says nothing. Without
+  // this, a dead Cloudinary asset is invisible until somebody complains.
+  useEffect(() => {
+    const sub = player.addListener("statusChange", ({ status, error }) => {
+      if (status !== "error") return;
+      report("video.native", error ?? new Error("player error"), { uri });
+    });
+    return () => sub.remove();
+  }, [player, uri]);
 
   const togglePlay = () => {
     if (playing) player.pause();
@@ -180,6 +191,19 @@ function EmbeddedVideo({ src }: { src: string }) {
         originWhitelist={["*"]}
         source={{ html, baseUrl: origin }}
         style={styles.surface}
+        // YouTube answers an embed it will not play with an error code inside
+        // the iframe rather than a failed request, so these two catch the
+        // WebView failing outright; the player's own 150/152/153 do not reach
+        // us here.
+        onError={({ nativeEvent }) =>
+          report("video.webview", new Error(nativeEvent.description), { src })
+        }
+        onHttpError={({ nativeEvent }) =>
+          report("video.webview.http", new Error("http error"), {
+            src,
+            status: nativeEvent.statusCode,
+          })
+        }
         allowsInlineMediaPlayback
         mediaPlaybackRequiresUserAction={false}
         allowsFullscreenVideo

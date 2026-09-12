@@ -11,6 +11,7 @@ import Animated, { SlideInDown } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Svg, { Path } from "react-native-svg";
 
+import { track } from "@/lib/observability";
 import { colors, fonts, radius, space } from "@/lib/theme";
 
 export interface FilterOption {
@@ -115,6 +116,10 @@ export function FilterSelect({
                 return (
                   <Pressable
                     onPress={() => {
+                      track("wt_filter_applied", {
+                        filter: label,
+                        value: item.value,
+                      });
                       onSelect(item.value);
                       setOpen(false);
                     }}

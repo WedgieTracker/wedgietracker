@@ -1,5 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
+import { track } from "@/lib/observability";
 import { colors, fonts, radius, space } from "@/lib/theme";
 import type { VideoUrls } from "@wedgietracker/core/types/wedgie";
 import type { ActiveVideo } from "@wedgietracker/core/utils/wedgieVideo";
@@ -20,6 +21,11 @@ export function WedgieVideoTabs({
   activeVideo: ActiveVideo | null;
   onChange: (next: ActiveVideo) => void;
 }) {
+  const switchTo = (next: ActiveVideo) => {
+    track("wt_video_source_switched", { from: activeVideo, to: next });
+    onChange(next);
+  };
+
   const hasBroadcast = Boolean(videoUrl.cloudinary ?? videoUrl.youtube);
   const hasNoDunks = Boolean(videoUrl.youtubeNoDunks);
   const broadcastActive =
@@ -35,7 +41,7 @@ export function WedgieVideoTabs({
           label="NBA Broadcast"
           active={broadcastActive}
           onPress={() =>
-            onChange(videoUrl.cloudinary ? "cloudinary" : "youtube")
+            switchTo(videoUrl.cloudinary ? "cloudinary" : "youtube")
           }
         />
       ) : null}
@@ -43,7 +49,7 @@ export function WedgieVideoTabs({
       <Tab
         label="NoDunks"
         active={activeVideo === "youtubeNoDunks"}
-        onPress={() => onChange("youtubeNoDunks")}
+        onPress={() => switchTo("youtubeNoDunks")}
       />
     </View>
   );

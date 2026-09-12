@@ -88,8 +88,6 @@ basketball,stats,nodunks,rim,backboard,highlights,hoops,standings,boxscore,bball
 | Marketing URL  | `https://www.wedgietracker.com`         |
 | Privacy Policy | `https://www.wedgietracker.com/privacy` |
 
-**The privacy URL is the problem. See below.**
-
 ## Age Rating
 
 **4+.** No objectionable content: basketball clips and numbers.
@@ -102,51 +100,41 @@ or Safari. If review pushes back, that is the reason why.
 
 ## App Privacy ("Data Collection")
 
-**Data Not Collected.** The app has no accounts, no analytics, no tracking, and
-no crash reporting. It makes read-only requests to the site's public API and
-loads video from Cloudinary and YouTube.
+The app reports crashes to Sentry and anonymous usage to PostHog, both hosted
+in the EU. It has no accounts, so nothing it collects is tied to a person.
 
-Worth knowing: YouTube embeds set their own cookies inside the WebView. That is
-not data _you_ collect, so it does not change the answer, but it is the kind of
-thing that is better understood before someone asks.
+Declare three categories, each **Not Linked to You** and **Not Used for
+Tracking**:
 
----
+| Category        | Type                | Purpose           | Source                          |
+| --------------- | ------------------- | ----------------- | ------------------------------- |
+| **Diagnostics** | Crash Data          | App Functionality | Sentry                          |
+| **Usage Data**  | Product Interaction | Analytics         | PostHog                         |
+| **Identifiers** | Device ID           | Analytics         | PostHog's anonymous distinct_id |
 
-# Blocker: the privacy policy does not describe this app
+Three things worth being able to defend if review asks:
 
-`https://www.wedgietracker.com/privacy` is written for the website. It says it
-covers "our website (wedgietracker.com)" and describes collecting:
+- **No performance data.** Sentry tracing, profiling and replay are all off,
+  set explicitly in `lib/observability.ts` rather than left to a default, so
+  Crash Data is the whole of the Diagnostics answer.
+- **No IP address.** `sendDefaultPii: false`, so Sentry does not record it.
+- **Device ID is not the IDFA.** PostHog generates a random id on first launch
+  and it never leaves the install. Nothing asks for tracking permission,
+  because nothing tracks.
 
-- email addresses for the newsletter
-- names and shipping addresses for purchases
-- Google Analytics 4 usage data
-
-**The app does none of these.** There is no newsletter, no store, and no
-analytics in it, because those were deliberately left out of the mobile build.
-
-So the App Privacy answers and the linked policy would contradict each other:
-one says nothing is collected, the other describes collecting three categories.
-That inconsistency is a common review rejection, and it is also just wrong.
-
-Two ways to fix it, in order of preference:
-
-1. **Add an app section to the existing page.** A short block stating that the
-   iOS app collects no personal data, has no accounts or analytics, and only
-   reads the public API. Keeps one URL and one page to maintain. This is a small
-   change to `apps/web/src/app/privacy/page.tsx`.
-2. **A separate `/privacy/app` page** covering the app alone. Cleaner
-   separation, one more page to keep in step.
-
-Either way this has to be live on the site before submitting, since Apple
-fetches the URL during review.
+YouTube embeds set their own cookies inside the WebView. That is not data we
+collect, so it does not change the answers, but the privacy policy says so.
 
 ---
 
 # Still needed before submission
 
-- [ ] Privacy policy updated to cover the app (above)
-- [ ] Screenshots, being generated separately
-- [ ] A build uploaded: `eas build --profile production --platform ios`
+- [x] Privacy policy updated to cover the app. `apps/web/src/app/privacy/page.tsx`
+      now carries a WedgieTracker iOS App section naming both processors.
+      **It has to be deployed before submitting**, since Apple fetches the URL.
+- [x] Screenshots. Five 6.9" tiles in `store/screenshots/ios-6.9/`. No iPad set
+      is needed: `supportsTablet` is false.
+- [ ] A build uploaded: `./scripts/build-ios.sh`
 - [ ] Export compliance answer. The app makes HTTPS requests and nothing more,
       so it qualifies for the standard exemption, but the question must be
       answered at upload.
