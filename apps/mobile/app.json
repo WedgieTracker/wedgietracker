@@ -8,12 +8,15 @@
     "scheme": "wedgietracker",
     "userInterfaceStyle": "dark",
     "ios": {
-      "supportsTablet": true,
+      "supportsTablet": false,
       "bundleIdentifier": "com.wedgietracker.app",
       "icon": {
         "light": "./assets/images/icon.png",
         "dark": "./assets/images/ios-dark.png",
         "tinted": "./assets/images/ios-tinted.png"
+      },
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
