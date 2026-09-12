@@ -1,9 +1,21 @@
+import { useEffect } from "react";
 import { StyleSheet, Text, View } from "react-native";
+import Animated, {
+  Easing,
+  cancelAnimation,
+  interpolateColor,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withRepeat,
+  withTiming,
+} from "react-native-reanimated";
 
 import { useCountUp } from "@/components/Counter";
 import { PillButton } from "@/components/PillButton";
 import { WaveCounterPanel } from "@/components/WaveCounterPanel";
 import { useFluidType } from "@/lib/fluid";
+import { SCREENSHOT_MODE } from "@/lib/screenshot";
 import { colors, fonts, radius, space } from "@/lib/theme";
 
 export interface HeroStatsData {
@@ -114,24 +126,7 @@ function PaceBlock({
             </Text>
           </View>
         ) : (
-          <View style={styles.freshRow}>
-            <Text
-              style={[styles.freshNew, tight(FRESH_NEW)]}
-              allowFontScaling={false}
-            >
-              NEW
-            </Text>
-            <Text
-              style={[
-                styles.freshWedgie,
-                tight(FRESH_WEDGIE),
-                { marginTop: -0.3 * FRESH_WEDGIE },
-              ]}
-              allowFontScaling={false}
-            >
-              WEDGIE
-            </Text>
-          </View>
+          <FreshWedgie />
         )}
       </View>
 
@@ -188,16 +183,73 @@ function daysSince(value: Date | string | null): number | null {
   const last = new Date(value);
   if (Number.isNaN(last.getTime())) return null;
 
-  // Store screenshots only. Captured in the offseason, the panel would read
-  // "96 days without wedgies", which is true that day and a strange first
-  // impression of an app that spends the season announcing new ones. This
-  // pins today to the last wedgie so the capture shows the in-season state.
-  // `__DEV__` is false in release builds and the whole branch is stripped, so
-  // it cannot reach anyone who installs the app.
-  if (__DEV__ && process.env.EXPO_PUBLIC_SCREENSHOT_MODE === "1") return 0;
+  // Store screenshots only, see lib/screenshot.ts. Captured in the offseason
+  // the panel reads "96 days without wedgies", true that day and an odd first
+  // impression of an app that spends the season announcing new ones.
+  if (SCREENSHOT_MODE) return 0;
 
   const diff = easternDay(new Date()) - easternDay(last);
   return Math.round(diff / (1000 * 60 * 60 * 24));
+}
+
+/**
+ * Half of `animation: colorShift 1s infinite` in apps/web/tailwind.config.ts:
+ * yellow to pink takes half a second, pink back to yellow the other half.
+ */
+const COLOR_SHIFT_HALF_MS = 500;
+
+/**
+ * Port of the web's `animate-color-shift` / `animate-color-shift-delayed` pair:
+ * NEW and WEDGIE swap between yellow and pink, always opposite each other.
+ *
+ * One value yoyos 0 to 1 and back, and the two words read it in opposite
+ * directions, so they cannot drift out of phase.
+ */
+function FreshWedgie() {
+  const reduceMotion = useReducedMotion();
+  const shift = useSharedValue(0);
+
+  useEffect(() => {
+    if (reduceMotion) return;
+    shift.value = withRepeat(
+      withTiming(1, {
+        duration: COLOR_SHIFT_HALF_MS,
+        easing: Easing.inOut(Easing.ease),
+      }),
+      -1,
+      true,
+    );
+    return () => cancelAnimation(shift);
+  }, [reduceMotion, shift]);
+
+  const newStyle = useAnimatedStyle(() => ({
+    color: interpolateColor(shift.value, [0, 1], [colors.yellow, colors.pink]),
+  }));
+  const wedgieStyle = useAnimatedStyle(() => ({
+    color: interpolateColor(shift.value, [0, 1], [colors.pink, colors.yellow]),
+  }));
+
+  return (
+    <View style={styles.freshRow}>
+      <Animated.Text
+        style={[styles.freshNew, tight(FRESH_NEW), !reduceMotion && newStyle]}
+        allowFontScaling={false}
+      >
+        NEW
+      </Animated.Text>
+      <Animated.Text
+        style={[
+          styles.freshWedgie,
+          tight(FRESH_WEDGIE),
+          { marginTop: -0.3 * FRESH_WEDGIE },
+          !reduceMotion && wedgieStyle,
+        ]}
+        allowFontScaling={false}
+      >
+        WEDGIE
+      </Animated.Text>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({

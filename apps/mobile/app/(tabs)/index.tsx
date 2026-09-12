@@ -17,6 +17,7 @@ import { useFluidType } from "@/lib/fluid";
 import { useTabBarClearance } from "@/lib/layout";
 import { api } from "@/lib/api";
 import { colors, fonts, radius, space } from "@/lib/theme";
+import { heroForScreenshot, latestForScreenshot } from "@/lib/screenshot";
 
 /**
  * Mirrors the composition of apps/web/src/app/page.tsx: the stats hero, the
@@ -94,7 +95,7 @@ export default function HomeScreen() {
 
         {stats.data ? (
           <HeroStats
-            stats={stats.data}
+            stats={heroForScreenshot(stats.data)}
             onMoreStats={() => router.push("/stats")}
           />
         ) : null}
@@ -103,15 +104,17 @@ export default function HomeScreen() {
           {latest.data && latest.data.length > 0 ? (
             <View style={styles.card}>
               <View style={styles.cardBody}>
-                {latest.data.slice(0, 3).map((wedgie, index, rows) => (
-                  <WedgieRow
-                    key={wedgie.id}
-                    wedgie={wedgie}
-                    first={index === 0}
-                    last={index === rows.length - 1}
-                    onPress={() => router.push(`/wedgie/${wedgie.id}`)}
-                  />
-                ))}
+                {latestForScreenshot(latest.data)
+                  .slice(0, 3)
+                  .map((wedgie, index, rows) => (
+                    <WedgieRow
+                      key={wedgie.id}
+                      wedgie={wedgie}
+                      first={index === 0}
+                      last={index === rows.length - 1}
+                      onPress={() => router.push(`/wedgie/${wedgie.id}`)}
+                    />
+                  ))}
               </View>
               <PillButton
                 label="WATCH THEM ALL"
