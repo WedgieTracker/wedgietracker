@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
 import { Loader } from "@/components/Loader";
@@ -18,12 +19,22 @@ export function Loading({ label = "Loading" }: { label?: string }) {
  * above it, so nothing is half-drawn and nothing jumps when the data lands.
  */
 export function ScreenLoading() {
+  // A load that finishes inside this window shows only the background, never
+  // the animation. Without it, a fast response put the loader on screen for a
+  // few frames and read as a flash rather than as loading.
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const timer = setTimeout(() => setVisible(true), LOADER_DELAY_MS);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
-    <View style={styles.screen}>
-      <Loader size={132} />
-    </View>
+    <View style={styles.screen}>{visible ? <Loader size={132} /> : null}</View>
   );
 }
+
+/** Long enough to swallow a cached or quick response, short enough to feel prompt. */
+const LOADER_DELAY_MS = 250;
 
 export function ErrorState({ message }: { message: string }) {
   return (

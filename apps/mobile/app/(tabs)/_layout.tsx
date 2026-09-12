@@ -1,6 +1,7 @@
 import { NativeTabs } from "expo-router/unstable-native-tabs";
 
 import { colors, fonts } from "@/lib/theme";
+import { usePrefetchTabs } from "@/lib/use-prefetch-tabs";
 
 /**
  * The real UITabBarController rather than a JavaScript tab bar, so on iOS 26
@@ -13,6 +14,8 @@ import { colors, fonts } from "@/lib/theme";
  * a dark bar on 26.
  */
 export default function TabLayout() {
+  usePrefetchTabs();
+
   return (
     <NativeTabs
       tintColor={colors.yellow}
