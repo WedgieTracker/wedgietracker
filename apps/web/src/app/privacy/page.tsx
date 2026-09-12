@@ -67,10 +67,10 @@ export default function PrivacyPage() {
                 goes with it.
               </p>
               <p>
-                The app plays video hosted by Cloudinary and, for some clips,
-                embedded from YouTube. YouTube sets its own cookies inside the
-                embedded player and its privacy policy governs that, not this
-                one.
+                Clips play in YouTube&apos;s own embedded player. YouTube sets
+                its own cookies inside that player and its privacy policy
+                governs them, not this one. Images, such as the court diagrams,
+                are served from Cloudinary.
               </p>
             </section>
 
