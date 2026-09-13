@@ -6,9 +6,10 @@ import {
   StyleSheet,
   Text,
   View,
+  useWindowDimensions,
 } from "react-native";
 import Animated, { SlideInDown } from "react-native-reanimated";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Path } from "react-native-svg";
 
 import { track } from "@/lib/observability";
@@ -40,6 +41,8 @@ export function FilterSelect({
   tone?: "yellow" | "pink";
 }) {
   const [open, setOpen] = useState(false);
+  const { height } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
   const active = value !== "";
   // Falling back to options[0] was wrong while the option list is still
   // loading: a real season would display as "All Seasons", claiming a filter
@@ -99,9 +102,25 @@ export function FilterSelect({
         transparent
         onRequestClose={() => setOpen(false)}
       >
-        <Pressable style={styles.backdrop} onPress={() => setOpen(false)} />
-        <Animated.View entering={SlideInDown.duration(240)}>
-          <SafeAreaView style={styles.sheet} edges={["bottom"]}>
+        {/*
+          The backdrop fills the whole screen behind the sheet, and the sheet
+          is pinned to the bottom with its height cap on the view that
+          actually lays it out. The cap used to sit on an inner view, so the
+          wrapper kept the list's full height: the sheet floated mid-screen
+          with undimmed strips above and below it.
+        */}
+        <View style={styles.modalRoot}>
+          <Pressable
+            style={[StyleSheet.absoluteFill, styles.backdrop]}
+            onPress={() => setOpen(false)}
+          />
+          <Animated.View
+            entering={SlideInDown.duration(240)}
+            style={[
+              styles.sheet,
+              { maxHeight: height * 0.62, paddingBottom: insets.bottom },
+            ]}
+          >
             <View style={styles.sheetHead}>
               <Text style={styles.sheetTitle} allowFontScaling={false}>
                 {label}
@@ -117,6 +136,7 @@ export function FilterSelect({
               data={options}
               keyExtractor={(o) => o.value || "__all__"}
               style={styles.sheetList}
+              contentContainerStyle={styles.sheetListContent}
               renderItem={({ item }) => {
                 const selected = item.value === value;
                 return (
@@ -152,8 +172,8 @@ export function FilterSelect({
                 );
               }}
             />
-          </SafeAreaView>
-        </Animated.View>
+          </Animated.View>
+        </View>
       </Modal>
     </>
   );
@@ -271,12 +291,13 @@ const styles = StyleSheet.create({
   },
   valueTextEmpty: { color: "rgba(255, 255, 255, 0.25)" },
 
-  backdrop: { flex: 1, backgroundColor: "rgba(0, 0, 0, 0.6)" },
+  modalRoot: { flex: 1, justifyContent: "flex-end" },
+  backdrop: { backgroundColor: "rgba(0, 0, 0, 0.6)" },
   sheet: {
     backgroundColor: colors.darkpurple,
     borderTopLeftRadius: radius.xl,
     borderTopRightRadius: radius.xl,
-    maxHeight: "62%",
+    overflow: "hidden",
   },
   sheetHead: {
     flexDirection: "row",
@@ -289,7 +310,9 @@ const styles = StyleSheet.create({
   },
   sheetTitle: { fontFamily: fonts.black, color: colors.yellow, fontSize: 16 },
   sheetClose: { fontFamily: fonts.black, color: colors.pink, fontSize: 14 },
-  sheetList: { paddingHorizontal: space.md },
+  // Shrinks to fit under the cap and scrolls, rather than pushing past it.
+  sheetList: { flexShrink: 1, paddingHorizontal: space.md },
+  sheetListContent: { paddingBottom: space.sm },
   option: {
     flexDirection: "row",
     alignItems: "center",
