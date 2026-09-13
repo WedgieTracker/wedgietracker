@@ -118,7 +118,7 @@ export function FilterSelect({
             entering={SlideInDown.duration(240)}
             style={[
               styles.sheet,
-              { maxHeight: height * 0.62, paddingBottom: insets.bottom },
+              { maxHeight: height - insets.top - SHEET_TOP_GAP },
             ]}
           >
             <View style={styles.sheetHead}>
@@ -136,7 +136,9 @@ export function FilterSelect({
               data={options}
               keyExtractor={(o) => o.value || "__all__"}
               style={styles.sheetList}
-              contentContainerStyle={styles.sheetListContent}
+              contentContainerStyle={{
+                paddingBottom: insets.bottom + space.sm,
+              }}
               renderItem={({ item }) => {
                 const selected = item.value === value;
                 return (
@@ -178,6 +180,13 @@ export function FilterSelect({
     </>
   );
 }
+
+/**
+ * How much of the screen stays visible above the tallest sheet. The sheet
+ * otherwise sizes to its options, so short lists show whole instead of being
+ * cut at a fixed fraction of the screen.
+ */
+const SHEET_TOP_GAP = 72;
 
 /** A drawn chevron centres reliably; a text glyph sits off its own baseline. */
 function Chevron({ color }: { color: string }) {
@@ -312,7 +321,6 @@ const styles = StyleSheet.create({
   sheetClose: { fontFamily: fonts.black, color: colors.pink, fontSize: 14 },
   // Shrinks to fit under the cap and scrolls, rather than pushing past it.
   sheetList: { flexShrink: 1, paddingHorizontal: space.md },
-  sheetListContent: { paddingBottom: space.sm },
   option: {
     flexDirection: "row",
     alignItems: "center",
