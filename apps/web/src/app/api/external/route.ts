@@ -181,13 +181,14 @@ export async function POST(request: Request) {
 
   await syncIncomingGames(newGames);
 
-  // Calculate pace if we have wedgie/game data to work with
+  // Recalculate pace once games are being played, including before the
+  // season's first wedgie, so a dry start lowers the projection
   const [wedgieCount, gameCount] = await Promise.all([
     resolveTotalWedgies(newWedgieCount),
     resolveTotalGames(newTotalGamesCount),
   ]);
 
-  if (wedgieCount > 0 && gameCount > 0) {
+  if (gameCount > 0) {
     const pace = await calculatePace({
       currentTotalWedgies: wedgieCount,
       currentTotalGames: gameCount,
