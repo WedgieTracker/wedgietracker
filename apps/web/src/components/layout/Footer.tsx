@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { socialLinks } from "./SocialIcons";
+import { AppStoreBadge } from "../shared/AppStoreBadge";
 
 export function Footer() {
   const [hoveredSocial, setHoveredSocial] = useState<string | null>(null);
@@ -48,6 +49,7 @@ export function Footer() {
           </Link>
         </div>
         <div className="flex flex-col items-center gap-2 sm:items-end lg:flex-row lg:items-center lg:gap-8">
+          <AppStoreBadge />
           <span className="text-xs text-white/50">
             Inspired by{" "}
             <a

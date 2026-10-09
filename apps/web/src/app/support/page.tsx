@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { PageLayout } from "~/components/layout/PageLayout";
+import { AppStoreBadge } from "~/components/shared/AppStoreBadge";
 import { generateMetadata } from "~/config/metadata";
 
 export const metadata = generateMetadata({
@@ -39,6 +40,7 @@ export default function SupportPage() {
 
             <section>
               <h2 className="text-pink mb-4 text-2xl font-bold">The iOS app</h2>
+              <AppStoreBadge className="mb-4" />
               <ul className="list-inside list-disc space-y-2">
                 <li>Runs on iPhone with iOS 16.4 or later.</li>
                 <li>
