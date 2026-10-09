@@ -39,7 +39,7 @@ export function useSeasonFallback() {
   const { data: stats, isLoading: isLoadingStats } =
     api.wedgie.getStats.useQuery();
 
-  const defaultSeason = global?.currentSeason?.name ?? "2025/26";
+  const defaultSeason = global?.currentSeason?.name ?? "2026/27";
   const previousSeason = pickPreviousSeason(
     seasons,
     global?.currentSeason?.name,

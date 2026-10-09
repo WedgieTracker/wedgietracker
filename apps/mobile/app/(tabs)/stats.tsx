@@ -171,7 +171,10 @@ function SeasonComparison({ stats }: { stats: NerdStats }) {
             WE ARE ON PACE TO MATCH THE AVERAGE OF{" "}
             <Text style={styles.pinkBold}>{stats.averageLastTenSeasons}</Text>
             {"\n"}
-            OF THE PAST <Text style={styles.pinkBold}>11 SEASONS</Text>
+            OF THE PAST{" "}
+            <Text style={styles.pinkBold}>
+              {stats.averageSeasonsCount} SEASONS
+            </Text>
           </>
         ) : showPace ? (
           <>
@@ -179,14 +182,20 @@ function SeasonComparison({ stats }: { stats: NerdStats }) {
             {isMore ? "MORE" : "LESS"} THAN THE AVERAGE OF{" "}
             <Text style={styles.pinkBold}>{stats.averageLastTenSeasons}</Text>
             {"\n"}
-            OF THE PAST <Text style={styles.pinkBold}>11 SEASONS</Text>
+            OF THE PAST{" "}
+            <Text style={styles.pinkBold}>
+              {stats.averageSeasonsCount} SEASONS
+            </Text>
           </>
         ) : (
           <>
             THAN THE AVERAGE OF{" "}
             <Text style={styles.pinkBold}>{stats.averageLastTenSeasons}</Text>
             {"\n"}
-            OF THE PAST <Text style={styles.pinkBold}>11 SEASONS</Text>
+            OF THE PAST{" "}
+            <Text style={styles.pinkBold}>
+              {stats.averageSeasonsCount} SEASONS
+            </Text>
           </>
         )}
       </Text>

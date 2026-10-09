@@ -14,6 +14,7 @@ interface StatsForNerdsProps {
     pace: number;
     previousRecord: number;
     averageLastTenSeasons: number;
+    averageSeasonsCount: number;
     gamesSinceLastWedgie?: number | undefined;
     lastWedgiePlayer: string | null;
     totalWedgiesOverall: number;
@@ -154,7 +155,10 @@ function SeasonComparisonWrapper({ stats }: StatsForNerdsProps) {
               {stats.averageLastTenSeasons}
             </span>
             <br />
-            OF THE PAST <span className="text-pink font-black">11 SEASONS</span>
+            OF THE PAST{" "}
+            <span className="text-pink font-black">
+              {stats.averageSeasonsCount} SEASONS
+            </span>
           </>
         ) : showPace ? (
           <div>
@@ -166,7 +170,10 @@ function SeasonComparisonWrapper({ stats }: StatsForNerdsProps) {
               {stats.averageLastTenSeasons}
             </span>
             <br />
-            OF THE PAST <span className="text-pink font-black">11 SEASONS</span>
+            OF THE PAST{" "}
+            <span className="text-pink font-black">
+              {stats.averageSeasonsCount} SEASONS
+            </span>
           </div>
         ) : (
           <div>
@@ -175,7 +182,10 @@ function SeasonComparisonWrapper({ stats }: StatsForNerdsProps) {
               {stats.averageLastTenSeasons}
             </span>
             <br />
-            OF THE PAST <span className="text-pink font-black">11 SEASONS</span>
+            OF THE PAST{" "}
+            <span className="text-pink font-black">
+              {stats.averageSeasonsCount} SEASONS
+            </span>
           </div>
         )}
       </div>
