@@ -391,7 +391,7 @@ async function getCachedNerdStats() {
     seasons.length > 0 ? Math.max(...seasons.map((s) => s.wedgies.length)) : 0;
 
   return {
-    currentSeason: currentSeason ?? "2025/26",
+    currentSeason: currentSeason ?? "2026/27",
     wedgiesThisSeason:
       currentSeasonWedgies > (globalRow?.currentTotalWedgies ?? 0)
         ? currentSeasonWedgies
@@ -399,6 +399,7 @@ async function getCachedNerdStats() {
     fgaPerWedgie,
     pace: globalRow?.pace ?? 0,
     averageLastTenSeasons: averageSeasonRate,
+    averageSeasonsCount: seasonRates.length,
     ...(hideGamesSinceLastWedgie ? {} : { gamesSinceLastWedgie }),
     lastWedgiePlayer: lastWedgie?.playerName ?? null,
     statsPerWedgie: {
