@@ -10,7 +10,7 @@ interface CalculatePaceParams {
 }
 
 /**
- * Fetches historical season rates from the database and computes pace projections.
+ * Fetches completed seasons' rates from the database and computes pace projections.
  */
 export async function calculatePace({
   currentTotalWedgies,
@@ -22,19 +22,17 @@ export async function calculatePace({
     with: { wedgies: { columns: { id: true } } },
   });
 
-  const filteredSeasons = seasons.filter((s) => s.totalGames > 0);
-
-  const currentWedgies = await db.query.global.findFirst({
+  const globalRow = await db.query.global.findFirst({
     where: eq(global.id, 1),
-    columns: { currentTotalWedgies: true, currentSeasonId: true },
+    columns: { currentSeasonId: true },
   });
 
-  const seasonRates = filteredSeasons.map((s) => {
-    if (s.id === currentWedgies?.currentSeasonId) {
-      return currentWedgies.currentTotalWedgies / s.totalGames;
-    }
-    return s.wedgies.length / s.totalGames;
-  });
+  // Only completed seasons feed the historical rate. The current season's
+  // own rate swings wildly over its first games (0 before the first wedgie,
+  // then 1-in-3), and averaging it in made early-season pace jump around.
+  const seasonRates = seasons
+    .filter((s) => s.totalGames > 0 && s.id !== globalRow?.currentSeasonId)
+    .map((s) => s.wedgies.length / s.totalGames);
 
   return computePace({
     currentTotalWedgies,
