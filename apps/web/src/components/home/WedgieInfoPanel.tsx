@@ -1,11 +1,12 @@
 import type { Wedgie } from "@wedgietracker/core/types/wedgie";
 import { GEMS_EMOJI, isGemsDate } from "@wedgietracker/core/utils/formatDate";
-import { gameMoment } from "@wedgietracker/core/utils/gameMoment";
+import { gameTimeline } from "@wedgietracker/core/utils/gameMoment";
 import {
   tweetUrl,
   twitterProfileUrl,
 } from "@wedgietracker/core/utils/twitterHandle";
 import { CourtPositionDiagram } from "./CourtPositionDiagram";
+import { GameTimeline } from "./GameTimeline";
 
 interface WedgieInfoPanelProps {
   wedgie: Wedgie & {
@@ -26,7 +27,7 @@ function formatDate(date: string | Date) {
 }
 
 export function WedgieInfoPanel({ wedgie }: WedgieInfoPanelProps) {
-  const moment = gameMoment(wedgie);
+  const timeline = gameTimeline(wedgie);
   return (
     <div className="relative flex w-full flex-col justify-between p-6 px-4 sm:px-6 md:p-8 lg:w-[35%]">
       <div className="space-y-2 sm:space-y-6">
@@ -75,15 +76,6 @@ export function WedgieInfoPanel({ wedgie }: WedgieInfoPanelProps) {
               : ""}
           </p>
 
-          {moment && (
-            <>
-              <p className="text-right text-[.75em] font-bold tracking-wider text-white/60 uppercase">
-                When
-              </p>
-              <p className="text-[1em] text-white">{moment}</p>
-            </>
-          )}
-
           <p className="text-right text-[.75em] font-bold tracking-wider text-white/60 uppercase">
             Type
           </p>
@@ -114,24 +106,23 @@ export function WedgieInfoPanel({ wedgie }: WedgieInfoPanelProps) {
           )}
         </div>
 
+        {timeline && <GameTimeline timeline={timeline} />}
+
         {wedgie.noDunksTweet && (
           <a
             href={tweetUrl("NoDunksInc", wedgie.noDunksTweet.id)}
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:border-yellow block rounded-xl border border-white/15 bg-white/5 p-3 transition-colors duration-200"
+            className="hover:border-yellow inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 py-1 pr-3 pl-1 text-xs font-bold text-white transition-colors duration-200"
           >
-            <p className="text-[.7rem] font-bold tracking-wider text-white/60 uppercase">
-              No Dunks ·{" "}
-              {new Date(wedgie.noDunksTweet.postedAt).toLocaleDateString(
-                "en-US",
-                { month: "short", day: "numeric", year: "numeric" },
-              )}
-            </p>
-            <p className="mt-1 line-clamp-4 text-sm whitespace-pre-line text-white/90">
-              {wedgie.noDunksTweet.text}
-            </p>
-            <p className="text-yellow mt-2 text-xs font-bold">View on X →</p>
+            <img
+              src="/nodunks-logo.png"
+              alt=""
+              width={24}
+              height={24}
+              className="size-6 rounded-full"
+            />
+            See it on No Dunks ↗
           </a>
         )}
       </div>

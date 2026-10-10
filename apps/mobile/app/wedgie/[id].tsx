@@ -1,6 +1,7 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import {
+  Image,
   Linking,
   Pressable,
   ScrollView,
@@ -12,6 +13,7 @@ import {
 import Svg, { Path } from "react-native-svg";
 
 import { CourtPositionDiagram } from "@/components/CourtPositionDiagram";
+import { GameTimeline } from "@/components/GameTimeline";
 import { ErrorState, Loading } from "@/components/States";
 import { WedgiePlayer, pickVideoForApp } from "@/components/WedgiePlayer";
 import { WedgieVideoTabs } from "@/components/WedgieVideoTabs";
@@ -19,7 +21,7 @@ import { api, type RouterOutputs } from "@/lib/api";
 import { track } from "@/lib/observability";
 import { colors, fonts, radius, space } from "@/lib/theme";
 import { GEMS_EMOJI, isGemsDate } from "@wedgietracker/core/utils/formatDate";
-import { gameMoment } from "@wedgietracker/core/utils/gameMoment";
+import { gameTimeline } from "@wedgietracker/core/utils/gameMoment";
 import { tweetUrl } from "@wedgietracker/core/utils/twitterHandle";
 import type { ActiveVideo } from "@wedgietracker/core/utils/wedgieVideo";
 
@@ -114,7 +116,7 @@ function WedgieDetail({
   // piece that gives way - everything above it carries information the court
   // only illustrates.
   const courtWidth = height >= 820 ? 124 : height >= 720 ? 104 : 84;
-  const moment = gameMoment(wedgie);
+  const timeline = gameTimeline(wedgie);
 
   // Reset the chosen source when stepping to another wedgie.
   useEffect(() => {
@@ -213,11 +215,6 @@ function WedgieDetail({
                 : ` vs ${wedgie.teamAgainstName}`}
             </Text>
           </Fact>
-          {moment ? (
-            <Fact label="When">
-              <Text style={styles.types}>{moment}</Text>
-            </Fact>
-          ) : null}
           {wedgie.types.length > 0 ? (
             <Fact label="Type">
               <Text style={styles.types}>
@@ -225,25 +222,26 @@ function WedgieDetail({
               </Text>
             </Fact>
           ) : null}
-          {wedgie.noDunksTweet ? (
-            <Fact label="No Dunks">
-              <Text style={styles.tweet} numberOfLines={4}>
-                {wedgie.noDunksTweet.text}
-              </Text>
-              <Pressable
-                accessibilityRole="link"
-                hitSlop={8}
-                onPress={() => {
-                  const tweet = wedgie.noDunksTweet;
-                  if (tweet)
-                    void Linking.openURL(tweetUrl("NoDunksInc", tweet.id));
-                }}
-              >
-                <Text style={styles.tweetLink}>View on X →</Text>
-              </Pressable>
-            </Fact>
-          ) : null}
         </View>
+
+        {timeline ? <GameTimeline timeline={timeline} /> : null}
+
+        {wedgie.noDunksTweet ? (
+          <Pressable
+            accessibilityRole="link"
+            style={styles.noDunks}
+            onPress={() => {
+              const tweet = wedgie.noDunksTweet;
+              if (tweet) void Linking.openURL(tweetUrl("NoDunksInc", tweet.id));
+            }}
+          >
+            <Image
+              source={require("../../assets/images/nodunks-logo.png")}
+              style={styles.noDunksLogo}
+            />
+            <Text style={styles.noDunksText}>See it on No Dunks ↗</Text>
+          </Pressable>
+        ) : null}
 
         <View style={styles.courtWrap}>
           <CourtPositionDiagram
@@ -446,13 +444,21 @@ const styles = StyleSheet.create({
   teams: { fontFamily: fonts.bold, color: colors.white, fontSize: 22 },
   teamName: { color: colors.pink },
   types: { fontFamily: fonts.bold, color: colors.white, fontSize: 16 },
-  tweet: { fontFamily: fonts.bold, color: colors.white, fontSize: 14 },
-  tweetLink: {
-    fontFamily: fonts.bold,
-    color: colors.yellow,
-    fontSize: 13,
-    marginTop: space.xs,
+  noDunks: {
+    alignSelf: "flex-start",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingVertical: 4,
+    paddingLeft: 4,
+    paddingRight: 12,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.2)",
+    backgroundColor: "rgba(255,255,255,0.05)",
   },
+  noDunksLogo: { width: 24, height: 24, borderRadius: 12 },
+  noDunksText: { fontFamily: fonts.bold, color: colors.white, fontSize: 12 },
 
   courtWrap: { alignItems: "center" },
 
