@@ -2,6 +2,7 @@ import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 import { type NextRequest } from "next/server";
 
 import { env } from "~/env";
+import { cdnCacheResponseMeta } from "~/server/api/cdn-cache";
 import { appRouter } from "~/server/api/root";
 import { createTRPCContext } from "~/server/api/trpc";
 
@@ -21,6 +22,9 @@ const handler = (req: NextRequest) =>
     req,
     router: appRouter,
     createContext: () => createContext(req),
+    // Lets Vercel's CDN serve the public, input-free queries (see cdn-cache.ts).
+    responseMeta: ({ paths, type, errors, eagerGeneration }) =>
+      cdnCacheResponseMeta({ paths, type, errors, eagerGeneration }),
     onError:
       env.NODE_ENV === "development"
         ? ({ path, error }) => {
