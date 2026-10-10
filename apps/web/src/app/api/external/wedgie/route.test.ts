@@ -103,6 +103,9 @@ describe("/api/external/wedgie", () => {
       gameClock: "0:09.6",
       teamScore: 63,
     });
+    expect((record as { noDunksTweet: unknown }).noDunksTweet).toEqual({
+      id: "1",
+    });
     expect(syncWedgieTypes).toHaveBeenCalledWith(expect.anything(), 9, [
       "Layup",
     ]);
