@@ -12,7 +12,10 @@ days without wedgies and the all-time total. It mirrors the website home page.
   `apps/web/public/github-logo-light.svg` as `wt_logo` for the title bar.
 - `src/transform.js`: flattens the five API responses into the variables the markup uses.
 - `src/settings.yml`: polling URLs, refresh interval and the recipe's author bio.
-- `previews/`: renders at TRMNL X (`v2`) resolution.
+- `previews/`: renders at TRMNL X (`v2`) resolution; `previews/og/` holds TRMNL OG (800x480) renders.
+
+The markup is sized for the OG by default, with `lg:` classes for the larger TRMNL X. Preview
+both (`og_plus` and `v2`) after any change.
 
 ## Data
 

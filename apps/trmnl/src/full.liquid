@@ -9,15 +9,15 @@
         {% if live %}<span class="label label--small label--filled mt--1">Games live now</span>{% endif %}
       </div>
     </div>
-    <div class="col--span-7 flex flex--col flex--left flex--center-y gap--large">
-      <span class="title">Latest wedgies</span>
+    <div class="col--span-7 flex flex--col flex--left flex--center-y gap--small lg:gap--large">
+      <span class="title title--small lg:title--base">Latest wedgies</span>
       {% for w in latest limit: 3 %}
-      <div class="flex flex--row flex--center-y gap--large">
-        <div class="flex flex--col flex--center-x gap--none w--32 py--3 no-shrink bg--black rounded--small"><span class="title title--xxlarge text--bold text--white"><span class="label label--large text--white">#</span>{{ w.number }}</span><span class="label label--large text--white">{{ w.date }}</span></div>
+      <div class="flex flex--row flex--center-y gap lg:gap--large">
+        <div class="flex flex--col flex--center-x gap--none w--20 lg:w--32 py--1 lg:py--3 no-shrink bg--black rounded--small"><span class="title title--large lg:title--xxlarge text--bold text--white"><span class="label label--small lg:label--large text--white">#</span>{{ w.number }}</span><span class="label label--small lg:label--large text--white">{{ w.date }}</span></div>
         <div class="flex flex--col flex--left gap--none">
-          <span class="title title--xlarge" data-clamp="1">{{ w.player }}</span>
-          <span class="label label--large">{{ w.team }} - {{ w.against }}</span>
-          <span class="label label--gray">{{ w.type }}</span>
+          <span class="title lg:title--xlarge" data-clamp="1">{{ w.player }}</span>
+          <span class="label lg:label--large">{{ w.team }} - {{ w.against }}</span>
+          <span class="label label--small lg:label--base label--gray">{{ w.type }}</span>
         </div>
       </div>
       {% endfor %}
@@ -27,14 +27,14 @@
   <div class="grid grid--cols-3">
     <div class="flex flex--col">
       <span class="value value--small lg:value--large value--tnums text--bold" style="margin-bottom:-0.15em">{{ days_since | default: 0 }}</span>
-      <span class="title">DAYS WITHOUT WEDGIES</span>
+      <span class="title title--small lg:title--base">DAYS WITHOUT WEDGIES</span>
     </div>
     <div class="flex flex--col">
-      {% if show_pace %}<span class="value value--small lg:value--large value--tnums text--bold" style="margin-bottom:-0.15em">{{ pace }}</span><span class="title">PACE</span>{% else %}<span class="value value--small lg:value--large value--tnums text--bold" style="margin-bottom:-0.15em">{{ record }}</span><span class="title">RECORD TO BEAT</span>{% endif %}
+      {% if show_pace %}<span class="value value--small lg:value--large value--tnums text--bold" style="margin-bottom:-0.15em">{{ pace }}</span><span class="title title--small lg:title--base">PACE</span>{% else %}<span class="value value--small lg:value--large value--tnums text--bold" style="margin-bottom:-0.15em">{{ record }}</span><span class="title title--small lg:title--base">RECORD TO BEAT</span>{% endif %}
     </div>
     <div class="flex flex--col">
       <span class="value value--small lg:value--large value--tnums text--bold" style="margin-bottom:-0.15em">{{ all_time }}</span>
-      <span class="title">TOTAL WEDGIES FROM 14/15</span>
+      <span class="title title--small lg:title--base">TOTAL WEDGIES FROM 14/15</span>
     </div>
   </div>
 </div>
