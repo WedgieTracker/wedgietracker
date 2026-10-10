@@ -9,7 +9,7 @@ export function AppStoreBadge({ className = "" }: { className?: string }) {
       href={APP_STORE_URL}
       target="_blank"
       rel="noopener noreferrer"
-      className={`inline-block transition-opacity duration-300 hover:opacity-80 ${className}`}
+      className={`inline-block transition-opacity duration-300 hover:opacity-80 lg:hidden ${className}`}
     >
       <img
         src="/app-store-badge.svg"

@@ -3,6 +3,7 @@ import {
   matchesFilter,
   matchesMoment,
   matchesPlayerOrTeam,
+  shortFilterLabel,
 } from "./wedgieFilter";
 import type { WedgieWithTypes } from "../types/wedgie";
 
@@ -153,5 +154,18 @@ describe("matchesMoment", () => {
     const filters = { type: "", playerOrTeam: "", moment: "Clutch time" };
     expect(matchesFilter(at(4, "1:57", 100, 99), filters)).toBe(true);
     expect(matchesFilter(at(1, "10:00"), filters)).toBe(false);
+  });
+});
+
+describe("shortFilterLabel", () => {
+  it("shortens each kind of filter value", () => {
+    expect(shortFilterLabel("season", "2025/26")).toBe("25/26");
+    expect(shortFilterLabel("season", "")).toBe("All");
+    expect(shortFilterLabel("type", "Three point")).toBe("3PT");
+    expect(shortFilterLabel("type", "Layup")).toBe("Layup");
+    expect(shortFilterLabel("type", "")).toBe("All");
+    expect(shortFilterLabel("when", "Garbage time")).toBe("Garbage");
+    expect(shortFilterLabel("when", "Q3")).toBe("Q3");
+    expect(shortFilterLabel("when", "")).toBe("Any");
   });
 });

@@ -33,12 +33,15 @@ export function FilterSelect({
   options,
   onSelect,
   tone = "yellow",
+  shortLabel,
 }: {
   label: string;
   value: string;
   options: FilterOption[];
   onSelect: (value: string) => void;
   tone?: "yellow" | "pink";
+  /** A shorter label for the field itself, when several share a row; the sheet keeps the full ones. */
+  shortLabel?: (value: string) => string;
 }) {
   const [open, setOpen] = useState(false);
   const { height } = useWindowDimensions();
@@ -49,8 +52,9 @@ export function FilterSelect({
   // that is not the one applied. Show the value itself until its option
   // arrives, and only fall back for the genuinely empty case.
   const matched = options.find((o) => o.value === value);
-  const currentLabel =
-    matched?.label ?? (value !== "" ? value : (options[0]?.label ?? ""));
+  const currentLabel = shortLabel
+    ? shortLabel(value)
+    : (matched?.label ?? (value !== "" ? value : (options[0]?.label ?? "")));
 
   return (
     <>

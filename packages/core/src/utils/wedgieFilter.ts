@@ -76,3 +76,33 @@ export function matchesFilter(
 
   return matchesType && matchesTeamOrPlayer && matchesWhen;
 }
+
+const SHORT_TYPES: Record<string, string> = {
+  "Three point": "3PT",
+  "Mid-range": "Mid",
+  Rebound: "Reb",
+  "Alley-oop": "Oop",
+  "Free throw": "FT",
+};
+
+const SHORT_MOMENTS: Record<string, string> = {
+  "Clutch time": "Clutch",
+  "Garbage time": "Garbage",
+  Overtime: "OT",
+  "Final minute": "Final min",
+};
+
+/**
+ * A short label for a filter's value, for narrow screens where the three
+ * small filters share one row: "25/26", "3PT", "Clutch", or "All"/"Any"
+ * when nothing is picked.
+ */
+export function shortFilterLabel(
+  kind: "season" | "type" | "when",
+  value: string,
+): string {
+  if (!value) return kind === "when" ? "Any" : "All";
+  if (kind === "season") return value.replace(/^\d{2}(\d{2}\/)/, "$1");
+  if (kind === "type") return SHORT_TYPES[value] ?? value;
+  return SHORT_MOMENTS[value] ?? value;
+}
