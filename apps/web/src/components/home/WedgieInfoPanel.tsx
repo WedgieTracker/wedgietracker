@@ -1,5 +1,6 @@
 import type { Wedgie } from "@wedgietracker/core/types/wedgie";
 import { GEMS_EMOJI, isGemsDate } from "@wedgietracker/core/utils/formatDate";
+import { gameMoment } from "@wedgietracker/core/utils/gameMoment";
 import { twitterProfileUrl } from "@wedgietracker/core/utils/twitterHandle";
 import { CourtPositionDiagram } from "./CourtPositionDiagram";
 
@@ -22,6 +23,7 @@ function formatDate(date: string | Date) {
 }
 
 export function WedgieInfoPanel({ wedgie }: WedgieInfoPanelProps) {
+  const moment = gameMoment(wedgie);
   return (
     <div className="relative flex w-full flex-col justify-between p-6 px-4 sm:px-6 md:p-8 lg:w-[35%]">
       <div className="space-y-2 sm:space-y-6">
@@ -69,6 +71,15 @@ export function WedgieInfoPanel({ wedgie }: WedgieInfoPanelProps) {
               ? `vs ${wedgie.teamAgainstName}`
               : ""}
           </p>
+
+          {moment && (
+            <>
+              <p className="text-right text-[.75em] font-bold tracking-wider text-white/60 uppercase">
+                When
+              </p>
+              <p className="text-[1em] text-white">{moment}</p>
+            </>
+          )}
 
           <p className="text-right text-[.75em] font-bold tracking-wider text-white/60 uppercase">
             Type
