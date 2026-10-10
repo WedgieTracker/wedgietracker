@@ -4,7 +4,7 @@
       <img class="absolute inset--0 w--full h--full rounded--base image-dither" src="data:image/svg+xml;base64,{{ wave_svg | base64_encode }}">
       <div class="relative z--2 flex flex--col flex--center-x flex--center-y h--full w--full px--2 pt--2 pb--6">
         <span class="label label--small label--filled">{{ record_label }}</span>
-        <span class="value value--xlarge lg:value--xxlarge value--tnums text--bold" data-fit-value="true" style="margin-bottom:-0.2em">{{ total }}</span>
+        <span class="value value--xlarge lg:value--xxlarge value--tnums text--bold" data-fit-value="true">{{ total }}</span>
         <span class="title title--large text--bold">WEDGIES</span>
         {% if live %}<span class="label label--small label--filled">Games live now</span>{% endif %}
       </div>
@@ -24,10 +24,10 @@
     </div>
     <div class="col--span-3 flex flex--col flex--left flex--center-y gap lg:gap--xlarge">
       <div class="flex flex--col flex--left gap--none">
-        {% if show_pace %}<span class="value value--small lg:value--xlarge value--tnums text--bold" style="margin-bottom:-0.15em">{{ pace }}</span><span class="title lg:title--xlarge text--bold">PACE</span>{% else %}<span class="value value--small lg:value--xlarge value--tnums text--bold" style="margin-bottom:-0.15em">{{ record }}</span><span class="title title--small lg:title--base text--bold">RECORD TO BEAT</span>{% endif %}
+        {% if show_pace %}<span class="value value--small lg:value--xlarge value--tnums text--bold">{{ pace }}</span><span class="title lg:title--xlarge text--bold">PACE</span>{% else %}<span class="value value--small lg:value--xlarge value--tnums text--bold">{{ record }}</span><span class="title title--small lg:title--base text--bold">RECORD TO BEAT</span>{% endif %}
       </div>
       <div class="flex flex--col flex--left gap--none">
-        <span class="value value--xsmall lg:value--large value--tnums text--bold" style="margin-bottom:-0.15em">{{ days_since | default: 0 }} <span class="title title--small lg:title--large text--bold">DAYS</span></span>
+        <span class="value value--xsmall lg:value--large value--tnums text--bold">{{ days_since | default: 0 }} <span class="title title--small lg:title--large text--bold">DAYS</span></span>
         <span class="title title--small lg:title--base text--bold">WITHOUT WEDGIES</span>
       </div>
     </div>
@@ -35,5 +35,5 @@
 </div>
 
 <div class="title_bar flex flex--row flex--center-x">
-  <img class="image" src="data:image/svg+xml;base64,{{ wt_logo | base64_encode }}" alt="WedgieTracker">
+  <img class="image image--adaptive" src="data:image/svg+xml;base64,{{ wt_logo | base64_encode }}" alt="WedgieTracker">
 </div>

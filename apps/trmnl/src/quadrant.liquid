@@ -3,7 +3,7 @@
     <img class="absolute inset--0 w--full h--full rounded--base image-dither" src="data:image/svg+xml;base64,{{ wave_svg | base64_encode }}">
     <div class="relative z--2 flex flex--col flex--center-x flex--center-y h--full w--full px--2 pt--2 pb--6">
       <span class="label label--small label--filled">{{ record_label }}</span>
-      <span class="value value--xxlarge lg:value--xxxlarge value--tnums text--bold" data-fit-value="true" style="margin-bottom:-0.2em">{{ total }}</span>
+      <span class="value value--xxlarge lg:value--xxxlarge value--tnums text--bold" data-fit-value="true">{{ total }}</span>
       <span class="title title--large text--bold">WEDGIES</span>
       {% if live %}<span class="label label--small label--filled">Games live now</span>{% endif %}
     </div>
@@ -11,5 +11,5 @@
 </div>
 
 <div class="title_bar flex flex--row flex--center-x">
-  <img class="image" src="data:image/svg+xml;base64,{{ wt_logo | base64_encode }}" alt="WedgieTracker">
+  <img class="image image--adaptive" src="data:image/svg+xml;base64,{{ wt_logo | base64_encode }}" alt="WedgieTracker">
 </div>
