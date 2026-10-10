@@ -229,6 +229,8 @@ function WedgieDetail({
         {wedgie.noDunksTweet ? (
           <Pressable
             accessibilityRole="link"
+            accessibilityLabel="No Dunks tweet"
+            hitSlop={8}
             style={styles.noDunks}
             onPress={() => {
               const tweet = wedgie.noDunksTweet;
@@ -239,7 +241,6 @@ function WedgieDetail({
               source={require("../../assets/images/nodunks-logo.png")}
               style={styles.noDunksLogo}
             />
-            <Text style={styles.noDunksText}>See it on No Dunks ↗</Text>
           </Pressable>
         ) : null}
 
@@ -444,21 +445,8 @@ const styles = StyleSheet.create({
   teams: { fontFamily: fonts.bold, color: colors.white, fontSize: 22 },
   teamName: { color: colors.pink },
   types: { fontFamily: fonts.bold, color: colors.white, fontSize: 16 },
-  noDunks: {
-    alignSelf: "flex-start",
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    paddingVertical: 4,
-    paddingLeft: 4,
-    paddingRight: 12,
-    borderRadius: 999,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.2)",
-    backgroundColor: "rgba(255,255,255,0.05)",
-  },
-  noDunksLogo: { width: 24, height: 24, borderRadius: 12 },
-  noDunksText: { fontFamily: fonts.bold, color: colors.white, fontSize: 12 },
+  noDunks: { alignSelf: "flex-start" },
+  noDunksLogo: { width: 32, height: 32, borderRadius: 6 },
 
   courtWrap: { alignItems: "center" },
 

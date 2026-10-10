@@ -35,9 +35,27 @@ export function GameTimeline({ timeline }: { timeline: Timeline }) {
                 />
                 {i === timeline.active && (
                   <div
-                    className={`ring-darkpurple-dark absolute top-1/2 size-3 -translate-x-1/2 -translate-y-1/2 rounded-full ring-2 ${tone.dot}`}
+                    className="absolute top-1/2 size-3 -translate-x-1/2 -translate-y-1/2"
                     style={{ left: `${timeline.progress * 100}%` }}
-                  />
+                  >
+                    {timeline.tone === "clutch" && (
+                      <span className="wt-clutch-ring bg-pink absolute inset-0 rounded-full" />
+                    )}
+                    {timeline.tone === "garbage" &&
+                      [0, 1.2].map((delay) => (
+                        <span
+                          key={delay}
+                          className="wt-snooze absolute -top-1 left-2 text-[.6rem] font-black text-white/60"
+                          style={{ animationDelay: `${delay}s` }}
+                          aria-hidden="true"
+                        >
+                          z
+                        </span>
+                      ))}
+                    <span
+                      className={`ring-darkpurple-dark absolute inset-0 rounded-full ring-2 ${tone.dot}`}
+                    />
+                  </div>
                 )}
               </div>
               <p
@@ -54,7 +72,18 @@ export function GameTimeline({ timeline }: { timeline: Timeline }) {
       <p
         className={`mt-1 text-[.75rem] font-black tracking-wider uppercase ${tone.text}`}
       >
-        {timeline.label}
+        {timeline.tone === "clutch" ? (
+          <span className="wt-heartbeat">{timeline.label}</span>
+        ) : timeline.tone === "garbage" ? (
+          <>
+            <span className="wt-wobble mr-1" aria-hidden="true">
+              🗑️
+            </span>
+            {timeline.label}
+          </>
+        ) : (
+          timeline.label
+        )}
       </p>
     </div>
   );

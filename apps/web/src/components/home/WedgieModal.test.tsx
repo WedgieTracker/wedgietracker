@@ -79,10 +79,12 @@ describe("WedgieModal", () => {
       expect(screen.getByText("42")).toBeInTheDocument();
     });
 
-    it("renders 'No video' fallback when videoUrl is null", () => {
+    it("says the video is not available when videoUrl is null", () => {
       const wedgie = { ...baseWedgie, videoUrl: null };
       render(<WedgieModal wedgie={wedgie} isOpen onClose={noop} />);
-      expect(screen.getByText("No video")).toBeInTheDocument();
+      expect(
+        screen.getByText("Video not available at the moment"),
+      ).toBeInTheDocument();
     });
 
     it("does not render when closed", () => {
@@ -154,14 +156,16 @@ describe("WedgieModal", () => {
       );
     });
 
-    it("falls back through the priority list (cloudinary when youtube missing)", () => {
+    it("does not play a Cloudinary-only video and says it is not available", () => {
       const wedgie = {
         ...baseWedgie,
         videoUrl: { cloudinary: "https://cdn/example.mp4" },
       };
       render(<WedgieModal wedgie={wedgie} isOpen onClose={noop} />);
-      const iframe = screen.getByTitle("Video player") as HTMLIFrameElement;
-      expect(iframe.src).toBe("https://cdn/example.mp4");
+      expect(screen.queryByTitle("Video player")).not.toBeInTheDocument();
+      expect(
+        screen.getByText("Video not available at the moment"),
+      ).toBeInTheDocument();
     });
 
     it("appends 'embed' for instagram URLs", () => {
@@ -200,7 +204,7 @@ describe("WedgieModal", () => {
       await Promise.resolve();
 
       expect(writeText).toHaveBeenCalledWith(
-        "https://wedgietracker.test/all-wedgies?ws=2025%2F26&wn=42",
+        "https://wedgietracker.test/all-wedgies?season=2025-26&wedgie=42",
       );
       expect(toast).toHaveBeenCalledWith(
         expect.objectContaining({ title: "Link copied!" }),
@@ -276,7 +280,7 @@ describe("WedgieModal", () => {
       render(<WedgieModal wedgie={baseWedgie} isOpen onClose={noop} />);
       const share = screen.getByTestId("share-buttons");
       expect(share.getAttribute("data-url")).toBe(
-        "/all-wedgies?ws=2025%2F26&wn=42",
+        "/all-wedgies?season=2025-26&wedgie=42",
       );
       expect(share.getAttribute("data-title")).toContain("LeBron");
     });

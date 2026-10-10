@@ -1,3 +1,4 @@
+import { buildAllWedgiesQuery } from "@wedgietracker/core/utils/allWedgiesUrl";
 import { useToast } from "~/hooks/use-toast";
 
 interface CopyableWedgie {
@@ -6,10 +7,12 @@ interface CopyableWedgie {
 }
 
 export function buildShareParams(wedgie: CopyableWedgie) {
-  return new URLSearchParams({
-    ws: wedgie.seasonName ?? "",
-    wn: wedgie.number?.toString() ?? "",
-  });
+  return new URLSearchParams(
+    buildAllWedgiesQuery({
+      season: wedgie.seasonName ?? "",
+      wedgie: wedgie.number ?? null,
+    }),
+  );
 }
 
 export function useCopyWedgieLink(wedgie: CopyableWedgie) {

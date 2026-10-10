@@ -1,3 +1,4 @@
+import { buildAllWedgiesQuery } from "@wedgietracker/core/utils/allWedgiesUrl";
 import { Card } from "~/components/ui/card";
 import { Loader } from "~/components/shared/Loader";
 import { StandingsList } from "./StandingsList";
@@ -31,8 +32,6 @@ export function StandingsGrid({
     );
   }
 
-  const seasonParam = currentSeason || "all";
-
   return (
     <Card className="md:bg-darkpurple-light/30 w-full overflow-hidden border-none bg-transparent">
       <div className="grid grid-cols-5 gap-3 p-0 md:gap-8 md:p-4">
@@ -40,7 +39,9 @@ export function StandingsGrid({
           <StandingsList
             title="PLAYERS"
             items={players}
-            buildHref={(name) => `/all-wedgies?wp=${name}&ws=${seasonParam}`}
+            buildHref={(name) =>
+              `/all-wedgies?${buildAllWedgiesQuery({ playerOrTeam: name, season: currentSeason || "" })}`
+            }
             countClassName="pl-2"
           />
         </div>
@@ -49,7 +50,9 @@ export function StandingsGrid({
           <StandingsList
             title="TEAMS"
             items={teams}
-            buildHref={(name) => `/all-wedgies?wt=${name}&ws=${seasonParam}`}
+            buildHref={(name) =>
+              `/all-wedgies?${buildAllWedgiesQuery({ playerOrTeam: name, season: currentSeason || "" })}`
+            }
             countClassName="pl-2"
           />
         </div>

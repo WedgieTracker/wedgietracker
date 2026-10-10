@@ -1,10 +1,7 @@
 import type { Wedgie } from "@wedgietracker/core/types/wedgie";
 import { GEMS_EMOJI, isGemsDate } from "@wedgietracker/core/utils/formatDate";
 import { gameTimeline } from "@wedgietracker/core/utils/gameMoment";
-import {
-  tweetUrl,
-  twitterProfileUrl,
-} from "@wedgietracker/core/utils/twitterHandle";
+import { twitterProfileUrl } from "@wedgietracker/core/utils/twitterHandle";
 import { CourtPositionDiagram } from "./CourtPositionDiagram";
 import { GameTimeline } from "./GameTimeline";
 
@@ -29,8 +26,8 @@ function formatDate(date: string | Date) {
 export function WedgieInfoPanel({ wedgie }: WedgieInfoPanelProps) {
   const timeline = gameTimeline(wedgie);
   return (
-    <div className="relative flex w-full flex-col justify-between p-6 px-4 sm:px-6 md:p-8 lg:w-[35%]">
-      <div className="space-y-2 sm:space-y-6">
+    <div className="relative flex min-h-full w-full flex-col p-6 px-4 max-lg:min-h-[320px] sm:px-6 sm:pb-24 md:px-8 lg:pb-6">
+      <div className="space-y-2 sm:space-y-4">
         <div className="sm:text-wedgie-number flex flex-row items-center justify-start gap-4 text-xl leading-none">
           <h2 className="bg-pink text-yellow mb-2 flex size-[70px] flex-row items-center justify-center rounded-xl px-4 py-2 text-[1.6em] font-black">
             <span className="text-darkpurple mt-[.75em] text-[.5em]">#</span>
@@ -56,7 +53,7 @@ export function WedgieInfoPanel({ wedgie }: WedgieInfoPanelProps) {
         </div>
 
         <div
-          className="sm:text-wedgie-number grid items-baseline gap-2 text-sm sm:gap-4"
+          className="sm:text-wedgie-number grid items-baseline gap-2 text-sm sm:gap-3"
           style={{ gridTemplateColumns: "70px 1fr" }}
         >
           <p className="text-right text-[.75em] font-bold tracking-wider text-white/60 uppercase">
@@ -104,30 +101,20 @@ export function WedgieInfoPanel({ wedgie }: WedgieInfoPanelProps) {
               </ul>
             </>
           )}
+
+          {timeline && (
+            <>
+              <span aria-hidden="true" />
+              <div className="pt-1">
+                <GameTimeline timeline={timeline} />
+              </div>
+            </>
+          )}
         </div>
-
-        {timeline && <GameTimeline timeline={timeline} />}
-
-        {wedgie.noDunksTweet && (
-          <a
-            href={tweetUrl("NoDunksInc", wedgie.noDunksTweet.id)}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:border-yellow inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 py-1 pr-3 pl-1 text-xs font-bold text-white transition-colors duration-200"
-          >
-            <img
-              src="/nodunks-logo.png"
-              alt=""
-              width={24}
-              height={24}
-              className="size-6 rounded-full"
-            />
-            See it on No Dunks ↗
-          </a>
-        )}
       </div>
 
-      <div className="relative hidden w-full max-w-[150px] sm:block">
+      {/* Between phone and desktop widths; on desktop the modal pins it instead. */}
+      <div className="absolute bottom-6 left-6 hidden w-[70px] sm:block md:left-8 lg:hidden">
         <CourtPositionDiagram position={wedgie.position} />
       </div>
     </div>

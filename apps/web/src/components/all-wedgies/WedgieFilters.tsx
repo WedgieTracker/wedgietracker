@@ -1,5 +1,6 @@
 "use client";
 
+import { MOMENT_FILTERS } from "@wedgietracker/core/utils/wedgieFilter";
 import { api } from "~/trpc/react";
 import { useState, type Dispatch, type SetStateAction } from "react";
 import { Counter } from "../ui/Counter";
@@ -9,6 +10,7 @@ interface FiltersProps {
     season: string;
     type: string;
     playerOrTeam: string;
+    moment: string;
   };
   setFilters: Dispatch<SetStateAction<FiltersProps["filters"]>>;
   visibleWedgies: number;
@@ -152,6 +154,53 @@ export function WedgieFilters({
                 {types.map((type) => (
                   <option key={type} value={type}>
                     {type}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* When Filter */}
+            <div
+              className={`relative rounded-md p-2 ${
+                filters.moment ? "bg-yellow-darker/20" : "bg-pink-darker/20"
+              }`}
+            >
+              <button
+                className={`flex items-center gap-2 rounded-md px-0 py-0 text-sm font-bold uppercase ${
+                  filters.moment ? "text-yellow" : "text-pink"
+                }`}
+              >
+                <span>When</span>
+                <span
+                  className={`relative flex size-5 items-center justify-center rounded-full border leading-none ${
+                    filters.moment ? "border-yellow" : "border-pink"
+                  }`}
+                >
+                  <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                    +
+                  </span>
+                </span>
+              </button>
+              {filters.moment ? (
+                <span className="bg-yellow text-darkpurple mt-2 inline-block rounded-md px-2 py-1 font-bold whitespace-nowrap">
+                  {filters.moment}
+                </span>
+              ) : (
+                <span className="mt-2 inline-block rounded-md px-2 py-1 font-bold whitespace-nowrap text-white/20">
+                  Anytime
+                </span>
+              )}
+              <select
+                className="absolute inset-0 w-full cursor-pointer opacity-0"
+                value={filters.moment}
+                onChange={(e) =>
+                  setFilters((prev) => ({ ...prev, moment: e.target.value }))
+                }
+              >
+                <option value="">Anytime</option>
+                {MOMENT_FILTERS.map((moment) => (
+                  <option key={moment} value={moment}>
+                    {moment}
                   </option>
                 ))}
               </select>

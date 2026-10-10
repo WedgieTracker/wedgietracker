@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { WedgieFilters } from "./WedgieFilters";
 import { WedgieGrid } from "./WedgieGrid";
@@ -10,6 +10,10 @@ import { Cta } from "~/components/shared/Cta";
 import { api } from "~/trpc/react";
 import { useSeasonFallback } from "~/hooks/use-season-fallback";
 import { matchesFilter } from "@wedgietracker/core/utils/wedgieFilter";
+import {
+  buildAllWedgiesQuery,
+  parseAllWedgiesQuery,
+} from "@wedgietracker/core/utils/allWedgiesUrl";
 
 export function AllWedgiesPage() {
   const searchParams = useSearchParams();
@@ -30,14 +34,17 @@ export function AllWedgiesPage() {
     ? previousSeason!.name
     : defaultSeason;
 
-  // Initialize filters with URL params
-  const wsParam = searchParams?.get("ws") ?? null;
-  const hasSeasonFromUrl = wsParam !== null;
-  const isAllSeasons = wsParam === "all";
+  // What the page was opened with. Read once: afterwards the URL follows the
+  // filters, not the other way round.
+  const [fromUrl] = useState(() =>
+    parseAllWedgiesQuery(searchParams ?? new URLSearchParams()),
+  );
+  const hasSeasonFromUrl = fromUrl.season !== undefined;
   const [filters, setFilters] = useState({
-    season: isAllSeasons ? "" : (wsParam ?? initialSeason),
-    type: "",
-    playerOrTeam: searchParams?.get("wp") ?? searchParams?.get("wt") ?? "",
+    season: fromUrl.season ?? initialSeason,
+    type: fromUrl.type ?? "",
+    playerOrTeam: fromUrl.playerOrTeam ?? "",
+    moment: fromUrl.moment ?? "",
   });
 
   // Queries first
@@ -52,21 +59,60 @@ export function AllWedgiesPage() {
   // Use the appropriate data source
   const wedgies = filters.season ? seasonWedgies : allWedgies;
 
+  // Slugs in the URL ("three-point", "luka-doncic") become the names the
+  // filters use once the full list is here to match them against.
+  const resolvedNames = useRef(false);
   useEffect(() => {
-    const wedgieNumber = searchParams?.get("wn") ?? null;
-    const season = searchParams?.get("ws") ?? null;
+    if (!allWedgies || resolvedNames.current) return;
+    resolvedNames.current = true;
+    const named = parseAllWedgiesQuery(searchParams ?? new URLSearchParams(), {
+      types: [
+        ...new Set(allWedgies.flatMap((w) => w.types.map((t) => t.name))),
+      ],
+      players: [...new Set(allWedgies.map((w) => w.playerName))],
+    });
+    setFilters((prev) => ({
+      ...prev,
+      type: named.type ?? prev.type,
+      playerOrTeam: named.playerOrTeam ?? prev.playerOrTeam,
+    }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allWedgies]);
 
-    if (wedgieNumber && wedgies) {
-      const wedgie = wedgies.find(
-        (w) => w.seasonName === season && w.number?.toString() === wedgieNumber,
-      );
-
-      if (wedgie) {
-        setSelectedWedgieData(wedgie);
-        setIsModalOpen(true);
-      }
+  // Open the wedgie the link points at, once.
+  const openedFromUrl = useRef(false);
+  useEffect(() => {
+    if (openedFromUrl.current || !fromUrl.wedgie || !wedgies) return;
+    // An empty season ("all") means the number alone picks the wedgie.
+    const season = fromUrl.season ?? filters.season;
+    const wedgie = wedgies.find(
+      (w) =>
+        w.number === fromUrl.wedgie && (!season || w.seasonName === season),
+    );
+    if (wedgie) {
+      openedFromUrl.current = true;
+      setSelectedWedgieData(wedgie);
+      setIsModalOpen(true);
     }
-  }, [searchParams, wedgies, defaultSeason]);
+  }, [wedgies, fromUrl, filters.season]);
+
+  // Keep the address bar in step with the filters and the open wedgie, so
+  // any view can be copied from it.
+  useEffect(() => {
+    if (isLoadingSeasonData) return;
+    const open = isModalOpen && selectedWedgieData;
+    const query = buildAllWedgiesQuery({
+      season: open ? selectedWedgieData.seasonName : filters.season,
+      wedgie: open ? selectedWedgieData.number : null,
+      playerOrTeam: filters.playerOrTeam,
+      type: filters.type,
+      moment: filters.moment,
+    });
+    const url = `${window.location.pathname}${query ? `?${query}` : ""}`;
+    if (url !== `${window.location.pathname}${window.location.search}`) {
+      window.history.replaceState(null, "", url);
+    }
+  }, [filters, isModalOpen, selectedWedgieData, isLoadingSeasonData]);
 
   // Update selected season when data loads (but not if URL explicitly specified a season)
   useEffect(() => {
@@ -90,16 +136,6 @@ export function AllWedgiesPage() {
     stats?.currentSeasonWedgies,
     hasSeasonFromUrl,
   ]);
-
-  useEffect(() => {
-    if (hasSeasonFromUrl) return;
-
-    setFilters((prev) => ({
-      ...prev,
-      season: defaultSeason,
-    }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [global, hasSeasonFromUrl]);
 
   // Only show loading state while data is loading
   if (isLoadingAll || isLoadingSeason || isLoadingSeasonData) {

@@ -1,3 +1,4 @@
+import { buildAllWedgiesQuery } from "@wedgietracker/core/utils/allWedgiesUrl";
 import { z } from "zod";
 import { and, count, desc, eq } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
@@ -68,9 +69,9 @@ export const reportRouter = createTRPCRouter({
         .insert(wedgieReport)
         .values({ wedgieId: target.id, field: input.field, note });
 
-      const shareParams = new URLSearchParams({
-        ws: target.seasonName,
-        wn: target.number.toString(),
+      const shareQuery = buildAllWedgiesQuery({
+        season: target.seasonName,
+        wedgie: target.number,
       });
       // With an assistant reading /api/reports, it tells the admin; Telegram is the fallback.
       if (!process.env.REPORTS_API_KEY)
@@ -81,7 +82,7 @@ export const reportRouter = createTRPCRouter({
             `Field: <b>${input.field}</b>`,
             note ? `Note: ${escapeHtml(note)}` : null,
             "",
-            `<a href="${APP_URL}/all-wedgies?${shareParams.toString()}">View</a> · <a href="${APP_URL}/admin/wedgies/${target.id}">Edit</a> · <a href="${APP_URL}/admin/reports">Reports</a>`,
+            `<a href="${APP_URL}/all-wedgies?${shareQuery}">View</a> · <a href="${APP_URL}/admin/wedgies/${target.id}">Edit</a> · <a href="${APP_URL}/admin/reports">Reports</a>`,
           ]
             .filter((line) => line !== null)
             .join("\n"),
