@@ -3,7 +3,7 @@
     <img class="absolute inset--0 w--full h--full rounded--base image-dither" src="data:image/svg+xml;base64,{{ wave_svg | base64_encode }}">
     <div class="relative z--2 flex flex--col flex--center-x flex--center-y h--full w--full px--2 pt--1 lg:pt--2 pb--4 lg:pb--8">
       <span class="label label--small label--filled">{{ record_label }}</span>
-      <span class="value value--large lg:value--xxxlarge value--tnums text--bold" data-fit-value="true" style="margin-bottom:-0.2em">{{ total }}</span>
+      <span class="value value--large lg:value--xxxlarge value--tnums text--bold" data-fit-value="true">{{ total }}</span>
       <span class="title lg:title--large text--bold">WEDGIES</span>
       {% if live %}<span class="label label--small label--filled">Games live now</span>{% endif %}
     </div>
@@ -24,15 +24,15 @@
   <div class="divider"></div>
   <div class="grid grid--cols-2">
     <div class="flex flex--col flex--left gap--none">
-      {% if show_pace %}<span class="value value--large lg:value--xlarge value--tnums text--bold" style="margin-bottom:-0.15em">{{ pace }}</span><span class="title title--xlarge text--bold">PACE</span>{% else %}<span class="value value--large lg:value--xlarge value--tnums text--bold" style="margin-bottom:-0.15em">{{ record }}</span><span class="title text--bold">RECORD TO BEAT</span>{% endif %}
+      {% if show_pace %}<span class="value value--large lg:value--xlarge value--tnums text--bold">{{ pace }}</span><span class="title title--xlarge text--bold">PACE</span>{% else %}<span class="value value--large lg:value--xlarge value--tnums text--bold">{{ record }}</span><span class="title text--bold">RECORD TO BEAT</span>{% endif %}
     </div>
     <div class="flex flex--col flex--left gap--none">
-      <span class="value value--large lg:value--xlarge value--tnums text--bold" style="margin-bottom:-0.075em">{{ days_since | default: 0 }}</span>
-      <span class="title title--small text--bold" style="line-height:1">DAYS WITHOUT<br>WEDGIES</span>
+      <span class="value value--large lg:value--xlarge value--tnums text--bold">{{ days_since | default: 0 }}</span>
+      <span class="title title--small text--bold">DAYS WITHOUT<br>WEDGIES</span>
     </div>
   </div>
 </div>
 
 <div class="title_bar flex flex--row flex--center-x">
-  <img class="image" src="data:image/svg+xml;base64,{{ wt_logo | base64_encode }}" alt="WedgieTracker">
+  <img class="image image--adaptive" src="data:image/svg+xml;base64,{{ wt_logo | base64_encode }}" alt="WedgieTracker">
 </div>
