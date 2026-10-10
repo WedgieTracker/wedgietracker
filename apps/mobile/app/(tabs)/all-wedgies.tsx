@@ -20,7 +20,10 @@ import { api } from "@/lib/api";
 import { useTabBarClearance } from "@/lib/layout";
 import { useSeasonFallback } from "@/lib/use-season-fallback";
 import { colors, fonts, radius, space } from "@/lib/theme";
-import { matchesFilter } from "@wedgietracker/core/utils/wedgieFilter";
+import {
+  MOMENT_FILTERS,
+  matchesFilter,
+} from "@wedgietracker/core/utils/wedgieFilter";
 
 /**
  * Port of apps/web/src/components/all-wedgies - the full list with the season,
@@ -49,6 +52,7 @@ export default function AllWedgiesScreen() {
     params.ws === "all" ? "" : (params.ws ?? defaultSeason),
   );
   const [type, setType] = useState("");
+  const [when, setWhen] = useState("");
   const [playerOrTeam, setPlayerOrTeam] = useState(
     params.wp ?? params.wt ?? "",
   );
@@ -92,7 +96,10 @@ export default function AllWedgiesScreen() {
     defaultSeason;
 
   const isFiltered =
-    season !== openingSeason || type !== "" || playerOrTeam !== "";
+    season !== openingSeason ||
+    type !== "" ||
+    when !== "" ||
+    playerOrTeam !== "";
 
   // Back to how the page opened, so the control disappears once used. "All
   // Seasons" is still a choice in the dropdown, it is just not the default.
@@ -100,6 +107,7 @@ export default function AllWedgiesScreen() {
     setSeasonTouched(false);
     setSeason(openingSeason);
     setType("");
+    setWhen("");
     setPlayerOrTeam("");
   };
 
@@ -140,13 +148,13 @@ export default function AllWedgiesScreen() {
 
   const wedgies = useMemo(() => {
     const rows = (source ?? []).filter((w) =>
-      matchesFilter(w, { type, playerOrTeam }),
+      matchesFilter(w, { type, playerOrTeam, moment: when }),
     );
     return rows.sort(
       (a, b) =>
         new Date(b.wedgieDate).getTime() - new Date(a.wedgieDate).getTime(),
     );
-  }, [source, type, playerOrTeam]);
+  }, [source, type, playerOrTeam, when]);
 
   const visible = useCountUp(wedgies.length, 200);
   const tabBar = useTabBarClearance();
@@ -225,6 +233,16 @@ export default function AllWedgiesScreen() {
                     ...types.map((name) => ({ value: name, label: name })),
                   ]}
                   onSelect={setType}
+                  tone="pink"
+                />
+                <FilterSelect
+                  label="When"
+                  value={when}
+                  options={[
+                    { value: "", label: "Anytime" },
+                    ...MOMENT_FILTERS.map((m) => ({ value: m, label: m })),
+                  ]}
+                  onSelect={setWhen}
                   tone="pink"
                 />
               </View>

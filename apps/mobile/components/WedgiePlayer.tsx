@@ -27,7 +27,9 @@ export function WedgiePlayer({
   if (!active || !src) {
     return (
       <View style={styles.placeholder}>
-        <Text style={styles.placeholderText}>No video for this wedgie</Text>
+        <Text style={styles.placeholderText}>
+          Video not available at the moment
+        </Text>
       </View>
     );
   }
