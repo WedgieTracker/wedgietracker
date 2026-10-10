@@ -51,10 +51,8 @@ const createInput = key.extend({
     .default(null),
   teamScore: z.number().int().nullable().default(null),
   opponentScore: z.number().int().nullable().default(null),
-  noDunksTweet: z
-    .object({ id: z.string(), text: z.string(), postedAt: z.string() })
-    .nullable()
-    .default(null),
+  // only the tweet's id is kept (#172); anything else sent with it is dropped
+  noDunksTweet: z.object({ id: z.string() }).nullable().default(null),
   dryRun: z.boolean().default(false),
 });
 
