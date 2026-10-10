@@ -247,3 +247,81 @@
     transform: scale(1.5) translate(200%, 50%);
   }
 }
+
+/* Game timeline: a pulse for clutch time, a doze for garbage time. */
+@keyframes wt-clutch-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(2.8);
+    opacity: 0;
+  }
+}
+@keyframes wt-heartbeat {
+  0%,
+  40%,
+  100% {
+    transform: scale(1);
+  }
+  10% {
+    transform: scale(1.08);
+  }
+  25% {
+    transform: scale(1.04);
+  }
+}
+@keyframes wt-snooze {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.6);
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(10px, -16px) scale(1);
+  }
+}
+@keyframes wt-wobble {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-12deg);
+  }
+  75% {
+    transform: rotate(12deg);
+  }
+}
+.wt-clutch-ring {
+  animation: wt-clutch-ring 1.6s ease-out infinite;
+}
+.wt-heartbeat {
+  display: inline-block;
+  transform-origin: left center;
+  animation: wt-heartbeat 1.6s ease-in-out infinite;
+}
+.wt-snooze {
+  animation: wt-snooze 2.4s ease-out infinite;
+}
+.wt-wobble {
+  display: inline-block;
+  transform-origin: bottom center;
+  animation: wt-wobble 2.6s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .wt-clutch-ring,
+  .wt-heartbeat,
+  .wt-snooze,
+  .wt-wobble {
+    animation: none;
+  }
+  .wt-snooze,
+  .wt-clutch-ring {
+    display: none;
+  }
+}

@@ -1,3 +1,4 @@
+import { buildAllWedgiesQuery } from "@wedgietracker/core/utils/allWedgiesUrl";
 import Link from "next/link";
 import { Card } from "~/components/ui/card";
 import { StandingsList } from "~/components/standings/StandingsList";
@@ -21,7 +22,9 @@ export function Standings({ players, teams }: StandingsProps) {
           <StandingsList
             title="PLAYERS"
             items={players}
-            buildHref={(name) => `/all-wedgies?wp=${name}`}
+            buildHref={(name) =>
+              `/all-wedgies?${buildAllWedgiesQuery({ playerOrTeam: name })}`
+            }
           />
         </div>
 
@@ -29,7 +32,9 @@ export function Standings({ players, teams }: StandingsProps) {
           <StandingsList
             title="TEAMS"
             items={teams}
-            buildHref={(name) => `/all-wedgies?wt=${name}`}
+            buildHref={(name) =>
+              `/all-wedgies?${buildAllWedgiesQuery({ playerOrTeam: name })}`
+            }
             titleClassName="pl-4"
           />
         </div>

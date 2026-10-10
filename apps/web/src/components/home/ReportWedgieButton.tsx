@@ -38,8 +38,9 @@ export function ReportWedgieButton({ wedgie }: ReportWedgieButtonProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
-        aria-label="Report wrong info"
-        className="border-yellow/60 text-yellow hover:bg-yellow hover:text-darkpurple flex size-7 items-center justify-center gap-1 rounded-md border text-xs font-bold uppercase transition-all duration-300 sm:h-auto sm:w-auto sm:px-3 sm:py-2"
+        aria-label="Challenge: report wrong info"
+        title="Challenge"
+        className="border-yellow/60 text-yellow hover:bg-yellow hover:text-darkpurple flex size-7 items-center justify-center rounded-md border transition-all duration-300 sm:size-8"
       >
         <svg
           className="size-4"
@@ -56,7 +57,6 @@ export function ReportWedgieButton({ wedgie }: ReportWedgieButtonProps) {
           </g>
           <circle cx="9" cy="15" r="1.5" fill="currentColor" stroke="none" />
         </svg>
-        <span className="hidden sm:inline">Challenge</span>
       </DialogTrigger>
       <DialogContent className="bg-darkpurple border-yellow max-w-[90vw] rounded-xl border-2 text-white sm:max-w-md">
         <DialogClose className="border-yellow bg-yellow text-darkpurple hover:bg-darkpurple hover:text-yellow absolute top-3 right-3 rounded-full border transition-all duration-300">

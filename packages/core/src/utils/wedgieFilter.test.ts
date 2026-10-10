@@ -1,5 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { matchesPlayerOrTeam, matchesFilter } from "./wedgieFilter";
+import {
+  matchesFilter,
+  matchesMoment,
+  matchesPlayerOrTeam,
+} from "./wedgieFilter";
 import type { WedgieWithTypes } from "../types/wedgie";
 
 function makeWedgie(overrides: Partial<WedgieWithTypes> = {}): WedgieWithTypes {
@@ -116,5 +120,38 @@ describe("matchesFilter", () => {
     expect(matchesFilter(wedgie, { type: "CLASSIC", playerOrTeam: "" })).toBe(
       true,
     );
+  });
+});
+
+describe("matchesMoment", () => {
+  const at = (
+    period: number,
+    gameClock: string,
+    teamScore?: number,
+    opponentScore?: number,
+  ) => makeWedgie({ period, gameClock, teamScore, opponentScore });
+
+  it("matches quarters whatever the band", () => {
+    expect(matchesMoment(at(2, "0:09.6"), "Q2")).toBe(true);
+    expect(matchesMoment(at(2, "0:09.6"), "Q3")).toBe(false);
+    expect(matchesMoment(at(4, "1:57", 100, 99), "Q4")).toBe(true);
+  });
+
+  it("matches the bands", () => {
+    expect(matchesMoment(at(4, "1:57", 100, 99), "Clutch time")).toBe(true);
+    expect(matchesMoment(at(4, "7:16", 108, 133), "Garbage time")).toBe(true);
+    expect(matchesMoment(at(2, "0:09.6"), "Final minute")).toBe(true);
+    expect(matchesMoment(at(5, "2:00", 110, 100), "Overtime")).toBe(true);
+    expect(matchesMoment(at(4, "8:00", 100, 98), "Clutch time")).toBe(false);
+  });
+
+  it("never matches a wedgie without a game clock", () => {
+    expect(matchesMoment(makeWedgie(), "Q1")).toBe(false);
+  });
+
+  it("is applied by matchesFilter", () => {
+    const filters = { type: "", playerOrTeam: "", moment: "Clutch time" };
+    expect(matchesFilter(at(4, "1:57", 100, 99), filters)).toBe(true);
+    expect(matchesFilter(at(1, "10:00"), filters)).toBe(false);
   });
 });

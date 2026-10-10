@@ -10,6 +10,8 @@ const NEXT_PATH = "M9 5l7 7-7 7";
 function NavArrow({ direction, enabled, onClick }: NavArrowProps) {
   return (
     <button
+      type="button"
+      aria-label={direction === "previous" ? "Previous wedgie" : "Next wedgie"}
       {...(enabled ? { onClick } : {})}
       className={`border-yellow bg-darkpurple text-yellow hover:bg-yellow hover:text-darkpurple rounded-full border p-1 transition-all sm:p-2 ${
         !enabled ? "pointer-events-none cursor-not-allowed opacity-50" : ""
