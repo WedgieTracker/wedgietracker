@@ -30,9 +30,14 @@ export async function calculatePace({
   // Only completed seasons feed the historical rate. The current season's
   // own rate swings wildly over its first games (0 before the first wedgie,
   // then 1-in-3), and averaging it in made early-season pace jump around.
+  //
+  // Each season counts as its wedgie total spread over a full schedule, so
+  // before any games the pace equals the average wedgies per season shown
+  // beside it. Per-game rates would weigh the shortened 2019/20 and 2020/21
+  // seasons differently and land a wedgie off that average.
   const seasonRates = seasons
     .filter((s) => s.totalGames > 0 && s.id !== globalRow?.currentSeasonId)
-    .map((s) => s.wedgies.length / s.totalGames);
+    .map((s) => s.wedgies.length / totalEstimatedGames);
 
   return computePace({
     currentTotalWedgies,
