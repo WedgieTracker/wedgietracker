@@ -6,7 +6,7 @@ export const donationsRouter = createTRPCRouter({
   createCheckoutSession: publicProcedure
     .input(
       z.object({
-        quantity: z.number().min(1),
+        quantity: z.number().int().min(1).max(50),
       }),
     )
     .mutation(async ({ input }) => {
@@ -29,8 +29,8 @@ export const donationsRouter = createTRPCRouter({
           coffee: "true",
         },
         mode: "payment",
-        success_url: `${process.env.NEXTAUTH_URL}/store/success?session_id={CHECKOUT_SESSION_ID}&coffee=true`,
-        cancel_url: `${process.env.NEXTAUTH_URL}/store`,
+        success_url: `${process.env.NEXTAUTH_URL}/support-us/thanks`,
+        cancel_url: `${process.env.NEXTAUTH_URL}/support-us`,
       });
 
       return session.url;

@@ -10,7 +10,7 @@ const menuItems = [
   { href: "/all-wedgies", label: "ALL WEDGIES ARCHIVE" },
   { href: "/standings", label: "PLAYERS/TEAMS STANDINGS" },
   { href: "/seasons-history", label: "SEASONS HISTORY" },
-  { href: "/store", label: "OG WEDGIE T-SHIRT" },
+  { href: "/support-us", label: "BUY ME A COFFEE" },
   { href: "/blog", label: "BLOG" },
 ];
 

@@ -29,13 +29,13 @@ export function Header() {
           {/* Left column */}
           <div className="justify-self-start">
             <Link
-              href="/store"
+              href="/support-us"
               className={`store-CTA border-yellow text-yellow before:animate-gradient before:via-yellow/20 hover:bg-yellow hover:text-darkpurple relative mb-0.5 inline-block rounded-md border px-2 py-1.5 text-[10px] font-bold tracking-wider uppercase transition-all duration-300 before:absolute before:inset-0 before:-z-10 before:bg-linear-to-r before:from-transparent before:to-transparent before:bg-size-[200%_100%] md:px-3 md:text-xs ${
                 isMenuOpen ? "opacity-0" : "opacity-100"
               }`}
             >
-              <span className="inline md:hidden">Store</span>
-              <span className="hidden md:inline">Support Us</span>
+              <span className="inline md:hidden">Support</span>
+              <span className="hidden md:inline">Support</span>
             </Link>
           </div>
 
