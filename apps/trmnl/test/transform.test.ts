@@ -10,12 +10,10 @@ const transform = new Function(
   `${readFileSync(join(here, "../src/transform.js"), "utf8")}\nreturn transform;`,
 )() as (input: Record<string, unknown>) => Record<string, unknown>;
 
-// The five polling URLs in src/settings.yml, in order. TRMNL hands their responses to the
-// transform as IDX_0..IDX_4. The fixtures are real responses from www.wedgietracker.com.
+// The three polling URLs in src/settings.yml, in order. TRMNL hands their responses to the
+// transform as IDX_0..IDX_2. The fixtures are real responses from www.wedgietracker.com.
 const ENDPOINTS = [
   "wedgie.getStats",
-  "wedgie.getTopStandings",
-  "admin.getGlobal",
   "wedgie.getLatestWedgies",
   "wedgie.getTotalWedgies",
 ];
@@ -35,8 +33,6 @@ describe("transform", () => {
   it("produces every variable the markup reads, from the live API shapes", () => {
     const out = transform(fixtureInput());
 
-    expect(out.season).toEqual(expect.any(String));
-    expect(out.season).not.toBe("");
     expect(out.total).toEqual(expect.any(Number));
     expect(out.pace).toEqual(expect.any(Number));
     expect(out.show_pace).toEqual(expect.any(Boolean));
