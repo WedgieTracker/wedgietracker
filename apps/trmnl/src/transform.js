@@ -4,36 +4,15 @@ function transform(input) {
     return (v && v.result && v.result.data && v.result.data.json) || null;
   }
   var stats = json("IDX_0");
-  var standings = json("IDX_1");
-  var global = json("IDX_2");
-  var latest = json("IDX_3") || [];
-  var allTime = json("IDX_4");
+  var latest = json("IDX_1") || [];
+  var allTime = json("IDX_2");
   if (!stats) return input;
 
   var total = stats.currentSeasonWedgies || 0;
-  var games = stats.gamesPlayed || 0;
   var record = stats.previousRecord || 0;
-  var months = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-  ];
-
-  var last = null;
   var daysSince = null;
   if (stats.lastWedgie) {
     var d = new Date(stats.lastWedgie);
-    last =
-      d.getUTCDate() + " " + months[d.getUTCMonth()] + " " + d.getUTCFullYear();
     daysSince = Math.max(0, Math.floor((Date.now() - d.getTime()) / 86400000));
   }
 
@@ -205,29 +184,17 @@ function transform(input) {
     };
   });
 
-  var players = (standings && standings.players) || [];
-  var teams = (standings && standings.teams) || [];
-
   return {
-    season: (global && global.currentSeason && global.currentSeason.name) || "",
     total: total,
-    games: games,
     pace: stats.currentPace || 0,
     // The website only shows pace when it differs from the current total.
     show_pace: (stats.currentPace || 0) !== total,
     all_time: typeof allTime === "number" ? allTime : null,
     latest: latestWedgies,
     record: record,
-    record_pct:
-      record > 0 ? Math.min(100, Math.round((total / record) * 100)) : 0,
-    record_broken: record > 0 && total > record,
     record_label: recordLabel,
     wave_svg: waveSvg,
-    last_wedgie: last,
     days_since: daysSince,
     live: !!stats.liveGames,
-    has_wedgies: total > 0 && !!(standings && standings.hasWedgiesThisSeason),
-    players: players.slice(0, 5),
-    teams: teams.slice(0, 5),
   };
 }
