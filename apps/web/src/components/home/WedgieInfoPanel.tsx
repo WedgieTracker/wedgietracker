@@ -40,6 +40,13 @@ export function WedgieInfoPanel({ wedgie }: WedgieInfoPanelProps) {
               </p>
             )}
           </div>
+          {/* On phones the diagram sits in the header row, leaving the rows below full width. */}
+          <div className="relative ml-auto w-[64px] shrink-0 self-start sm:hidden">
+            <CourtPositionDiagram
+              position={wedgie.position}
+              dotClassName="size-2"
+            />
+          </div>
         </div>
 
         <div
@@ -75,27 +82,26 @@ export function WedgieInfoPanel({ wedgie }: WedgieInfoPanelProps) {
               <p className="text-right text-[.75em] font-bold tracking-wider text-white/60 uppercase">
                 Shoutout
               </p>
-              <p className="text-[1em] text-white">
-                {wedgie.shoutouts.map((handle, i) => (
-                  <span key={handle}>
-                    {i > 0 && ", "}
+              <ul className="flex flex-wrap gap-1.5">
+                {wedgie.shoutouts.map((handle) => (
+                  <li key={handle}>
                     <a
                       href={twitterProfileUrl(handle)}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-yellow hover:text-pink underline-offset-2 transition-colors hover:underline"
+                      className="hover:border-yellow hover:bg-yellow hover:text-darkpurple block rounded-full border border-white/20 bg-white/5 px-2.5 py-0.5 text-[.75em] font-bold text-white transition-colors duration-200"
                     >
                       @{handle}
                     </a>
-                  </span>
+                  </li>
                 ))}
-              </p>
+              </ul>
             </>
           )}
         </div>
       </div>
 
-      <div className="absolute right-1.5 bottom-16 w-full max-w-[80px] sm:relative sm:right-auto sm:bottom-auto sm:max-w-[150px]">
+      <div className="relative hidden w-full max-w-[150px] sm:block">
         <CourtPositionDiagram position={wedgie.position} />
       </div>
     </div>

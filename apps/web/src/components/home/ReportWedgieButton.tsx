@@ -39,7 +39,7 @@ export function ReportWedgieButton({ wedgie }: ReportWedgieButtonProps) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         aria-label="Report wrong info"
-        className="border-yellow/60 text-yellow hover:bg-yellow hover:text-darkpurple flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-bold uppercase transition-all duration-300 sm:px-3 sm:py-2"
+        className="border-yellow/60 text-yellow hover:bg-yellow hover:text-darkpurple flex size-7 items-center justify-center gap-1 rounded-md border text-xs font-bold uppercase transition-all duration-300 sm:h-auto sm:w-auto sm:px-3 sm:py-2"
       >
         <svg
           className="size-4"
@@ -48,14 +48,15 @@ export function ReportWedgieButton({ wedgie }: ReportWedgieButtonProps) {
           viewBox="0 0 24 24"
           aria-hidden="true"
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M3 21V4m0 0h13l-2 4 2 4H3"
-          />
+          {/* Referee whistle: body, mouthpiece, pea, and a couple of "tweet" lines */}
+          <g strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}>
+            <circle cx="9" cy="15" r="5" />
+            <path d="M9 10h12v4h-7.4" />
+            <path d="M14 6.5 15 4M18 7l1.8-2" />
+          </g>
+          <circle cx="9" cy="15" r="1.5" fill="currentColor" stroke="none" />
         </svg>
-        <span className="hidden sm:inline">Report</span>
+        <span className="hidden sm:inline">Challenge</span>
       </DialogTrigger>
       <DialogContent className="bg-darkpurple border-yellow max-w-[90vw] rounded-xl border-2 text-white sm:max-w-md">
         <DialogClose className="border-yellow bg-yellow text-darkpurple hover:bg-darkpurple hover:text-yellow absolute top-3 right-3 rounded-full border transition-all duration-300">
@@ -63,7 +64,7 @@ export function ReportWedgieButton({ wedgie }: ReportWedgieButtonProps) {
           <span className="sr-only">Close</span>
         </DialogClose>
         <DialogTitle className="text-yellow pr-8 font-black uppercase">
-          Report wrong info on #{wedgie.number}
+          Coach&apos;s challenge on #{wedgie.number}
         </DialogTitle>
         <ReportForm wedgieId={wedgie.id} onDone={() => setOpen(false)} />
       </DialogContent>
@@ -87,8 +88,8 @@ function ReportForm({
   const report = api.report.create.useMutation({
     onSuccess: () => {
       toast({
-        title: "Thanks for the heads up!",
-        description: "We'll take a look and fix it if needed.",
+        title: "Thanks, got it",
+        description: "We'll check the footage and fix it if we got it wrong.",
       });
       onDone();
     },
@@ -110,7 +111,7 @@ function ReportForm({
     >
       <fieldset>
         <legend className="mb-2 text-xs font-bold tracking-wider text-white/60 uppercase">
-          What&apos;s wrong?
+          What did we get wrong?
         </legend>
         <div className="flex flex-wrap gap-2">
           {WEDGIE_REPORT_FIELDS.map((f) => (
@@ -180,7 +181,7 @@ function ReportForm({
         disabled={!field || report.isPending}
         className="bg-yellow text-darkpurple hover:bg-yellow/80 w-full rounded-md px-3 py-2 text-sm font-bold uppercase transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-50"
       >
-        {report.isPending ? "Sending..." : "Send report"}
+        {report.isPending ? "Sending..." : "Send challenge"}
       </button>
     </form>
   );

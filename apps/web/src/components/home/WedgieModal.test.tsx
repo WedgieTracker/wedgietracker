@@ -127,7 +127,7 @@ describe("WedgieModal", () => {
       fireEvent.click(
         screen.getByRole("button", { name: /report wrong info/i }),
       );
-      const submit = screen.getByRole("button", { name: /send report/i });
+      const submit = screen.getByRole("button", { name: /send challenge/i });
       expect(submit).toBeDisabled();
 
       fireEvent.click(screen.getByLabelText("Player"));
