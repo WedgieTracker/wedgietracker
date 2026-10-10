@@ -40,6 +40,7 @@
 </div>
 
 <div class="title_bar">
-  <img class="image image--adaptive" src="data:image/svg+xml;base64,{{ wt_logo | base64_encode }}" alt="WedgieTracker">
+  <img class="image dark:hidden" src="data:image/svg+xml;base64,{{ wt_logo | base64_encode }}" alt="WedgieTracker">
+  <img class="image hidden dark:block" src="data:image/svg+xml;base64,{{ wt_logo | replace: '#000', '#fff' | base64_encode }}" alt="WedgieTracker">
   <span class="instance">wedgietracker.com</span>
 </div>
