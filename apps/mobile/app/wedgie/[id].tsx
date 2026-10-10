@@ -1,6 +1,7 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import {
+  Linking,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -19,6 +20,7 @@ import { track } from "@/lib/observability";
 import { colors, fonts, radius, space } from "@/lib/theme";
 import { GEMS_EMOJI, isGemsDate } from "@wedgietracker/core/utils/formatDate";
 import { gameMoment } from "@wedgietracker/core/utils/gameMoment";
+import { tweetUrl } from "@wedgietracker/core/utils/twitterHandle";
 import type { ActiveVideo } from "@wedgietracker/core/utils/wedgieVideo";
 
 type Wedgie = RouterOutputs["wedgie"]["getAll"][number];
@@ -221,6 +223,24 @@ function WedgieDetail({
               <Text style={styles.types}>
                 {wedgie.types.map((t) => t.name).join(", ")}
               </Text>
+            </Fact>
+          ) : null}
+          {wedgie.noDunksTweet ? (
+            <Fact label="No Dunks">
+              <Text style={styles.tweet} numberOfLines={4}>
+                {wedgie.noDunksTweet.text}
+              </Text>
+              <Pressable
+                accessibilityRole="link"
+                hitSlop={8}
+                onPress={() => {
+                  const tweet = wedgie.noDunksTweet;
+                  if (tweet)
+                    void Linking.openURL(tweetUrl("NoDunksInc", tweet.id));
+                }}
+              >
+                <Text style={styles.tweetLink}>View on X →</Text>
+              </Pressable>
             </Fact>
           ) : null}
         </View>
@@ -426,6 +446,13 @@ const styles = StyleSheet.create({
   teams: { fontFamily: fonts.bold, color: colors.white, fontSize: 22 },
   teamName: { color: colors.pink },
   types: { fontFamily: fonts.bold, color: colors.white, fontSize: 16 },
+  tweet: { fontFamily: fonts.bold, color: colors.white, fontSize: 14 },
+  tweetLink: {
+    fontFamily: fonts.bold,
+    color: colors.yellow,
+    fontSize: 13,
+    marginTop: space.xs,
+  },
 
   courtWrap: { alignItems: "center" },
 
