@@ -1,6 +1,6 @@
 <div class="layout layout--col layout--stretch-x gap--space-between">
-  <div class="grid gap--large h--[60cqh] portrait:grid--cols-1">
-    <div class="col--span-5 portrait:col--span-1 relative h--full rounded--base outline">
+  <div class="grid gap--large h--[60cqh] portrait:grid--cols-1 portrait:h--auto">
+    <div class="col--span-5 portrait:col--span-1 relative h--full portrait:h--[34cqh] rounded--base outline">
       <img class="absolute inset--0 w--full h--full rounded--base image-dither" src="data:image/svg+xml;base64,{{ wave_svg | base64_encode }}">
       <div class="relative z--2 flex flex--col flex--center-x flex--center-y h--full w--full px--4 pt--4 pb--12">
         <span class="label label--small label--filled">{{ record_label }}</span>
@@ -14,7 +14,7 @@
       {% for w in latest limit: 3 %}
       <div class="flex flex--row flex--center-y gap lg:gap--large">
         <div class="flex flex--col flex--center-x gap--none w--20 lg:w--32 py--1 lg:py--3 no-shrink bg--black rounded--small"><span class="title title--large lg:title--xxlarge text--bold text--white"><span class="label label--small lg:label--large text--white">#</span>{{ w.number }}</span><span class="label label--small lg:label--large text--white">{{ w.date }}</span></div>
-        <div class="flex flex--col flex--left gap--none">
+        <div class="flex flex--col flex--left gap--none grow">
           <span class="title lg:title--xlarge lg:portrait:title--large" data-clamp="1">{{ w.player }}</span>
           <span class="label lg:label--large" data-clamp="1">{{ w.team }}{% if w.against != "" %} - {{ w.against }}{% endif %}</span>
           <span class="label label--small lg:label--base 4bit:label--gray">{{ w.type }}</span>
@@ -27,14 +27,14 @@
   <div class="grid grid--cols-3">
     <div class="flex flex--col">
       <span class="value value--small lg:value--large value--tnums text--bold">{{ days_since | default: "-" }}</span>
-      <span class="title title--small lg:title--base">DAYS WITHOUT WEDGIES</span>
+      <span class="title title--small lg:title--base lg:portrait:title--small">DAYS WITHOUT WEDGIES</span>
     </div>
     <div class="flex flex--col">
-      {% if show_pace %}<span class="value value--small lg:value--large value--tnums text--bold">{{ pace }}</span><span class="title title--small lg:title--base">PACE</span>{% else %}<span class="value value--small lg:value--large value--tnums text--bold">{{ record }}</span><span class="title title--small lg:title--base">RECORD TO BEAT</span>{% endif %}
+      {% if show_pace %}<span class="value value--small lg:value--large value--tnums text--bold">{{ pace }}</span><span class="title title--small lg:title--base lg:portrait:title--small">PACE</span>{% else %}<span class="value value--small lg:value--large value--tnums text--bold">{{ record }}</span><span class="title title--small lg:title--base lg:portrait:title--small">RECORD TO BEAT</span>{% endif %}
     </div>
     <div class="flex flex--col">
       <span class="value value--small lg:value--large value--tnums text--bold">{{ all_time }}</span>
-      <span class="title title--small lg:title--base">TOTAL WEDGIES FROM 14/15</span>
+      <span class="title title--small lg:title--base lg:portrait:title--small">TOTAL WEDGIES FROM 14/15</span>
     </div>
   </div>
 </div>
