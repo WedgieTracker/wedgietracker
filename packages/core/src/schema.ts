@@ -43,6 +43,9 @@ export const wedgie = sqliteTable(
     // the game clock as shown on the broadcast ("2:51", "0:43.7").
     period: integer("period"),
     gameClock: text("game_clock"),
+    // Score of teamName and of teamAgainstName at that moment.
+    teamScore: integer("team_score"),
+    opponentScore: integer("opponent_score"),
     // X/Twitter handles (no @) of the people who tagged us about this wedgie.
     shoutouts: text("shoutouts", { mode: "json" })
       .$type<string[]>()

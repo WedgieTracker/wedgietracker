@@ -18,6 +18,7 @@ import { api, type RouterOutputs } from "@/lib/api";
 import { track } from "@/lib/observability";
 import { colors, fonts, radius, space } from "@/lib/theme";
 import { GEMS_EMOJI, isGemsDate } from "@wedgietracker/core/utils/formatDate";
+import { gameMoment } from "@wedgietracker/core/utils/gameMoment";
 import type { ActiveVideo } from "@wedgietracker/core/utils/wedgieVideo";
 
 type Wedgie = RouterOutputs["wedgie"]["getAll"][number];
@@ -111,6 +112,7 @@ function WedgieDetail({
   // piece that gives way - everything above it carries information the court
   // only illustrates.
   const courtWidth = height >= 820 ? 124 : height >= 720 ? 104 : 84;
+  const moment = gameMoment(wedgie);
 
   // Reset the chosen source when stepping to another wedgie.
   useEffect(() => {
@@ -209,6 +211,11 @@ function WedgieDetail({
                 : ` vs ${wedgie.teamAgainstName}`}
             </Text>
           </Fact>
+          {moment ? (
+            <Fact label="When">
+              <Text style={styles.types}>{moment}</Text>
+            </Fact>
+          ) : null}
           {wedgie.types.length > 0 ? (
             <Fact label="Type">
               <Text style={styles.types}>
