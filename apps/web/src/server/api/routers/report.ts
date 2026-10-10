@@ -72,18 +72,20 @@ export const reportRouter = createTRPCRouter({
         ws: target.seasonName,
         wn: target.number.toString(),
       });
-      await sendTelegramMessage(
-        [
-          `🚩 <b>Wrong info reported</b> on wedgie #${target.number} (${escapeHtml(target.seasonName)})`,
-          `${escapeHtml(target.playerName)}, ${escapeHtml(target.teamName)} vs ${escapeHtml(target.teamAgainstName)}`,
-          `Field: <b>${input.field}</b>`,
-          note ? `Note: ${escapeHtml(note)}` : null,
-          "",
-          `<a href="${APP_URL}/all-wedgies?${shareParams.toString()}">View</a> · <a href="${APP_URL}/admin/wedgies/${target.id}">Edit</a> · <a href="${APP_URL}/admin/reports">Reports</a>`,
-        ]
-          .filter((line) => line !== null)
-          .join("\n"),
-      );
+      // With an assistant reading /api/reports, it tells the admin; Telegram is the fallback.
+      if (!process.env.REPORTS_API_KEY)
+        await sendTelegramMessage(
+          [
+            `🚩 <b>Wrong info reported</b> on wedgie #${target.number} (${escapeHtml(target.seasonName)})`,
+            `${escapeHtml(target.playerName)}, ${escapeHtml(target.teamName)} vs ${escapeHtml(target.teamAgainstName)}`,
+            `Field: <b>${input.field}</b>`,
+            note ? `Note: ${escapeHtml(note)}` : null,
+            "",
+            `<a href="${APP_URL}/all-wedgies?${shareParams.toString()}">View</a> · <a href="${APP_URL}/admin/wedgies/${target.id}">Edit</a> · <a href="${APP_URL}/admin/reports">Reports</a>`,
+          ]
+            .filter((line) => line !== null)
+            .join("\n"),
+        );
 
       return { ok: true };
     }),

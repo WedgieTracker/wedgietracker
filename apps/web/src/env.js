@@ -37,6 +37,7 @@ export const env = createEnv({
     RESEND_API_KEY: z.string(),
     TELEGRAM_BOT_TOKEN: z.string(),
     TELEGRAM_CHAT_ID: z.string(),
+    REPORTS_API_KEY: z.string().optional(),
     STRIPE_WEBHOOK_SECRET: z.string(),
   },
 
@@ -79,6 +80,7 @@ export const env = createEnv({
     RESEND_API_KEY: process.env.RESEND_API_KEY,
     TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN,
     TELEGRAM_CHAT_ID: process.env.TELEGRAM_CHAT_ID,
+    REPORTS_API_KEY: process.env.REPORTS_API_KEY,
     STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
     NEXT_PUBLIC_GA_ID: process.env.NEXT_PUBLIC_GA_ID,
   },
