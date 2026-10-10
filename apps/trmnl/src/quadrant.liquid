@@ -13,5 +13,5 @@
 <div class="title_bar flex flex--row flex--center-x">
   <img class="image image--adaptive hidden lg:block" src="data:image/svg+xml;base64,{{ wt_logo | base64_encode }}" alt="WedgieTracker">
   <img class="image lg:hidden dark:hidden" src="data:image/svg+xml;base64,{{ wt_logo | base64_encode }}" alt="WedgieTracker">
-  <img class="image hidden dark:block dark:lg:hidden" src="data:image/svg+xml;base64,{{ wt_logo | replace: '#000', '#fff' | base64_encode }}" alt="WedgieTracker">
+  <img class="image hidden dark:block dark:lg:hidden" src="data:image/svg+xml;base64,{{ wt_logo | replace: '#000', '#fff' | replace: '<svg ', '<svg fill="#fff" ' | base64_encode }}" alt="WedgieTracker">
 </div>
