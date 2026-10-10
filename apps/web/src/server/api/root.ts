@@ -6,7 +6,6 @@ import { playerRouter } from "./routers/player";
 import { teamRouter } from "./routers/team";
 import { gameRouter } from "./routers/game";
 import { typeRouter } from "./routers/type";
-import { blogRouter } from "./routers/blog";
 import { donationsRouter } from "./routers/donations";
 import { reportRouter } from "./routers/report";
 
@@ -23,7 +22,6 @@ export const appRouter = createTRPCRouter({
   team: teamRouter,
   game: gameRouter,
   type: typeRouter,
-  blog: blogRouter,
   donations: donationsRouter,
   report: reportRouter,
 });

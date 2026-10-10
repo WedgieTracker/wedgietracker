@@ -1,30 +1,6 @@
-import { PageLayout } from "~/components/layout/PageLayout";
-import { BlogList } from "~/components/blog/BlogList";
-import { generateMetadata } from "~/config/metadata";
+import { permanentRedirect } from "next/navigation";
 
-export const metadata = generateMetadata({
-  title: "Blog | NBA Wedgie Tracker",
-  description: "Latest news and stories about NBA wedgies and more.",
-});
-
-export default async function BlogPage() {
-  return (
-    <PageLayout>
-      <div className="flex flex-col">
-        <div className="flex w-full flex-col items-center justify-center gap-8 px-4 py-4 md:gap-8 md:py-8 lg:px-8 lg:py-8">
-          <h1 className="text-center text-4xl leading-none font-black uppercase md:text-6xl">
-            <span className="text-shadow-darkpurple text-yellow relative z-10 block leading-none">
-              Wedgie
-            </span>
-            <span className="text-pink relative z-0 mt-[-.3em] block text-[1.4em] leading-none">
-              Blog
-            </span>
-          </h1>
-          <div className="min-h-[60vh] w-full">
-            <BlogList />
-          </div>
-        </div>
-      </div>
-    </PageLayout>
-  );
+// The blog's only post told WedgieTracker's story, which /history now does.
+export default function BlogPage() {
+  permanentRedirect("/history");
 }
