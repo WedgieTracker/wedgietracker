@@ -179,7 +179,11 @@ function transform(input) {
         String(wd.getUTCFullYear()).slice(2),
       player: w.playerName,
       team: w.teamName,
-      against: w.teamAgainstName,
+      // The website leaves out an unknown opponent ("Unknown Away Team").
+      against:
+        (w.teamAgainstName || "").indexOf("Unknown") === -1
+          ? w.teamAgainstName
+          : "",
       type: ((w.types && w.types[0] && w.types[0].name) || "").toUpperCase(),
     };
   });
