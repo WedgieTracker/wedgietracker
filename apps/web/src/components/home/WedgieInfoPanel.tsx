@@ -1,5 +1,6 @@
 import type { Wedgie } from "@wedgietracker/core/types/wedgie";
 import { GEMS_EMOJI, isGemsDate } from "@wedgietracker/core/utils/formatDate";
+import { twitterProfileUrl } from "@wedgietracker/core/utils/twitterHandle";
 import { CourtPositionDiagram } from "./CourtPositionDiagram";
 
 interface WedgieInfoPanelProps {
@@ -68,6 +69,29 @@ export function WedgieInfoPanel({ wedgie }: WedgieInfoPanelProps) {
           <p className="text-[1em] text-white">
             {wedgie.types.map((type) => type.name).join(", ")}
           </p>
+
+          {wedgie.shoutouts?.length > 0 && (
+            <>
+              <p className="text-right text-[.75em] font-bold tracking-wider text-white/60 uppercase">
+                Shoutout
+              </p>
+              <p className="text-[1em] text-white">
+                {wedgie.shoutouts.map((handle, i) => (
+                  <span key={handle}>
+                    {i > 0 && ", "}
+                    <a
+                      href={twitterProfileUrl(handle)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-yellow hover:text-pink underline-offset-2 transition-colors hover:underline"
+                    >
+                      @{handle}
+                    </a>
+                  </span>
+                ))}
+              </p>
+            </>
+          )}
         </div>
       </div>
 

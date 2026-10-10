@@ -10,6 +10,21 @@ vi.mock("~/components/shared/ShareButtons", () => ({
   ),
 }));
 
+const reportMutate = vi.fn();
+vi.mock("~/trpc/react", () => ({
+  api: {
+    report: {
+      create: {
+        useMutation: () => ({
+          mutate: reportMutate,
+          isPending: false,
+          isError: false,
+        }),
+      },
+    },
+  },
+}));
+
 vi.mock("./CourtPositionDiagram", () => ({
   CourtPositionDiagram: () => <div data-testid="court-diagram" />,
 }));
@@ -32,6 +47,7 @@ const baseWedgie = {
   createdAt: "",
   updatedAt: "",
   gameName: "",
+  shoutouts: [],
 } as unknown as Parameters<typeof WedgieModal>[0]["wedgie"];
 
 let writeText = vi.fn<(text: string) => Promise<void>>();
@@ -82,6 +98,50 @@ describe("WedgieModal", () => {
       const lakersSpan = screen.getByText("Lakers");
       const teamsParagraph = lakersSpan.parentElement!;
       expect(teamsParagraph.textContent).not.toMatch(/Unknown/);
+    });
+  });
+
+  describe("shoutouts", () => {
+    it("links each handle to its X profile", () => {
+      const wedgie = { ...baseWedgie, shoutouts: ["nodunks", "fan_1"] };
+      render(<WedgieModal wedgie={wedgie} isOpen onClose={noop} />);
+
+      expect(
+        screen.getByRole("link", { name: "@nodunks" }).getAttribute("href"),
+      ).toBe("https://x.com/nodunks");
+      expect(
+        screen.getByRole("link", { name: "@fan_1" }).getAttribute("href"),
+      ).toBe("https://x.com/fan_1");
+    });
+
+    it("hides the row when there are no shoutouts", () => {
+      render(<WedgieModal wedgie={baseWedgie} isOpen onClose={noop} />);
+      expect(screen.queryByText("Shoutout")).not.toBeInTheDocument();
+    });
+  });
+
+  describe("report wrong info", () => {
+    it("sends the picked field and note", () => {
+      render(<WedgieModal wedgie={baseWedgie} isOpen onClose={noop} />);
+
+      fireEvent.click(
+        screen.getByRole("button", { name: /report wrong info/i }),
+      );
+      const submit = screen.getByRole("button", { name: /send report/i });
+      expect(submit).toBeDisabled();
+
+      fireEvent.click(screen.getByLabelText("Player"));
+      fireEvent.change(screen.getByLabelText(/details/i), {
+        target: { value: "  it was Bronny  " },
+      });
+      fireEvent.click(submit);
+
+      expect(reportMutate).toHaveBeenCalledWith({
+        wedgieId: 1,
+        field: "player",
+        note: "it was Bronny",
+        website: undefined,
+      });
     });
   });
 

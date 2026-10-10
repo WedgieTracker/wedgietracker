@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 const APP_NAME = "WedgieTracker";
 const APP_DESCRIPTION =
   "The original NBA wedgie tracker. We count how many times a basketball gets stuck between the rim and the backboard. NoDunks Inspired.";
-const APP_URL =
+export const APP_URL =
   process.env.NEXT_PUBLIC_APP_URL ?? "https://www.wedgietracker.com";
 const DEFAULT_SOCIAL_IMAGE =
   "https://res.cloudinary.com/wedgietracker/image/upload/v1736700345/assets/social-wedgietracker_bibnbu.jpg";

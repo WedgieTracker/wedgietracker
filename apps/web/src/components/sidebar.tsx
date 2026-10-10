@@ -1,4 +1,11 @@
-import { Home, Settings, LoaderPinwheel, User, Users } from "lucide-react";
+import {
+  Flag,
+  Home,
+  Settings,
+  LoaderPinwheel,
+  User,
+  Users,
+} from "lucide-react";
 
 import {
   Sidebar,
@@ -22,6 +29,11 @@ const items = [
     title: "Wedgies",
     url: "/admin/wedgies",
     icon: LoaderPinwheel,
+  },
+  {
+    title: "Reports",
+    url: "/admin/reports",
+    icon: Flag,
   },
   {
     title: "Players",
