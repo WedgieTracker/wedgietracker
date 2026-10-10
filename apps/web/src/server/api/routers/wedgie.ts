@@ -50,6 +50,7 @@ const wedgieInput = z.object({
   }),
   types: z.array(z.string()),
   gameName: z.string().optional(),
+  shoutouts: z.array(z.string().regex(/^[A-Za-z0-9_]{1,15}$/)).default([]),
 });
 
 // Helper: connect or create types for a wedgie

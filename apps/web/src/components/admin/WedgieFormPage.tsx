@@ -7,6 +7,7 @@ import { CourtPositionPicker } from "./CourtPositionPicker";
 import { TypeSearchInput } from "./TypeSearchInput";
 import { VideoUrlInput } from "./VideoUrlInput";
 import { useWedgieForm } from "./useWedgieForm";
+import { ShoutoutsInput } from "./ShoutoutsInput";
 import type { WedgieWithTypes } from "@wedgietracker/core/types/wedgie";
 import { WedgieSocialShareWrapper } from "~/components/admin/WedgieSocialShareWrapper";
 import { CloudinaryUpload } from "~/components/admin/CloudinaryUpload";
@@ -179,6 +180,22 @@ export function WedgieFormPage({ wedgie, currentSeason }: WedgieFormPageProps) {
             <TypeSearchInput
               value={formData.types}
               onChange={(types) => setFormData((prev) => ({ ...prev, types }))}
+            />
+          </div>
+
+          <div className="col-span-2">
+            <label
+              htmlFor="shoutouts"
+              className="block text-sm font-medium text-white"
+            >
+              Shoutouts (X handles that tagged us)
+            </label>
+            <ShoutoutsInput
+              id="shoutouts"
+              value={formData.shoutouts}
+              onChange={(shoutouts) =>
+                setFormData((prev) => ({ ...prev, shoutouts }))
+              }
             />
           </div>
 

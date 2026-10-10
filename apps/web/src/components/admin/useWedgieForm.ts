@@ -19,6 +19,7 @@ interface WedgieFormData {
   videoUrl: VideoUrls;
   types: string[];
   gameName: string;
+  shoutouts: string[];
 }
 
 function initialFormData(
@@ -42,6 +43,7 @@ function initialFormData(
     },
     types: wedgie?.types?.map((t) => t.name) ?? [],
     gameName: wedgie?.gameName ?? "",
+    shoutouts: wedgie?.shoutouts ?? [],
   };
 }
 

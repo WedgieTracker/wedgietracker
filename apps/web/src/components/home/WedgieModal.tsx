@@ -12,6 +12,7 @@ import { ShareButtons } from "~/components/shared/ShareButtons";
 import { WedgieVideoTabs } from "./WedgieVideoTabs";
 import { WedgieInfoPanel } from "./WedgieInfoPanel";
 import { WedgieModalNav } from "./WedgieModalNav";
+import { ReportWedgieButton } from "./ReportWedgieButton";
 import { buildShareParams, useCopyWedgieLink } from "./useCopyWedgieLink";
 import {
   pickInitialVideo,
@@ -134,6 +135,7 @@ export function WedgieModal({
               url={`/all-wedgies?${buildShareParams(wedgie).toString()}`}
               title={`Check out this wedgie by ${wedgie.playerName} - ${wedgie.teamName} vs ${wedgie.teamAgainstName} on WedgieTracker!`}
             />
+            <ReportWedgieButton wedgie={wedgie} />
           </div>
 
           <WedgieModalNav

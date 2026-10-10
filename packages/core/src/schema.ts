@@ -8,6 +8,7 @@ import {
   primaryKey,
 } from "drizzle-orm/sqlite-core";
 import { createId } from "@paralleldrive/cuid2";
+import { WEDGIE_REPORT_FIELDS } from "./types/report";
 
 // ─── Domain Tables ───────────────────────────────────────────────────────────
 
@@ -38,6 +39,11 @@ export const wedgie = sqliteTable(
     playerName: text("player_name").notNull(),
     seasonName: text("season_name").notNull(),
     gameName: text("game_name"),
+    // X/Twitter handles (no @) of the people who tagged us about this wedgie.
+    shoutouts: text("shoutouts", { mode: "json" })
+      .$type<string[]>()
+      .notNull()
+      .default([]),
   },
   (table) => [
     index("wedgie_team_name_idx").on(table.teamName),
@@ -165,6 +171,28 @@ export const wedgieToType = sqliteTable(
   (table) => [primaryKey({ columns: [table.wedgieId, table.typeId] })],
 );
 
+// ─── Reports ─────────────────────────────────────────────────────────────────
+
+export const wedgieReport = sqliteTable(
+  "wedgie_report",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    wedgieId: integer("wedgie_id")
+      .notNull()
+      .references(() => wedgie.id, { onDelete: "cascade" }),
+    field: text("field", { enum: WEDGIE_REPORT_FIELDS }).notNull(),
+    note: text("note"),
+    resolved: integer("resolved", { mode: "boolean" }).default(false).notNull(),
+    createdAt: text("created_at")
+      .default(sql`(CURRENT_TIMESTAMP)`)
+      .notNull(),
+  },
+  (table) => [
+    index("wedgie_report_wedgie_id_idx").on(table.wedgieId),
+    index("wedgie_report_resolved_idx").on(table.resolved),
+  ],
+);
+
 // ─── Auth Tables (NextAuth) ──────────────────────────────────────────────────
 
 export const user = sqliteTable("user", {
@@ -280,6 +308,14 @@ export const wedgieRelations = relations(wedgie, ({ one, many }) => ({
     relationName: "teamAgainst",
   }),
   wedgieToTypes: many(wedgieToType),
+  reports: many(wedgieReport),
+}));
+
+export const wedgieReportRelations = relations(wedgieReport, ({ one }) => ({
+  wedgie: one(wedgie, {
+    fields: [wedgieReport.wedgieId],
+    references: [wedgie.id],
+  }),
 }));
 
 export const playerRelations = relations(player, ({ many }) => ({
