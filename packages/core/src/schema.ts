@@ -51,11 +51,9 @@ export const wedgie = sqliteTable(
       .$type<string[]>()
       .notNull()
       .default([]),
-    // The tweet in which @NoDunksInc announced this wedgie.
+    // The tweet in which @NoDunksInc announced this wedgie; only its id is kept.
     noDunksTweet: text("nodunks_tweet", { mode: "json" }).$type<{
       id: string;
-      text: string;
-      postedAt: string;
     }>(),
   },
   (table) => [

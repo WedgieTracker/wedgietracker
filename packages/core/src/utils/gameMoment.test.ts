@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { gameMoment } from "./gameMoment";
+import { gameMoment, gameTimeline } from "./gameMoment";
 
 const at = (
   period: number,
@@ -47,5 +47,41 @@ describe("gameMoment", () => {
   it("names overtime that is not close", () => {
     expect(at(5, "1:00", 120, 110)).toBe("Overtime");
     expect(at(6, "4:00")).toBe("Overtime");
+  });
+});
+
+describe("gameTimeline", () => {
+  it("places the moment within its quarter", () => {
+    const t = gameTimeline({ period: 2, gameClock: "0:09.6" })!;
+    expect(t.segments).toEqual(["Q1", "Q2", "Q3", "Q4"]);
+    expect(t.active).toBe(1);
+    expect(t.progress).toBeCloseTo(1 - 9.6 / 720);
+    expect(t.label).toBe("Final minute of Q2");
+    expect(t.tone).toBe("normal");
+  });
+
+  it("adds overtime segments and measures them in five minutes", () => {
+    const t = gameTimeline({
+      period: 6,
+      gameClock: "2:30",
+      teamScore: 120,
+      opponentScore: 118,
+    })!;
+    expect(t.segments).toEqual(["Q1", "Q2", "Q3", "Q4", "OT", "2OT"]);
+    expect(t.active).toBe(5);
+    expect(t.progress).toBeCloseTo(0.5);
+    expect(t.tone).toBe("clutch");
+  });
+
+  it("marks garbage time and returns null without a clock", () => {
+    expect(
+      gameTimeline({
+        period: 4,
+        gameClock: "4:25",
+        teamScore: 97,
+        opponentScore: 134,
+      })!.tone,
+    ).toBe("garbage");
+    expect(gameTimeline({ period: 4, gameClock: null })).toBeNull();
   });
 });

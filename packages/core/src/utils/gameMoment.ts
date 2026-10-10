@@ -54,3 +54,47 @@ export function gameMoment({
   if (period <= 3 && seconds <= 60) return `Final minute of Q${period}`;
   return `${seconds > 360 ? "Early" : "Late"} Q${period}`;
 }
+
+export interface GameTimeline {
+  /** "Q1"-"Q4", plus one segment per overtime played up to the wedgie. */
+  segments: string[];
+  /** Index of the segment the wedgie happened in. */
+  active: number;
+  /** How far through that segment it happened, 0 at the start to 1 at the buzzer. */
+  progress: number;
+  /** The band from gameMoment, e.g. "Late Q1" or "Clutch time". */
+  label: string;
+  tone: "clutch" | "garbage" | "normal";
+}
+
+/** Where a wedgie sits on a quarter-by-quarter bar, for the game timeline. */
+export function gameTimeline(input: GameMomentInput): GameTimeline | null {
+  const label = gameMoment(input);
+  const seconds = input.gameClock ? clockSeconds(input.gameClock) : null;
+  if (!label || !input.period || seconds === null) return null;
+
+  const period = input.period;
+  const length = period >= 5 ? 300 : 720;
+  const overtimes = Math.max(0, period - 4);
+  const segments = [
+    "Q1",
+    "Q2",
+    "Q3",
+    "Q4",
+    ...Array.from({ length: overtimes }, (_, i) =>
+      i === 0 ? "OT" : `${i + 1}OT`,
+    ),
+  ];
+  return {
+    segments,
+    active: period - 1,
+    progress: Math.min(1, Math.max(0, (length - seconds) / length)),
+    label,
+    tone:
+      label === "Clutch time"
+        ? "clutch"
+        : label === "Garbage time"
+          ? "garbage"
+          : "normal",
+  };
+}
