@@ -224,24 +224,30 @@ function WedgieDetail({
           ) : null}
         </View>
 
-        {timeline ? <GameTimeline timeline={timeline} /> : null}
+        {/* Lined up with the values above (Player, Teams...), not the labels. */}
+        {timeline || wedgie.noDunksTweet ? (
+          <View style={styles.valueColumn}>
+            {timeline ? <GameTimeline timeline={timeline} /> : null}
 
-        {wedgie.noDunksTweet ? (
-          <Pressable
-            accessibilityRole="link"
-            accessibilityLabel="No Dunks tweet"
-            hitSlop={8}
-            style={styles.noDunks}
-            onPress={() => {
-              const tweet = wedgie.noDunksTweet;
-              if (tweet) void Linking.openURL(tweetUrl("NoDunksInc", tweet.id));
-            }}
-          >
-            <Image
-              source={require("../../assets/images/nodunks-logo.png")}
-              style={styles.noDunksLogo}
-            />
-          </Pressable>
+            {wedgie.noDunksTweet ? (
+              <Pressable
+                accessibilityRole="link"
+                accessibilityLabel="No Dunks tweet"
+                hitSlop={8}
+                style={styles.noDunks}
+                onPress={() => {
+                  const tweet = wedgie.noDunksTweet;
+                  if (tweet)
+                    void Linking.openURL(tweetUrl("NoDunksInc", tweet.id));
+                }}
+              >
+                <Image
+                  source={require("../../assets/images/nodunks-logo.png")}
+                  style={styles.noDunksLogo}
+                />
+              </Pressable>
+            ) : null}
+          </View>
         ) : null}
 
         <View style={styles.courtWrap}>
@@ -445,6 +451,8 @@ const styles = StyleSheet.create({
   teams: { fontFamily: fonts.bold, color: colors.white, fontSize: 22 },
   teamName: { color: colors.pink },
   types: { fontFamily: fonts.bold, color: colors.white, fontSize: 16 },
+  // The facts' label column (70) plus the gap between label and value.
+  valueColumn: { paddingLeft: 70 + space.md, gap: space.md },
   noDunks: { alignSelf: "flex-start" },
   noDunksLogo: { width: 32, height: 32, borderRadius: 6 },
 
