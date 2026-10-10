@@ -13,7 +13,7 @@
       <span class="title title--small hidden lg:visible">Latest wedgies</span>
       {% for w in latest limit: 3 %}
       <div class="flex flex--row flex--center-y gap--small lg:gap">
-        <div class="flex flex--col flex--center-x gap--none w--24 lg:w--20 py--2 no-shrink bg--black rounded--small"><span class="title lg:title--large text--bold text--white"><span class="label label--xsmall lg:label--small text--white">#</span>{{ w.number }}</span><span class="label label--xsmall lg:label--small text--white">{{ w.date }}</span></div>
+        <div class="flex flex--col flex--center-x gap--none w--24 lg:w--20 portrait:w--20 py--2 portrait:py--1 lg:portrait:py--2 no-shrink bg--black rounded--small"><span class="title lg:title--large text--bold text--white"><span class="label label--xsmall lg:label--small text--white">#</span>{{ w.number }}</span><span class="label label--xsmall lg:label--small text--white">{{ w.date }}</span></div>
         <div class="flex flex--col flex--left gap--none">
           <span class="title title--small lg:title--base" data-clamp="1">{{ w.player }}</span>
           <span class="label label--small lg:label--base" data-clamp="1">{{ w.team }}{% if w.against != "" %} - {{ w.against }}{% endif %}</span>
