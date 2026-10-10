@@ -24,15 +24,15 @@
     </div>
   </div>
   <div class="divider"></div>
-  <div class="grid grid--cols-3">
-    <div class="flex flex--col">
+  <div class="grid grid--cols-3 portrait:grid--cols-1 lg:portrait:grid--cols-3">
+    <div class="flex flex--col portrait:flex--row lg:portrait:flex--col">
       <span class="value value--small lg:value--large value--tnums text--bold">{{ days_since | default: "-" }}</span>
       <span class="title title--small lg:title--base lg:portrait:title--small">DAYS WITHOUT WEDGIES</span>
     </div>
-    <div class="flex flex--col">
+    <div class="flex flex--col portrait:flex--row lg:portrait:flex--col">
       {% if show_pace %}<span class="value value--small lg:value--large value--tnums text--bold">{{ pace }}</span><span class="title title--small lg:title--base lg:portrait:title--small">PACE</span>{% else %}<span class="value value--small lg:value--large value--tnums text--bold">{{ record }}</span><span class="title title--small lg:title--base lg:portrait:title--small">RECORD TO BEAT</span>{% endif %}
     </div>
-    <div class="flex flex--col">
+    <div class="flex flex--col portrait:flex--row lg:portrait:flex--col">
       <span class="value value--small lg:value--large value--tnums text--bold">{{ all_time }}</span>
       <span class="title title--small lg:title--base lg:portrait:title--small">TOTAL WEDGIES FROM 14/15</span>
     </div>
