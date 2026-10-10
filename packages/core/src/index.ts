@@ -1,6 +1,5 @@
 export * from "./schema";
 export * from "./types/wedgie";
-export * from "./types/blog";
 export * from "./types/product";
 export * from "./utils/formatDate";
 export * from "./utils/paceCalculator";
