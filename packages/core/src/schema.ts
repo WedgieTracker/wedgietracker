@@ -51,6 +51,12 @@ export const wedgie = sqliteTable(
       .$type<string[]>()
       .notNull()
       .default([]),
+    // The tweet in which @NoDunksInc announced this wedgie.
+    noDunksTweet: text("nodunks_tweet", { mode: "json" }).$type<{
+      id: string;
+      text: string;
+      postedAt: string;
+    }>(),
   },
   (table) => [
     index("wedgie_team_name_idx").on(table.teamName),

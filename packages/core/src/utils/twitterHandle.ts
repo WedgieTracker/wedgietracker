@@ -32,3 +32,7 @@ export function parseTwitterHandles(input: string): string[] {
 export function twitterProfileUrl(handle: string) {
   return `https://x.com/${handle}`;
 }
+
+export function tweetUrl(handle: string, tweetId: string) {
+  return `https://x.com/${handle}/status/${tweetId}`;
+}

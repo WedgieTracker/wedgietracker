@@ -1,7 +1,10 @@
 import type { Wedgie } from "@wedgietracker/core/types/wedgie";
 import { GEMS_EMOJI, isGemsDate } from "@wedgietracker/core/utils/formatDate";
 import { gameMoment } from "@wedgietracker/core/utils/gameMoment";
-import { twitterProfileUrl } from "@wedgietracker/core/utils/twitterHandle";
+import {
+  tweetUrl,
+  twitterProfileUrl,
+} from "@wedgietracker/core/utils/twitterHandle";
 import { CourtPositionDiagram } from "./CourtPositionDiagram";
 
 interface WedgieInfoPanelProps {
@@ -110,6 +113,27 @@ export function WedgieInfoPanel({ wedgie }: WedgieInfoPanelProps) {
             </>
           )}
         </div>
+
+        {wedgie.noDunksTweet && (
+          <a
+            href={tweetUrl("NoDunksInc", wedgie.noDunksTweet.id)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:border-yellow block rounded-xl border border-white/15 bg-white/5 p-3 transition-colors duration-200"
+          >
+            <p className="text-[.7rem] font-bold tracking-wider text-white/60 uppercase">
+              No Dunks ·{" "}
+              {new Date(wedgie.noDunksTweet.postedAt).toLocaleDateString(
+                "en-US",
+                { month: "short", day: "numeric", year: "numeric" },
+              )}
+            </p>
+            <p className="mt-1 line-clamp-4 text-sm whitespace-pre-line text-white/90">
+              {wedgie.noDunksTweet.text}
+            </p>
+            <p className="text-yellow mt-2 text-xs font-bold">View on X →</p>
+          </a>
+        )}
       </div>
 
       <div className="relative hidden w-full max-w-[150px] sm:block">
