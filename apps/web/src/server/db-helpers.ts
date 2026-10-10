@@ -1,6 +1,11 @@
 import { eq, count } from "drizzle-orm";
 import type { db } from "./db";
-import { global, wedgie } from "@wedgietracker/core/schema";
+import {
+  global,
+  wedgie,
+  type as typeTable,
+  wedgieToType,
+} from "@wedgietracker/core/schema";
 import { calculatePace } from "~/server/pace";
 
 /**
@@ -72,5 +77,31 @@ export async function maybeUpdateGlobalWedgieCount(
         pace: pace.medianPace,
       })
       .where(eq(global.id, 1));
+  }
+}
+
+// Helper: connect or create types for a wedgie
+export async function syncWedgieTypes(
+  trx: typeof db,
+  wedgieId: number,
+  typeNames: string[],
+) {
+  // Clear existing type associations
+  await trx.delete(wedgieToType).where(eq(wedgieToType.wedgieId, wedgieId));
+
+  for (const name of typeNames) {
+    // Find or create the type
+    let existing = await trx.query.type.findFirst({
+      where: eq(typeTable.name, name),
+    });
+    if (!existing) {
+      const [created] = await trx
+        .insert(typeTable)
+        .values({ name })
+        .returning();
+      existing = created;
+    }
+    // Create the join row
+    await trx.insert(wedgieToType).values({ wedgieId, typeId: existing!.id });
   }
 }
