@@ -23,6 +23,7 @@ import { colors, fonts, radius, space } from "@/lib/theme";
 import {
   MOMENT_FILTERS,
   matchesFilter,
+  shortFilterLabel,
 } from "@wedgietracker/core/utils/wedgieFilter";
 
 /**
@@ -224,6 +225,7 @@ export default function AllWedgiesScreen() {
                     setSeasonTouched(true);
                     setSeason(next);
                   }}
+                  shortLabel={(v) => shortFilterLabel("season", v)}
                 />
                 <FilterSelect
                   label="Type"
@@ -234,6 +236,7 @@ export default function AllWedgiesScreen() {
                   ]}
                   onSelect={setType}
                   tone="pink"
+                  shortLabel={(v) => shortFilterLabel("type", v)}
                 />
                 <FilterSelect
                   label="When"
@@ -244,6 +247,7 @@ export default function AllWedgiesScreen() {
                   ]}
                   onSelect={setWhen}
                   tone="pink"
+                  shortLabel={(v) => shortFilterLabel("when", v)}
                 />
               </View>
 

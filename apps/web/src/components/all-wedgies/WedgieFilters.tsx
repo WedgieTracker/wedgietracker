@@ -1,6 +1,9 @@
 "use client";
 
-import { MOMENT_FILTERS } from "@wedgietracker/core/utils/wedgieFilter";
+import {
+  MOMENT_FILTERS,
+  shortFilterLabel,
+} from "@wedgietracker/core/utils/wedgieFilter";
 import { api } from "~/trpc/react";
 import { useState, type Dispatch, type SetStateAction } from "react";
 import { Counter } from "../ui/Counter";
@@ -14,6 +17,24 @@ interface FiltersProps {
   };
   setFilters: Dispatch<SetStateAction<FiltersProps["filters"]>>;
   visibleWedgies: number;
+}
+
+/** Short on phones, where three filters share a row; full from sm up. */
+function FilterValue({
+  kind,
+  value,
+  full,
+}: {
+  kind: "season" | "type" | "when";
+  value: string;
+  full: string;
+}) {
+  return (
+    <>
+      <span className="sm:hidden">{shortFilterLabel(kind, value)}</span>
+      <span className="hidden sm:inline">{full}</span>
+    </>
+  );
 }
 
 export function WedgieFilters({
@@ -71,15 +92,15 @@ export function WedgieFilters({
             </svg>
           </span>
 
-          <div className="grid w-full grid-cols-2 flex-row gap-2 sm:flex">
+          <div className="grid w-full grid-cols-3 flex-row gap-2 sm:flex">
             {/* Season Filter */}
             <div className="bg-yellow-darker/20 relative rounded-md p-2">
               <button
-                className={`text-yellow flex items-center gap-2 rounded-md px-0 py-0 text-sm font-bold uppercase`}
+                className={`text-yellow flex items-center gap-1 rounded-md px-0 py-0 text-xs font-bold uppercase sm:gap-2 sm:text-sm`}
               >
                 <span>Season</span>
                 <span
-                  className={`border-yellow relative flex size-5 items-center justify-center rounded-full border leading-none`}
+                  className={`border-yellow relative flex size-4 items-center justify-center rounded-full border text-xs leading-none sm:size-5 sm:text-base`}
                 >
                   <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
                     +
@@ -87,12 +108,16 @@ export function WedgieFilters({
                 </span>
               </button>
               {filters.season ? (
-                <span className="bg-yellow text-darkpurple mt-2 inline-block rounded-md px-2 py-1 font-bold">
-                  {filters.season}
+                <span className="bg-yellow text-darkpurple mt-2 inline-block max-w-full rounded-md px-1.5 py-1 text-sm font-bold whitespace-nowrap sm:px-2 sm:text-base">
+                  <FilterValue
+                    kind="season"
+                    value={filters.season}
+                    full={filters.season}
+                  />
                 </span>
               ) : (
-                <span className="bg-yellow text-darkpurple mt-2 inline-block rounded-md px-2 py-1 font-bold">
-                  All Seasons
+                <span className="bg-yellow text-darkpurple mt-2 inline-block max-w-full rounded-md px-1.5 py-1 text-sm font-bold whitespace-nowrap sm:px-2 sm:text-base">
+                  <FilterValue kind="season" value="" full="All Seasons" />
                 </span>
               )}
               {/* Keep existing select but make it absolute/hidden */}
@@ -119,13 +144,13 @@ export function WedgieFilters({
               }`}
             >
               <button
-                className={`flex items-center gap-2 rounded-md px-0 py-0 text-sm font-bold uppercase ${
+                className={`flex items-center gap-1 rounded-md px-0 py-0 text-xs font-bold uppercase sm:gap-2 sm:text-sm ${
                   filters.type ? "text-yellow" : "text-pink"
                 }`}
               >
                 <span>Type</span>
                 <span
-                  className={`relative flex size-5 items-center justify-center rounded-full border leading-none ${
+                  className={`relative flex size-4 items-center justify-center rounded-full border text-xs leading-none sm:size-5 sm:text-base ${
                     filters.type ? "border-yellow" : "border-pink"
                   }`}
                 >
@@ -135,12 +160,16 @@ export function WedgieFilters({
                 </span>
               </button>
               {filters.type ? (
-                <span className="bg-yellow text-darkpurple mt-2 inline-block rounded-md px-2 py-1 font-bold whitespace-nowrap">
-                  {filters.type}
+                <span className="bg-yellow text-darkpurple mt-2 inline-block max-w-full rounded-md px-1.5 py-1 text-sm font-bold whitespace-nowrap sm:px-2 sm:text-base">
+                  <FilterValue
+                    kind="type"
+                    value={filters.type}
+                    full={filters.type}
+                  />
                 </span>
               ) : (
-                <span className="mt-2 inline-block rounded-md px-2 py-1 font-bold whitespace-nowrap text-white/20">
-                  All Types
+                <span className="mt-2 inline-block max-w-full truncate rounded-md px-1.5 py-1 text-sm font-bold text-white/20 sm:px-2 sm:text-base">
+                  <FilterValue kind="type" value="" full="All Types" />
                 </span>
               )}
               <select
@@ -166,13 +195,13 @@ export function WedgieFilters({
               }`}
             >
               <button
-                className={`flex items-center gap-2 rounded-md px-0 py-0 text-sm font-bold uppercase ${
+                className={`flex items-center gap-1 rounded-md px-0 py-0 text-xs font-bold uppercase sm:gap-2 sm:text-sm ${
                   filters.moment ? "text-yellow" : "text-pink"
                 }`}
               >
                 <span>When</span>
                 <span
-                  className={`relative flex size-5 items-center justify-center rounded-full border leading-none ${
+                  className={`relative flex size-4 items-center justify-center rounded-full border text-xs leading-none sm:size-5 sm:text-base ${
                     filters.moment ? "border-yellow" : "border-pink"
                   }`}
                 >
@@ -182,12 +211,16 @@ export function WedgieFilters({
                 </span>
               </button>
               {filters.moment ? (
-                <span className="bg-yellow text-darkpurple mt-2 inline-block rounded-md px-2 py-1 font-bold whitespace-nowrap">
-                  {filters.moment}
+                <span className="bg-yellow text-darkpurple mt-2 inline-block max-w-full rounded-md px-1.5 py-1 text-sm font-bold whitespace-nowrap sm:px-2 sm:text-base">
+                  <FilterValue
+                    kind="when"
+                    value={filters.moment}
+                    full={filters.moment}
+                  />
                 </span>
               ) : (
-                <span className="mt-2 inline-block rounded-md px-2 py-1 font-bold whitespace-nowrap text-white/20">
-                  Anytime
+                <span className="mt-2 inline-block max-w-full truncate rounded-md px-1.5 py-1 text-sm font-bold text-white/20 sm:px-2 sm:text-base">
+                  <FilterValue kind="when" value="" full="Anytime" />
                 </span>
               )}
               <select
@@ -208,7 +241,7 @@ export function WedgieFilters({
 
             {/* Combined Team/Player Filter */}
             <div
-              className={`relative col-span-2 rounded-md p-2 md:col-span-1 ${
+              className={`relative col-span-3 rounded-md p-2 sm:col-span-1 ${
                 isActive || filters.playerOrTeam
                   ? "bg-yellow-darker/20"
                   : "bg-pink-darker/20"
