@@ -10,7 +10,7 @@ days without wedgies and the all-time total. It mirrors the website home page.
   one per TRMNL view size.
 - `src/shared.liquid`: `markup_shared` on TRMNL. Inlines the black wordmark from
   `apps/web/public/github-logo-light.svg` as `wt_logo` for the title bar.
-- `src/transform.js`: flattens the five API responses into the variables the markup uses.
+- `src/transform.js`: flattens the three API responses into the variables the markup uses.
 - `src/settings.yml`: polling URLs, refresh interval and the recipe's author bio.
 - `previews/`: renders at TRMNL X (`v2`) resolution; `previews/og/` holds TRMNL OG (800x480) renders.
 
@@ -19,19 +19,19 @@ both (`og_plus` and `v2`) after any change.
 
 ## Data
 
-The plugin polls five public, input-free tRPC queries on www.wedgietracker.com with no key:
-`wedgie.getStats`, `wedgie.getTopStandings`, `admin.getGlobal`, `wedgie.getLatestWedgies` and
-`wedgie.getTotalWedgies`. TRMNL passes their responses to the transform as `IDX_0` to `IDX_4`,
-in the order of the polling URLs. Vercel's CDN serves these queries (see
-`apps/web/src/server/api/cdn-cache.ts`), so polling devices don't invoke the function.
+The plugin polls three public, input-free tRPC queries on www.wedgietracker.com with no key:
+`wedgie.getStats`, `wedgie.getLatestWedgies` and `wedgie.getTotalWedgies`. TRMNL passes their
+responses to the transform as `IDX_0` to `IDX_2`, in the order of the polling URLs. Vercel's CDN
+serves these queries (see `apps/web/src/server/api/cdn-cache.ts`), so polling devices don't invoke
+the function.
 
 The plugin depends on the response shape of those procedures in
-`apps/web/src/server/api/routers/{wedgie,admin}.ts`. `pnpm test` runs the transform against real
+`apps/web/src/server/api/routers/wedgie.ts`. `pnpm test` runs the transform against real
 responses saved in `test/fixtures/`. If you change those procedures, refresh the fixtures with
 the new shape and the test will tell you whether the plugin still gets what it needs:
 
 ```sh
-for e in wedgie.getStats wedgie.getTopStandings admin.getGlobal wedgie.getLatestWedgies wedgie.getTotalWedgies; do
+for e in wedgie.getStats wedgie.getLatestWedgies wedgie.getTotalWedgies; do
   curl -s "https://www.wedgietracker.com/api/trpc/$e" > "test/fixtures/$e.json"
 done
 ```
