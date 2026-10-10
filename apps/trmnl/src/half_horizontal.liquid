@@ -27,7 +27,7 @@
         {% if show_pace %}<span class="value value--small lg:value--xlarge value--tnums text--bold">{{ pace }}</span><span class="title lg:title--xlarge text--bold">PACE</span>{% else %}<span class="value value--small lg:value--xlarge value--tnums text--bold">{{ record }}</span><span class="title title--small lg:title--base text--bold">RECORD TO BEAT</span>{% endif %}
       </div>
       <div class="flex flex--col flex--left gap--none">
-        <span class="value value--xsmall lg:value--large value--tnums text--bold">{{ days_since | default: 0 }} <span class="title title--small lg:title--large text--bold">DAYS</span></span>
+        <span class="value value--xsmall lg:value--large value--tnums text--bold">{{ days_since | default: "-" }} <span class="title title--small lg:title--large text--bold">DAYS</span></span>
         <span class="title title--small lg:title--base text--bold">WITHOUT WEDGIES</span>
       </div>
     </div>
