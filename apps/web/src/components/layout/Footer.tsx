@@ -13,7 +13,7 @@ export function Footer() {
       <div className="flex flex-col-reverse items-center justify-between gap-2 sm:flex-row md:flex-row">
         <div className="block items-center gap-8 text-center sm:text-left lg:flex lg:flex-row">
           {/* social networks */}
-          <div className="mb-1 flex flex-row items-center gap-2 lg:mb-0">
+          <div className="mb-1 flex flex-row items-center justify-center gap-2 sm:justify-start lg:mb-0">
             {socialLinks.map((social) => (
               <a
                 key={social.href}
