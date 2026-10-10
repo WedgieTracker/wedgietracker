@@ -16,7 +16,7 @@
         <div class="flex flex--col flex--center-x gap--none w--16 lg:w--20 py--0 lg:py--2 no-shrink bg--black rounded--small"><span class="title lg:title--large text--bold text--white"><span class="label label--xsmall lg:label--small text--white">#</span>{{ w.number }}</span><span class="label label--xsmall lg:label--small text--white">{{ w.date }}</span></div>
         <div class="flex flex--col flex--left gap--none">
           <span class="title title--small lg:title--base" data-clamp="1">{{ w.player }}</span>
-          <span class="label label--small lg:label--base">{{ w.team }} - {{ w.against }}</span>
+          <span class="label label--small lg:label--base" data-clamp="1">{{ w.team }}{% if w.against != "" %} - {{ w.against }}{% endif %}</span>
           <span class="label label--small label--gray hidden lg:visible">{{ w.type }}</span>
         </div>
       </div>
@@ -35,6 +35,7 @@
 </div>
 
 <div class="title_bar flex flex--row flex--center-x">
-  <img class="image dark:hidden" src="data:image/svg+xml;base64,{{ wt_logo | base64_encode }}" alt="WedgieTracker">
-  <img class="image hidden dark:block" src="data:image/svg+xml;base64,{{ wt_logo | replace: '#000', '#fff' | base64_encode }}" alt="WedgieTracker">
+  <img class="image image--adaptive hidden lg:block" src="data:image/svg+xml;base64,{{ wt_logo | base64_encode }}" alt="WedgieTracker">
+  <img class="image lg:hidden dark:hidden" src="data:image/svg+xml;base64,{{ wt_logo | base64_encode }}" alt="WedgieTracker">
+  <img class="image hidden dark:block dark:lg:hidden" src="data:image/svg+xml;base64,{{ wt_logo | replace: '#000', '#fff' | base64_encode }}" alt="WedgieTracker">
 </div>

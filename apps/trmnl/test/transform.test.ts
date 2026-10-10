@@ -70,6 +70,18 @@ describe("transform", () => {
     expect(transform(input).record_label).toBe("NEW ALL-TIME RECORD");
   });
 
+  it("leaves out an unknown opponent, as the website does", () => {
+    const input = fixtureInput();
+    const latest = (
+      input.IDX_1 as { result: { data: { json: Record<string, string>[] } } }
+    ).result.data.json;
+    latest[0]!.teamAgainstName = "Unknown Away Team";
+
+    const out = transform(input).latest as Record<string, string>[];
+    expect(out[0]!.against).toBe("");
+    expect(out[1]!.against).not.toBe("");
+  });
+
   it("returns the input untouched when the stats call failed", () => {
     const input = { IDX_0: { error: "boom" } };
     expect(transform(input)).toBe(input);
