@@ -73,6 +73,14 @@ describe("reportRouter.create", () => {
     expect(message).toContain("/admin/wedgies/7");
   });
 
+  it("leaves Telegram alone when the reports API is read instead", async () => {
+    vi.stubEnv("REPORTS_API_KEY", "k");
+    await anonCaller().create({ wedgieId: 7, field: "player" });
+    vi.unstubAllEnvs();
+    expect(insertValues).toHaveBeenCalled();
+    expect(sendTelegramMessage).not.toHaveBeenCalled();
+  });
+
   it("stores a null note when it is blank", async () => {
     await anonCaller().create({ wedgieId: 7, field: "video", note: "   " });
     expect(insertValues).toHaveBeenCalledWith(
