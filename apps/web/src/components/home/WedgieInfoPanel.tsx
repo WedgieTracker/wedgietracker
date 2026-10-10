@@ -122,13 +122,13 @@ export function WedgieInfoPanel({ wedgie }: WedgieInfoPanelProps) {
             className="hover:border-yellow block rounded-xl border border-white/15 bg-white/5 p-3 transition-colors duration-200"
           >
             <p className="text-[.7rem] font-bold tracking-wider text-white/60 uppercase">
-              @NoDunksInc ·{" "}
+              No Dunks ·{" "}
               {new Date(wedgie.noDunksTweet.postedAt).toLocaleDateString(
                 "en-US",
                 { month: "short", day: "numeric", year: "numeric" },
               )}
             </p>
-            <p className="mt-1 line-clamp-4 text-sm text-white/90">
+            <p className="mt-1 line-clamp-4 text-sm whitespace-pre-line text-white/90">
               {wedgie.noDunksTweet.text}
             </p>
             <p className="text-yellow mt-2 text-xs font-bold">View on X →</p>
