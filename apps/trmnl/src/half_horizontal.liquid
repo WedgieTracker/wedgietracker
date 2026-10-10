@@ -1,0 +1,39 @@
+<div class="layout layout--stretch">
+  <div class="grid gap--large h--full">
+    <div class="col--span-4 relative h--full rounded--base outline">
+      <img class="absolute inset--0 w--full h--full rounded--base image-dither" src="data:image/svg+xml;base64,{{ wave_svg | base64_encode }}">
+      <div class="relative z--2 flex flex--col flex--center-x flex--center-y h--full w--full px--2 pt--2 pb--6">
+        <span class="label label--small label--filled">{{ record_label }}</span>
+        <span class="value value--xlarge lg:value--xxlarge value--tnums text--bold" data-fit-value="true" style="margin-bottom:-0.2em">{{ total }}</span>
+        <span class="title title--large text--bold">WEDGIES</span>
+        {% if live %}<span class="label label--small label--filled">Games live now</span>{% endif %}
+      </div>
+    </div>
+    <div class="col--span-5 flex flex--col flex--left flex--center-y gap--small">
+      <span class="title title--small">Latest wedgies</span>
+      {% for w in latest limit: 3 %}
+      <div class="flex flex--row flex--center-y gap">
+        <div class="flex flex--col flex--center-x gap--none w--20 py--2 no-shrink bg--black rounded--small"><span class="title title--large text--bold text--white"><span class="label label--small text--white">#</span>{{ w.number }}</span><span class="label label--small text--white">{{ w.date }}</span></div>
+        <div class="flex flex--col flex--left gap--none">
+          <span class="title" data-clamp="1">{{ w.player }}</span>
+          <span class="label">{{ w.team }} - {{ w.against }}</span>
+          <span class="label label--small label--gray">{{ w.type }}</span>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="col--span-3 flex flex--col flex--left flex--center-y gap--xlarge">
+      <div class="flex flex--col flex--left gap--none">
+        {% if show_pace %}<span class="value value--large lg:value--xlarge value--tnums text--bold" style="margin-bottom:-0.15em">{{ pace }}</span><span class="title title--xlarge text--bold">PACE</span>{% else %}<span class="value value--large lg:value--xlarge value--tnums text--bold" style="margin-bottom:-0.15em">{{ record }}</span><span class="title text--bold">RECORD TO BEAT</span>{% endif %}
+      </div>
+      <div class="flex flex--col flex--left gap--none">
+        <span class="value value--medium lg:value--large value--tnums text--bold" style="margin-bottom:-0.15em">{{ days_since | default: 0 }} <span class="title title--large text--bold">DAYS</span></span>
+        <span class="title text--bold">WITHOUT WEDGIES</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="title_bar flex flex--row flex--center-x">
+  <img class="image" src="data:image/svg+xml;base64,{{ wt_logo | base64_encode }}" alt="WedgieTracker">
+</div>

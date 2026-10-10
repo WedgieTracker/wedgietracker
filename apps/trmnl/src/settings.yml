@@ -1,0 +1,16 @@
+strategy: polling
+polling_verb: get
+polling_url: |-
+  https://www.wedgietracker.com/api/trpc/wedgie.getStats
+  https://www.wedgietracker.com/api/trpc/wedgie.getTopStandings
+  https://www.wedgietracker.com/api/trpc/admin.getGlobal
+  https://www.wedgietracker.com/api/trpc/wedgie.getLatestWedgies
+  https://www.wedgietracker.com/api/trpc/wedgie.getTotalWedgies
+refresh_interval: 15
+custom_fields:
+  - keyname: about
+    name: About This Plugin
+    field_type: author_bio
+    category: sports,entertainment
+    description: WedgieTracker counts every time an NBA basketball gets stuck between the rim and the backboard. This plugin brings the count to your TRMNL with the current season total against the all-time record, the projected pace for the season, the days since the last wedgie, and the three latest wedgies with the player, the teams and the play. The data comes straight from wedgietracker.com and refreshes on its own, so there is nothing to set up. Install it and wait for the next ball to get stuck.
+    learn_more_url: https://www.wedgietracker.com

@@ -1,0 +1,17 @@
+{
+  "result": {
+    "data": {
+      "json": {
+        "totalWedgies": 0,
+        "currentPace": 53,
+        "simplePace": 53,
+        "mathPace": 53,
+        "gamesPlayed": 0,
+        "lastWedgie": "2026-06-08T20:30:00.000Z",
+        "liveGames": false,
+        "currentSeasonWedgies": 0,
+        "previousRecord": 74
+      }
+    }
+  }
+}
