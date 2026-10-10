@@ -25,6 +25,7 @@ import {
 import {
   buildTeamStandings,
   maybeUpdateGlobalWedgieCount,
+  syncWedgieTypes,
 } from "~/server/db-helpers";
 import { type VideoUrls } from "@wedgietracker/core/types/wedgie";
 
@@ -52,32 +53,6 @@ const wedgieInput = z.object({
   gameName: z.string().optional(),
   shoutouts: z.array(z.string().regex(/^[A-Za-z0-9_]{1,15}$/)).default([]),
 });
-
-// Helper: connect or create types for a wedgie
-async function syncWedgieTypes(
-  trx: typeof db,
-  wedgieId: number,
-  typeNames: string[],
-) {
-  // Clear existing type associations
-  await trx.delete(wedgieToType).where(eq(wedgieToType.wedgieId, wedgieId));
-
-  for (const name of typeNames) {
-    // Find or create the type
-    let existing = await trx.query.type.findFirst({
-      where: eq(typeTable.name, name),
-    });
-    if (!existing) {
-      const [created] = await trx
-        .insert(typeTable)
-        .values({ name })
-        .returning();
-      existing = created;
-    }
-    // Create the join row
-    await trx.insert(wedgieToType).values({ wedgieId, typeId: existing!.id });
-  }
-}
 
 // Helper: get wedgies with their types via the join table
 async function getWedgiesWithTypes(wedgieRows: { id: number }[]) {

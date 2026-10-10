@@ -1,3 +1,4 @@
+import type * as DbHelpers from "~/server/db-helpers";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { TRPCError } from "@trpc/server";
 
@@ -26,9 +27,10 @@ vi.mock("~/server/cache", () => ({
 
 const buildTeamStandings = vi.fn(() => []);
 const maybeUpdateGlobalWedgieCount = vi.fn();
-vi.mock("~/server/db-helpers", () => ({
+vi.mock("~/server/db-helpers", async (importOriginal) => ({
   buildTeamStandings,
   maybeUpdateGlobalWedgieCount,
+  syncWedgieTypes: (await importOriginal<typeof DbHelpers>()).syncWedgieTypes,
 }));
 
 vi.mock("@wedgietracker/core/schema", () => ({
