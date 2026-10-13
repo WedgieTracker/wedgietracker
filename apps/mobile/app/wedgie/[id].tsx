@@ -22,7 +22,10 @@ import { track } from "@/lib/observability";
 import { colors, fonts, radius, space } from "@/lib/theme";
 import { GEMS_EMOJI, isGemsDate } from "@wedgietracker/core/utils/formatDate";
 import { gameTimeline } from "@wedgietracker/core/utils/gameMoment";
-import { tweetUrl } from "@wedgietracker/core/utils/twitterHandle";
+import {
+  tweetUrl,
+  twitterProfileUrl,
+} from "@wedgietracker/core/utils/twitterHandle";
 import type { ActiveVideo } from "@wedgietracker/core/utils/wedgieVideo";
 
 type Wedgie = RouterOutputs["wedgie"]["getAll"][number];
@@ -220,6 +223,39 @@ function WedgieDetail({
               <Text style={styles.types}>
                 {wedgie.types.map((t) => t.name).join(", ")}
               </Text>
+            </Fact>
+          ) : null}
+          {wedgie.shoutouts.length > 0 ? (
+            <Fact label="Shoutout">
+              {/* The X accounts that tagged the wedgie, as pills like the site's. */}
+              <View style={styles.shoutouts}>
+                {wedgie.shoutouts.map((handle) => (
+                  <Pressable
+                    key={handle}
+                    accessibilityRole="link"
+                    accessibilityLabel={`@${handle} on X`}
+                    hitSlop={4}
+                    style={({ pressed }) => [
+                      styles.shoutout,
+                      pressed && styles.shoutoutPressed,
+                    ]}
+                    onPress={() =>
+                      void Linking.openURL(twitterProfileUrl(handle))
+                    }
+                  >
+                    {({ pressed }) => (
+                      <Text
+                        style={[
+                          styles.shoutoutText,
+                          pressed && styles.shoutoutTextPressed,
+                        ]}
+                      >
+                        @{handle}
+                      </Text>
+                    )}
+                  </Pressable>
+                ))}
+              </View>
             </Fact>
           ) : null}
         </View>
@@ -451,6 +487,22 @@ const styles = StyleSheet.create({
   teams: { fontFamily: fonts.bold, color: colors.white, fontSize: 22 },
   teamName: { color: colors.pink },
   types: { fontFamily: fonts.bold, color: colors.white, fontSize: 16 },
+  // The site's pills: white/20 border on a white/5 fill, yellow when pressed.
+  shoutouts: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
+  shoutout: {
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.2)",
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    borderRadius: radius.pill,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+  },
+  shoutoutPressed: {
+    backgroundColor: colors.yellow,
+    borderColor: colors.yellow,
+  },
+  shoutoutText: { fontFamily: fonts.bold, color: colors.white, fontSize: 13 },
+  shoutoutTextPressed: { color: colors.darkpurple },
   // The facts' label column (70) plus the gap between label and value.
   valueColumn: { paddingLeft: 70 + space.md, gap: space.md },
   noDunks: { alignSelf: "flex-start" },
