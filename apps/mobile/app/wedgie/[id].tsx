@@ -37,6 +37,9 @@ const SHEET_RADIUS = 24;
 const BADGE_NUMBER = 32;
 const BADGE_HASH = BADGE_NUMBER * 0.5;
 
+/** Wide enough for the longest label, SHOUTOUT, on one line. */
+const LABEL_WIDTH = 84;
+
 /**
  * Port of apps/web/src/components/home/WedgieModal.tsx and WedgieInfoPanel.
  */
@@ -307,7 +310,7 @@ function Fact({
 }) {
   return (
     <View style={styles.fact}>
-      <Text style={styles.factLabel} allowFontScaling={false}>
+      <Text style={styles.factLabel} numberOfLines={1} allowFontScaling={false}>
         {label.toUpperCase()}
       </Text>
       <View style={styles.factValue}>{children}</View>
@@ -475,7 +478,7 @@ const styles = StyleSheet.create({
   facts: { gap: space.md },
   fact: { flexDirection: "row", alignItems: "baseline", gap: space.md },
   factLabel: {
-    width: 70,
+    width: LABEL_WIDTH,
     textAlign: "right",
     fontFamily: fonts.bold,
     color: colors.white60,
@@ -503,8 +506,8 @@ const styles = StyleSheet.create({
   },
   shoutoutText: { fontFamily: fonts.bold, color: colors.white, fontSize: 13 },
   shoutoutTextPressed: { color: colors.darkpurple },
-  // The facts' label column (70) plus the gap between label and value.
-  valueColumn: { paddingLeft: 70 + space.md, gap: space.md },
+  // The facts' label column plus the gap between label and value.
+  valueColumn: { paddingLeft: LABEL_WIDTH + space.md, gap: space.md },
   noDunks: { alignSelf: "flex-start" },
   noDunksLogo: { width: 32, height: 32, borderRadius: 6 },
 
