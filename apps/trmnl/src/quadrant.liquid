@@ -9,10 +9,10 @@
     </div>
   </div>
   <div class="hidden lg:grid grid--cols-2 w--full no-shrink">
-    <div class="flex flex--col gap--none">
+    <div class="flex flex--col gap--none text--center">
       {% if show_pace %}<span class="value value--small value--tnums text--bold">{{ pace }}</span><span class="title title--small text--bold">PACE</span>{% else %}<span class="value value--small value--tnums text--bold">{{ record }}</span><span class="title title--small text--bold">RECORD TO BEAT</span>{% endif %}
     </div>
-    <div class="flex flex--col gap--none">
+    <div class="flex flex--col gap--none text--center">
       <span class="value value--small value--tnums text--bold">{{ days_since | default: "-" }}</span>
       <span class="title title--small text--bold">DAYS WITHOUT WEDGIES</span>
     </div>
