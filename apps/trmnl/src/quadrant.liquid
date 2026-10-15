@@ -8,7 +8,7 @@
       {% if live %}<span class="label label--small label--filled">Games live now</span>{% endif %}
     </div>
   </div>
-  <div class="hidden lg:flex flex--row flex--center-x gap--xlarge no-shrink">
+  <div class="hidden lg:grid grid--cols-2 w--full no-shrink">
     <div class="flex flex--col gap--none">
       {% if show_pace %}<span class="value value--small value--tnums text--bold">{{ pace }}</span><span class="title title--small text--bold">PACE</span>{% else %}<span class="value value--small value--tnums text--bold">{{ record }}</span><span class="title title--small text--bold">RECORD TO BEAT</span>{% endif %}
     </div>
