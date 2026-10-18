@@ -3,7 +3,6 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 vi.mock("~/env", () => ({ env: { WEDGIETRACKER_API_KEY: "tracker-key" } }));
 vi.mock("~/server/cache", () => ({
   invalidateWedgieData: vi.fn(),
-  invalidateStoreData: vi.fn(),
 }));
 const syncWedgieTypes = vi.fn();
 const maybeUpdateGlobalWedgieCount = vi.fn();

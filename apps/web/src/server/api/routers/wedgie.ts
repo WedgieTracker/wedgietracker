@@ -18,11 +18,7 @@ import {
   season,
   game,
 } from "@wedgietracker/core/schema";
-import {
-  CACHE_TAGS,
-  invalidateWedgieData,
-  invalidateStoreData,
-} from "~/server/cache";
+import { CACHE_TAGS, invalidateWedgieData } from "~/server/cache";
 import {
   buildTeamStandings,
   maybeUpdateGlobalWedgieCount,
@@ -546,7 +542,6 @@ export const wedgieRouter = createTRPCRouter({
       await maybeUpdateGlobalWedgieCount(ctx.db, input.seasonName);
 
       invalidateWedgieData();
-      invalidateStoreData();
 
       return created;
     }),
@@ -627,7 +622,6 @@ export const wedgieRouter = createTRPCRouter({
         .where(eq(wedgie.id, Number(input.id)))
         .returning();
       invalidateWedgieData();
-      invalidateStoreData();
       return result;
     }),
 

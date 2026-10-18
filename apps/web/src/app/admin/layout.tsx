@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { connection } from "next/server";
 import { auth } from "~/server/auth";
-import { isAllowedEmail } from "~/server/auth/config";
+import { isAllowedEmail } from "~/server/auth/allowlist";
 import { HydrateClient } from "~/trpc/server";
 import { SignIn, SignOut } from "~/components/admin/auth";
 import { SidebarProvider } from "~/components/ui/sidebar";

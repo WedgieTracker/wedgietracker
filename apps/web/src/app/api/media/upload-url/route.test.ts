@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 
 const auth = vi.fn();
 vi.mock("~/server/auth", () => ({ auth }));
-vi.mock("~/server/auth/config", () => ({
+vi.mock("~/server/auth/allowlist", () => ({
   isAllowedEmail: (email?: string | null) => email === "admin@example.com",
 }));
 const presignUpload = vi.fn((key: string, _contentType: string) =>
