@@ -24,7 +24,6 @@ import {
   maybeUpdateGlobalWedgieCount,
   syncWedgieTypes,
 } from "~/server/db-helpers";
-import { type VideoUrls } from "@wedgietracker/core/types/wedgie";
 
 const wedgieInput = z.object({
   playerName: z.string(),
@@ -40,9 +39,8 @@ const wedgieInput = z.object({
     })
     .nullable(),
   videoUrl: z.object({
-    selfHosted: z.string().optional(),
     youtube: z.string().optional(),
-    cloudinary: z.string().optional(),
+    hosted: z.string().optional(),
     youtubeNoDunks: z.string().optional(),
     instagram: z.string().optional(),
   }),
@@ -432,39 +430,7 @@ async function getCachedByType(typeName: string) {
   return db.select().from(wedgie).where(inArray(wedgie.id, wedgieIds));
 }
 
-async function getCachedSelfHostedVideos() {
-  "use cache";
-  cacheTag(CACHE_TAGS.WEDGIE_DATA);
-  cacheLife({ revalidate: 3600 });
-
-  const wedgies = await db
-    .select({
-      id: wedgie.id,
-      wedgieDate: wedgie.wedgieDate,
-      videoUrl: wedgie.videoUrl,
-      playerName: wedgie.playerName,
-      teamName: wedgie.teamName,
-      teamAgainstName: wedgie.teamAgainstName,
-      number: wedgie.number,
-      seasonName: wedgie.seasonName,
-    })
-    .from(wedgie)
-    .where(
-      and(
-        sql`json_extract(${wedgie.videoUrl}, '$.selfHosted') IS NOT NULL`,
-        ne(wedgie.seasonName, "GEMS"),
-      ),
-    );
-
-  return wedgies
-    .filter((w) => !(w.videoUrl as VideoUrls)?.youtube)
-    .sort(
-      (a, b) =>
-        new Date(b.wedgieDate).getTime() - new Date(a.wedgieDate).getTime(),
-    );
-}
-
-async function getCachedCloudinaryWedgies() {
+async function getCachedHostedWedgies() {
   "use cache";
   cacheTag(CACHE_TAGS.WEDGIE_DATA);
   cacheLife({ revalidate: 3600 });
@@ -480,7 +446,9 @@ async function getCachedCloudinaryWedgies() {
       videoUrl: wedgie.videoUrl,
     })
     .from(wedgie)
-    .where(sql`json_extract(${wedgie.videoUrl}, '$.cloudinary') IS NOT NULL`)
+    .where(
+      sql`nullif(json_extract(${wedgie.videoUrl}, '$.hosted'), '') IS NOT NULL`,
+    )
     .orderBy(desc(wedgie.wedgieDate));
 }
 
@@ -546,15 +514,11 @@ export const wedgieRouter = createTRPCRouter({
       return created;
     }),
 
-  getSelfHostedVideos: publicProcedure.query(() => getCachedSelfHostedVideos()),
-
   getLatestWedgies: publicProcedure.query(() => getCachedLatestWedgies()),
 
   getStats: publicProcedure.query(() => getCachedStats()),
 
-  getCloudinaryWedgies: publicProcedure.query(() =>
-    getCachedCloudinaryWedgies(),
-  ),
+  getHostedWedgies: publicProcedure.query(() => getCachedHostedWedgies()),
 
   getTopStandings: publicProcedure.query(() => getCachedTopStandings()),
 

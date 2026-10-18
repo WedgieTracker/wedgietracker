@@ -4,14 +4,11 @@ import { useState, useEffect } from "react";
 
 import { Preview } from "../admin/Preview";
 
-import type { WedgieWithTypes } from "@wedgietracker/core/types/wedgie";
-
-interface VideoUrl {
-  youtube?: string;
-  cloudinary?: string;
-  youtubeNoDunks?: string;
-  instagram?: string;
-}
+import type {
+  VideoUrls,
+  WedgieWithTypes,
+} from "@wedgietracker/core/types/wedgie";
+import { hostedVideo } from "@wedgietracker/core/utils/wedgieVideo";
 
 interface UploadResult {
   success: boolean;
@@ -50,14 +47,14 @@ export function YouTubeUploadForm({ wedgie }: YouTubeUploadFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!(wedgie.videoUrl as VideoUrl)?.cloudinary) return;
+    if (!hostedVideo(wedgie.videoUrl as VideoUrls | null)) return;
 
     setUploading(true);
     const formData = new FormData();
 
     formData.append(
       "videoUrl",
-      (wedgie.videoUrl as VideoUrl)?.cloudinary ?? "",
+      hostedVideo(wedgie.videoUrl as VideoUrls | null) ?? "",
     );
     formData.append("title", title);
     formData.append("description", description);
@@ -107,10 +104,10 @@ export function YouTubeUploadForm({ wedgie }: YouTubeUploadFormProps) {
             />
           </div>
 
-          {(wedgie.videoUrl as VideoUrl)?.cloudinary && (
+          {hostedVideo(wedgie.videoUrl as VideoUrls | null) && (
             <div className="mt-4">
               <video
-                src={(wedgie.videoUrl as VideoUrl)?.cloudinary}
+                src={hostedVideo(wedgie.videoUrl as VideoUrls | null)}
                 controls
                 className="max-h-[200px] rounded"
               />
@@ -149,7 +146,9 @@ export function YouTubeUploadForm({ wedgie }: YouTubeUploadFormProps) {
 
         <button
           type="submit"
-          disabled={uploading || !(wedgie.videoUrl as VideoUrl)?.cloudinary}
+          disabled={
+            uploading || !hostedVideo(wedgie.videoUrl as VideoUrls | null)
+          }
           className="w-full rounded bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700 disabled:opacity-50"
         >
           {uploading ? "Uploading..." : "Upload Video"}

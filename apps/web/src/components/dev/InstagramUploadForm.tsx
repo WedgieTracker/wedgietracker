@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { Preview } from "../admin/Preview";
-import type { WedgieWithTypes } from "@wedgietracker/core/types/wedgie";
+import type {
+  VideoUrls,
+  WedgieWithTypes,
+} from "@wedgietracker/core/types/wedgie";
+import { hostedVideo } from "@wedgietracker/core/utils/wedgieVideo";
 import { usePathname, useSearchParams } from "next/navigation";
-
-type VideoUrl = {
-  cloudinary: string;
-};
 
 type UploadResult = {
   success: boolean;
@@ -66,12 +66,12 @@ export function InstagramUploadForm({ wedgie }: InstagramUploadFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const videoUrl = wedgie.videoUrl as VideoUrl;
-    if (!videoUrl?.cloudinary) return;
+    const videoUrl = hostedVideo(wedgie.videoUrl as VideoUrls | null);
+    if (!videoUrl) return;
 
     setUploading(true);
     const formData = new FormData();
-    formData.append("videoUrl", videoUrl.cloudinary);
+    formData.append("videoUrl", videoUrl);
     formData.append("description", description);
     formData.append("number", wedgie.number?.toString() ?? "");
     formData.append("season", wedgie.seasonName?.slice(-5) ?? "");
@@ -130,12 +130,12 @@ export function InstagramUploadForm({ wedgie }: InstagramUploadFormProps) {
   };
 
   const handleGeneratePreview = async () => {
-    const videoUrl = wedgie.videoUrl as VideoUrl;
-    if (!videoUrl?.cloudinary) return;
+    const videoUrl = hostedVideo(wedgie.videoUrl as VideoUrls | null);
+    if (!videoUrl) return;
 
     setUploading(true);
     const formData = new FormData();
-    formData.append("videoUrl", videoUrl.cloudinary);
+    formData.append("videoUrl", videoUrl);
     formData.append("description", description);
     formData.append("number", wedgie.number?.toString() ?? "");
     formData.append("season", wedgie.seasonName?.slice(-5) ?? "");
@@ -235,10 +235,10 @@ export function InstagramUploadForm({ wedgie }: InstagramUploadFormProps) {
             <form className="space-y-4">
               {showPreview && (
                 <>
-                  {(wedgie.videoUrl as VideoUrl)?.cloudinary && (
+                  {hostedVideo(wedgie.videoUrl as VideoUrls | null) && (
                     <div className="mt-4">
                       <video
-                        src={(wedgie.videoUrl as VideoUrl)?.cloudinary}
+                        src={hostedVideo(wedgie.videoUrl as VideoUrls | null)}
                         controls
                         className="max-h-[200px] rounded"
                       />

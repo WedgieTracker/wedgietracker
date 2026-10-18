@@ -4,11 +4,11 @@ import { useState, type ReactNode } from "react";
 import { Button } from "~/components/ui/button";
 import { toast } from "~/hooks/use-toast";
 import { api } from "~/trpc/react";
-import type { WedgieWithTypes } from "@wedgietracker/core/types/wedgie";
-
-interface VideoUrl {
-  cloudinary: string;
-}
+import type {
+  VideoUrls,
+  WedgieWithTypes,
+} from "@wedgietracker/core/types/wedgie";
+import { hostedVideo } from "@wedgietracker/core/utils/wedgieVideo";
 
 interface SocialPostFormProps {
   wedgie: WedgieWithTypes;
@@ -47,10 +47,7 @@ export function SocialPostForm({
       formData.append("customMessage", customMessage);
       formData.append("pace", pace?.currentPace.toString() ?? "");
 
-      const videoUrl =
-        typeof wedgie.videoUrl === "object" && wedgie.videoUrl
-          ? (wedgie.videoUrl as unknown as VideoUrl).cloudinary
-          : null;
+      const videoUrl = hostedVideo(wedgie.videoUrl as VideoUrls | null);
       if (videoUrl) formData.append("videoUrl", videoUrl);
       formData.append("number", wedgie.number.toString() ?? "");
 
@@ -96,18 +93,15 @@ export function SocialPostForm({
       </div>
 
       <div className="mt-4 space-y-4">
-        {showPreview &&
-          typeof wedgie.videoUrl === "object" &&
-          wedgie.videoUrl &&
-          "cloudinary" in wedgie.videoUrl && (
-            <div className="mt-4">
-              <video
-                src={wedgie.videoUrl.cloudinary as string}
-                controls
-                className="max-h-[200px] w-full rounded"
-              />
-            </div>
-          )}
+        {showPreview && hostedVideo(wedgie.videoUrl as VideoUrls | null) && (
+          <div className="mt-4">
+            <video
+              src={hostedVideo(wedgie.videoUrl as VideoUrls | null)}
+              controls
+              className="max-h-[200px] w-full rounded"
+            />
+          </div>
+        )}
 
         <div>
           <label

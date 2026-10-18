@@ -1,13 +1,19 @@
 import type { VideoUrls } from "@wedgietracker/core/types/wedgie";
 
-export type ActiveVideo =
-  "youtube" | "cloudinary" | "youtubeNoDunks" | "instagram";
+export type ActiveVideo = "youtube" | "hosted" | "youtubeNoDunks" | "instagram";
+
+/** Our own copy of the clip, if there is one. */
+export function hostedVideo(
+  videoUrl: VideoUrls | null | undefined,
+): string | undefined {
+  return videoUrl?.hosted || undefined;
+}
 
 export function pickInitialVideo(
   videoUrl: VideoUrls | null,
 ): ActiveVideo | null {
   if (videoUrl?.youtube) return "youtube";
-  if (videoUrl?.cloudinary) return "cloudinary";
+  if (hostedVideo(videoUrl)) return "hosted";
   if (videoUrl?.youtubeNoDunks) return "youtubeNoDunks";
   if (videoUrl?.instagram) return "instagram";
   return null;
@@ -40,8 +46,8 @@ export function getVideoSrc(
       return toYoutubeEmbed(videoUrl.youtubeNoDunks ?? "");
     case "instagram":
       return `${videoUrl.instagram}embed`;
-    case "cloudinary":
-      return videoUrl.cloudinary;
+    case "hosted":
+      return hostedVideo(videoUrl);
     default:
       return undefined;
   }

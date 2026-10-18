@@ -11,8 +11,8 @@ export interface WedgieWithTypes extends Wedgie {
 export interface VideoUrls {
   youtube?: string;
   youtubeShort?: string;
-  cloudinary?: string;
+  /** Our own copy of the clip, on media.wedgietracker.com. */
+  hosted?: string;
   youtubeNoDunks?: string;
   instagram?: string;
-  selfHosted?: string;
 }
