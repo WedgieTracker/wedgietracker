@@ -131,8 +131,7 @@ function WedgieDetail({
   }, [wedgie.id, wedgie.videoUrl]);
 
   // Which wedgies get watched, and which source served them. The source is the
-  // useful half: the app prefers the Cloudinary mp4, and this is how we find
-  // out how often it falls through to a WebView instead.
+  // useful half: it shows which publisher's embed the app ended up using.
   useEffect(() => {
     track("wt_wedgie_opened", {
       number: wedgie.number,

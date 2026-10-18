@@ -43,7 +43,7 @@ export async function POST(req: Request) {
           exp: Date.now() / 1000 + 60 * 30,
         });
 
-      // Fetch video from Cloudinary as a stream
+      // Fetch the hosted video as a stream
       const response = await fetch(videoUrl, {
         headers: {
           Accept: "video/mp4",

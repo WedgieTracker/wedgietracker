@@ -28,7 +28,7 @@ export function CourtPositionDiagram({
           top: "50%",
           left: "50%",
           transform: "translate(-50%, -50%)",
-          backgroundImage: `url(https://res.cloudinary.com/wedgietracker/image/upload/v1735557904/assets/court_aazejm.svg)`,
+          backgroundImage: `url(https://media.wedgietracker.com/assets/court_aazejm.svg)`,
           backgroundSize: "contain",
           backgroundPosition: "center center",
           backgroundRepeat: "no-repeat",

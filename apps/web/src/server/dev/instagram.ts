@@ -2,7 +2,7 @@ import { type Session } from "next-auth";
 import { spawn } from "child_process";
 import fs from "fs";
 import { createBackground } from "./createBackground";
-import { v2 as cloudinary } from "cloudinary";
+import { uploadFile } from "~/server/services/r2";
 
 interface InstagramContainerResponse {
   id: string;
@@ -17,13 +17,6 @@ interface InstagramPublishResponse {
 }
 
 const READY_STATES = new Set(["FINISHED", "PUBLISHED"]);
-
-// Configure Cloudinary
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
 
 export async function createReel(
   inputPath: string,
@@ -142,20 +135,20 @@ export async function uploadToInstagram(
     // Create the reel with background
     await createReel(tempInputPath, tempOutputPath, number, season, player);
 
-    // Upload to Cloudinary
-    const uploadResult = await cloudinary.uploader.upload(tempOutputPath, {
-      resource_type: "video",
-      folder: "reels",
-      public_id: `reel_${Date.now()}`,
-    });
+    // Upload so Instagram can fetch the reel from a public URL
+    const reelUrl = await uploadFile(
+      tempOutputPath,
+      `reels/reel_${Date.now()}.mp4`,
+      "video/mp4",
+    );
 
     // Clean up temporary files
     await fs.promises.unlink(tempInputPath);
     await fs.promises.unlink(tempOutputPath);
 
-    // Upload to Instagram using the Cloudinary URL
+    // Upload to Instagram using the public reel URL
     const result = await uploadToInstagramAPI(
-      uploadResult.secure_url,
+      reelUrl,
       description,
       instagramToken,
       coverImagePath,
@@ -197,17 +190,14 @@ async function uploadToInstagramAPI(
   }
 
   try {
-    // Upload cover image to Cloudinary if it exists
+    // Upload the cover image too, if there is one
     let coverUrl = "";
     if (coverImagePath) {
-      const coverUploadResult = await cloudinary.uploader.upload(
+      coverUrl = await uploadFile(
         coverImagePath,
-        {
-          resource_type: "image",
-          folder: "covers",
-        },
+        `covers/cover_${Date.now()}.jpg`,
+        "image/jpeg",
       );
-      coverUrl = coverUploadResult.secure_url;
     }
 
     // Create container for the reel with user tag

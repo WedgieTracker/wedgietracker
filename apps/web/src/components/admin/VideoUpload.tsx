@@ -3,19 +3,46 @@
 import { useState } from "react";
 import { toast } from "~/hooks/use-toast";
 
-interface CloudinaryUploadProps {
+interface VideoUploadProps {
   onUploadComplete: (url: string) => void;
   initialUrl?: string;
 }
 
-interface CloudinaryResponse {
-  url: string;
+interface UploadTarget {
+  uploadUrl: string;
+  cacheControl: string;
+  publicUrl: string;
 }
 
-export function CloudinaryUpload({
+/** PUTs the file to the presigned URL, reporting progress as a percentage. */
+function putFile(
+  file: File,
+  target: UploadTarget,
+  onProgress: (percent: number) => void,
+) {
+  return new Promise<void>((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("PUT", target.uploadUrl);
+    xhr.setRequestHeader("Content-Type", file.type);
+    xhr.setRequestHeader("Cache-Control", target.cacheControl);
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable) {
+        onProgress(Math.round((event.loaded / event.total) * 100));
+      }
+    };
+    xhr.onload = () =>
+      xhr.status >= 200 && xhr.status < 300
+        ? resolve()
+        : reject(new Error(`Upload failed with status ${xhr.status}`));
+    xhr.onerror = () => reject(new Error("Upload failed"));
+    xhr.send(file);
+  });
+}
+
+export function VideoUpload({
   onUploadComplete,
   initialUrl,
-}: CloudinaryUploadProps) {
+}: VideoUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [uploadedUrl, setUploadedUrl] = useState<string | null>(
@@ -51,21 +78,20 @@ export function CloudinaryUpload({
     setUploadedUrl(null);
 
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-
-      const response = await fetch("/api/cloudinary/upload", {
+      const response = await fetch("/api/media/upload-url", {
         method: "POST",
-        body: formData,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contentType: file.type }),
       });
 
       if (!response.ok) {
-        throw new Error("Upload failed");
+        throw new Error("Could not get an upload URL");
       }
 
-      const data = (await response.json()) as CloudinaryResponse;
-      setUploadedUrl(data.url);
-      onUploadComplete(data.url);
+      const target = (await response.json()) as UploadTarget;
+      await putFile(file, target, setProgress);
+      setUploadedUrl(target.publicUrl);
+      onUploadComplete(target.publicUrl);
 
       toast({
         title: "Success",
@@ -142,7 +168,7 @@ export function CloudinaryUpload({
                     : "Click to upload or drag and drop"}
                 </p>
                 <p className="mt-1 text-xs text-gray-400">
-                  MP4, WebM, Ogg (max 100MB)
+                  MP4, WebM, Ogg, MOV (max 100MB)
                 </p>
               </>
             )}
@@ -153,7 +179,7 @@ export function CloudinaryUpload({
       {uploadedUrl && (
         <div className="mt-2 rounded-md bg-green-500/10 p-3">
           <p className="text-sm text-white">
-            <span className="font-semibold">Cloudinary URL:</span>{" "}
+            <span className="font-semibold">Video URL:</span>{" "}
             <a
               href={uploadedUrl}
               target="_blank"

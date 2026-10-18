@@ -92,9 +92,9 @@ vi.mock("./CourtPositionPicker", () => ({
 vi.mock("~/components/admin/WedgieSocialShareWrapper", () => ({
   WedgieSocialShareWrapper: () => <div data-testid="social-share" />,
 }));
-vi.mock("~/components/admin/CloudinaryUpload", () => ({
-  CloudinaryUpload: ({ initialUrl }: { initialUrl?: string }) => (
-    <div data-testid="cloudinary-upload">{initialUrl}</div>
+vi.mock("~/components/admin/VideoUpload", () => ({
+  VideoUpload: ({ initialUrl }: { initialUrl?: string }) => (
+    <div data-testid="video-upload">{initialUrl}</div>
   ),
 }));
 

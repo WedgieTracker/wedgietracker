@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createReel } from "~/server/dev/instagram";
 import fs from "fs";
-import { v2 as cloudinary } from "cloudinary";
+import { uploadFile } from "~/server/services/r2";
 import { requireDevSession } from "~/server/dev/requireDevSession";
 
 export async function POST(req: Request) {
@@ -27,11 +27,12 @@ export async function POST(req: Request) {
     // Create the preview reel
     await createReel(tempInputPath, tempOutputPath, number, season, player);
 
-    // Upload preview to Cloudinary
-    const uploadResult = await cloudinary.uploader.upload(tempOutputPath, {
-      resource_type: "video",
-      folder: "previews",
-    });
+    // Upload the preview so Instagram can fetch it from a public URL
+    const previewUrl = await uploadFile(
+      tempOutputPath,
+      `previews/preview_${Date.now()}.mp4`,
+      "video/mp4",
+    );
 
     // Clean up temporary files
     await fs.promises.unlink(tempInputPath);
@@ -39,7 +40,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       success: true,
-      previewUrl: uploadResult.secure_url,
+      previewUrl,
     });
   } catch (error) {
     console.error("Error generating preview:", error);
