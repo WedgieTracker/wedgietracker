@@ -6,7 +6,7 @@ import { z } from "zod";
 import { db } from "~/server/db";
 import { game, player, team, wedgie } from "@wedgietracker/core/schema";
 import { env } from "~/env";
-import { invalidateStoreData, invalidateWedgieData } from "~/server/cache";
+import { invalidateWedgieData } from "~/server/cache";
 import {
   maybeUpdateGlobalWedgieCount,
   syncWedgieTypes,
@@ -142,7 +142,6 @@ export async function POST(request: Request) {
   }
   await maybeUpdateGlobalWedgieCount(db, data.seasonName);
   invalidateWedgieData();
-  invalidateStoreData();
 
   return NextResponse.json({ created: true, wedgie: created });
 }
@@ -189,6 +188,5 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
   invalidateWedgieData();
-  invalidateStoreData();
   return NextResponse.json({ deleted: true, wedgie: deleted });
 }

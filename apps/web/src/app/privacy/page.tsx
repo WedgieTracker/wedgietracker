@@ -103,7 +103,7 @@ export default function PrivacyPage() {
                 </h3>
                 <ul className="list-inside list-disc space-y-2">
                   <li>Email address (when you subscribe to our newsletter)</li>
-                  <li>Name and shipping address (when you make a purchase)</li>
+                  <li>Name and email address (when you buy us a coffee)</li>
                 </ul>
 
                 <h3 className="text-yellow text-xl font-semibold">
@@ -129,11 +129,10 @@ export default function PrivacyPage() {
                 How We Use Your Information
               </h2>
               <ul className="list-inside list-disc space-y-2">
-                <li>To process and fulfill your orders</li>
+                <li>To process your coffee donation and send a receipt</li>
                 <li>To send you our newsletter (if subscribed)</li>
                 <li>To improve our website and user experience</li>
                 <li>To analyze website traffic and usage patterns</li>
-                <li>To communicate with you about your orders</li>
               </ul>
             </section>
 
@@ -144,10 +143,9 @@ export default function PrivacyPage() {
               <p className="mb-4">We use the following third-party services:</p>
               <ul className="list-inside list-disc space-y-2">
                 <li>A web analytics provider, for how the site is used</li>
-                <li>A payment processor, for checkout</li>
+                <li>A payment processor, for coffee donations</li>
                 <li>A newsletter provider, for subscriptions</li>
-                <li>An email provider, for order and donation confirmations</li>
-                <li>A print and fulfilment partner, for orders</li>
+                <li>An email provider, for donation confirmations</li>
                 <li>A media host, for images and video</li>
               </ul>
             </section>
@@ -200,7 +198,7 @@ export default function PrivacyPage() {
                 We may update this Privacy Policy from time to time. The latest
                 version will always be posted on this page.
               </p>
-              <p className="mt-2 text-sm">Last updated: 09/12/2026</p>
+              <p className="mt-2 text-sm">Last updated: 10/18/2026</p>
             </section>
           </div>
         </div>

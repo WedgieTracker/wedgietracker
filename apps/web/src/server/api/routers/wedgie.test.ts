@@ -18,11 +18,9 @@ vi.mock("next/cache", () => ({
 vi.mock("~/server/auth", () => ({ auth: vi.fn() }));
 
 const invalidateWedgieData = vi.fn();
-const invalidateStoreData = vi.fn();
 vi.mock("~/server/cache", () => ({
-  CACHE_TAGS: { WEDGIE_DATA: "wedgie-data", STORE_DATA: "store-data" },
+  CACHE_TAGS: { WEDGIE_DATA: "wedgie-data" },
   invalidateWedgieData,
-  invalidateStoreData,
 }));
 
 const buildTeamStandings = vi.fn(() => []);
@@ -82,15 +80,19 @@ const { createCallerFactory } = await import("~/server/api/trpc");
 
 const createCaller = createCallerFactory(wedgieRouter);
 
-function authedCaller() {
+function callerAs(email: string) {
   return createCaller({
     db: fakeDb as never,
     getSession: () =>
       Promise.resolve({
-        user: { id: "u1", email: "admin@test" },
+        user: { id: "u1", email },
         expires: "2099-01-01",
       }),
   });
+}
+
+function authedCaller() {
+  return callerAs("admin@test");
 }
 
 function anonCaller() {
@@ -117,6 +119,7 @@ const sampleInput = {
 describe("wedgieRouter", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    process.env.ADMIN_EMAILS = "admin@test";
     buildTeamStandings.mockReturnValue([]);
     // Defaults that satisfy the type-sync helper inside `create` / `update`.
     queryTypeFindFirst.mockResolvedValue({ id: 99, name: "existing" });
@@ -148,6 +151,12 @@ describe("wedgieRouter", () => {
         TRPCError,
       );
     });
+
+    it("rejects signed-in users outside the allowlist", async () => {
+      await expect(
+        callerAs("someone@test").delete({ id: "1" }),
+      ).rejects.toMatchObject({ code: "FORBIDDEN" });
+    });
   });
 
   describe("create", () => {
@@ -163,7 +172,6 @@ describe("wedgieRouter", () => {
         "2025/26",
       );
       expect(invalidateWedgieData).toHaveBeenCalledOnce();
-      expect(invalidateStoreData).toHaveBeenCalledOnce();
     });
 
     it("skips type sync when insert returns nothing", async () => {
@@ -195,7 +203,7 @@ describe("wedgieRouter", () => {
   });
 
   describe("update", () => {
-    it("updates the wedgie, syncs types, invalidates wedgie cache only", async () => {
+    it("updates the wedgie, syncs types, invalidates the wedgie cache", async () => {
       updateReturning.mockResolvedValueOnce([{ id: 7 }]);
 
       const result = await authedCaller().update({
@@ -208,12 +216,11 @@ describe("wedgieRouter", () => {
       expect(maybeUpdateGlobalWedgieCount).toHaveBeenCalledOnce();
       expect(invalidateWedgieData).toHaveBeenCalledOnce();
       // update doesn't touch the store
-      expect(invalidateStoreData).not.toHaveBeenCalled();
     });
   });
 
   describe("delete", () => {
-    it("deletes by id and invalidates both caches", async () => {
+    it("deletes by id and invalidates the wedgie cache", async () => {
       deleteWhere.mockReturnValueOnce({ returning: deleteReturning });
       deleteReturning.mockResolvedValueOnce([{ id: 7 }]);
 
@@ -221,7 +228,6 @@ describe("wedgieRouter", () => {
 
       expect(result).toEqual({ id: 7 });
       expect(invalidateWedgieData).toHaveBeenCalledOnce();
-      expect(invalidateStoreData).toHaveBeenCalledOnce();
     });
   });
 

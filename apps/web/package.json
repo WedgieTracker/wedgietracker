@@ -48,7 +48,6 @@
     "@wedgietracker/core": "workspace:*",
     "archiver": "^8.0.0",
     "class-variance-authority": "^0.7.1",
-    "cloudinary": "^2.11.0",
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.45.3",
     "googleapis": "^174.0.0",

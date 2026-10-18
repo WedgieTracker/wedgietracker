@@ -13,7 +13,7 @@ import { cache } from "react";
 import { z, ZodError } from "zod";
 
 import { auth } from "~/server/auth";
-import { isAllowedEmail } from "~/server/auth/config";
+import { isAllowedEmail } from "~/server/auth/allowlist";
 import { db } from "~/server/db";
 
 /**

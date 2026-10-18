@@ -28,8 +28,7 @@ A modern application for tracking basketball wedgies, on the web and on iOS.
 - Instagram, Twitter, Bluesky, and YouTube integration for sharing wedgies
 - Cloudflare R2 for wedgie videos and site images
 - Newsletter subscription with Mailchimp
-- Stripe integration for store purchases
-- Printful integration for t-shirt orders
+- Stripe checkout for coffee donations
 - Responsive design with custom animations
 - Admin dashboard for managing wedgies
 
@@ -47,7 +46,7 @@ apps/
 │   ├── src/server/
 │   │   ├── api/            # tRPC routers; types.ts is the client-facing type
 │   │   ├── auth/           # Auth.js configuration
-│   │   └── services/       # Stripe, R2, Cloudinary, Printful, email, ...
+│   │   └── services/       # Stripe, R2, email, Telegram, ...
 │   └── src/config|context|hooks|lib|trpc/
 └── mobile/                 # Expo app (iOS)
     ├── app/                # expo-router routes

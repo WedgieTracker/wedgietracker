@@ -2,7 +2,7 @@ import { randomUUID } from "crypto";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { auth } from "~/server/auth";
-import { isAllowedEmail } from "~/server/auth/config";
+import { isAllowedEmail } from "~/server/auth/allowlist";
 import { presignUpload } from "~/server/services/r2";
 
 const VIDEO_EXTENSIONS: Record<string, string> = {

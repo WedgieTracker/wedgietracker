@@ -3,7 +3,7 @@ import { type DefaultSession, type NextAuthConfig } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import type { JWT } from "next-auth/jwt";
 
-import { env } from "~/env";
+import { isAllowedEmail } from "~/server/auth/allowlist";
 import { db } from "~/server/db";
 
 /**
@@ -43,20 +43,6 @@ declare module "next-auth" {
     accessTokenExpires?: number;
     error?: string;
   }
-}
-
-const ADMIN_EMAILS = (env.ADMIN_EMAILS ?? "")
-  .split(",")
-  .map((email) => email.trim().toLowerCase())
-  .filter(Boolean);
-
-/**
- * Whether an email may use the admin. Exact matches against ADMIN_EMAILS only;
- * an unset list lets nobody in.
- */
-export function isAllowedEmail(email: string | null | undefined): boolean {
-  if (!email) return false;
-  return ADMIN_EMAILS.includes(email.trim().toLowerCase());
 }
 
 // Add this interface for the refresh token response
