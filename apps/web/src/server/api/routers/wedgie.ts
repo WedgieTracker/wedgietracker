@@ -1,3 +1,4 @@
+import { SHOUTOUT_PATTERN } from "@wedgietracker/core/utils/shoutout";
 import { z } from "zod";
 import { eq, desc, ne, and, count, sql, asc, gt, inArray } from "drizzle-orm";
 import { cacheTag, cacheLife } from "next/cache";
@@ -51,7 +52,7 @@ const wedgieInput = z.object({
   }),
   types: z.array(z.string()),
   gameName: z.string().optional(),
-  shoutouts: z.array(z.string().regex(/^[A-Za-z0-9_]{1,15}$/)).default([]),
+  shoutouts: z.array(z.string().regex(SHOUTOUT_PATTERN)).default([]),
 });
 
 // Helper: get wedgies with their types via the join table
