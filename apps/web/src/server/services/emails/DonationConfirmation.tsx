@@ -37,7 +37,7 @@ export default function DonationConfirmationEmail({
           <Section>
             <Img
               src={
-                "https://res.cloudinary.com/wedgietracker/image/upload/v1737299676/assets/logo-wedgietracker_rlzejd.png"
+                "https://media.wedgietracker.com/assets/logo-wedgietracker_rlzejd.png"
               }
               alt={`Logo WedgieTracker`}
               width={120}

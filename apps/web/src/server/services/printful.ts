@@ -48,13 +48,13 @@ async function verifyVariantId(variantId: number): Promise<boolean> {
 // Add this constant with the design URLs
 const TSHIRT_DESIGN_URLS: Record<string, string> = {
   "Ice Blue":
-    "https://res.cloudinary.com/wedgietracker/image/upload/v1737209145/tshirt-numbers/black-tshirt_yvk7dm.png",
+    "https://media.wedgietracker.com/tshirt-numbers/black-tshirt_yvk7dm.png",
   Peach:
-    "https://res.cloudinary.com/wedgietracker/image/upload/v1737209145/tshirt-numbers/black-tshirt_yvk7dm.png",
+    "https://media.wedgietracker.com/tshirt-numbers/black-tshirt_yvk7dm.png",
   Black:
-    "https://res.cloudinary.com/wedgietracker/image/upload/v1737209145/tshirt-numbers/black-tshirt_yvk7dm.png",
+    "https://media.wedgietracker.com/tshirt-numbers/black-tshirt_yvk7dm.png",
   White:
-    "https://res.cloudinary.com/wedgietracker/image/upload/v1737209145/tshirt-numbers/white-tshirt_edkxxi.png",
+    "https://media.wedgietracker.com/tshirt-numbers/white-tshirt_edkxxi.png",
 };
 
 // Add interfaces for API responses

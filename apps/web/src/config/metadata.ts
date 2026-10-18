@@ -6,7 +6,7 @@ const APP_DESCRIPTION =
 export const APP_URL =
   process.env.NEXT_PUBLIC_APP_URL ?? "https://www.wedgietracker.com";
 const DEFAULT_SOCIAL_IMAGE =
-  "https://res.cloudinary.com/wedgietracker/image/upload/v1736700345/assets/social-wedgietracker_bibnbu.jpg";
+  "https://media.wedgietracker.com/assets/social-wedgietracker_bibnbu.jpg";
 
 export const defaultMetadata: Metadata = {
   applicationName: APP_NAME,

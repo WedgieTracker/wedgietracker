@@ -15,16 +15,16 @@ import type { Color } from "@wedgietracker/core/types/product";
 
 const TSHIRT_IMAGES: Record<Color, string[]> = {
   Black: [
-    "https://res.cloudinary.com/wedgietracker/image/upload/v1737220662/mockups-tshirt/folded-black_xyfesd.png",
+    "https://media.wedgietracker.com/mockups-tshirt/folded-black_xyfesd.png",
   ],
   "Ice Blue": [
-    "https://res.cloudinary.com/wedgietracker/image/upload/v1737220662/mockups-tshirt/folded-blue_eblukm.png",
+    "https://media.wedgietracker.com/mockups-tshirt/folded-blue_eblukm.png",
   ],
   Peach: [
-    "https://res.cloudinary.com/wedgietracker/image/upload/v1737220660/mockups-tshirt/folded-peach_llbbng.png",
+    "https://media.wedgietracker.com/mockups-tshirt/folded-peach_llbbng.png",
   ],
   White: [
-    "https://res.cloudinary.com/wedgietracker/image/upload/v1737221067/mockups-tshirt/folded-white_nmxh0p.png",
+    "https://media.wedgietracker.com/mockups-tshirt/folded-white_nmxh0p.png",
   ],
 };
 

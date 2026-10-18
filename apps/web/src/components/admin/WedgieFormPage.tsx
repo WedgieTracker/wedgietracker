@@ -10,7 +10,7 @@ import { useWedgieForm } from "./useWedgieForm";
 import { ShoutoutsInput } from "./ShoutoutsInput";
 import type { WedgieWithTypes } from "@wedgietracker/core/types/wedgie";
 import { WedgieSocialShareWrapper } from "~/components/admin/WedgieSocialShareWrapper";
-import { CloudinaryUpload } from "~/components/admin/CloudinaryUpload";
+import { VideoUpload } from "~/components/admin/VideoUpload";
 
 interface WedgieFormPageProps {
   wedgie?: WedgieWithTypes;
@@ -224,7 +224,7 @@ export function WedgieFormPage({ wedgie, currentSeason }: WedgieFormPageProps) {
               Video URLs
             </label>
             <div className="mt-1 space-y-2">
-              <CloudinaryUpload
+              <VideoUpload
                 initialUrl={formData.videoUrl.cloudinary}
                 onUploadComplete={(url) =>
                   setFormData((prev) => ({

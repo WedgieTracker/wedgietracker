@@ -17,7 +17,7 @@ import {
 } from "./stats-video-canvas";
 
 const LOGO_URL =
-  "https://res.cloudinary.com/wedgietracker/image/upload/v1737299676/assets/logo-wedgietracker_rlzejd.png";
+  "https://media.wedgietracker.com/assets/logo-wedgietracker_rlzejd.png";
 
 const DESKTOP_DIMENSIONS = { width: 1920, height: 1080 } as const;
 const MOBILE_DIMENSIONS = { width: 1080, height: 1920 } as const;

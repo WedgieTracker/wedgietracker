@@ -33,7 +33,7 @@ export function CourtPositionPicker({
           className="absolute inset-0 cursor-crosshair border-none bg-transparent p-0"
           onClick={handleClick}
           style={{
-            backgroundImage: `url(https://res.cloudinary.com/wedgietracker/image/upload/v1735557904/assets/court_aazejm.svg)`,
+            backgroundImage: `url(https://media.wedgietracker.com/assets/court_aazejm.svg)`,
             backgroundSize: "contain",
             backgroundPosition: "center center",
             backgroundRepeat: "no-repeat",
