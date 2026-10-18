@@ -88,12 +88,12 @@ export function WedgieModal({
                   : "h-full w-full"
               }
             >
-              {(!wedgie.videoUrl || activeVideo === "cloudinary") && (
+              {(!wedgie.videoUrl || activeVideo === "hosted") && (
                 <div className="bg-darkpurple-darker flex h-full w-full items-center justify-center p-6 text-center text-sm font-bold tracking-wider text-white/60 uppercase">
                   Video not available at the moment
                 </div>
               )}
-              {wedgie.videoUrl && activeVideo !== "cloudinary" && (
+              {wedgie.videoUrl && activeVideo !== "hosted" && (
                 <iframe
                   title="Video player"
                   width="100%"

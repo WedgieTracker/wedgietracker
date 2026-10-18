@@ -111,7 +111,7 @@ const existingWedgie = {
   seasonName: "2025/26",
   wedgieDate: "2026-01-15T20:00:00.000Z",
   position: { x: 0.5, y: 0.6 },
-  videoUrl: { youtube: "https://yt/x", cloudinary: "https://cdn/x" },
+  videoUrl: { youtube: "https://yt/x", hosted: "https://cdn/x" },
   types: [{ id: 1, name: "clutch", createdAt: "", updatedAt: "" }],
   gameName: "LAL @ BOS",
   createdAt: "",

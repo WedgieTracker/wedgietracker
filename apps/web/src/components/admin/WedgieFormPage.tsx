@@ -225,11 +225,11 @@ export function WedgieFormPage({ wedgie, currentSeason }: WedgieFormPageProps) {
             </label>
             <div className="mt-1 space-y-2">
               <VideoUpload
-                initialUrl={formData.videoUrl.cloudinary}
+                initialUrl={formData.videoUrl.hosted}
                 onUploadComplete={(url) =>
                   setFormData((prev) => ({
                     ...prev,
-                    videoUrl: { ...prev.videoUrl, cloudinary: url },
+                    videoUrl: { ...prev.videoUrl, hosted: url },
                   }))
                 }
               />

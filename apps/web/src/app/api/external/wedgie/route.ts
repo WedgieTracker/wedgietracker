@@ -23,12 +23,16 @@ function authorised(request: Request) {
   return given.length === want.length && timingSafeEqual(given, want);
 }
 
-const videoUrl = z.object({
-  cloudinary: z.string().url().optional(),
-  youtube: z.string().url().optional(),
-  youtubeNoDunks: z.string().optional(),
-  instagram: z.string().url().optional(),
-});
+// `.strict()` so a payload still using the old `cloudinary` name fails loudly instead of losing
+// the video.
+const videoUrl = z
+  .object({
+    hosted: z.string().url().optional(),
+    youtube: z.string().url().optional(),
+    youtubeNoDunks: z.string().optional(),
+    instagram: z.string().url().optional(),
+  })
+  .strict();
 
 const key = z.object({
   seasonName: z.string().regex(/^\d{4}\/\d{2}$/),
@@ -124,7 +128,10 @@ export async function POST(request: Request) {
     wedgieDate: new Date(picked.createdAt).toISOString(),
   };
   if (dryRun) {
-    return NextResponse.json({ dryRun: true, wedgie: { ...record, types } });
+    return NextResponse.json({
+      dryRun: true,
+      wedgie: { ...record, types },
+    });
   }
 
   await db

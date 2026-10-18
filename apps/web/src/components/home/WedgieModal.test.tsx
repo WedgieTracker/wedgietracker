@@ -159,7 +159,7 @@ describe("WedgieModal", () => {
     it("does not play a Cloudinary-only video and says it is not available", () => {
       const wedgie = {
         ...baseWedgie,
-        videoUrl: { cloudinary: "https://cdn/example.mp4" },
+        videoUrl: { hosted: "https://cdn/example.mp4" },
       };
       render(<WedgieModal wedgie={wedgie} isOpen onClose={noop} />);
       expect(screen.queryByTitle("Video player")).not.toBeInTheDocument();

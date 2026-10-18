@@ -1,5 +1,8 @@
 import type { VideoUrls } from "@wedgietracker/core/types/wedgie";
-import type { ActiveVideo } from "@wedgietracker/core/utils/wedgieVideo";
+import {
+  hostedVideo,
+  type ActiveVideo,
+} from "@wedgietracker/core/utils/wedgieVideo";
 
 interface WedgieVideoTabsProps {
   videoUrl: VideoUrls;
@@ -19,16 +22,15 @@ export function WedgieVideoTabs({
   activeVideo,
   onChange,
 }: WedgieVideoTabsProps) {
-  const hasBroadcast = Boolean(videoUrl.youtube ?? videoUrl.cloudinary);
-  const broadcastActive =
-    activeVideo === "youtube" || activeVideo === "cloudinary";
+  const hasBroadcast = Boolean(videoUrl.youtube ?? hostedVideo(videoUrl));
+  const broadcastActive = activeVideo === "youtube" || activeVideo === "hosted";
 
   return (
     <div className="relative flex justify-start gap-2 p-2 pt-4 pb-0">
       {hasBroadcast && (
         <button
           className={tabClass(broadcastActive)}
-          onClick={() => onChange(videoUrl.youtube ? "youtube" : "cloudinary")}
+          onClick={() => onChange(videoUrl.youtube ? "youtube" : "hosted")}
         >
           NBA Broadcast
         </button>

@@ -62,7 +62,7 @@ const draft = {
   gameName: "NYK @ SAS - 2026-11-09T00:30:00Z",
   position: { x: 48.4, y: 89.7 },
   types: ["Layup"],
-  videoUrl: { cloudinary: "https://res.cloudinary.com/x/video.mp4" },
+  videoUrl: { hosted: "https://media.example/video.mp4" },
   period: 2,
   gameClock: "0:09.6",
   teamScore: 63,
@@ -139,7 +139,7 @@ describe("/api/external/wedgie", () => {
   it("merges video links", async () => {
     wedgieFindFirst.mockResolvedValue({
       id: 9,
-      videoUrl: { cloudinary: "https://c/v.mp4" },
+      videoUrl: { hosted: "https://c/v.mp4" },
     });
     const res = await PATCH(
       call("PATCH", {
@@ -151,10 +151,23 @@ describe("/api/external/wedgie", () => {
     expect(res.status).toBe(200);
     expect(updateSet).toHaveBeenCalledWith({
       videoUrl: {
-        cloudinary: "https://c/v.mp4",
+        hosted: "https://c/v.mp4",
         youtube: "https://youtu.be/x",
       },
     });
+  });
+
+  it("rejects the old cloudinary key instead of dropping the video", async () => {
+    wedgieFindFirst.mockResolvedValue({ id: 9, videoUrl: {} });
+    const res = await PATCH(
+      call("PATCH", {
+        seasonName: "2026/27",
+        number: 3,
+        videoUrl: { cloudinary: "https://c/v.mp4" },
+      }),
+    );
+    expect(res.status).toBe(400);
+    expect(updateSet).not.toHaveBeenCalled();
   });
 
   it("undoes a wedgie", async () => {

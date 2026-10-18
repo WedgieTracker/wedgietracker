@@ -7,6 +7,7 @@ import type {
   WedgieWithTypes,
   VideoUrls,
 } from "@wedgietracker/core/types/wedgie";
+import { hostedVideo } from "@wedgietracker/core/utils/wedgieVideo";
 
 interface WedgieFormData {
   playerName: string;
@@ -36,7 +37,7 @@ function initialFormData(
     wedgieDate: wedgie?.wedgieDate ? new Date(wedgie.wedgieDate) : new Date(),
     position: wedgie?.position ?? null,
     videoUrl: {
-      cloudinary: video.cloudinary ?? "",
+      hosted: hostedVideo(video) ?? "",
       youtube: video.youtube ?? "",
       youtubeNoDunks: video.youtubeNoDunks ?? "",
       instagram: video.instagram ?? "",
