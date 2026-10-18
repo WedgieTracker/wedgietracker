@@ -13,6 +13,7 @@ import { cache } from "react";
 import { z, ZodError } from "zod";
 
 import { auth } from "~/server/auth";
+import { isAllowedEmail } from "~/server/auth/config";
 import { db } from "~/server/db";
 
 /**
@@ -104,6 +105,9 @@ export const protectedProcedure = t.procedure.use(async ({ ctx, next }) => {
   const session = await ctx.getSession();
   if (!session?.user) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
+  }
+  if (!isAllowedEmail(session.user.email)) {
+    throw new TRPCError({ code: "FORBIDDEN" });
   }
   return next({
     ctx: {
