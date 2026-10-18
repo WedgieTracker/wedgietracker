@@ -1,3 +1,4 @@
+import { SHOUTOUT_PATTERN } from "@wedgietracker/core/utils/shoutout";
 import { timingSafeEqual } from "crypto";
 import { NextResponse } from "next/server";
 import { and, eq, like } from "drizzle-orm";
@@ -42,7 +43,7 @@ const createInput = key.extend({
   position: z.object({ x: z.number(), y: z.number() }).nullable(),
   types: z.array(z.string()).min(1),
   videoUrl: videoUrl.default({}),
-  shoutouts: z.array(z.string().regex(/^[A-Za-z0-9_]{1,15}$/)).default([]),
+  shoutouts: z.array(z.string().regex(SHOUTOUT_PATTERN)).default([]),
   period: z.number().int().min(1).max(10).nullable().default(null),
   gameClock: z
     .string()

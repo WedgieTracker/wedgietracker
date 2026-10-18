@@ -1,7 +1,10 @@
 import type { Wedgie } from "@wedgietracker/core/types/wedgie";
 import { GEMS_EMOJI, isGemsDate } from "@wedgietracker/core/utils/formatDate";
 import { gameTimeline } from "@wedgietracker/core/utils/gameMoment";
-import { twitterProfileUrl } from "@wedgietracker/core/utils/twitterHandle";
+import {
+  shoutoutNetwork,
+  shoutoutProfileUrl,
+} from "@wedgietracker/core/utils/shoutout";
 import { CourtPositionDiagram } from "./CourtPositionDiagram";
 import { GameTimeline } from "./GameTimeline";
 
@@ -89,9 +92,14 @@ export function WedgieInfoPanel({ wedgie }: WedgieInfoPanelProps) {
                 {wedgie.shoutouts.map((handle) => (
                   <li key={handle}>
                     <a
-                      href={twitterProfileUrl(handle)}
+                      href={shoutoutProfileUrl(handle)}
                       target="_blank"
                       rel="noopener noreferrer"
+                      title={
+                        shoutoutNetwork(handle) === "bluesky"
+                          ? `${handle} on Bluesky`
+                          : `@${handle} on X`
+                      }
                       className="hover:border-yellow hover:bg-yellow hover:text-darkpurple block rounded-full border border-white/20 bg-white/5 px-2.5 py-0.5 text-[.75em] font-bold text-white transition-colors duration-200"
                     >
                       @{handle}

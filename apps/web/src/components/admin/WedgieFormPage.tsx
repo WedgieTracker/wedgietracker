@@ -188,7 +188,7 @@ export function WedgieFormPage({ wedgie, currentSeason }: WedgieFormPageProps) {
               htmlFor="shoutouts"
               className="block text-sm font-medium text-white"
             >
-              Shoutouts (X handles that tagged us)
+              Shoutouts (X and Bluesky handles that tagged us)
             </label>
             <ShoutoutsInput
               id="shoutouts"

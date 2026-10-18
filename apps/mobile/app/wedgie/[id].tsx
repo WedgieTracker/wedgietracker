@@ -23,9 +23,10 @@ import { colors, fonts, radius, space } from "@/lib/theme";
 import { GEMS_EMOJI, isGemsDate } from "@wedgietracker/core/utils/formatDate";
 import { gameTimeline } from "@wedgietracker/core/utils/gameMoment";
 import {
-  tweetUrl,
-  twitterProfileUrl,
-} from "@wedgietracker/core/utils/twitterHandle";
+  shoutoutNetwork,
+  shoutoutProfileUrl,
+} from "@wedgietracker/core/utils/shoutout";
+import { tweetUrl } from "@wedgietracker/core/utils/twitterHandle";
 import type { ActiveVideo } from "@wedgietracker/core/utils/wedgieVideo";
 
 type Wedgie = RouterOutputs["wedgie"]["getAll"][number];
@@ -230,20 +231,24 @@ function WedgieDetail({
           ) : null}
           {wedgie.shoutouts.length > 0 ? (
             <Fact label="Shoutout">
-              {/* The X accounts that tagged the wedgie, as pills like the site's. */}
+              {/* The X and Bluesky accounts that tagged the wedgie, as pills like the site's. */}
               <View style={styles.shoutouts}>
                 {wedgie.shoutouts.map((handle) => (
                   <Pressable
                     key={handle}
                     accessibilityRole="link"
-                    accessibilityLabel={`@${handle} on X`}
+                    accessibilityLabel={
+                      shoutoutNetwork(handle) === "bluesky"
+                        ? `${handle} on Bluesky`
+                        : `@${handle} on X`
+                    }
                     hitSlop={4}
                     style={({ pressed }) => [
                       styles.shoutout,
                       pressed && styles.shoutoutPressed,
                     ]}
                     onPress={() =>
-                      void Linking.openURL(twitterProfileUrl(handle))
+                      void Linking.openURL(shoutoutProfileUrl(handle))
                     }
                   >
                     {({ pressed }) => (
