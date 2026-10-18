@@ -3,6 +3,7 @@ import { type DefaultSession, type NextAuthConfig } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import type { JWT } from "next-auth/jwt";
 
+import { env } from "~/env";
 import { db } from "~/server/db";
 
 /**
@@ -42,6 +43,20 @@ declare module "next-auth" {
     accessTokenExpires?: number;
     error?: string;
   }
+}
+
+const ADMIN_EMAILS = (env.ADMIN_EMAILS ?? "")
+  .split(",")
+  .map((email) => email.trim().toLowerCase())
+  .filter(Boolean);
+
+/**
+ * Whether an email may use the admin. Exact matches against ADMIN_EMAILS only;
+ * an unset list lets nobody in.
+ */
+export function isAllowedEmail(email: string | null | undefined): boolean {
+  if (!email) return false;
+  return ADMIN_EMAILS.includes(email.trim().toLowerCase());
 }
 
 // Add this interface for the refresh token response
@@ -177,21 +192,11 @@ export const authConfig: NextAuthConfig = {
     },
 
     /**
-     * Sign In Callback (Optional)
-     * Uncomment and customize if you want to restrict sign-in to certain users.
+     * Sign In Callback
+     * Only allowlisted, Google-verified emails can sign in.
      */
-    // async signIn({ user, account, profile, email, credentials }) {
-    //   const allowedEmailPatterns = [
-    //     "@wedgietracker.com",
-    //     "@riccardoaltieri.com",
-    //     "riccardoaltieri@me.com",
-    //   ];
-
-    //   const isAllowedEmail = allowedEmailPatterns.some(
-    //     (pattern) => user.email?.endsWith(pattern) ?? false,
-    //   );
-
-    //   return isAllowedEmail;
-    // },
+    signIn({ profile }) {
+      return profile?.email_verified === true && isAllowedEmail(profile.email);
+    },
   },
 } satisfies NextAuthConfig;
