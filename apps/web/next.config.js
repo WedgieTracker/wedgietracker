@@ -18,6 +18,17 @@ const config = {
   cacheComponents: true,
   // @wedgietracker/core ships raw TypeScript from the workspace
   transpilePackages: ["@wedgietracker/core"],
+  async redirects() {
+    return [
+      // A short link to the iOS app for posts and bios. Kept temporary so it can
+      // point elsewhere later. Same URL as APP_STORE_URL in AppStoreBadge.tsx.
+      {
+        source: "/app",
+        destination: "https://apps.apple.com/app/wedgietracker/id6811376841",
+        permanent: false,
+      },
+    ];
+  },
 };
 
 export default config;
