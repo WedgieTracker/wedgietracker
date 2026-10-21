@@ -27,8 +27,9 @@ function isGarbageTime(secondsLeft: number, margin: number): boolean {
 /**
  * Describes when in the game a wedgie happened as a band rather than an
  * exact time: "Early Q2", "Late Q1", "Final minute of Q3", "Clutch time"
- * (last five minutes of Q4 or overtime within five points, the NBA's
- * definition), "Garbage time" or "Overtime". Returns null without a clock.
+ * (last five minutes of Q4 or overtime within six points: the NBA says five,
+ * but a leading team's basket at six all but ends it), "Garbage time" or
+ * "Overtime". Returns null without a clock.
  */
 export function gameMoment({
   period,
@@ -49,7 +50,7 @@ export function gameMoment({
   if (period === 4 && margin !== null && isGarbageTime(seconds, margin)) {
     return "Garbage time";
   }
-  if (crunch && margin !== null && margin <= 5) return "Clutch time";
+  if (crunch && margin !== null && margin <= 6) return "Clutch time";
   if (period >= 5) return "Overtime";
   if (period <= 3 && seconds <= 60) return `Final minute of Q${period}`;
   return `${seconds > 360 ? "Early" : "Late"} Q${period}`;
