@@ -19,15 +19,20 @@ A modern application for tracking basketball wedgies, on the web and on iOS.
 - [oxlint](https://oxc.rs) - Fast linting (Rust-based)
 - [Vitest](https://vitest.dev) - Testing
 - [Expo](https://expo.dev) 57 / React Native - iOS app
+- [Resend](https://resend.com) - Newsletter and transactional email
 - [Vercel](https://vercel.com) - Deployment
 
 ## Features
 
-- Real-time wedgie tracking and statistics
+- Real-time wedgie tracking and statistics, with a season pace explained on
+  `/stats-for-nerds/pace`
+- Each wedgie's game moment (Early Q2, Clutch time, Garbage time, ...) and
+  fan shoutouts from X and Bluesky
 - Authentication with Google
 - Instagram, Twitter, Bluesky, and YouTube integration for sharing wedgies
 - Cloudflare R2 for wedgie videos and site images
-- Newsletter subscription with Mailchimp
+- Newsletter with Resend: a welcome email on signup, and a morning recap after
+  each night with a wedgie, built from `/api/external/recap`
 - Stripe checkout for coffee donations
 - Responsive design with custom animations
 - Admin dashboard for managing wedgies
@@ -50,16 +55,18 @@ apps/
 │   └── src/config|context|hooks|lib|trpc/
 └── mobile/                 # Expo app (iOS)
     ├── app/                # expo-router routes
-    │   ├── (tabs)/         # Feed, Standings, Seasons, Stats
+    │   ├── (tabs)/         # Home, All wedgies, Standings, Stats
+    │   ├── seasons         # Seasons history
     │   └── wedgie/[id]     # Wedgie detail + video player
-    ├── components/         # WedgieCard, WedgiePlayer, StatTile, Screen
-    └── lib/                # tRPC client, provider, theme
+    ├── components/         # WedgieRow, WedgiePlayer, GameTimeline, StatTile, ...
+    └── lib/                # tRPC client, provider, theme, observability
 
 packages/
 └── core/                   # Shared, client-agnostic code
     ├── src/schema.ts       # Drizzle schema (single source of truth)
     ├── src/types/          # Domain types derived from the schema
-    └── src/utils/          # Pure helpers (pace, filters, team aliases, video)
+    └── src/utils/          # Pure helpers (pace, game moment, filters, URLs,
+                            # team aliases, shoutouts, video)
 ```
 
 ### How the iOS app talks to the API
@@ -140,30 +147,29 @@ IP rather than `localhost` if you are testing on a physical device.
 
 ## Available Scripts
 
-| Script               | Description                           |
-| -------------------- | ------------------------------------- |
-| `pnpm dev`           | Start dev server with Turbo and HTTPS |
-| `pnpm build`         | Production build                      |
-| `pnpm start`         | Start production server               |
-| `pnpm lint`          | Run oxlint                            |
-| `pnpm lint:fix`      | Run oxlint with auto-fix              |
-| `pnpm typecheck`     | Run type checking with tsc (native)   |
-| `pnpm format:check`  | Check Prettier formatting             |
-| `pnpm format:write`  | Fix Prettier formatting               |
-| `pnpm test`          | Run tests once                        |
-| `pnpm test:watch`    | Run tests in watch mode               |
-| `pnpm test:coverage` | Run tests with coverage               |
-| `pnpm check`         | Run oxlint + tsc + tests              |
-| `pnpm db:push`       | Push schema changes to database       |
-| `pnpm db:generate`   | Generate database migrations          |
-| `pnpm db:studio`     | Open Drizzle Studio                   |
-| `pnpm db:dump`       | Refresh `database-backups/seed.sql`   |
-| `pnpm mobile`        | Start the Expo dev server             |
-| `pnpm mobile:ios`    | Open the iOS app in the Simulator     |
+| Script              | Description                           |
+| ------------------- | ------------------------------------- |
+| `pnpm dev`          | Start dev server with Turbo and HTTPS |
+| `pnpm build`        | Production build                      |
+| `pnpm start`        | Start production server               |
+| `pnpm lint`         | Run oxlint                            |
+| `pnpm typecheck`    | Run type checking with tsc (native)   |
+| `pnpm format:check` | Check Prettier formatting             |
+| `pnpm format:write` | Fix Prettier formatting               |
+| `pnpm test`         | Run tests once                        |
+| `pnpm check`        | Run oxlint + tsc + tests              |
+| `pnpm db:push`      | Push schema changes to database       |
+| `pnpm db:generate`  | Generate database migrations          |
+| `pnpm db:migrate`   | Apply database migrations             |
+| `pnpm db:studio`    | Open Drizzle Studio                   |
+| `pnpm db:dump`      | Refresh `database-backups/seed.sql`   |
+| `pnpm mobile`       | Start the Expo dev server             |
+| `pnpm mobile:ios`   | Open the iOS app in the Simulator     |
 
 Scripts at the root delegate to the workspace packages. To target one package
 directly, use `pnpm --filter @wedgietracker/web <script>` (or `.../core`,
-`.../mobile`).
+`.../mobile`). The web package also has `lint:fix`, `test:watch` and
+`test:coverage`.
 
 ## Development Workflow
 
@@ -183,9 +189,9 @@ Dependencies are kept up to date with [Dependabot](https://docs.github.com/en/co
 Tests are written with [Vitest](https://vitest.dev) and [@testing-library/react](https://testing-library.com/docs/react-testing-library/intro/).
 
 ```bash
-pnpm test          # Run all tests
-pnpm test:watch    # Watch mode
-pnpm test:coverage # With coverage report
+pnpm test                                            # Run all tests
+pnpm --filter @wedgietracker/web test:watch          # Watch mode
+pnpm --filter @wedgietracker/web test:coverage       # With coverage report
 ```
 
 Test files use the `*.test.ts` / `*.test.tsx` convention and live alongside the code they test.
