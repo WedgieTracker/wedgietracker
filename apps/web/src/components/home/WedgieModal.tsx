@@ -73,7 +73,9 @@ export function WedgieModal({
           {wedgie.teamAgainstName}
         </DialogTitle>
 
-        <div className="border-darkpurple-lighter bg-darkpurple flex flex-col overflow-hidden rounded-xl lg:flex-row">
+        {/* Below lg the dialog scrolls: the panel keeps its full height instead of shrinking to fit
+            and clipping a long shoutout list (16 fans on No. 1 of 2026/27). */}
+        <div className="border-darkpurple-lighter bg-darkpurple flex flex-col overflow-hidden rounded-xl max-lg:shrink-0 lg:flex-row">
           <div
             className={`w-full lg:w-[65%] ${
               activeVideo === "instagram"
