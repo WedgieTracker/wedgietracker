@@ -28,6 +28,8 @@ describe("gameMoment", () => {
     expect(at(4, "1:57", 100, 99)).toBe("Clutch time");
     expect(at(4, "5:00", 90, 95)).toBe("Clutch time");
     expect(at(5, "2:54", 108, 103)).toBe("Clutch time");
+    // a six-point game, one basket from over (LeBron, 20 Oct 2026)
+    expect(at(4, "1:13", 104, 98)).toBe("Clutch time");
   });
 
   it("does not call clutch before five minutes are left or when the margin is wider", () => {
