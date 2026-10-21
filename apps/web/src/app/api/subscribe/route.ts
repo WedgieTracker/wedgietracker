@@ -1,50 +1,39 @@
 import { NextResponse } from "next/server";
-import mailchimp from "@mailchimp/mailchimp_marketing";
+import { z } from "zod";
+import {
+  addNewsletterSubscriber,
+  sendWelcomeEmail,
+} from "~/server/services/email";
 
-mailchimp.setConfig({
-  apiKey: process.env.MAILCHIMP_API_KEY,
-  server: process.env.MAILCHIMP_SERVER_PREFIX,
-});
-
-// Add interface for the expected request body
-interface SubscribeRequest {
-  email: string;
-}
+const subscribeInput = z.object({ email: z.string().email() });
 
 export async function POST(req: Request) {
-  try {
-    const { email } = (await req.json()) as SubscribeRequest;
+  const parsed = subscribeInput.safeParse(await req.json().catch(() => null));
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: "Please enter a valid email" },
+      { status: 400 },
+    );
+  }
+  const email = parsed.data.email.toLowerCase();
 
-    // Check if member exists
-    try {
-      await mailchimp.lists.getListMember(
-        process.env.MAILCHIMP_LIST_ID!,
-        email.toLowerCase(),
-      );
-      // If we get here, the member exists
+  try {
+    if (!(await addNewsletterSubscriber(email))) {
       return NextResponse.json(
         { error: "You're already subscribed!" },
         { status: 400 },
       );
-    } catch (error: unknown) {
-      // Type guard for Mailchimp error
-      if (
-        error &&
-        typeof error === "object" &&
-        "status" in error &&
-        error.status === 404
-      ) {
-        // Add new subscriber to Mailchimp
-        await mailchimp.lists.addListMember(process.env.MAILCHIMP_LIST_ID!, {
-          email_address: email,
-          status: "subscribed",
-        });
-        return NextResponse.json({ success: true });
-      }
-      throw error;
     }
   } catch (error: unknown) {
-    console.error("Mailchimp error:", error);
+    console.error("Newsletter subscribe error:", error);
     return NextResponse.json({ error: "Failed to subscribe" }, { status: 500 });
   }
+
+  // The subscription stands even if the thank-you email fails
+  try {
+    await sendWelcomeEmail(email);
+  } catch (error: unknown) {
+    console.error("Welcome email error:", error);
+  }
+  return NextResponse.json({ success: true });
 }

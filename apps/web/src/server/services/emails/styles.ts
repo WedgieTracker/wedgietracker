@@ -12,7 +12,7 @@ export const paragraph = {
 };
 
 export const orderDetails = {
-  padding: "16",
+  padding: "8px 24px",
   backgroundColor: "#130135",
   borderRadius: "12px",
   marginBottom: "16px",
