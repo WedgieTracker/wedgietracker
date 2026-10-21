@@ -1,4 +1,5 @@
 import { SHOUTOUT_PATTERN } from "@wedgietracker/core/utils/shoutout";
+import { SEASON_GAMES } from "@wedgietracker/core/utils/paceCalculator";
 import { z } from "zod";
 import { eq, desc, ne, and, count, sql, asc, gt, inArray } from "drizzle-orm";
 import { cacheTag, cacheLife } from "next/cache";
@@ -346,8 +347,11 @@ async function getCachedNerdStats() {
       : [];
   });
 
+  // A normal season as the pace counts it (server/pace.ts): the average rate
+  // per game played over a full schedule, so shortened seasons count by rate.
   const averageSeasonRate = Math.round(
-    seasonRates.reduce((acc, s) => acc + s.wedgies, 0) / seasonRates.length,
+    (seasonRates.reduce((acc, s) => acc + s.rate, 0) / seasonRates.length) *
+      SEASON_GAMES,
   );
 
   const totalSeasonsOverall = seasons.length;
@@ -407,8 +411,8 @@ async function getCachedNerdStats() {
 
 /**
  * What the pace is built from, for /stats-for-nerds/pace: every completed
- * season's total (the same seasons calculatePace averages), and where the
- * current season stands.
+ * season's wedgies and games (the same seasons calculatePace averages), and
+ * where the current season stands.
  */
 async function getCachedPaceBreakdown() {
   "use cache";
@@ -427,7 +431,11 @@ async function getCachedPaceBreakdown() {
 
   const completed = seasons
     .filter((s) => s.totalGames > 0 && s.id !== globalRow?.currentSeasonId)
-    .map((s) => ({ name: s.name, wedgies: s.wedgies.length }));
+    .map((s) => ({
+      name: s.name,
+      wedgies: s.wedgies.length,
+      games: s.totalGames,
+    }));
   const currentSeason = globalRow?.currentSeason.name ?? "2026/27";
   const [current] = await db
     .select({ count: count() })
