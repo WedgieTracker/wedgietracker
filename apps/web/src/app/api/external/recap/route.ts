@@ -95,7 +95,10 @@ export async function GET(request: Request) {
       teamScore: w.teamScore,
       opponentScore: w.opponentScore,
       // the quarter bar and band ("Late Q4", "Clutch time") the wedgie dialog shows
-      moment: gameTimeline(w),
+      moment: gameTimeline({
+        ...w,
+        types: w.wedgieToTypes.map((t) => t.type),
+      }),
       facts:
         w.seasonName === "GEMS"
           ? []

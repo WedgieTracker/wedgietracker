@@ -6,12 +6,26 @@ interface GameMomentInput {
   /** Score of the wedgie's team and of its opponent at that moment. */
   teamScore?: number | null;
   opponentScore?: number | null;
+  /** The wedgie's types, for what the shot would have scored had it gone in. */
+  types?: { name: string }[];
 }
 
 function clockSeconds(clock: string): number | null {
   const match = /^(\d{1,2}):(\d{2}(?:\.\d+)?)$/.exec(clock.trim());
   if (!match) return null;
   return Number(match[1]) * 60 + Number(match[2]);
+}
+
+/**
+ * Points the stuck shot would have scored: 3 for a three, 1 for a free throw,
+ * else 2. Unknown without types, when only the score before it counts.
+ */
+function shotValue(types: { name: string }[] | undefined): number | null {
+  const names = (types ?? []).map((t) => t.name.toLowerCase());
+  if (names.length === 0) return null;
+  if (names.includes("three point")) return 3;
+  if (names.includes("free throw")) return 1;
+  return 2;
 }
 
 /**
@@ -27,15 +41,17 @@ function isGarbageTime(secondsLeft: number, margin: number): boolean {
 /**
  * Describes when in the game a wedgie happened as a band rather than an
  * exact time: "Early Q2", "Late Q1", "Final minute of Q3", "Clutch time"
- * (last five minutes of Q4 or overtime within six points: the NBA says five,
- * but a leading team's basket at six all but ends it), "Garbage time" or
- * "Overtime". Returns null without a clock.
+ * (last five minutes of Q4 or overtime within six points, before the shot or
+ * had it gone in: the NBA says five, but a basket that would end it or make it
+ * a one-possession game is just as tense), "Garbage time" or "Overtime".
+ * Returns null without a clock.
  */
 export function gameMoment({
   period,
   gameClock,
   teamScore,
   opponentScore,
+  types,
 }: GameMomentInput): string | null {
   if (!period || !gameClock) return null;
   const seconds = clockSeconds(gameClock);
@@ -45,12 +61,25 @@ export function gameMoment({
     typeof teamScore === "number" && typeof opponentScore === "number"
       ? Math.abs(teamScore - opponentScore)
       : null;
+  const value = shotValue(types);
+  const marginIfIn =
+    value !== null &&
+    typeof teamScore === "number" &&
+    typeof opponentScore === "number"
+      ? Math.abs(teamScore + value - opponentScore)
+      : null;
   const crunch = period >= 5 || (period === 4 && seconds <= 300);
 
   if (period === 4 && margin !== null && isGarbageTime(seconds, margin)) {
     return "Garbage time";
   }
-  if (crunch && margin !== null && margin <= 6) return "Clutch time";
+  if (
+    crunch &&
+    margin !== null &&
+    Math.min(margin, marginIfIn ?? margin) <= 6
+  ) {
+    return "Clutch time";
+  }
   if (period >= 5) return "Overtime";
   if (period <= 3 && seconds <= 60) return `Final minute of Q${period}`;
   return `${seconds > 360 ? "Early" : "Late"} Q${period}`;
