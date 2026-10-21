@@ -157,6 +157,41 @@ describe("/api/external/wedgie", () => {
     });
   });
 
+  it("replaces the shoutouts and leaves the video links alone", async () => {
+    wedgieFindFirst.mockResolvedValue({
+      id: 9,
+      videoUrl: { hosted: "https://c/v.mp4" },
+    });
+    const res = await PATCH(
+      call("PATCH", {
+        seasonName: "2026/27",
+        number: 3,
+        shoutouts: ["RichieConant", "jasoncpatton.com"],
+      }),
+    );
+    expect(res.status).toBe(200);
+    expect(updateSet).toHaveBeenCalledWith({
+      shoutouts: ["RichieConant", "jasoncpatton.com"],
+    });
+  });
+
+  it("refuses an update with nothing to change or a bad handle", async () => {
+    wedgieFindFirst.mockResolvedValue({ id: 9, videoUrl: {} });
+    const empty = await PATCH(
+      call("PATCH", { seasonName: "2026/27", number: 3 }),
+    );
+    const bad = await PATCH(
+      call("PATCH", {
+        seasonName: "2026/27",
+        number: 3,
+        shoutouts: ["not a handle!"],
+      }),
+    );
+    expect(empty.status).toBe(400);
+    expect(bad.status).toBe(400);
+    expect(updateSet).not.toHaveBeenCalled();
+  });
+
   it("rejects the old cloudinary key instead of dropping the video", async () => {
     wedgieFindFirst.mockResolvedValue({ id: 9, videoUrl: {} });
     const res = await PATCH(

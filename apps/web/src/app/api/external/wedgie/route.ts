@@ -15,7 +15,8 @@ import {
 // Adds a wedgie from a NoDunks tweet once the admin has confirmed the draft on his phone, the
 // same record the admin form would save. Same key as /api/external ("x-api-key"). Idempotent on
 // season + number: a second POST returns the wedgie already there. PATCH fills in video links
-// once the clip is posted; DELETE undoes a wedgie added by mistake.
+// once the clip is posted, and replaces the shoutouts when more fans turn up after the wedgie was
+// added; DELETE undoes a wedgie added by mistake.
 
 function authorised(request: Request) {
   const given = Buffer.from(request.headers.get("x-api-key") ?? "");
@@ -157,7 +158,13 @@ export async function PATCH(request: Request) {
   if (!authorised(request)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const parsed = key.extend({ videoUrl }).safeParse(await readBody(request));
+  const parsed = key
+    .extend({
+      videoUrl: videoUrl.optional(),
+      shoutouts: z.array(z.string().regex(SHOUTOUT_PATTERN)).optional(),
+    })
+    .refine((u) => u.videoUrl !== undefined || u.shoutouts !== undefined)
+    .safeParse(await readBody(request));
   if (!parsed.success) {
     return NextResponse.json({ error: "Invalid update" }, { status: 400 });
   }
@@ -167,7 +174,12 @@ export async function PATCH(request: Request) {
   }
   const [updated] = await db
     .update(wedgie)
-    .set({ videoUrl: { ...existing.videoUrl, ...parsed.data.videoUrl } })
+    .set({
+      ...(parsed.data.videoUrl && {
+        videoUrl: { ...existing.videoUrl, ...parsed.data.videoUrl },
+      }),
+      ...(parsed.data.shoutouts && { shoutouts: parsed.data.shoutouts }),
+    })
     .where(eq(wedgie.id, existing.id))
     .returning();
   invalidateWedgieData();
