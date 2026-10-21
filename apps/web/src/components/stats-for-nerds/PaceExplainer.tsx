@@ -9,7 +9,7 @@ import {
 
 interface PaceExplainerProps {
   data: {
-    seasons: { name: string; wedgies: number }[];
+    seasons: { name: string; wedgies: number; games: number }[];
     currentSeason: string;
     wedgiesThisSeason: number;
     gamesPlayed: number;
@@ -17,21 +17,25 @@ interface PaceExplainerProps {
   };
 }
 
+/** Each completed season's wedgies per game it actually played. */
+const ratesOf = (seasons: PaceExplainerProps["data"]["seasons"]) =>
+  seasons.map((s) => s.wedgies / s.games);
+
 /**
  * The pace the server stores, worked out the same way: computePace with each
- * completed season as its total spread over a full schedule (server/pace.ts).
- * computePace has no answer before the first game, when the pace is simply the
- * average season plus this season's wedgies so far.
+ * completed season's rate per game played (server/pace.ts). computePace has no
+ * answer before the first game, when the pace is simply a normal season plus
+ * this season's wedgies so far.
  */
 function paceFor(
   seasons: PaceExplainerProps["data"]["seasons"],
   wedgies: number,
   games: number,
 ) {
-  const seasonRates = seasons.map((s) => s.wedgies / SEASON_GAMES);
-  const average =
-    seasons.reduce((acc, s) => acc + s.wedgies, 0) / (seasons.length || 1);
-  if (games <= 0) return Math.round(wedgies + average);
+  const seasonRates = ratesOf(seasons);
+  const rate =
+    seasonRates.reduce((acc, r) => acc + r, 0) / (seasonRates.length || 1);
+  if (games <= 0) return Math.round(wedgies + rate * SEASON_GAMES);
   return computePace({
     currentTotalWedgies: wedgies,
     currentTotalGames: games,
@@ -43,8 +47,10 @@ const fmt = (n: number) => n.toLocaleString("en-US");
 
 export function PaceExplainer({ data }: PaceExplainerProps) {
   const { seasons } = data;
-  const total = seasons.reduce((acc, s) => acc + s.wedgies, 0);
-  const average = total / (seasons.length || 1);
+  const rates = ratesOf(seasons);
+  const rate = rates.reduce((acc, r) => acc + r, 0) / (rates.length || 1);
+  // a normal season: the average rate over a full schedule
+  const average = rate * SEASON_GAMES;
   const most = Math.max(...seasons.map((s) => s.wedgies), 1);
 
   const [games, setGames] = useState(data.gamesPlayed);
@@ -66,12 +72,11 @@ export function PaceExplainer({ data }: PaceExplainerProps) {
         <p className="mb-4 font-bold">
           Over the last{" "}
           <span className="text-pink">{seasons.length} completed seasons</span>{" "}
-          we tracked an average of{" "}
-          <span className="text-yellow">{Math.round(average)}</span> wedgies a
-          season.
+          a normal season works out at{" "}
+          <span className="text-yellow">{Math.round(average)}</span> wedgies.
         </p>
         <ul className="flex flex-col gap-1.5">
-          {seasons.map((s) => (
+          {seasons.map((s, i) => (
             <li key={s.name} className="flex items-center gap-2 text-sm">
               <span className="w-16 shrink-0 font-bold text-white/70">
                 {s.name}
@@ -79,7 +84,7 @@ export function PaceExplainer({ data }: PaceExplainerProps) {
               <span className="relative h-5 flex-1">
                 <span
                   className={`absolute inset-y-0 left-0 rounded-r-md ${
-                    s.wedgies >= average ? "bg-yellow" : "bg-pink"
+                    (rates[i] ?? 0) >= rate ? "bg-yellow" : "bg-pink"
                   }`}
                   style={{ width: `${(s.wedgies / most) * 100}%` }}
                 />
@@ -96,14 +101,18 @@ export function PaceExplainer({ data }: PaceExplainerProps) {
           ))}
         </ul>
         <p className="mt-5 mb-4 font-bold">
-          Add up every completed season and share it out evenly:
+          Each season&apos;s wedgies are divided by the games it actually
+          played, so the shortened 2019/20 and 2020/21 seasons count by how
+          often wedgies happened, not by their smaller totals. On average
+          that&apos;s one wedgie every {Math.round(1 / rate)} games, over a full
+          season:
         </p>
         <div className="flex flex-col gap-3 md:flex-row md:justify-center md:gap-2">
           <Line>
-            <Term value={fmt(total)} label="wedgies in total" />
+            <Term value={fmt(SEASON_GAMES)} label="games (est.)" />
           </Line>
           <Line op="÷">
-            <Term value={String(seasons.length)} label="seasons" />
+            <Term value={String(Math.round(1 / rate))} label="games a wedgie" />
           </Line>
           <Line op="=">
             <Term
@@ -114,17 +123,17 @@ export function PaceExplainer({ data }: PaceExplainerProps) {
           </Line>
         </div>
         <p className="mt-4 text-center text-sm text-white/60">
-          That is the same as averaging each season&apos;s rate per game, (
+          The average rate is (
           {[...seasons.slice(0, 2), ...seasons.slice(-1)]
-            .map((s) => `${s.wedgies}/${fmt(SEASON_GAMES)}`)
+            .map((s) => `${s.wedgies}/${fmt(s.games)}`)
             .join(" + ")
             .replace(/ \+ (?=[^+]*$)/, " + … + ")}
-          ) ÷ {seasons.length}, which is {Math.round(average)}/
-          {fmt(SEASON_GAMES)} a game.
+          ) ÷ {seasons.length}, each season&apos;s wedgies over the games it
+          played.
         </p>
         <p className="mt-4 text-sm text-white/60">
-          Yellow seasons beat the average, pink ones fell short. The white line
-          is the average.
+          Yellow seasons had wedgies more often than average, pink ones less.
+          The white line is a normal season.
         </p>
       </Section>
 
@@ -220,10 +229,6 @@ export function PaceExplainer({ data }: PaceExplainerProps) {
               </>
             )}
             .
-          </li>
-          <li>
-            Every completed season counts as its total, including the shortened
-            2019/20 and 2020/21 seasons.
           </li>
           <li>
             {fmt(SEASON_GAMES)} games is an estimate of a full season the way we
