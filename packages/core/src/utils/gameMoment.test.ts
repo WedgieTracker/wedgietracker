@@ -32,6 +32,37 @@ describe("gameMoment", () => {
     expect(at(4, "1:13", 104, 98)).toBe("Clutch time");
   });
 
+  it("counts a shot that would have brought it within five as clutch", () => {
+    const shot = (clock: string, us: number, them: number, type: string) =>
+      gameMoment({
+        period: 4,
+        gameClock: clock,
+        teamScore: us,
+        opponentScore: them,
+        types: [{ name: type }],
+      });
+    expect(shot("3:00", 90, 97, "Three point")).toBe("Clutch time");
+    expect(shot("3:00", 90, 97, "Layup")).toBe("Clutch time");
+    expect(shot("3:00", 90, 98, "Layup")).toBe("Late Q4");
+    expect(shot("0:59", 97, 106, "Three point")).toBe("Late Q4");
+    expect(shot("3:00", 90, 97, "Free throw")).toBe("Late Q4");
+  });
+
+  it("needs a one-possession game in the last 24 seconds", () => {
+    expect(at(4, "0:09.8", 111, 118)).toBe("Late Q4");
+    expect(
+      gameMoment({
+        period: 4,
+        gameClock: "0:09.8",
+        teamScore: 111,
+        opponentScore: 118,
+        types: [{ name: "Three point" }],
+      }),
+    ).toBe("Late Q4");
+    expect(at(4, "0:20", 100, 103)).toBe("Clutch time");
+    expect(at(4, "0:20", 100, 105)).toBe("Late Q4");
+  });
+
   it("does not call clutch before five minutes are left or when the margin is wider", () => {
     expect(at(4, "5:01", 90, 92)).toBe("Late Q4");
     expect(at(4, "3:00", 90, 97)).toBe("Late Q4");
