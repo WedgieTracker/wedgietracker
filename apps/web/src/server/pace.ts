@@ -1,7 +1,10 @@
 import { ne, eq } from "drizzle-orm";
 import { db } from "./db";
 import { season, global } from "@wedgietracker/core/schema";
-import { computePace } from "@wedgietracker/core/utils/paceCalculator";
+import {
+  SEASON_GAMES,
+  computePace,
+} from "@wedgietracker/core/utils/paceCalculator";
 
 interface CalculatePaceParams {
   currentTotalWedgies: number;
@@ -15,7 +18,7 @@ interface CalculatePaceParams {
 export async function calculatePace({
   currentTotalWedgies,
   currentTotalGames,
-  totalEstimatedGames = 1315,
+  totalEstimatedGames = SEASON_GAMES,
 }: CalculatePaceParams) {
   const seasons = await db.query.season.findMany({
     where: ne(season.name, "GEMS"),

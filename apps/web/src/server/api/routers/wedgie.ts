@@ -405,6 +405,47 @@ async function getCachedNerdStats() {
   };
 }
 
+/**
+ * What the pace is built from, for /stats-for-nerds/pace: every completed
+ * season's total (the same seasons calculatePace averages), and where the
+ * current season stands.
+ */
+async function getCachedPaceBreakdown() {
+  "use cache";
+  cacheTag(CACHE_TAGS.WEDGIE_DATA);
+  cacheLife({ revalidate: 3600 });
+
+  const globalRow = await db.query.global.findFirst({
+    where: eq(global.id, 1),
+    with: { currentSeason: true },
+  });
+  const seasons = await db.query.season.findMany({
+    where: ne(season.name, "GEMS"),
+    with: { wedgies: { columns: { id: true } } },
+    orderBy: asc(season.name),
+  });
+
+  const completed = seasons
+    .filter((s) => s.totalGames > 0 && s.id !== globalRow?.currentSeasonId)
+    .map((s) => ({ name: s.name, wedgies: s.wedgies.length }));
+  const currentSeason = globalRow?.currentSeason.name ?? "2026/27";
+  const [current] = await db
+    .select({ count: count() })
+    .from(wedgie)
+    .where(eq(wedgie.seasonName, currentSeason));
+
+  return {
+    seasons: completed,
+    currentSeason,
+    wedgiesThisSeason: Math.max(
+      current?.count ?? 0,
+      globalRow?.currentTotalWedgies ?? 0,
+    ),
+    gamesPlayed: globalRow?.currentTotalGames ?? 0,
+    pace: globalRow?.pace ?? 0,
+  };
+}
+
 async function getCachedByPlayer(playerName: string) {
   "use cache";
   cacheTag(CACHE_TAGS.WEDGIE_DATA);
@@ -534,6 +575,8 @@ export const wedgieRouter = createTRPCRouter({
     ),
 
   getNerdStats: publicProcedure.query(() => getCachedNerdStats()),
+
+  getPaceBreakdown: publicProcedure.query(() => getCachedPaceBreakdown()),
 
   getById: protectedProcedure
     .input(z.object({ id: z.string() }))

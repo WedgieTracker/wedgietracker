@@ -1,3 +1,9 @@
+/**
+ * Games in a full NBA season as the pace counts it: the 1,230 regular-season
+ * games plus the play-in and playoffs.
+ */
+export const SEASON_GAMES = 1315;
+
 interface PaceInput {
   currentTotalWedgies: number;
   currentTotalGames: number;
@@ -19,7 +25,7 @@ export interface PaceResult {
 export function computePace({
   currentTotalWedgies,
   currentTotalGames,
-  totalEstimatedGames = 1315,
+  totalEstimatedGames = SEASON_GAMES,
   seasonRates,
 }: PaceInput): PaceResult {
   if (currentTotalGames <= 0) {

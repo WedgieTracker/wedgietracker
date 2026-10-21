@@ -123,72 +123,80 @@ function SeasonComparisonWrapper({ stats }: StatsForNerdsProps) {
   const isMore = stats.pace > stats.averageLastTenSeasons;
 
   return (
-    <div className="bg-darkpurple-dark flex w-full max-w-xl flex-col items-center justify-center gap-2 rounded-3xl py-4 md:flex-row md:gap-5 md:py-8">
-      {showPace ? (
-        <div className="text-center">
-          <div className="text-pace-text-mobile text-pink md:text-pace-text w-full leading-none font-black tracking-wider uppercase">
-            Pace
-          </div>
-          <div className="shadow-lg-darkpurple-light text-pace-number-mobile text-yellow md:text-pace-number mt-[-.2em] w-full leading-none font-black">
-            {stats.pace.toFixed(0)}
-          </div>
-        </div>
-      ) : (
-        !isMatchingAverage && (
+    <div className="flex w-full max-w-xl flex-col items-center justify-center">
+      <div className="bg-darkpurple-dark flex w-full flex-col items-center justify-center gap-2 rounded-t-3xl py-4 md:flex-row md:gap-5 md:py-8">
+        {showPace ? (
           <div className="text-center">
-            <div className="shadow-lg-darkpurple-light text-pace-number-mobile text-yellow md:text-pace-number w-full leading-none font-black">
-              {diff}
+            <div className="text-pace-text-mobile text-pink md:text-pace-text w-full leading-none font-black tracking-wider uppercase">
+              Pace
             </div>
-            <div className="text-pace-text-mobile text-pink md:text-pace-text mt-[-.6em] w-full leading-none font-black tracking-wider uppercase">
-              {isMore ? "More" : "Less"}
+            <div className="shadow-lg-darkpurple-light text-pace-number-mobile text-yellow md:text-pace-number mt-[-.2em] w-full leading-none font-black">
+              {stats.pace.toFixed(0)}
             </div>
-          </div>
-        )
-      )}
-      <div className="text-center text-xl font-bold text-white md:text-left">
-        {isMatchingAverage ? (
-          <>
-            WE ARE ON PACE TO MATCH
-            <br />
-            THE AVERAGE OF{" "}
-            <span className="text-pink font-black">
-              {stats.averageLastTenSeasons}
-            </span>
-            <br />
-            OF THE PAST{" "}
-            <span className="text-pink font-black">
-              {stats.averageSeasonsCount} SEASONS
-            </span>
-          </>
-        ) : showPace ? (
-          <div>
-            IT IS <span className="text-pink font-black">{diff}</span>{" "}
-            {isMore ? "MORE" : "LESS"} THAN
-            <br />
-            THE AVERAGE OF{" "}
-            <span className="text-pink font-black">
-              {stats.averageLastTenSeasons}
-            </span>
-            <br />
-            OF THE PAST{" "}
-            <span className="text-pink font-black">
-              {stats.averageSeasonsCount} SEASONS
-            </span>
           </div>
         ) : (
-          <div>
-            THAN THE AVERAGE OF{" "}
-            <span className="text-pink font-black">
-              {stats.averageLastTenSeasons}
-            </span>
-            <br />
-            OF THE PAST{" "}
-            <span className="text-pink font-black">
-              {stats.averageSeasonsCount} SEASONS
-            </span>
-          </div>
+          !isMatchingAverage && (
+            <div className="text-center">
+              <div className="shadow-lg-darkpurple-light text-pace-number-mobile text-yellow md:text-pace-number w-full leading-none font-black">
+                {diff}
+              </div>
+              <div className="text-pace-text-mobile text-pink md:text-pace-text mt-[-.6em] w-full leading-none font-black tracking-wider uppercase">
+                {isMore ? "More" : "Less"}
+              </div>
+            </div>
+          )
         )}
+        <div className="text-center text-xl font-bold text-white md:text-left">
+          {isMatchingAverage ? (
+            <>
+              WE ARE ON PACE TO MATCH
+              <br />
+              THE AVERAGE OF{" "}
+              <span className="text-pink font-black">
+                {stats.averageLastTenSeasons}
+              </span>
+              <br />
+              OF THE PAST{" "}
+              <span className="text-pink font-black">
+                {stats.averageSeasonsCount} SEASONS
+              </span>
+            </>
+          ) : showPace ? (
+            <div>
+              IT IS <span className="text-pink font-black">{diff}</span>{" "}
+              {isMore ? "MORE" : "LESS"} THAN
+              <br />
+              THE AVERAGE OF{" "}
+              <span className="text-pink font-black">
+                {stats.averageLastTenSeasons}
+              </span>
+              <br />
+              OF THE PAST{" "}
+              <span className="text-pink font-black">
+                {stats.averageSeasonsCount} SEASONS
+              </span>
+            </div>
+          ) : (
+            <div>
+              THAN THE AVERAGE OF{" "}
+              <span className="text-pink font-black">
+                {stats.averageLastTenSeasons}
+              </span>
+              <br />
+              OF THE PAST{" "}
+              <span className="text-pink font-black">
+                {stats.averageSeasonsCount} SEASONS
+              </span>
+            </div>
+          )}
+        </div>
       </div>
+      <Link
+        href="/stats-for-nerds/pace"
+        className="border-yellow bg-yellow text-button-text text-darkpurple hover:bg-darkpurple hover:text-yellow w-full rounded-b-3xl border-2 py-1.5 text-center font-bold transition-all duration-300"
+      >
+        HOW THE PACE WORKS
+      </Link>
     </div>
   );
 }
