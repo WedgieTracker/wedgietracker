@@ -29,6 +29,20 @@ function shotValue(types: { name: string }[] | undefined): number | null {
 }
 
 /**
+ * Clutch: within six before the shot, or within five had it gone in. In the
+ * last 24 seconds only a one-possession game (within three) counts.
+ */
+function isClutch(
+  secondsLeft: number,
+  margin: number,
+  marginIfIn: number | null,
+): boolean {
+  const closest = Math.min(margin, marginIfIn ?? margin);
+  if (secondsLeft <= 24) return closest <= 3;
+  return margin <= 6 || (marginIfIn !== null && marginIfIn <= 5);
+}
+
+/**
  * Garbage time in the fourth quarter, using Cleaning the Glass's thresholds:
  * a 25+ point lead with 12-9 minutes left, 20+ with 9-6, 10+ with under 6.
  */
@@ -41,9 +55,9 @@ function isGarbageTime(secondsLeft: number, margin: number): boolean {
 /**
  * Describes when in the game a wedgie happened as a band rather than an
  * exact time: "Early Q2", "Late Q1", "Final minute of Q3", "Clutch time"
- * (last five minutes of Q4 or overtime within six points, before the shot or
- * had it gone in: the NBA says five, but a basket that would end it or make it
- * a one-possession game is just as tense), "Garbage time" or "Overtime".
+ * (last five minutes of Q4 or overtime within six points, or within five had
+ * the shot gone in; one possession in the last 24 seconds. The NBA says
+ * within five), "Garbage time" or "Overtime".
  * Returns null without a clock.
  */
 export function gameMoment({
@@ -73,11 +87,7 @@ export function gameMoment({
   if (period === 4 && margin !== null && isGarbageTime(seconds, margin)) {
     return "Garbage time";
   }
-  if (
-    crunch &&
-    margin !== null &&
-    Math.min(margin, marginIfIn ?? margin) <= 6
-  ) {
+  if (crunch && margin !== null && isClutch(seconds, margin, marginIfIn)) {
     return "Clutch time";
   }
   if (period >= 5) return "Overtime";
