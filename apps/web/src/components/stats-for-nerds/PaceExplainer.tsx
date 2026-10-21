@@ -43,8 +43,8 @@ const fmt = (n: number) => n.toLocaleString("en-US");
 
 export function PaceExplainer({ data }: PaceExplainerProps) {
   const { seasons } = data;
-  const average =
-    seasons.reduce((acc, s) => acc + s.wedgies, 0) / (seasons.length || 1);
+  const total = seasons.reduce((acc, s) => acc + s.wedgies, 0);
+  const average = total / (seasons.length || 1);
   const most = Math.max(...seasons.map((s) => s.wedgies), 1);
 
   const [games, setGames] = useState(data.gamesPlayed);
@@ -59,8 +59,7 @@ export function PaceExplainer({ data }: PaceExplainerProps) {
       <p className="text-center text-lg font-bold md:text-xl">
         The pace is our guess at how many wedgies the{" "}
         <span className="text-yellow">{data.currentSeason}</span> season will
-        finish with. It starts from a normal season and adds the wedgies we have
-        had so far.
+        finish with.
       </p>
 
       <Section step="1" title="A normal season">
@@ -96,10 +95,36 @@ export function PaceExplainer({ data }: PaceExplainerProps) {
             </li>
           ))}
         </ul>
-        <p className="mt-3 text-sm text-white/60">
+        <p className="mt-5 mb-4 font-bold">
+          Add up every completed season and share it out evenly:
+        </p>
+        <div className="flex flex-col gap-3 md:flex-row md:justify-center md:gap-2">
+          <Line>
+            <Term value={fmt(total)} label="wedgies in total" />
+          </Line>
+          <Line op="÷">
+            <Term value={String(seasons.length)} label="seasons" />
+          </Line>
+          <Line op="=">
+            <Term
+              value={String(Math.round(average))}
+              label="normal season"
+              highlight
+            />
+          </Line>
+        </div>
+        <p className="mt-4 text-center text-sm text-white/60">
+          That is the same as averaging each season&apos;s rate per game, (
+          {[...seasons.slice(0, 2), ...seasons.slice(-1)]
+            .map((s) => `${s.wedgies}/${fmt(SEASON_GAMES)}`)
+            .join(" + ")
+            .replace(/ \+ (?=[^+]*$)/, " + … + ")}
+          ) ÷ {seasons.length}, which is {Math.round(average)}/
+          {fmt(SEASON_GAMES)} a game.
+        </p>
+        <p className="mt-4 text-sm text-white/60">
           Yellow seasons beat the average, pink ones fell short. The white line
-          is the average. The pace works with the exact average,{" "}
-          {average.toFixed(1)}, and only rounds at the end.
+          is the average.
         </p>
       </Section>
 
@@ -125,17 +150,10 @@ export function PaceExplainer({ data }: PaceExplainerProps) {
       <Section step="3" title="Put together">
         <p className="mb-4 font-bold">
           We expect the games still to play to go like a normal season, and add
-          this season&apos;s wedgies so far:
+          this season&apos;s wedgies so far. Move the numbers below to try it.
         </p>
-        <Formula
-          wedgies={data.wedgiesThisSeason}
-          average={average}
-          left={Math.max(0, SEASON_GAMES - data.gamesPlayed)}
-          pace={paceFor(seasons, data.wedgiesThisSeason, data.gamesPlayed)}
-        />
-      </Section>
-
-      <Section step="4" title="Try it">
+        <Formula wedgies={wedgies} average={average} left={left} pace={pace} />
+        <div className="my-5 border-t border-white/10" />
         <label className="mb-1 flex justify-between font-bold">
           <span>Games played</span>
           <span className="text-yellow">{fmt(games)}</span>
@@ -169,8 +187,7 @@ export function PaceExplainer({ data }: PaceExplainerProps) {
             </Stepper>
           </span>
         </div>
-        <Formula wedgies={wedgies} average={average} left={left} pace={pace} />
-        <div className="mt-4 flex justify-center">
+        <div className="flex justify-center">
           <button
             type="button"
             disabled={isToday}
@@ -188,9 +205,21 @@ export function PaceExplainer({ data }: PaceExplainerProps) {
       <Section title="Why it works this way">
         <ul className="flex list-disc flex-col gap-2 pl-5 font-bold">
           <li>
-            Only completed seasons go into the average. A new season&apos;s own
-            rate swings wildly over its first few games, so it only counts
-            through the wedgies it has already had.
+            Only completed seasons go into the average. This season only adds
+            the wedgies it has had so far, because a handful of games says very
+            little about the rest
+            {data.gamesPlayed > 0 && data.wedgiesThisSeason > 0 && (
+              <>
+                : {data.wedgiesThisSeason} in {fmt(data.gamesPlayed)} games kept
+                up all season would be{" "}
+                {fmt(
+                  Math.round(
+                    (data.wedgiesThisSeason / data.gamesPlayed) * SEASON_GAMES,
+                  ),
+                )}
+              </>
+            )}
+            .
           </li>
           <li>
             Every completed season counts as its total, including the shortened
@@ -238,7 +267,7 @@ function Section({
   );
 }
 
-/** wedgies so far + average × (games left ÷ season games) = pace */
+/** wedgies so far + (average × games left ÷ season games) = pace */
 function Formula({
   wedgies,
   average,
@@ -251,17 +280,38 @@ function Formula({
   pace: number;
 }) {
   return (
-    <div className="flex flex-wrap items-start justify-center gap-x-2 gap-y-3 text-center">
-      <Term value={String(wedgies)} label="wedgies so far" />
-      <Op>+</Op>
-      <Term value={String(Math.round(average))} label="normal season" />
-      <Op>×</Op>
-      <Term
-        value={`${fmt(left)}/${fmt(SEASON_GAMES)}`}
-        label="of the season left (est.)"
-      />
-      <Op>=</Op>
-      <Term value={String(pace)} label="pace" highlight />
+    <div className="flex flex-col gap-3 md:flex-row md:justify-center md:gap-2">
+      <Line>
+        <Term value={String(wedgies)} label="wedgies so far" />
+      </Line>
+      <Line op="+">
+        <Op>(</Op>
+        <Term value={String(Math.round(average))} label="normal season" />
+        <Op>×</Op>
+        <Term
+          value={`${fmt(left)}/${fmt(SEASON_GAMES)}`}
+          label="season left (est.)"
+        />
+        <Op>)</Op>
+      </Line>
+      <Line op="=">
+        <Term value={String(pace)} label="pace" highlight />
+      </Line>
+    </div>
+  );
+}
+
+/**
+ * One step of a sum. On phones the steps stack with the operator in a column
+ * on the left; from md up they sit in one row.
+ */
+function Line({ op, children }: { op?: string; children: React.ReactNode }) {
+  return (
+    <div className="flex items-start gap-2">
+      <span className={`w-5 shrink-0 md:w-auto ${op ? "" : "md:hidden"}`}>
+        {op && <Op>{op}</Op>}
+      </span>
+      {children}
     </div>
   );
 }
@@ -284,7 +334,7 @@ function Term({
       >
         {value}
       </span>
-      <span className="mt-1 text-xs font-bold text-white/60 uppercase">
+      <span className="mt-1 text-center text-xs font-bold text-white/60 uppercase md:whitespace-nowrap">
         {label}
       </span>
     </div>
@@ -293,7 +343,7 @@ function Term({
 
 function Op({ children }: { children: React.ReactNode }) {
   return (
-    <span className="text-pink pt-1 text-2xl font-black md:text-3xl">
+    <span className="text-pink block pt-1 text-center text-2xl font-black md:text-3xl">
       {children}
     </span>
   );
