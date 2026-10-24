@@ -27,6 +27,14 @@ const config = {
         destination: "https://apps.apple.com/app/wedgietracker/id6811376841",
         permanent: false,
       },
+      // A short link to the TRMNL recipe, with the WedgieTracker referral code
+      // that gives buyers a discount. Same URL as the TRMNL icon in SocialIcons.tsx.
+      {
+        source: "/trmnl",
+        destination:
+          "https://trmnl.com/recipes/wedgietracker-501111?ref=WedgieTracker",
+        permanent: false,
+      },
     ];
   },
 };
