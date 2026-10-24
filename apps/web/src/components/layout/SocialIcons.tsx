@@ -134,6 +134,24 @@ const Github = ({ isHovered, isFooter = false }: IconProps) => (
   </svg>
 );
 
+const Trmnl = ({ isHovered, isFooter = false }: IconProps) => (
+  <svg
+    viewBox="0 0 160 162"
+    width="1em"
+    height="1em"
+    className="transition-colors duration-300"
+    fill={isHovered ? "#F8654B" : isFooter ? "#fff" : "#000"}
+    xmlns="http://www.w3.org/2000/svg"
+    preserveAspectRatio="xMidYMid"
+  >
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M43.2322 11.3438L85.6168 27.2379L77.7459 48.2271L35.3613 32.3328L43.2322 11.3438Z M111.192 6.1543L125.192 49.2018L103.875 56.1345L89.875 13.0871L111.192 6.1543Z M157.609 56.0686L132.682 93.8537L113.971 81.5097L138.898 43.7246L157.609 56.0686Z M147.533 123.467L102.449 127.536L100.434 105.211L145.517 101.141L147.533 123.467Z M88.5468 157.611L57.2559 124.901L73.4541 109.406L104.745 142.116L88.5468 157.611Z M25.0723 132.804L31.1366 87.9453L53.3508 90.9484L47.2865 135.808L25.0723 132.804Z M4.9082 67.6808L43.7612 44.4531L55.2636 63.6933L16.4107 86.921L4.9082 67.6808Z"
+    />
+  </svg>
+);
+
 const socialLinks = [
   {
     href: "https://x.com/wedgietracker",
@@ -168,6 +186,13 @@ const socialLinks = [
     label: "GitHub",
     icon: (isHovered: boolean, isFooter?: boolean) => (
       <Github isHovered={isHovered} isFooter={isFooter} />
+    ),
+  },
+  {
+    href: "https://trmnl.com/recipes/wedgietracker-501111?ref=WedgieTracker",
+    label: "TRMNL",
+    icon: (isHovered: boolean, isFooter?: boolean) => (
+      <Trmnl isHovered={isHovered} isFooter={isFooter} />
     ),
   },
 ];

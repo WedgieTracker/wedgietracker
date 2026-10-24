@@ -47,14 +47,6 @@ export function Footer() {
           >
             Support
           </Link>
-          <a
-            href="https://trmnl.com/recipes/wedgietracker-501111?ref=WedgieTracker"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="ml-3 text-xs text-white/50 underline transition-all duration-300 hover:text-white"
-          >
-            On TRMNL
-          </a>
         </div>
         <div className="flex flex-col items-center gap-2 sm:items-end lg:flex-row lg:items-center lg:gap-8">
           <AppStoreBadge />
