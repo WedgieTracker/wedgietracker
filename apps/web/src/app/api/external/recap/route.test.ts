@@ -113,6 +113,7 @@ describe("GET /api/external/recap", () => {
         previous: { date: string; seasonName: string } | null;
         leagueGap: unknown;
         firstForTeam: boolean;
+        playerSeasonNumber: number | null;
       }[];
       season: { name: string; wedgies: number; pace: number };
       pace: unknown;
@@ -130,6 +131,7 @@ describe("GET /api/external/recap", () => {
     expect(body.wedgies[0]?.previous).toBeNull();
     expect(body.wedgies[0]?.leagueGap).toBeNull();
     expect(body.wedgies[0]?.firstForTeam).toBe(false);
+    expect(body.wedgies[0]?.playerSeasonNumber).toBe(1);
     expect(body.pace).toEqual({
       season: "2026/27",
       wedgies: 1,

@@ -9,6 +9,7 @@ import {
   firstForTeam,
   leagueGap,
   nightFacts,
+  playerSeasonNumber,
   previousWedgie,
   seasonPace,
   wedgieFacts,
@@ -164,6 +165,14 @@ export async function GET(request: Request) {
         );
         return g ? { days: g.days, games: g.games } : null;
       })(),
+      // this wedgie's place in the player's season ("his second of the season")
+      playerSeasonNumber:
+        w.seasonName === "GEMS"
+          ? null
+          : playerSeasonNumber(
+              { ...w, date: w.wedgieDate.slice(0, 10) },
+              history,
+            ),
       firstForTeam:
         w.seasonName !== "GEMS" &&
         firstForTeam({ ...w, date: w.wedgieDate.slice(0, 10) }, history),

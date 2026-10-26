@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   firstForTeam,
+  playerSeasonNumber,
   leagueGap,
   nightFacts,
   previousWedgie,
@@ -200,5 +201,18 @@ describe("seasonPace", () => {
       seasonGames,
     );
     expect(fact?.notable).toBe(false);
+  });
+});
+
+describe("playerSeasonNumber", () => {
+  it("counts the player's wedgies this season up to this one", () => {
+    const history = [
+      lebron("2025/26", 9, "2026-01-01"),
+      lebron("2026/27", 1, "2026-10-20"),
+      lebron("2026/27", 5, "2026-11-02"),
+      lebron("2026/27", 8, "2026-11-20"),
+    ];
+    expect(playerSeasonNumber(history[2]!, history)).toBe(2);
+    expect(playerSeasonNumber(history[1]!, history)).toBe(1);
   });
 });
