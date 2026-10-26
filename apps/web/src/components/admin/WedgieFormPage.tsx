@@ -80,10 +80,10 @@ export function WedgieFormPage({ wedgie, currentSeason }: WedgieFormPageProps) {
 
           <div>
             <label
-              htmlFor="homeTeam"
+              htmlFor="teamName"
               className="block text-sm font-medium text-white"
             >
-              Home Team
+              Player&apos;s Team
             </label>
             <TeamSearchInput
               value={formData.teamName}
@@ -95,10 +95,10 @@ export function WedgieFormPage({ wedgie, currentSeason }: WedgieFormPageProps) {
 
           <div>
             <label
-              htmlFor="awayTeam"
+              htmlFor="teamAgainstName"
               className="block text-sm font-medium text-white"
             >
-              Away Team
+              Opponent
             </label>
             <TeamSearchInput
               value={formData.teamAgainstName}
