@@ -2,13 +2,17 @@ import { buildAllWedgiesQuery } from "@wedgietracker/core/utils/allWedgiesUrl";
 import { gameTimeline } from "@wedgietracker/core/utils/gameMoment";
 import { timingSafeEqual } from "crypto";
 import { NextResponse } from "next/server";
-import { asc, count, eq, isNotNull, like, min, ne, sql } from "drizzle-orm";
+import { asc, count, eq, isNotNull, like, ne, sql } from "drizzle-orm";
 import { db } from "~/server/db";
 import { game, global, wedgie } from "@wedgietracker/core/schema";
 import {
+  firstForTeam,
+  leagueGap,
   nightFacts,
   previousWedgie,
+  seasonPace,
   wedgieFacts,
+  type GameNight,
   type PastWedgie,
 } from "./facts";
 import { env } from "~/env";
@@ -62,19 +66,26 @@ export async function GET(request: Request) {
     db
       .select({
         seasonName: game.seasonName,
-        date: min(sql<string>`substr(${game.createdAt}, 1, 10)`),
+        date: sql<string>`substr(${game.createdAt}, 1, 10)`,
+        games: count(),
       })
       .from(game)
       .where(isNotNull(game.seasonName))
-      .groupBy(game.seasonName),
+      .groupBy(game.seasonName, sql`substr(${game.createdAt}, 1, 10)`),
   ]);
 
   const history: PastWedgie[] = past;
-  const openingNights = Object.fromEntries(
-    openings
-      .filter((o) => o.seasonName && o.seasonName !== "GEMS" && o.date)
-      .map((o) => [o.seasonName, o.date]),
-  ) as Record<string, string>;
+  const nights: GameNight[] = openings.flatMap((o) =>
+    o.seasonName && o.seasonName !== "GEMS" && o.date
+      ? [{ seasonName: o.seasonName, date: o.date, games: o.games }]
+      : [],
+  );
+  // a season's opening night is its first night with games
+  const openingNights: Record<string, string> = {};
+  for (const n of nights) {
+    const first = openingNights[n.seasonName];
+    if (!first || n.date < first) openingNights[n.seasonName] = n.date;
+  }
   const tonight = rows.filter((w) => w.seasonName !== "GEMS");
 
   const seasonName = globalRow?.currentSeason.name ?? null;
@@ -85,9 +96,20 @@ export async function GET(request: Request) {
         .where(eq(wedgie.seasonName, seasonName))
     : [];
 
+  // the night's own season, so an older date compares against its own last season
+  const nightSeason = tonight[0]?.seasonName ?? seasonName;
+  const night = nightSeason
+    ? seasonPace(date, nightSeason, history, nights)
+    : null;
+
   return NextResponse.json({
     date,
-    facts: nightFacts(date, tonight.length, history),
+    facts: [
+      ...nightFacts(date, tonight.length, history),
+      ...(tonight.length > 0 && night?.fact ? [night.fact] : []),
+    ],
+    // this season after the night, next to last season at the same games
+    pace: night?.pace ?? null,
     wedgies: rows.map((w) => ({
       seasonName: w.seasonName,
       number: w.number,
@@ -111,6 +133,7 @@ export async function GET(request: Request) {
               { ...w, date: w.wedgieDate.slice(0, 10) },
               history,
               openingNights,
+              nights,
             ),
       // the player's wedgie before this one, so the recap can say how long it has been
       previous: (() => {
@@ -121,6 +144,19 @@ export async function GET(request: Request) {
         );
         return p ? { date: p.date, seasonName: p.seasonName } : null;
       })(),
+      // time since anyone's previous wedgie, in days and games played between
+      leagueGap: (() => {
+        if (w.seasonName === "GEMS") return null;
+        const g = leagueGap(
+          { ...w, date: w.wedgieDate.slice(0, 10) },
+          history,
+          nights,
+        );
+        return g ? { days: g.days, games: g.games } : null;
+      })(),
+      firstForTeam:
+        w.seasonName !== "GEMS" &&
+        firstForTeam({ ...w, date: w.wedgieDate.slice(0, 10) }, history),
       types: w.wedgieToTypes.map((t) => t.type.name),
       shoutouts: w.shoutouts,
       videoUrl: w.videoUrl,

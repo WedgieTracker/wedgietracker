@@ -16,7 +16,20 @@ export interface PastWedgie {
   date: string;
 }
 
+/** How many games were played on one night of one season. */
+export interface GameNight {
+  seasonName: string;
+  /** YYYY-MM-DD in US Eastern time, like PastWedgie.date. */
+  date: string;
+  games: number;
+}
+
 const MILESTONES = new Set([5, 10, 15, 20, 25, 30]);
+/** A league-wide wait at least this long (within a season) is worth calling out. */
+const LONG_WAIT_DAYS = 7;
+/** Below this many games a pace comparison says nothing; below the second it isn't news. */
+const PACE_FACT_GAMES = 50;
+const PACE_NOTABLE_GAMES = 100;
 
 function ordinal(n: number) {
   const tens = n % 100;
@@ -44,6 +57,36 @@ export function previousWedgie(
 }
 
 /**
+ * Time since anyone's previous wedgie: days between the two nights, and the
+ * games played on the nights in between. Null when there is no earlier one.
+ */
+export function leagueGap(
+  w: PastWedgie,
+  history: PastWedgie[],
+  nights: GameNight[],
+): { days: number; games: number; sameSeason: boolean } | null {
+  const previous = history
+    .filter((h) => before(h, w))
+    .sort((a, b) => (before(a, b) ? 1 : -1))[0];
+  if (!previous) return null;
+  const days = Math.round(
+    (Date.parse(w.date) - Date.parse(previous.date)) / 86_400_000,
+  );
+  const games = nights
+    .filter((n) => n.date > previous.date && n.date < w.date)
+    .reduce((acc, n) => acc + n.games, 0);
+  return { days, games, sameSeason: previous.seasonName === w.seasonName };
+}
+
+/** Whether the player has earlier wedgies, but none for this team. */
+export function firstForTeam(w: PastWedgie, history: PastWedgie[]): boolean {
+  const earlier = history.filter(
+    (h) => h.playerName === w.playerName && before(h, w),
+  );
+  return earlier.length > 0 && !earlier.some((h) => h.teamName === w.teamName);
+}
+
+/**
  * @param history every wedgie on the site, GEMS left out
  * @param openingNights the first game date of each season, by season name
  */
@@ -51,6 +94,7 @@ export function wedgieFacts(
   w: PastWedgie,
   history: PastWedgie[],
   openingNights: Record<string, string>,
+  nights: GameNight[] = [],
 ): Fact[] {
   const facts: Fact[] = [];
   const firstTracked = Object.keys(openingNights).sort()[0];
@@ -102,6 +146,21 @@ export function wedgieFacts(
     });
   }
 
+  if (firstForTeam(w, history)) {
+    facts.push({
+      text: `${w.playerName}'s first wedgie for ${w.teamName}`,
+      notable: true,
+    });
+  }
+
+  const gap = leagueGap(w, history, nights);
+  if (gap?.sameSeason && gap.days >= LONG_WAIT_DAYS) {
+    facts.push({
+      text: `First wedgie in ${gap.days} days, after ${gap.games} games without one`,
+      notable: true,
+    });
+  }
+
   const teamSeason = history.filter(
     (h) =>
       h.teamName === w.teamName &&
@@ -137,4 +196,76 @@ export function nightFacts(
       notable: true,
     },
   ];
+}
+
+export interface SeasonPace {
+  season: string;
+  /** Wedgies and games in this season up to and including the night. */
+  wedgies: number;
+  games: number;
+  lastSeason: {
+    name: string;
+    wedgies: number;
+    games: number;
+    /** Last season's wedgies by the time it had played as many games. */
+    wedgiesAtSameGames: number;
+  } | null;
+}
+
+/** Where a season stood after a night, next to last season at the same number of games. */
+export function seasonPace(
+  date: string,
+  season: string,
+  history: PastWedgie[],
+  nights: GameNight[],
+): { pace: SeasonPace; fact: Fact | null } {
+  const games = nights
+    .filter((n) => n.seasonName === season && n.date <= date)
+    .reduce((acc, n) => acc + n.games, 0);
+  const wedgies = history.filter(
+    (h) => h.seasonName === season && h.date <= date,
+  ).length;
+  const lastName = [...new Set(nights.map((n) => n.seasonName))]
+    .filter((name) => name < season)
+    .sort()
+    .pop();
+  if (!lastName)
+    return { pace: { season, wedgies, games, lastSeason: null }, fact: null };
+
+  const lastNights = nights
+    .filter((n) => n.seasonName === lastName)
+    .sort((a, b) => a.date.localeCompare(b.date));
+  const lastWedgies = history.filter((h) => h.seasonName === lastName);
+  // the night last season reached this many games
+  let played = 0;
+  let cutoff = lastNights.at(-1)?.date ?? "";
+  for (const n of lastNights) {
+    played += n.games;
+    if (played >= games) {
+      cutoff = n.date;
+      break;
+    }
+  }
+  const atSame = lastWedgies.filter((h) => h.date <= cutoff).length;
+  const pace: SeasonPace = {
+    season,
+    wedgies,
+    games,
+    lastSeason: {
+      name: lastName,
+      wedgies: lastWedgies.length,
+      games: lastNights.reduce((acc, n) => acc + n.games, 0),
+      wedgiesAtSameGames: atSame,
+    },
+  };
+  if (games < PACE_FACT_GAMES) return { pace, fact: null };
+  const where =
+    wedgies > atSame ? "Ahead of" : wedgies < atSame ? "Behind" : "Level with";
+  return {
+    pace,
+    fact: {
+      text: `${where} last season's pace: ${wedgies} after ${games} games, against ${atSame} for ${lastName} at the same point`,
+      notable: wedgies > atSame && games >= PACE_NOTABLE_GAMES,
+    },
+  };
 }
