@@ -4,7 +4,7 @@ import { timingSafeEqual } from "crypto";
 import { NextResponse } from "next/server";
 import { asc, count, eq, isNotNull, like, ne, sql } from "drizzle-orm";
 import { db } from "~/server/db";
-import { game, global, wedgie } from "@wedgietracker/core/schema";
+import { game, global, season, wedgie } from "@wedgietracker/core/schema";
 import {
   firstForTeam,
   leagueGap,
@@ -43,7 +43,7 @@ export async function GET(request: Request) {
     );
   }
 
-  const [rows, globalRow, past, openings] = await Promise.all([
+  const [rows, globalRow, past, openings, seasons] = await Promise.all([
     db.query.wedgie.findMany({
       where: like(wedgie.wedgieDate, `${date}%`),
       orderBy: [asc(wedgie.wedgieDate), asc(wedgie.number)],
@@ -72,6 +72,10 @@ export async function GET(request: Request) {
       .from(game)
       .where(isNotNull(game.seasonName))
       .groupBy(game.seasonName, sql`substr(${game.createdAt}, 1, 10)`),
+    db
+      .select({ name: season.name, totalGames: season.totalGames })
+      .from(season)
+      .where(ne(season.name, "GEMS")),
   ]);
 
   const history: PastWedgie[] = past;
@@ -99,7 +103,13 @@ export async function GET(request: Request) {
   // the night's own season, so an older date compares against its own last season
   const nightSeason = tonight[0]?.seasonName ?? seasonName;
   const night = nightSeason
-    ? seasonPace(date, nightSeason, history, nights)
+    ? seasonPace(
+        date,
+        nightSeason,
+        history,
+        nights,
+        Object.fromEntries(seasons.map((s) => [s.name, s.totalGames])),
+      )
     : null;
 
   return NextResponse.json({
@@ -108,7 +118,7 @@ export async function GET(request: Request) {
       ...nightFacts(date, tonight.length, history),
       ...(tonight.length > 0 && night?.fact ? [night.fact] : []),
     ],
-    // this season after the night, next to last season at the same games
+    // this season after the night, next to the completed seasons' average at the same games
     pace: night?.pace ?? null,
     wedgies: rows.map((w) => ({
       seasonName: w.seasonName,

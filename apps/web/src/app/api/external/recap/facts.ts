@@ -1,3 +1,5 @@
+import { SEASON_GAMES } from "@wedgietracker/core/utils/paceCalculator";
+
 // Facts worth telling about a night's wedgies, worked out from the whole history so the recap's
 // writer never has to guess. `notable` marks the ones (firsts, milestones, long gaps) the admin
 // confirms before they go in the email.
@@ -30,6 +32,8 @@ const LONG_WAIT_DAYS = 7;
 /** Below this many games a pace comparison says nothing; below the second it isn't news. */
 const PACE_FACT_GAMES = 50;
 const PACE_NOTABLE_GAMES = 100;
+/** Ahead or behind the average only counts as news by this share or more. */
+const PACE_CLEAR_GAP = 0.2;
 
 function ordinal(n: number) {
   const tens = n % 100;
@@ -203,6 +207,17 @@ export interface SeasonPace {
   /** Wedgies and games in this season up to and including the night. */
   wedgies: number;
   games: number;
+  /**
+   * The average of the completed seasons, as Stats for Nerds and the pace use
+   * it: each season's wedgies per game it played, averaged.
+   */
+  average: {
+    seasons: number;
+    /** What the average rate gives after this many games. */
+    wedgiesAtSameGames: number;
+    /** A normal season: the average rate over a full schedule. */
+    perSeason: number;
+  } | null;
   lastSeason: {
     name: string;
     wedgies: number;
@@ -212,12 +227,20 @@ export interface SeasonPace {
   } | null;
 }
 
-/** Where a season stood after a night, next to last season at the same number of games. */
+const fmt = (n: number) => n.toLocaleString("en-US");
+
+/**
+ * Where a season stood after a night, next to the average of the completed
+ * seasons at the same number of games (and to last season, as a field).
+ *
+ * @param seasonGames games each season played (season.totalGames)
+ */
 export function seasonPace(
   date: string,
   season: string,
   history: PastWedgie[],
   nights: GameNight[],
+  seasonGames: Record<string, number>,
 ): { pace: SeasonPace; fact: Fact | null } {
   const games = nights
     .filter((n) => n.seasonName === season && n.date <= date)
@@ -225,13 +248,68 @@ export function seasonPace(
   const wedgies = history.filter(
     (h) => h.seasonName === season && h.date <= date,
   ).length;
+
+  // completed seasons, as in server/pace.ts: every earlier one with games
+  const rates = Object.entries(seasonGames)
+    .filter(([name, total]) => name < season && total > 0)
+    .map(
+      ([name, total]) =>
+        history.filter((h) => h.seasonName === name).length / total,
+    );
+  const rate = rates.length
+    ? rates.reduce((acc, r) => acc + r, 0) / rates.length
+    : null;
+  const expected = rate === null ? null : Math.round(rate * games);
+  const average =
+    rate === null || expected === null
+      ? null
+      : {
+          seasons: rates.length,
+          wedgiesAtSameGames: expected,
+          perSeason: Math.round(rate * SEASON_GAMES),
+        };
+
+  const pace: SeasonPace = {
+    season,
+    wedgies,
+    games,
+    average,
+    lastSeason: lastSeasonAtSameGames(season, games, history, nights),
+  };
+  if (!average || expected === null || games < PACE_FACT_GAMES) {
+    return { pace, fact: null };
+  }
+  const where =
+    wedgies > expected
+      ? "Ahead of"
+      : wedgies < expected
+        ? "Behind"
+        : "Level with";
+  // a clear gap only, so a season tracking the average is not news every night
+  const clear =
+    expected > 0
+      ? Math.abs(wedgies - expected) / expected >= PACE_CLEAR_GAP
+      : wedgies > 0;
+  return {
+    pace,
+    fact: {
+      text: `${where} the ${average.seasons}-season average: ${fmt(wedgies)} after ${fmt(games)} games, against ${fmt(expected)} expected`,
+      notable: games >= PACE_NOTABLE_GAMES && wedgies !== expected && clear,
+    },
+  };
+}
+
+function lastSeasonAtSameGames(
+  season: string,
+  games: number,
+  history: PastWedgie[],
+  nights: GameNight[],
+): SeasonPace["lastSeason"] {
   const lastName = [...new Set(nights.map((n) => n.seasonName))]
     .filter((name) => name < season)
     .sort()
     .pop();
-  if (!lastName)
-    return { pace: { season, wedgies, games, lastSeason: null }, fact: null };
-
+  if (!lastName) return null;
   const lastNights = nights
     .filter((n) => n.seasonName === lastName)
     .sort((a, b) => a.date.localeCompare(b.date));
@@ -246,26 +324,10 @@ export function seasonPace(
       break;
     }
   }
-  const atSame = lastWedgies.filter((h) => h.date <= cutoff).length;
-  const pace: SeasonPace = {
-    season,
-    wedgies,
-    games,
-    lastSeason: {
-      name: lastName,
-      wedgies: lastWedgies.length,
-      games: lastNights.reduce((acc, n) => acc + n.games, 0),
-      wedgiesAtSameGames: atSame,
-    },
-  };
-  if (games < PACE_FACT_GAMES) return { pace, fact: null };
-  const where =
-    wedgies > atSame ? "Ahead of" : wedgies < atSame ? "Behind" : "Level with";
   return {
-    pace,
-    fact: {
-      text: `${where} last season's pace: ${wedgies} after ${games} games, against ${atSame} for ${lastName} at the same point`,
-      notable: wedgies > atSame && games >= PACE_NOTABLE_GAMES,
-    },
+    name: lastName,
+    wedgies: lastWedgies.length,
+    games: lastNights.reduce((acc, n) => acc + n.games, 0),
+    wedgiesAtSameGames: lastWedgies.filter((h) => h.date <= cutoff).length,
   };
 }
