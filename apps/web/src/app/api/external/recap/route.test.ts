@@ -15,7 +15,10 @@ const history = [
     date: "2026-10-20",
   },
 ];
-const openings = [{ seasonName: "2026/27", date: "2026-10-20" }];
+const openings = [
+  { seasonName: "2025/26", date: "2025-10-21", games: 2 },
+  { seasonName: "2026/27", date: "2026-10-20", games: 2 },
+];
 vi.mock("drizzle-orm", async (orig) => ({
   ...(await orig<typeof Drizzle>()),
   like: (col: unknown, pattern: unknown) => {
@@ -102,8 +105,11 @@ describe("GET /api/external/recap", () => {
         moment: unknown;
         facts: { text: string }[];
         previous: { date: string; seasonName: string } | null;
+        leagueGap: unknown;
+        firstForTeam: boolean;
       }[];
       season: { name: string; wedgies: number; pace: number };
+      pace: unknown;
     };
     expect(body.wedgies[0]?.url).toBe(
       "https://www.wedgietracker.com/all-wedgies?season=2026-27&wedgie=1",
@@ -116,6 +122,19 @@ describe("GET /api/external/recap", () => {
     });
     // the only Towns wedgie in the history is this one
     expect(body.wedgies[0]?.previous).toBeNull();
+    expect(body.wedgies[0]?.leagueGap).toBeNull();
+    expect(body.wedgies[0]?.firstForTeam).toBe(false);
+    expect(body.pace).toEqual({
+      season: "2026/27",
+      wedgies: 1,
+      games: 2,
+      lastSeason: {
+        name: "2025/26",
+        wedgies: 0,
+        games: 2,
+        wedgiesAtSameGames: 0,
+      },
+    });
     expect(body.wedgies[0]?.facts.map((f) => f.text)).toContain(
       "First wedgie of the 2026/27 season",
     );

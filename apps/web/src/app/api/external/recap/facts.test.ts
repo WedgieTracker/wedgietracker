@@ -1,7 +1,10 @@
 import { describe, it, expect } from "vitest";
 import {
+  firstForTeam,
+  leagueGap,
   nightFacts,
   previousWedgie,
+  seasonPace,
   wedgieFacts,
   type PastWedgie,
 } from "./facts";
@@ -98,5 +101,88 @@ describe("previousWedgie", () => {
 
   it("is undefined for a first career wedgie", () => {
     expect(previousWedgie(history[0]!, history)).toBeUndefined();
+  });
+});
+
+describe("leagueGap", () => {
+  const a = lebron("2026/27", 1, "2026-10-20");
+  const b = { ...lebron("2026/27", 2, "2026-10-29"), playerName: "S" };
+  const nights = [
+    { seasonName: "2026/27", date: "2026-10-20", games: 2 },
+    { seasonName: "2026/27", date: "2026-10-22", games: 10 },
+    { seasonName: "2026/27", date: "2026-10-25", games: 8 },
+    { seasonName: "2026/27", date: "2026-10-29", games: 6 },
+  ];
+
+  it("counts the days and the games on the nights in between", () => {
+    expect(leagueGap(b, [a, b], nights)).toEqual({
+      days: 9,
+      games: 18,
+      sameSeason: true,
+    });
+  });
+
+  it("flags a long wait as notable", () => {
+    expect(wedgieFacts(b, [a, b], {}, nights)).toContainEqual({
+      text: "First wedgie in 9 days, after 18 games without one",
+      notable: true,
+    });
+  });
+});
+
+describe("firstForTeam", () => {
+  it("is true for a player's first wedgie with a new team", () => {
+    const old = { ...lebron("2021/22", 4, "2022-02-02"), teamName: "POR" };
+    const now = lebron("2026/27", 2, "2026-10-25");
+    expect(firstForTeam(now, [old, now])).toBe(true);
+    expect(wedgieFacts(now, [old, now], {})).toContainEqual({
+      text: "LeBron James's first wedgie for PHI",
+      notable: true,
+    });
+  });
+
+  it("is false for a first career wedgie", () => {
+    const now = lebron("2026/27", 2, "2026-10-25");
+    expect(firstForTeam(now, [now])).toBe(false);
+  });
+});
+
+describe("seasonPace", () => {
+  const nights = [
+    { seasonName: "2025/26", date: "2025-10-21", games: 10 },
+    { seasonName: "2025/26", date: "2025-10-25", games: 30 },
+    { seasonName: "2025/26", date: "2025-12-01", games: 80 },
+    { seasonName: "2026/27", date: "2026-10-20", games: 10 },
+    { seasonName: "2026/27", date: "2026-10-25", games: 95 },
+  ];
+  const history = [
+    lebron("2025/26", 1, "2025-11-30"),
+    lebron("2026/27", 1, "2026-10-20"),
+    lebron("2026/27", 2, "2026-10-25"),
+  ];
+
+  it("leaves the fact out early in the season", () => {
+    expect(
+      seasonPace("2026-10-20", "2026/27", history, nights).fact,
+    ).toBeNull();
+  });
+
+  it("compares with last season after as many games", () => {
+    const { pace, fact } = seasonPace("2026-10-25", "2026/27", history, nights);
+    expect(pace).toEqual({
+      season: "2026/27",
+      wedgies: 2,
+      games: 105,
+      lastSeason: {
+        name: "2025/26",
+        wedgies: 1,
+        games: 120,
+        wedgiesAtSameGames: 1,
+      },
+    });
+    expect(fact).toEqual({
+      text: "Ahead of last season's pace: 2 after 105 games, against 1 for 2025/26 at the same point",
+      notable: true,
+    });
   });
 });
