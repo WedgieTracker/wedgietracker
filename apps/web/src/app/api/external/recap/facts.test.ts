@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { nightFacts, wedgieFacts, type PastWedgie } from "./facts";
+import {
+  nightFacts,
+  previousWedgie,
+  wedgieFacts,
+  type PastWedgie,
+} from "./facts";
 
 const openingNights = {
   "2014/15": "2014-10-28",
@@ -77,5 +82,21 @@ describe("nightFacts", () => {
     expect(nightFacts("2026-10-21", 3, past)[0]?.text).toBe(
       "3 wedgies in one night, the most we have ever tracked",
     );
+  });
+});
+
+describe("previousWedgie", () => {
+  const history = [
+    lebron("2014/15", 3, "2014-11-05"),
+    lebron("2019/20", 8, "2019-12-01"),
+    lebron("2026/27", 1, "2026-10-20"),
+  ];
+
+  it("finds the player's most recent earlier wedgie", () => {
+    expect(previousWedgie(history[2]!, history)?.date).toBe("2019-12-01");
+  });
+
+  it("is undefined for a first career wedgie", () => {
+    expect(previousWedgie(history[0]!, history)).toBeUndefined();
   });
 });

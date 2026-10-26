@@ -5,7 +5,12 @@ import { NextResponse } from "next/server";
 import { asc, count, eq, isNotNull, like, min, ne, sql } from "drizzle-orm";
 import { db } from "~/server/db";
 import { game, global, wedgie } from "@wedgietracker/core/schema";
-import { nightFacts, wedgieFacts, type PastWedgie } from "./facts";
+import {
+  nightFacts,
+  previousWedgie,
+  wedgieFacts,
+  type PastWedgie,
+} from "./facts";
 import { env } from "~/env";
 
 // The wedgies of one night, for the morning recap email. `date` is the US Eastern game date: a
@@ -107,6 +112,15 @@ export async function GET(request: Request) {
               history,
               openingNights,
             ),
+      // the player's wedgie before this one, so the recap can say how long it has been
+      previous: (() => {
+        if (w.seasonName === "GEMS") return null;
+        const p = previousWedgie(
+          { ...w, date: w.wedgieDate.slice(0, 10) },
+          history,
+        );
+        return p ? { date: p.date, seasonName: p.seasonName } : null;
+      })(),
       types: w.wedgieToTypes.map((t) => t.type.name),
       shoutouts: w.shoutouts,
       videoUrl: w.videoUrl,
