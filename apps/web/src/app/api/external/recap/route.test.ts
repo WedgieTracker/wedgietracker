@@ -101,6 +101,7 @@ describe("GET /api/external/recap", () => {
         types: string[];
         moment: unknown;
         facts: { text: string }[];
+        previous: { date: string; seasonName: string } | null;
       }[];
       season: { name: string; wedgies: number; pace: number };
     };
@@ -113,6 +114,8 @@ describe("GET /api/external/recap", () => {
       active: 1,
       label: "Late Q2",
     });
+    // the only Towns wedgie in the history is this one
+    expect(body.wedgies[0]?.previous).toBeNull();
     expect(body.wedgies[0]?.facts.map((f) => f.text)).toContain(
       "First wedgie of the 2026/27 season",
     );

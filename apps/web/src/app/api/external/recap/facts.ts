@@ -33,6 +33,16 @@ const before = (a: PastWedgie, b: PastWedgie) =>
     (a.seasonName < b.seasonName ||
       (a.seasonName === b.seasonName && a.number < b.number)));
 
+/** The player's most recent wedgie before this one, or undefined for a first career wedgie. */
+export function previousWedgie(
+  w: PastWedgie,
+  history: PastWedgie[],
+): PastWedgie | undefined {
+  return history
+    .filter((h) => h.playerName === w.playerName && before(h, w))
+    .sort((a, b) => (before(a, b) ? 1 : -1))[0];
+}
+
 /**
  * @param history every wedgie on the site, GEMS left out
  * @param openingNights the first game date of each season, by season name
@@ -73,9 +83,7 @@ export function wedgieFacts(
 
   const mine = history.filter((h) => h.playerName === w.playerName);
   const career = mine.filter((h) => before(h, w) || sameWedgie(h, w)).length;
-  const previous = mine
-    .filter((h) => before(h, w))
-    .sort((a, b) => (before(a, b) ? 1 : -1))[0];
+  const previous = previousWedgie(w, history);
   if (career === 1) {
     facts.push({
       text: `${w.playerName}'s first career wedgie`,
