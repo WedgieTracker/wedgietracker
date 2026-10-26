@@ -15,6 +15,10 @@ const history = [
     date: "2026-10-20",
   },
 ];
+const seasons = [
+  { name: "2025/26", totalGames: 2 },
+  { name: "2026/27", totalGames: 2 },
+];
 const openings = [
   { seasonName: "2025/26", date: "2025-10-21", games: 2 },
   { seasonName: "2026/27", date: "2026-10-20", games: 2 },
@@ -32,7 +36,7 @@ vi.mock("~/server/db", () => ({
       wedgie: { findMany: wedgieFindMany },
       global: { findFirst: globalFindFirst },
     },
-    // the season count, the wedgie history, then the opening nights
+    // the season count, the wedgie history, the game nights, then the seasons
     select: (cols: Record<string, unknown>) => ({
       from: () => ({
         where: () =>
@@ -40,7 +44,9 @@ vi.mock("~/server/db", () => ({
             ? [{ wedgies: 2 }]
             : "playerName" in cols
               ? history
-              : { groupBy: () => openings },
+              : "totalGames" in cols
+                ? seasons
+                : { groupBy: () => openings },
       }),
     }),
   },
@@ -128,6 +134,8 @@ describe("GET /api/external/recap", () => {
       season: "2026/27",
       wedgies: 1,
       games: 2,
+      // 2025/26 had no wedgies in its 2 games
+      average: { seasons: 1, wedgiesAtSameGames: 0, perSeason: 0 },
       lastSeason: {
         name: "2025/26",
         wedgies: 0,

@@ -148,41 +148,57 @@ describe("firstForTeam", () => {
 });
 
 describe("seasonPace", () => {
+  const many = (season: string, n: number, date: string) =>
+    Array.from({ length: n }, (_, i) => lebron(season, i + 1, date));
+  // two completed seasons at 40 and 60 wedgies in 1,000 games: 0.05 a game
+  const seasonGames = { "2024/25": 1000, "2025/26": 1000, "2026/27": 1020 };
   const nights = [
-    { seasonName: "2025/26", date: "2025-10-21", games: 10 },
-    { seasonName: "2025/26", date: "2025-10-25", games: 30 },
-    { seasonName: "2025/26", date: "2025-12-01", games: 80 },
-    { seasonName: "2026/27", date: "2026-10-20", games: 10 },
-    { seasonName: "2026/27", date: "2026-10-25", games: 95 },
+    { seasonName: "2025/26", date: "2025-12-01", games: 1000 },
+    { seasonName: "2026/27", date: "2026-10-20", games: 20 },
+    { seasonName: "2026/27", date: "2027-01-10", games: 1000 },
   ];
-  const history = [
-    lebron("2025/26", 1, "2025-11-30"),
-    lebron("2026/27", 1, "2026-10-20"),
-    lebron("2026/27", 2, "2026-10-25"),
+  const past = [
+    ...many("2024/25", 40, "2024-12-01"),
+    ...many("2025/26", 60, "2025-12-01"),
   ];
 
   it("leaves the fact out early in the season", () => {
+    const history = [...past, ...many("2026/27", 1, "2026-10-20")];
     expect(
-      seasonPace("2026-10-20", "2026/27", history, nights).fact,
+      seasonPace("2026-10-20", "2026/27", history, nights, seasonGames).fact,
     ).toBeNull();
   });
 
-  it("compares with last season after as many games", () => {
-    const { pace, fact } = seasonPace("2026-10-25", "2026/27", history, nights);
-    expect(pace).toEqual({
-      season: "2026/27",
-      wedgies: 2,
-      games: 105,
-      lastSeason: {
-        name: "2025/26",
-        wedgies: 1,
-        games: 120,
-        wedgiesAtSameGames: 1,
-      },
+  it("compares with the average of the completed seasons", () => {
+    const history = [...past, ...many("2026/27", 64, "2027-01-10")];
+    const { pace, fact } = seasonPace(
+      "2027-01-10",
+      "2026/27",
+      history,
+      nights,
+      seasonGames,
+    );
+    expect(pace.average).toEqual({
+      seasons: 2,
+      wedgiesAtSameGames: 51,
+      perSeason: 66,
     });
+    expect(pace.lastSeason?.name).toBe("2025/26");
     expect(fact).toEqual({
-      text: "Ahead of last season's pace: 2 after 105 games, against 1 for 2025/26 at the same point",
+      text: "Ahead of the 2-season average: 64 after 1,020 games, against 51 expected",
       notable: true,
     });
+  });
+
+  it("does not flag a season close to the average", () => {
+    const history = [...past, ...many("2026/27", 55, "2027-01-10")];
+    const { fact } = seasonPace(
+      "2027-01-10",
+      "2026/27",
+      history,
+      nights,
+      seasonGames,
+    );
+    expect(fact?.notable).toBe(false);
   });
 });
