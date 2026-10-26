@@ -82,6 +82,19 @@ export function leagueGap(
   return { days, games, sameSeason: previous.seasonName === w.seasonName };
 }
 
+/** The player's count this season, this wedgie included. */
+export function playerSeasonNumber(
+  w: PastWedgie,
+  history: PastWedgie[],
+): number {
+  return history.filter(
+    (h) =>
+      h.playerName === w.playerName &&
+      h.seasonName === w.seasonName &&
+      (before(h, w) || sameWedgie(h, w)),
+  ).length;
+}
+
 /** Whether the player has earlier wedgies, but none for this team. */
 export function firstForTeam(w: PastWedgie, history: PastWedgie[]): boolean {
   const earlier = history.filter(
