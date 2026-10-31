@@ -69,7 +69,7 @@ export function Stats({ stats, isLoading }: StatsProps) {
 
         <Wave fillPercentage={fillPercentage} showConfetti />
 
-        {/* A red animated dot when there are live games: centred on phones, bottom left from md up */}
+        {/* A red animated dot when there are live games: centred below the stats on phones, bottom left from md up */}
 
         <div className="bg-darkpurple-light/50 relative z-10 mx-auto w-[clamp(16rem,_13rem_+_16vw,_28rem)] rounded-lg p-4 text-center md:w-[90%] lg:w-[65%] lg:max-w-120 lg:min-w-[24rem]">
           <div className="text-yellow text-sm leading-none font-bold md:text-base">
@@ -94,7 +94,7 @@ export function Stats({ stats, isLoading }: StatsProps) {
       <div className="bg-darkpurple relative flex min-h-[12em] flex-1 flex-col justify-center px-8 pt-12 pb-4 md:min-h-[14em] md:p-8">
         {stats.liveGames && (
           <div
-            className="absolute bottom-2 left-1/2 z-50 flex -translate-x-1/2 flex-row items-center justify-center gap-2 rounded-full border border-red-500 bg-red-500/90 px-2 py-1 md:bottom-4 md:left-4 md:translate-x-0 md:px-2 md:py-2"
+            className="z-50 order-last mx-auto mt-8 flex w-fit flex-row items-center justify-center gap-2 rounded-full border border-red-500 bg-red-500/90 px-2 py-1 md:absolute md:bottom-4 md:left-4 md:order-none md:mx-0 md:mt-0 md:px-2 md:py-2"
             title="Updated every 15 minutes"
           >
             <div className="relative z-5">
