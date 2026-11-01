@@ -330,10 +330,11 @@ const styles = StyleSheet.create({
   freshNew: { fontFamily: fonts.black, color: colors.pink },
   freshWedgie: { fontFamily: fonts.black, color: colors.yellow },
 
+  // Centred under the pace with a gap, as the site does on phones
+  // (components/home/Stats.tsx `order-last mx-auto mt-4`)
   liveBadge: {
-    position: "absolute",
-    bottom: space.sm,
-    left: space.lg,
+    alignSelf: "center",
+    marginTop: space.lg,
     flexDirection: "row",
     alignItems: "center",
     gap: space.sm,
