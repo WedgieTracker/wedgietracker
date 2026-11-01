@@ -18,7 +18,7 @@ import { colors, fonts } from "@/lib/theme";
 export { ErrorBoundary } from "expo-router";
 
 export const unstable_settings = {
-  initialRouteName: "(tabs)",
+  anchor: "(tabs)",
 };
 
 // Before the first render, so a crash during startup is still reported.

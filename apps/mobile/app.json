@@ -72,7 +72,10 @@
           "url": "https://de.sentry.io/"
         }
       ],
-      "expo-localization"
+      "expo-localization",
+      "expo-font",
+      "expo-image",
+      "expo-status-bar"
     ],
     "experiments": {
       "typedRoutes": true

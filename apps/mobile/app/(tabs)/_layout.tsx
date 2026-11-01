@@ -1,4 +1,4 @@
-import { NativeTabs } from "expo-router/unstable-native-tabs";
+import { NativeTabs } from "expo-router/native-tabs";
 
 import { colors, fonts } from "@/lib/theme";
 import { usePrefetchTabs } from "@/lib/use-prefetch-tabs";
