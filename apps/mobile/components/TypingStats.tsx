@@ -24,46 +24,54 @@ const LABELS: Record<StatKey, string> = {
  * Port of apps/web/src/components/stats-for-nerds/TypingStats.tsx - types out
  * "a wedgie every N <unit>", cycling through the four measures.
  */
+const wait = (ms: number) =>
+  new Promise<void>((resolve) => setTimeout(resolve, ms));
+
 export function TypingStats({ stats }: { stats: StatsPerWedgie }) {
   const [index, setIndex] = useState(0);
   const [text, setText] = useState("");
-  const cancelled = useRef(false);
+  // What is on screen right now, so a new phrase erases from there
+  const shownRef = useRef("");
 
   const key = STATS_ORDER[index % STATS_ORDER.length] ?? "fga";
+  const value = stats[key];
+  const target = `${Number.isNaN(value) ? 0 : value.toLocaleString()} ${LABELS[key]}`;
 
   useEffect(() => {
-    cancelled.current = false;
-    const value = stats[key];
-    const target = `${Number.isNaN(value) ? 0 : value.toLocaleString()} ${LABELS[key]}`;
-
-    const wait = (ms: number) =>
-      new Promise<void>((resolve) => setTimeout(resolve, ms));
+    // Each run has its own flag. A flag shared between runs was reset by the
+    // next run (a refetch hands over a new stats object), so the interrupted
+    // run kept typing over the new one and cut it short.
+    let cancelled = false;
+    const show = (t: string) => {
+      shownRef.current = t;
+      setText(t);
+    };
 
     const run = async () => {
-      // Erase whatever is on screen, then type the next measure.
-      for (let i = text.length; i >= 0; i--) {
-        if (cancelled.current) return;
+      const shown = shownRef.current;
+      for (let i = shown.length - 1; i >= 0; i--) {
         await wait(50);
-        setText(text.slice(0, i));
+        if (cancelled) return;
+        show(shown.slice(0, i));
       }
       await wait(500);
-      for (let i = 0; i <= target.length; i++) {
-        if (cancelled.current) return;
+      for (let i = 1; i <= target.length; i++) {
+        if (cancelled) return;
+        show(target.slice(0, i));
         await wait(100);
-        setText(target.slice(0, i));
       }
       await wait(2000);
-      if (cancelled.current) return;
+      if (cancelled) return;
       setIndex((n) => n + 1);
     };
 
     void run();
     return () => {
-      cancelled.current = true;
+      cancelled = true;
     };
-    // `text` is intentionally excluded: it is the animation's own output.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key, stats]);
+    // The phrase, not the stats object, so a refetch with the same numbers
+    // does not restart it
+  }, [target]);
 
   const [amount, ...rest] = text.split(" ");
 
