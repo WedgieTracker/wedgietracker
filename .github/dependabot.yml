@@ -18,6 +18,18 @@ updates:
       major:
         update-types:
           - "major"
+    # Expo pins the app's native packages to its SDK: upgrade them together with
+    # `npx expo install --fix`. TypeScript stays on 6 in the app because Expo expects it.
+    ignore:
+      - dependency-name: "expo"
+      - dependency-name: "expo-*"
+      - dependency-name: "@expo/*"
+      - dependency-name: "react-native"
+      - dependency-name: "react-native-*"
+      - dependency-name: "@react-native/*"
+      - dependency-name: "@sentry/react-native"
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
     labels:
       - "dependencies"
   - package-ecosystem: "github-actions"
