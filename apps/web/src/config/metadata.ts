@@ -55,11 +55,14 @@ export function generateMetadata({
   description,
   image,
   noIndex,
+  canonical,
 }: {
   title?: string;
   description?: string;
   image?: string;
   noIndex?: boolean;
+  /** Absolute URL search engines should treat as this page's address */
+  canonical?: string;
 } = {}): Metadata {
   return {
     ...defaultMetadata,
@@ -81,5 +84,6 @@ export function generateMetadata({
       index: !noIndex,
       follow: !noIndex,
     },
+    ...(canonical && { alternates: { canonical } }),
   };
 }
