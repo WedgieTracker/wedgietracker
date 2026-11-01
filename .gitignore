@@ -79,3 +79,7 @@ apps/web/dist-types/
 # expo generated types
 apps/mobile/expo-env.d.ts
 apps/mobile/.expo/
+
+# written by `next dev` on every start
+apps/web/AGENTS.md
+apps/web/CLAUDE.md
