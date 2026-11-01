@@ -74,10 +74,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: p.priority,
   }));
   const each: MetadataRoute.Sitemap = wedgies.map((w) => ({
+    // Next writes <loc> as given, and a bare & breaks the XML (Search Console: parsing error)
     url: `${APP_URL}/all-wedgies?${buildAllWedgiesQuery({
       season: w.seasonName,
       wedgie: w.number,
-    })}`,
+    }).replaceAll("&", "&amp;")}`,
     lastModified: new Date(w.updatedAt),
     changeFrequency: "monthly",
     priority: 0.5,
