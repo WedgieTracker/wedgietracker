@@ -16,13 +16,13 @@
     "lint": "oxlint"
   },
   "dependencies": {
-    "drizzle-orm": "^0.45.3",
-    "@paralleldrive/cuid2": "^3.3.0"
+    "@paralleldrive/cuid2": "^3.3.0",
+    "drizzle-orm": "^0.45.3"
   },
   "devDependencies": {
     "@typescript/native-preview": "^7.0.0-dev.20260705.1",
-    "typescript": "^6.0.3",
-    "vitest": "^4.1.9",
-    "oxlint": "^1.85.0"
+    "oxlint": "^1.85.0",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.5"
   }
 }
