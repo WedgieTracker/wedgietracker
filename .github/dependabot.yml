@@ -28,6 +28,10 @@ updates:
       - dependency-name: "react-native-*"
       - dependency-name: "@react-native/*"
       - dependency-name: "@sentry/react-native"
+      # The app needs the exact React its React Native renderer was built with, which
+      # expo install --fix sets. Next ships its own React, so the site loses nothing.
+      - dependency-name: "react"
+      - dependency-name: "react-dom"
       - dependency-name: "typescript"
         update-types: ["version-update:semver-major"]
     labels:
