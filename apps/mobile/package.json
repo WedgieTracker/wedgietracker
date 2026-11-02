@@ -13,7 +13,7 @@
     "lint": "oxlint",
     "start": "expo start",
     "submit:ios": "./scripts/submit-ios.sh production",
-    "typecheck": "pnpm --filter @wedgietracker/web types:build && tsgo --noEmit",
+    "typecheck": "pnpm --filter @wedgietracker/web types:build && tsc --noEmit",
     "web": "expo start --web"
   },
   "dependencies": {
@@ -56,7 +56,6 @@
   "devDependencies": {
     "@sentry/cli": "3.8.2",
     "@types/react": "~19.3.0",
-    "@typescript/native-preview": "^7.0.0-dev.20260705.1",
     "@wedgietracker/web": "workspace:*",
     "oxlint": "^1.90.0",
     "typescript": "~6.0.3"
