@@ -1,10 +1,16 @@
 import { SHOUTOUT_PATTERN } from "@wedgietracker/core/utils/shoutout";
 import { timingSafeEqual } from "crypto";
 import { NextResponse } from "next/server";
-import { and, eq, like } from "drizzle-orm";
+import { and, eq, inArray, like } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "~/server/db";
-import { game, player, team, wedgie } from "@wedgietracker/core/schema";
+import {
+  game,
+  player,
+  team,
+  type as typeTable,
+  wedgie,
+} from "@wedgietracker/core/schema";
 import { env } from "~/env";
 import { invalidateWedgieData } from "~/server/cache";
 import {
@@ -16,7 +22,8 @@ import {
 // same record the admin form would save. Same key as /api/external ("x-api-key"). Idempotent on
 // season + number: a second POST returns the wedgie already there. PATCH fills in video links
 // once the clip is posted, and replaces the shoutouts when more fans turn up after the wedgie was
-// added; DELETE undoes a wedgie added by mistake.
+// added, and corrects a record that went on wrong (player, court position, types, period, clock,
+// score); DELETE undoes a wedgie added by mistake.
 
 function authorised(request: Request) {
   const given = Buffer.from(request.headers.get("x-api-key") ?? "");
@@ -40,6 +47,12 @@ const key = z.object({
   number: z.number().int().positive(),
 });
 
+const period = z.number().int().min(1).max(10).nullable();
+const gameClock = z
+  .string()
+  .regex(/^\d{1,2}:\d{2}(\.\d)?$/)
+  .nullable();
+
 const createInput = key.extend({
   playerName: z.string().min(2),
   teamName: z.string().min(2),
@@ -49,12 +62,8 @@ const createInput = key.extend({
   types: z.array(z.string()).min(1),
   videoUrl: videoUrl.default({}),
   shoutouts: z.array(z.string().regex(SHOUTOUT_PATTERN)).default([]),
-  period: z.number().int().min(1).max(10).nullable().default(null),
-  gameClock: z
-    .string()
-    .regex(/^\d{1,2}:\d{2}(\.\d)?$/)
-    .nullable()
-    .default(null),
+  period: period.default(null),
+  gameClock: gameClock.default(null),
   teamScore: z.number().int().nullable().default(null),
   opponentScore: z.number().int().nullable().default(null),
   // only the tweet's id is kept (#172); anything else sent with it is dropped
@@ -154,36 +163,84 @@ export async function POST(request: Request) {
   return NextResponse.json({ created: true, wedgie: created });
 }
 
+// Every field is optional and only the ones sent change. Team and game are not here: a wedgie on
+// the wrong game is deleted and added again.
+const updateInput = key
+  .extend({
+    videoUrl: videoUrl.optional(),
+    shoutouts: z.array(z.string().regex(SHOUTOUT_PATTERN)).optional(),
+    playerName: z.string().min(2).optional(),
+    // the court is drawn on a 0 to 100 grid both ways
+    position: z
+      .object({ x: z.number().min(0).max(100), y: z.number().min(0).max(100) })
+      .optional(),
+    types: z.array(z.string()).min(1).optional(),
+    period: period.optional(),
+    gameClock: gameClock.optional(),
+    teamScore: z.number().int().nullable().optional(),
+    opponentScore: z.number().int().nullable().optional(),
+  })
+  .refine(
+    (u) => Object.keys(u).some((k) => k !== "seasonName" && k !== "number"),
+    {
+      message: "Nothing to update",
+    },
+  );
+
 export async function PATCH(request: Request) {
   if (!authorised(request)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const parsed = key
-    .extend({
-      videoUrl: videoUrl.optional(),
-      shoutouts: z.array(z.string().regex(SHOUTOUT_PATTERN)).optional(),
-    })
-    .refine((u) => u.videoUrl !== undefined || u.shoutouts !== undefined)
-    .safeParse(await readBody(request));
+  const parsed = updateInput.safeParse(await readBody(request));
   if (!parsed.success) {
-    return NextResponse.json({ error: "Invalid update" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Invalid update", issues: parsed.error.issues },
+      { status: 400 },
+    );
   }
-  const existing = await findWedgie(parsed.data.seasonName, parsed.data.number);
+  const { seasonName, number, videoUrl: video, types, ...fields } = parsed.data;
+  const existing = await findWedgie(seasonName, number);
   if (!existing) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
-  const [updated] = await db
-    .update(wedgie)
-    .set({
-      ...(parsed.data.videoUrl && {
-        videoUrl: { ...existing.videoUrl, ...parsed.data.videoUrl },
-      }),
-      ...(parsed.data.shoutouts && { shoutouts: parsed.data.shoutouts }),
-    })
-    .where(eq(wedgie.id, existing.id))
-    .returning();
+
+  // A correction picks from the types the site already has, so a typo cannot add a new one
+  if (types) {
+    const known = await db.query.type.findMany({
+      where: inArray(typeTable.name, types),
+    });
+    const unknown = types.filter((t) => !known.some((k) => k.name === t));
+    if (unknown.length > 0) {
+      return NextResponse.json(
+        { error: `Unknown type ${unknown.join(", ")}` },
+        { status: 400 },
+      );
+    }
+  }
+
+  if (fields.playerName) {
+    await db
+      .insert(player)
+      .values({ name: fields.playerName })
+      .onConflictDoNothing();
+  }
+  const set = {
+    ...fields,
+    ...(video && { videoUrl: { ...existing.videoUrl, ...video } }),
+  };
+  const [updated] =
+    Object.keys(set).length > 0
+      ? await db
+          .update(wedgie)
+          .set(set)
+          .where(eq(wedgie.id, existing.id))
+          .returning()
+      : [existing];
+  if (types) {
+    await syncWedgieTypes(db, existing.id, types);
+  }
   invalidateWedgieData();
-  return NextResponse.json({ wedgie: updated });
+  return NextResponse.json({ wedgie: updated, ...(types && { types }) });
 }
 
 export async function DELETE(request: Request) {
