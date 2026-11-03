@@ -14,12 +14,14 @@ vi.mock("@wedgietracker/core/schema", () => ({
   game: { name: "name" },
   player: {},
   team: {},
+  type: { name: "name" },
   wedgie: { id: "id", seasonName: "seasonName", number: "number" },
 }));
 
 const wedgieFindFirst = vi.fn();
 const gameFindFirst = vi.fn();
 const gameFindMany = vi.fn();
+const typeFindMany = vi.fn();
 const inserted: unknown[] = [];
 const returning = vi.fn();
 const deleteReturning = vi.fn();
@@ -31,6 +33,7 @@ vi.mock("~/server/db", () => ({
     query: {
       wedgie: { findFirst: wedgieFindFirst },
       game: { findFirst: gameFindFirst, findMany: gameFindMany },
+      type: { findMany: typeFindMany },
     },
     insert: () => ({
       values: (v: unknown) => {
@@ -203,6 +206,67 @@ describe("/api/external/wedgie", () => {
     );
     expect(res.status).toBe(400);
     expect(updateSet).not.toHaveBeenCalled();
+  });
+
+  it("corrects the position, types, clock and score", async () => {
+    wedgieFindFirst.mockResolvedValue({ id: 9, videoUrl: {} });
+    typeFindMany.mockResolvedValue([{ id: 2, name: "Floater" }]);
+    const res = await PATCH(
+      call("PATCH", {
+        seasonName: "2026/27",
+        number: 7,
+        position: { x: 38.2, y: 61 },
+        types: ["Floater"],
+        period: 4,
+        gameClock: "2:31",
+        teamScore: 101,
+        opponentScore: 99,
+      }),
+    );
+    expect(res.status).toBe(200);
+    expect(updateSet).toHaveBeenCalledWith({
+      position: { x: 38.2, y: 61 },
+      period: 4,
+      gameClock: "2:31",
+      teamScore: 101,
+      opponentScore: 99,
+    });
+    expect(syncWedgieTypes).toHaveBeenCalledWith(expect.anything(), 9, [
+      "Floater",
+    ]);
+  });
+
+  it("changes only the types without touching the record", async () => {
+    wedgieFindFirst.mockResolvedValue({ id: 9, videoUrl: {} });
+    typeFindMany.mockResolvedValue([{ id: 2, name: "Floater" }]);
+    const res = await PATCH(
+      call("PATCH", { seasonName: "2026/27", number: 7, types: ["Floater"] }),
+    );
+    expect(res.status).toBe(200);
+    expect(updateSet).not.toHaveBeenCalled();
+    expect(syncWedgieTypes).toHaveBeenCalledWith(expect.anything(), 9, [
+      "Floater",
+    ]);
+  });
+
+  it("refuses a type the site does not have and a dot off the court", async () => {
+    wedgieFindFirst.mockResolvedValue({ id: 9, videoUrl: {} });
+    typeFindMany.mockResolvedValue([]);
+    const typo = await PATCH(
+      call("PATCH", { seasonName: "2026/27", number: 7, types: ["Flaoter"] }),
+    );
+    const off = await PATCH(
+      call("PATCH", {
+        seasonName: "2026/27",
+        number: 7,
+        position: { x: 120, y: 50 },
+      }),
+    );
+    expect(typo.status).toBe(400);
+    expect(await typo.json()).toMatchObject({ error: "Unknown type Flaoter" });
+    expect(off.status).toBe(400);
+    expect(updateSet).not.toHaveBeenCalled();
+    expect(syncWedgieTypes).not.toHaveBeenCalled();
   });
 
   it("undoes a wedgie", async () => {
