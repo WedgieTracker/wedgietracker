@@ -131,10 +131,11 @@ async function getCachedLatestWedgies() {
   cacheTag(CACHE_TAGS.WEDGIE_DATA);
   cacheLife({ revalidate: 3600 });
 
+  // Games that tip at the same time give their wedgies the same date; the number breaks the tie
   const wedgies = await db
     .select()
     .from(wedgie)
-    .orderBy(desc(wedgie.wedgieDate))
+    .orderBy(desc(wedgie.wedgieDate), desc(wedgie.number))
     .limit(13);
   const typesMap = await getWedgiesWithTypes(wedgies);
   return wedgies.map((w) => ({ ...w, types: typesMap.get(w.id) ?? [] }));
@@ -157,7 +158,7 @@ async function getCachedStats() {
   const [lastWedgie, [wedgieCountResult], previousSeasonCounts] =
     await Promise.all([
       db.query.wedgie.findFirst({
-        orderBy: desc(wedgie.wedgieDate),
+        orderBy: [desc(wedgie.wedgieDate), desc(wedgie.number)],
         columns: { wedgieDate: true },
       }),
       db
@@ -316,7 +317,7 @@ async function getCachedNerdStats() {
     : 0;
 
   const lastWedgie = await db.query.wedgie.findFirst({
-    orderBy: desc(wedgie.wedgieDate),
+    orderBy: [desc(wedgie.wedgieDate), desc(wedgie.number)],
     columns: { wedgieDate: true, playerName: true },
   });
 
@@ -498,7 +499,7 @@ async function getCachedHostedWedgies() {
     .where(
       sql`nullif(json_extract(${wedgie.videoUrl}, '$.hosted'), '') IS NOT NULL`,
     )
-    .orderBy(desc(wedgie.wedgieDate));
+    .orderBy(desc(wedgie.wedgieDate), desc(wedgie.number));
 }
 
 async function getCachedTotalWedgies() {
