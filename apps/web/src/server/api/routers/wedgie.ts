@@ -1,5 +1,8 @@
 import { SHOUTOUT_PATTERN } from "@wedgietracker/core/utils/shoutout";
-import { SEASON_GAMES } from "@wedgietracker/core/utils/paceCalculator";
+import {
+  SEASON_GAMES,
+  normalRate,
+} from "@wedgietracker/core/utils/paceCalculator";
 import { z } from "zod";
 import { eq, desc, ne, and, count, sql, asc, gt, inArray } from "drizzle-orm";
 import { cacheTag, cacheLife } from "next/cache";
@@ -339,6 +342,8 @@ async function getCachedNerdStats() {
   const seasons = await db.query.season.findMany({
     where: and(ne(season.name, "GEMS"), ne(season.name, currentSeason!)),
     with: { wedgies: true },
+    // oldest first: recent seasons count more in the normal rate
+    orderBy: asc(season.name),
   });
 
   const seasonRates = seasons.flatMap((s) => {
@@ -348,11 +353,10 @@ async function getCachedNerdStats() {
       : [];
   });
 
-  // A normal season as the pace counts it (server/pace.ts): the average rate
-  // per game played over a full schedule, so shortened seasons count by rate.
+  // A normal season as the pace counts it (server/pace.ts): each season's rate
+  // per game played, recent seasons counting more, over a full schedule.
   const averageSeasonRate = Math.round(
-    (seasonRates.reduce((acc, s) => acc + s.rate, 0) / seasonRates.length) *
-      SEASON_GAMES,
+    normalRate(seasonRates.map((s) => s.rate)) * SEASON_GAMES,
   );
 
   const totalSeasonsOverall = seasons.length;
