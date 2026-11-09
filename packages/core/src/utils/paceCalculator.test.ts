@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { computePace } from "./paceCalculator";
+import { blendedRate, computePace, normalRate } from "./paceCalculator";
 
 describe("computePace", () => {
   it("returns zeros when currentTotalGames is 0", () => {
@@ -70,14 +70,50 @@ describe("computePace", () => {
     expect(result.medianPace).toBe(result.simplePace);
   });
 
-  it("sets medianPace equal to rmPace", () => {
+  it("blends 600 made-up games at the normal rate with this season's real ones", () => {
+    // normal rate 0.05, so 600 made-up games bring 30 wedgies;
+    // (30 + 11) / (600 + 139) = 0.0555 a game for the 1,176 games left
+    // pace = 11 + 0.0555 * 1176 = 76.2 → 76
     const result = computePace({
-      currentTotalWedgies: 20,
-      currentTotalGames: 200,
-      totalEstimatedGames: 1000,
-      seasonRates: [0.08, 0.12],
+      currentTotalWedgies: 11,
+      currentTotalGames: 139,
+      seasonRates: [0.05],
     });
-    expect(result.medianPace).toBe(result.rmPace);
+    expect(result.medianPace).toBe(76);
+    // the plain average would ignore the hot start: 11 + 0.05 * 1176 = 69.8 → 70
+    expect(result.rmPace).toBe(70);
+  });
+
+  it("lets this season count more as its games pile up", () => {
+    // the same hot rate (0.08 a game) moves the pace more the further in we are
+    const early = computePace({
+      currentTotalWedgies: 8,
+      currentTotalGames: 100,
+      totalEstimatedGames: 1300,
+      seasonRates: [0.04],
+    });
+    const late = computePace({
+      currentTotalWedgies: 80,
+      currentTotalGames: 1000,
+      totalEstimatedGames: 1300,
+      seasonRates: [0.04],
+    });
+    const plain = (w: number, g: number) => w + 0.04 * (1300 - g);
+    const own = (w: number, g: number) => (w / g) * 1300;
+    const share = (r: typeof early, w: number, g: number) =>
+      (r.medianPace - plain(w, g)) / (own(w, g) - plain(w, g));
+    expect(share(late, 80, 1000)).toBeGreaterThan(share(early, 8, 100));
+  });
+
+  it("counts recent seasons more, last season in full and each before at 80%", () => {
+    // (0.05 + 0.8 * 0.04) / 1.8 = 0.04556
+    expect(normalRate([0.04, 0.05])).toBeCloseTo(0.04556, 5);
+    expect(normalRate([0.05])).toBe(0.05);
+    expect(normalRate([])).toBe(0);
+  });
+
+  it("starts from the normal rate before any games", () => {
+    expect(blendedRate(0, 0, [0.05])).toBe(0.05);
   });
 
   it("handles a single season rate", () => {

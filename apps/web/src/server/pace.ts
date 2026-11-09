@@ -1,4 +1,4 @@
-import { ne, eq } from "drizzle-orm";
+import { asc, ne, eq } from "drizzle-orm";
 import { db } from "./db";
 import { season, global } from "@wedgietracker/core/schema";
 import {
@@ -23,6 +23,8 @@ export async function calculatePace({
   const seasons = await db.query.season.findMany({
     where: ne(season.name, "GEMS"),
     with: { wedgies: { columns: { id: true } } },
+    // oldest first: recent seasons count more in the normal rate
+    orderBy: asc(season.name),
   });
 
   const globalRow = await db.query.global.findFirst({
@@ -33,6 +35,9 @@ export async function calculatePace({
   // Only completed seasons feed the historical rate. The current season's
   // own rate swings wildly over its first games (0 before the first wedgie,
   // then 1-in-3), and averaging it in made early-season pace jump around.
+  //
+  // The pace blends this season with the past (computePace): the games left go
+  // at a rate made of 600 games at the normal rate plus this season's real ones.
   //
   // Each season counts as wedgies per game it actually played, so the
   // shortened 2019/20 and 2020/21 seasons count by their rate rather than
