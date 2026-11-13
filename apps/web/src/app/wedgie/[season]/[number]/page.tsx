@@ -188,12 +188,10 @@ export default async function WedgiePage({ params }: { params: Params }) {
           >
             ← All wedgies {gems ? GEMS_EMOJI : `of ${w.seasonName}`}
           </Link>
-          <h1 className="text-3xl leading-none font-black uppercase md:text-5xl">
-            <span className="text-yellow block">{w.playerName}</span>
-            <span className="text-pink mt-1 block text-[.5em]">
-              Wedgie No. {w.number}
-              {gems ? "" : ` of ${w.seasonName}`}
-            </span>
+          {/* the card shows who and which; the heading stays for screen readers and search */}
+          <h1 className="sr-only">
+            {w.playerName}, Wedgie No. {w.number}
+            {gems ? "" : ` of ${w.seasonName}`}
           </h1>
         </div>
 
