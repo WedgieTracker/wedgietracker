@@ -72,25 +72,25 @@ export function Wave({
                 xlinkHref="#gentle-wave"
                 x="48"
                 y="0"
-                fill="rgba(255,0,255,0.7)"
+                style={{ fill: "hsl(var(--pink) / 0.7)" }}
               />
               <use
                 xlinkHref="#gentle-wave"
                 x="48"
                 y="3"
-                fill="rgba(255,0,255,0.5)"
+                style={{ fill: "hsl(var(--pink) / 0.5)" }}
               />
               <use
                 xlinkHref="#gentle-wave"
                 x="48"
                 y="5"
-                fill="rgba(255,0,255,0.3)"
+                style={{ fill: "hsl(var(--pink) / 0.3)" }}
               />
               <use
                 xlinkHref="#gentle-wave"
                 x="48"
                 y="7"
-                fill="rgb(255 0 255)"
+                style={{ fill: "hsl(var(--pink))" }}
               />
             </g>
           </svg>

@@ -57,8 +57,16 @@
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
     --yellow: 65 100% 50%;
+    --yellow-dark: 65 100% 40%;
+    --yellow-darker: 65 100% 30%;
     --pink: 300 100% 50%;
+    --pink-dark: 300 100% 40%;
+    --pink-darker: 300 100% 30%;
     --darkpurple: 264 100% 9%;
+    --darkpurple-light: 264 100% 15%;
+    --darkpurple-lighter: 264 100% 20%;
+    --darkpurple-dark: 264 100% 7%;
+    --darkpurple-darker: 264 100% 5%;
     /* rgb version */
     --darkpurple-rgb: 23 0 45;
   }
@@ -116,7 +124,7 @@
 /* selection color */
 ::selection {
   /* background color */
-  background-color: #e5ff00;
+  background-color: hsl(var(--yellow));
   /* text color */
   color: #000;
 }
@@ -379,10 +387,10 @@
 @keyframes wt-hof-glow {
   0%,
   100% {
-    box-shadow: 0 0 0 0 rgba(255, 0, 255, 0.5);
+    box-shadow: 0 0 0 0 hsl(var(--pink) / 0.5);
   }
   50% {
-    box-shadow: 0 0 12px 3px rgba(255, 0, 255, 0.55);
+    box-shadow: 0 0 12px 3px hsl(var(--pink) / 0.55);
   }
 }
 .wt-bump {
