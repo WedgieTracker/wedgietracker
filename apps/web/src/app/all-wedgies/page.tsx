@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { connection } from "next/server";
 import {
-  buildAllWedgiesQuery,
   seasonFromParam,
+  wedgiePath,
 } from "@wedgietracker/core/utils/allWedgiesUrl";
 import { TEAMS } from "@wedgietracker/core/utils/teamAliases";
 import { AllWedgiesPage } from "~/components/all-wedgies/AllWedgiesPage";
@@ -34,9 +34,10 @@ function ordinal(n: number) {
 }
 
 /**
- * A link to one wedgie (?season=2026-27&wedgie=5, or the older ws/wn) gets its own title,
- * description and canonical address, so each can be listed in the sitemap without reading
- * as a copy of All Wedgies. Everything else, filters included, points at /all-wedgies.
+ * A link to one wedgie (?season=2026-27&wedgie=5, or the older ws/wn) opens its modal over
+ * the list, and gets the wedgie's title with its own page (/wedgie/2026-27/5) as the canonical
+ * address: Google only indexes a clip on a page where the clip is the main content.
+ * Everything else, filters included, points at /all-wedgies.
  */
 export async function generateMetadata({
   searchParams,
@@ -70,10 +71,7 @@ export async function generateMetadata({
     title: `${w.playerName}, Wedgie No. ${w.number} of ${w.seasonName}`,
     description: `${w.playerName}'s ${shot}wedgie for the ${teamName(w.teamName)} against the ${teamName(w.teamAgainstName)} on ${night}, the ${ordinal(w.number)} of the ${w.seasonName} season. Watch the clip on WedgieTracker.`,
     image: youtubeThumbnail(w.videoUrl?.youtube),
-    canonical: `${APP_URL}/all-wedgies?${buildAllWedgiesQuery({
-      season: w.seasonName,
-      wedgie: w.number,
-    })}`,
+    canonical: `${APP_URL}${wedgiePath(w.seasonName, w.number)}`,
   });
 }
 

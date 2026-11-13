@@ -20,6 +20,11 @@ export function seasonFromParam(param: string): string {
   return /^\d{4}-\d{2}$/.test(param) ? param.replace("-", "/") : param;
 }
 
+/** One wedgie's own page: "2026/27", 5 -> "/wedgie/2026-27/5". */
+export function wedgiePath(season: string, number: number): string {
+  return `/wedgie/${encodeURIComponent(seasonToParam(season))}/${number}`;
+}
+
 export interface AllWedgiesState {
   /** Season name ("2025/26"), "" for every season, or undefined for the default. */
   season?: string;

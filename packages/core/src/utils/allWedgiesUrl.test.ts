@@ -4,6 +4,7 @@ import {
   parseAllWedgiesQuery,
   seasonFromParam,
   slugify,
+  wedgiePath,
 } from "./allWedgiesUrl";
 
 /** A minimal stand-in for URLSearchParams, which this package has no DOM types for. */
@@ -108,5 +109,12 @@ describe("parseAllWedgiesQuery", () => {
   it("converts season params either way", () => {
     expect(seasonFromParam("2025-26")).toBe("2025/26");
     expect(seasonFromParam("2025/26")).toBe("2025/26");
+  });
+});
+
+describe("wedgiePath", () => {
+  it("gives each wedgie a path with the season escaped", () => {
+    expect(wedgiePath("2026/27", 5)).toBe("/wedgie/2026-27/5");
+    expect(wedgiePath("GEMS", 3)).toBe("/wedgie/GEMS/3");
   });
 });
