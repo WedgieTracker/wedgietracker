@@ -7,7 +7,7 @@ import { Loader } from "~/components/shared/Loader";
 import {
   FilterPill,
   OptionRow,
-  POPOVER_CLASS,
+  POPOVER_CLASS_END,
   useCloseOnOutside,
 } from "~/components/shared/FilterPopover";
 
@@ -51,12 +51,16 @@ export function SeasonsHistoryContent() {
 
   return (
     <div className="container mx-auto max-w-6xl">
-      <div ref={wrapRef} className="relative mb-4 flex">
+      <div ref={wrapRef} className="relative mb-4 flex justify-end">
         <FilterPill set={sort !== 0} open={open} onClick={() => setOpen(!open)}>
           {sort === 0 ? "Sort" : SORTS[sort]!.label}
         </FilterPill>
         {open && (
-          <div role="group" aria-label="Sort seasons" className={POPOVER_CLASS}>
+          <div
+            role="group"
+            aria-label="Sort seasons"
+            className={POPOVER_CLASS_END}
+          >
             {SORTS.map((s, i) => (
               <OptionRow
                 key={s.label}

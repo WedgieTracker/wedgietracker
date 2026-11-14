@@ -2,9 +2,14 @@
 
 import { useEffect, type RefObject } from "react";
 
+const POPOVER_BASE =
+  "bg-panel border-violet/35 scrollbar-wt absolute top-12 z-20 max-h-[min(340px,60svh)] w-full overflow-y-auto rounded-2xl border p-2 shadow-[0_14px_30px_rgb(5_2_20/0.6)] sm:w-[380px]";
+
 /** Where a filter pill's choices open, under the row of pills. */
-export const POPOVER_CLASS =
-  "bg-panel border-violet/35 scrollbar-wt absolute top-12 left-0 z-20 max-h-[min(340px,60svh)] w-full overflow-y-auto rounded-2xl border p-2 shadow-[0_14px_30px_rgb(5_2_20/0.6)] sm:w-[380px]";
+export const POPOVER_CLASS = `${POPOVER_BASE} left-0`;
+
+/** The same, lined up with the right edge, for pills on the right. */
+export const POPOVER_CLASS_END = `${POPOVER_BASE} right-0`;
 
 /** Closes an open popover on Escape or a press outside `ref`. */
 export function useCloseOnOutside(
