@@ -16,7 +16,6 @@ const ATTRIBUTES: { name: string; down?: boolean }[] = [
   { name: "Stamina" },
   { name: "Hustle" },
   { name: "Clutch", down: true },
-  { name: "Rim stickiness" },
   // Wedgie watching has its costs.
   { name: "Basketball IQ", down: true },
   { name: "Shooting", down: true },
