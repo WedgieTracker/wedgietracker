@@ -20,7 +20,7 @@ export function Cta({ links }: CtaProps) {
       <h2 className="text-center text-[22px] leading-none font-black tracking-[-0.03em]">
         Find out more
       </h2>
-      <div className="mt-4 mb-6 flex flex-col gap-2.5 @lg:flex-row">
+      <div className="mt-4 mb-6 flex flex-col gap-2.5 @md:flex-row">
         {links.map((link) => (
           <Link
             key={link.url}

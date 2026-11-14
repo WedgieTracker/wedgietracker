@@ -37,7 +37,7 @@ export function StandingsPage() {
 
   if (isLoading || isLoadingSeasonData) {
     return (
-      <div className="container mx-auto max-w-3xl text-white">
+      <div className="container mx-auto max-w-5xl text-white">
         <StandingsFilters
           selectedSeason={selectedSeason}
           setSelectedSeason={setSelectedSeason}
@@ -62,7 +62,7 @@ export function StandingsPage() {
   }
 
   return (
-    <div className="container mx-auto max-w-3xl text-white">
+    <div className="container mx-auto max-w-5xl text-white">
       {shouldShowPreviousSeason && (
         <div className="border-pink/30 bg-pink/20 mb-4 rounded-lg border p-4 text-center">
           <p className="text-pink text-sm font-bold">

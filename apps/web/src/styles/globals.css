@@ -139,6 +139,15 @@
   color: hsl(var(--night));
 }
 
+/* On cream surfaces a cream highlight disappears, so it turns violet there. */
+.bg-cream::selection,
+.bg-cream ::selection,
+.btn-sticker::selection,
+.btn-sticker ::selection {
+  background-color: hsl(var(--violet));
+  color: hsl(var(--cream));
+}
+
 .waves {
   position: relative;
   width: 100%;
