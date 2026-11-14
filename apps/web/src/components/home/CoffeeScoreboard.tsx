@@ -115,11 +115,11 @@ export function CoffeeScoreboard({
       <div className="grid grid-cols-[1fr_auto_1fr] items-center px-4 pt-[18px] pb-1.5">
         <span className="flex items-center gap-2.5">
           <Side icon={<MugIcon />} label="Coffees" />
-          <span className="text-cream text-shadow-badge flex-1 text-right text-[52px] leading-none font-black tracking-[-0.04em] italic">
+          <span className="text-cream text-shadow-badge flex-1 pr-[0.14em] text-right text-[52px] leading-none font-black tracking-[-0.04em] italic">
             {coffees}
           </span>
         </span>
-        <span className="text-cream/70 px-2 text-[13px] font-black italic">
+        <span className="text-cream/70 px-3 text-[13px] font-black italic">
           vs
         </span>
         <span className="flex items-center gap-2.5">
@@ -136,7 +136,7 @@ export function CoffeeScoreboard({
         href="/support-us"
         className="bg-cream text-night focus-visible:outline-cream mx-4 mt-3.5 mb-4 flex min-h-[52px] items-center justify-center rounded-full text-base font-black transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2"
       >
-        Buy a coffee
+        Support us with a coffee donation
       </Link>
     </section>
   );

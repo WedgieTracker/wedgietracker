@@ -105,9 +105,9 @@ async function TotalWedgiesWrapper() {
   return (
     <div className="flex w-full max-w-2xl flex-col items-center justify-between gap-4">
       <div className="sm:text-wedgies-text flex flex-row items-center gap-4 text-3xl leading-none">
-        <span className="text-yellow text-[1.5em] font-black">{total}</span>
+        <span className="text-violet text-[1.5em] font-black">{total}</span>
         <div className="gap-.5 flex flex-col">
-          <span className="text-pink text-[0.6em] leading-none font-black uppercase">
+          <span className="text-cream text-[0.6em] leading-none font-black uppercase">
             Total Wedgies
           </span>
           <span className="mt-[0.2em] text-[0.4em] leading-none font-bold text-white/50 uppercase">
@@ -117,9 +117,9 @@ async function TotalWedgiesWrapper() {
       </div>
       <Link
         href="/seasons-history"
-        className="border-yellow bg-yellow text-button-text text-darkpurple hover:bg-darkpurple hover:text-yellow block rounded-full border-2 px-6 py-1 font-black uppercase transition-all duration-300"
+        className="bg-button text-cream text-button-text focus-visible:outline-cream flex min-h-[54px] w-full max-w-2xl items-center justify-center rounded-full font-black transition-opacity duration-300 hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2"
       >
-        Seasons History
+        Seasons history
       </Link>
     </div>
   );

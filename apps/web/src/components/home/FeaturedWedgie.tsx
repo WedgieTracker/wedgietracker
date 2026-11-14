@@ -82,11 +82,11 @@ export function FeaturedWedgie({
       onClick={onOpen}
       className="bg-glow focus-visible:outline-cream block w-full overflow-hidden rounded-3xl p-[1.5px] text-left focus-visible:outline-2 focus-visible:outline-offset-2 md:grid"
     >
-      <span className="bg-panel block overflow-hidden rounded-[22.5px] md:grid md:grid-cols-[300px_1fr]">
+      <span className="bg-panel block overflow-hidden rounded-[22.5px] md:grid md:grid-cols-[240px_1fr]">
         <span className="bg-badge grain block px-[18px] pt-[18px] pb-4 md:flex md:flex-col md:justify-between">
           <span className="grid grid-cols-[1fr_auto] items-end gap-3 md:block">
             <span className="block">
-              <span className="text-cream text-shadow-badge block text-[58px] leading-[0.95] font-black tracking-[-0.04em] italic">
+              <span className="text-cream text-shadow-badge block text-[58px] leading-[0.95] font-black tracking-[-0.04em] italic md:text-[48px]">
                 <span className="mr-[0.06em] text-[0.42em] tracking-normal opacity-55 [text-shadow:none]">
                   #
                 </span>
@@ -97,7 +97,7 @@ export function FeaturedWedgie({
                 className="text-cream/70 mt-1.5 block text-xs font-bold whitespace-nowrap"
               />
             </span>
-            <span className="relative block w-[150px] md:mx-auto md:mt-3 md:w-[210px]">
+            <span className="relative block w-[150px] md:mx-auto md:mt-2 md:w-[150px]">
               <CourtPositionDiagram
                 position={wedgie.position}
                 dotClassName="size-2.5"
@@ -109,7 +109,7 @@ export function FeaturedWedgie({
           </span>
         </span>
 
-        <span className="relative block p-[18px] md:flex md:flex-col md:px-6 md:py-[22px]">
+        <span className="relative block p-[18px] md:flex md:flex-col md:px-6 md:py-5">
           <span className="absolute top-[22px] right-[18px]">
             <PlayButton size="lg" />
           </span>
@@ -130,7 +130,7 @@ export function FeaturedWedgie({
               </span>
             ))}
           </span>
-          <span className="mt-auto hidden md:block">
+          <span className="mt-1 hidden md:block">
             <QuartersBar wedgie={wedgie} />
           </span>
           <span className="sr-only">Watch wedgie {wedgie.number}</span>

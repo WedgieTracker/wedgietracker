@@ -29,11 +29,29 @@ export function PaceGauge({
   recordSeason: string | null;
 }) {
   const id = `pace${useId().replace(/:/g, "")}`;
-  const [open, setOpen] = useState(false);
+  const [pinned, setPinned] = useState(false);
+  const [hovered, setHovered] = useState(false);
+  const open = pinned || hovered;
   const wrapRef = useRef<HTMLDivElement>(null);
+  const leaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // With a mouse the note opens on hover and stays while the pointer is on
+  // the record or the note; a short delay lets it cross the gap between them.
+  const hover = (on: boolean) => (e: React.PointerEvent) => {
+    if (e.pointerType !== "mouse") return;
+    if (leaveTimer.current) clearTimeout(leaveTimer.current);
+    if (on) setHovered(true);
+    else leaveTimer.current = setTimeout(() => setHovered(false), 150);
+  };
+  useEffect(
+    () => () => {
+      if (leaveTimer.current) clearTimeout(leaveTimer.current);
+    },
+    [],
+  );
 
   useEffect(() => {
-    if (!open) return;
+    if (!pinned) return;
     const close = (e: Event) => {
       if (e instanceof KeyboardEvent && e.key !== "Escape") return;
       if (
@@ -42,7 +60,7 @@ export function PaceGauge({
       ) {
         return;
       }
-      setOpen(false);
+      setPinned(false);
     };
     document.addEventListener("pointerdown", close);
     document.addEventListener("keydown", close);
@@ -50,7 +68,7 @@ export function PaceGauge({
       document.removeEventListener("pointerdown", close);
       document.removeEventListener("keydown", close);
     };
-  }, [open]);
+  }, [pinned]);
 
   const max = Math.max(record, pace, 1);
   const end = arcPoint(pace, max);
@@ -118,10 +136,12 @@ export function PaceGauge({
         </span>
         <button
           type="button"
-          onClick={() => setOpen((o) => !o)}
+          onClick={() => setPinned((o) => !o)}
+          onPointerEnter={hover(true)}
+          onPointerLeave={hover(false)}
           aria-expanded={open}
           aria-controls={`${id}-note`}
-          className="text-cream focus-visible:outline-cream absolute top-1/2 left-[91.43%] inline-flex min-h-9 -translate-x-1/2 -translate-y-1/2 items-center px-0.5 text-sm font-black before:absolute before:inset-[-4px_-8px_-4px_-26px] before:content-[''] focus-visible:rounded-md focus-visible:outline-2"
+          className="text-cream focus-visible:outline-cream/60 absolute top-1/2 left-[91.43%] inline-flex min-h-9 -translate-x-1/2 -translate-y-1/2 items-center px-0.5 text-sm font-black before:absolute before:inset-[-4px_-8px_-4px_-26px] before:content-[''] focus-visible:rounded-md focus-visible:outline-[1.5px] focus-visible:outline-offset-2"
         >
           <span
             aria-hidden="true"
@@ -132,19 +152,29 @@ export function PaceGauge({
           {record}
           <span className="sr-only">: what is this?</span>
         </button>
+        {open && (
+          <div
+            id={`${id}-note`}
+            role="note"
+            onPointerEnter={hover(true)}
+            onPointerLeave={hover(false)}
+            // Opens above the record, over the gauge, so it stays in view even
+            // where the stats are pinned to the screen on desktop.
+            className="bg-cream text-night absolute -right-2 bottom-[calc(100%+10px)] -left-2 z-20 rounded-[14px] px-3.5 py-3 text-left text-[13px] leading-snug font-bold shadow-[0_12px_28px_rgb(5_2_20/0.5)]"
+          >
+            <b className="font-black">{record} is the record.</b> The most
+            wedgies in a season
+            {recordSeason ? `, set in ${recordSeason}` : ""}.
+          </div>
+        )}
+        {open && (
+          <span
+            aria-hidden="true"
+            // Same 91.43% as the record, so the arrow always points at it.
+            className="bg-cream absolute bottom-[calc(100%+4px)] left-[91.43%] z-20 size-3 -translate-x-1/2 rotate-45 rounded-[2px]"
+          />
+        )}
       </div>
-
-      {open && (
-        <div
-          id={`${id}-note`}
-          role="note"
-          className="bg-cream text-night absolute top-[calc(100%-6px)] right-2 left-2 z-20 rounded-[14px] px-3.5 py-3 text-left text-[13px] leading-snug font-bold shadow-[0_12px_28px_rgb(5_2_20/0.5)] before:absolute before:-top-1.5 before:right-10 before:size-3 before:rotate-45 before:rounded-[2px] before:bg-inherit before:content-['']"
-        >
-          <b className="font-black">{record} is the record.</b> The most wedgies
-          in a season
-          {recordSeason ? `, set in ${recordSeason}` : ""}.
-        </div>
-      )}
     </div>
   );
 }

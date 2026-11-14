@@ -18,11 +18,13 @@ export function PlayersTeams({
   teams,
   season,
   limit,
+  showCount,
 }: {
   players: Item[];
   teams: Item[];
   season?: string;
   limit?: number;
+  showCount?: boolean;
 }) {
   const [tab, setTab] = useState<"players" | "teams">("players");
   const href = (name: string) =>
@@ -54,6 +56,7 @@ export function PlayersTeams({
           items={players}
           buildHref={href}
           limit={limit}
+          showCount={showCount}
           className={tab === "players" ? "" : "hidden md:block"}
         />
         <StandingsList
@@ -62,6 +65,7 @@ export function PlayersTeams({
           items={teams}
           buildHref={href}
           limit={limit}
+          showCount={showCount}
           className={tab === "teams" ? "" : "hidden md:block"}
         />
       </div>

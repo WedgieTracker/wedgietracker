@@ -3,8 +3,7 @@ import { cn } from "~/lib/utils";
 /**
  * The half court, drawn from the same artwork the positions were recorded
  * against (1024 by 751, baseline at the bottom), so a stored position lands
- * where it was logged. Lines are cream; the rim and backboard sit at their
- * regulation distance from the baseline.
+ * where it was logged. Lines are cream.
  */
 const COURT_PATHS = [
   "M491.59476,522.51978l1.591-7.55518a121.08956,121.08956,0,0,1-41.27444-17.01611l-4.21116,6.47317A128.8079,128.8079,0,0,0,491.59476,522.51978Z",
@@ -41,20 +40,6 @@ export function CourtPositionDiagram({
         {COURT_PATHS.map((d) => (
           <path key={d.slice(0, 12)} d={d} fill="currentColor" />
         ))}
-        <path
-          d="M460 676H573"
-          stroke="currentColor"
-          strokeWidth="10"
-          strokeLinecap="round"
-        />
-        <circle
-          cx="516.7"
-          cy="652"
-          r="16"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="8"
-        />
       </svg>
       <span
         aria-hidden="true"

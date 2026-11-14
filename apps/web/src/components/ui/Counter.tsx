@@ -32,5 +32,15 @@ export function Counter({
     return () => cancelAnimationFrame(animationFrame);
   }, [end, duration]);
 
-  return format ? format(count) : count;
+  // Hold the final number's width from the first frame, with equal-width
+  // digits, so counting up doesn't nudge what's around it.
+  const final = String(format ? format(end) : end);
+  return (
+    <span
+      className="inline-block tabular-nums"
+      style={{ minWidth: `${final.length}ch` }}
+    >
+      {format ? format(count) : count}
+    </span>
+  );
 }

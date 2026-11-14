@@ -34,6 +34,8 @@ interface StandingsListProps {
   buildHref: (name: string) => string;
   /** Show this many, then a button for the rest. */
   limit?: number;
+  /** Show how many are listed next to the title. */
+  showCount?: boolean;
   className?: string;
 }
 
@@ -47,6 +49,7 @@ export function StandingsList({
   kind = "players",
   buildHref,
   limit,
+  showCount = true,
   className,
 }: StandingsListProps) {
   const [showAll, setShowAll] = useState(false);
@@ -74,9 +77,11 @@ export function StandingsList({
       {title && (
         <h3 className="text-cream flex items-baseline justify-between pt-4 pb-1.5 text-lg font-extrabold">
           {title}
-          <small className="text-cream/50 text-[13px] font-bold">
-            {items.length}
-          </small>
+          {showCount && (
+            <small className="text-cream/50 text-[13px] font-bold">
+              {items.length}
+            </small>
+          )}
         </h3>
       )}
       {items.length === 0 ? (

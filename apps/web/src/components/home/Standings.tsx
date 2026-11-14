@@ -13,7 +13,7 @@ export function Standings({ players, teams }: StandingsProps) {
       <h2 className="text-cream mb-4 text-[21px] font-extrabold tracking-[-0.01em]">
         Leaders
       </h2>
-      <PlayersTeams players={players} teams={teams} />
+      <PlayersTeams players={players} teams={teams} showCount={false} />
       <Link
         href="/standings"
         className="bg-button text-cream text-button-text focus-visible:outline-cream mt-[18px] flex min-h-[54px] items-center justify-center rounded-full font-black transition-opacity duration-300 hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2"

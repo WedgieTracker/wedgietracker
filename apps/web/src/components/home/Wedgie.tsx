@@ -38,7 +38,7 @@ export function Wedgie({
     <>
       <button
         type="button"
-        className={`group bg-panel border-violet/20 hover:border-violet/45 focus-visible:outline-cream grid w-full grid-cols-[58px_minmax(0,1fr)_56px_30px] items-center gap-3 rounded-[20px] border py-3.5 pr-3.5 pl-[18px] text-left transition-colors duration-300 focus-visible:outline-2 focus-visible:outline-offset-2 ${
+        className={`group bg-panel border-violet/20 hover:border-violet/45 focus-visible:outline-cream grid w-full grid-cols-[58px_minmax(0,1fr)_76px_30px] items-center gap-3 rounded-[20px] border py-3.5 pr-3.5 pl-[18px] text-left transition-colors duration-300 focus-visible:outline-2 focus-visible:outline-offset-2 ${
           variant === "small" ? "min-h-20" : "min-h-[84px]"
         }`}
         onClick={() => {
@@ -78,7 +78,7 @@ export function Wedgie({
           </span>
         </span>
 
-        <span className="relative block w-14">
+        <span className="relative block w-[76px]">
           <CourtPositionDiagram
             position={wedgie.position}
             dotClassName="size-[7px]"
