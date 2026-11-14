@@ -467,6 +467,23 @@
   );
 }
 
+/* The same, left to right, for the wave fill so it meets the wave's own gradient. */
+@utility bg-glow-x {
+  background-image: linear-gradient(
+    90deg,
+    #5f84e6 0%,
+    #7b6bf0 50%,
+    #a65ff5 100%
+  );
+}
+
+/* Cream numbers on the badge get a dark drop, like the No Dunks lettering. */
+@utility text-shadow-badge {
+  text-shadow:
+    0 0.04em 0 #2a1a5c,
+    0 0.08em 0.14em rgb(10 5 30 / 0.45);
+}
+
 /* Film grain over a gradient, like the badge. */
 @utility grain {
   position: relative;

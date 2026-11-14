@@ -64,28 +64,28 @@ export function Stats({ stats, isLoading }: StatsProps) {
     <div className="md-min-h-[auto] relative flex min-h-[80svh] w-full flex-col md:sticky md:top-20 md:max-h-[calc(100svh-80px)] md:w-2/5 lg:w-1/2">
       {/* Top left section */}
 
-      <div className="bg-darkpurple-light relative flex min-h-[25em] flex-2 flex-col justify-center overflow-hidden p-8 md:min-h-[28em]">
+      <div className="bg-badge grain relative flex min-h-[25em] flex-2 flex-col justify-center overflow-hidden p-8 md:min-h-[28em]">
         <ShareableStatsVideo stats={stats} />
 
         <Wave fillPercentage={fillPercentage} showConfetti />
 
         {/* A red animated dot when there are live games: centred below the stats on phones, bottom left from md up */}
 
-        <div className="bg-darkpurple-light/50 relative z-10 mx-auto w-[clamp(16rem,_13rem_+_16vw,_28rem)] rounded-lg p-4 text-center md:w-[90%] lg:w-[65%] lg:max-w-120 lg:min-w-[24rem]">
-          <div className="text-yellow text-sm leading-none font-bold md:text-base">
+        <div className="bg-panel/50 relative z-10 mx-auto w-[clamp(16rem,_13rem_+_16vw,_28rem)] rounded-lg p-4 text-center md:w-[90%] lg:w-[65%] lg:max-w-120 lg:min-w-[24rem]">
+          <div className="text-cream text-sm leading-none font-bold md:text-base">
             {stats.totalWedgies > stats.previousRecord
               ? "NEW ALL-TIME RECORD"
               : stats.totalWedgies === stats.previousRecord
                 ? "ALL-TIME RECORD TIED"
                 : "WE'RE AT"}
           </div>
-          <div className="text-big-number-mobile text-yellow md:text-big-number-medium lg:text-big-number leading-none font-black whitespace-nowrap">
+          <div className="text-big-number-mobile text-cream md:text-big-number-medium lg:text-big-number text-shadow-badge leading-none font-black whitespace-nowrap">
             <Counter
               end={stats.totalWedgies}
               format={(n) => n.toLocaleString()}
             />
           </div>
-          <div className="text-wedgies-text-mobile text-yellow md:text-wedgies-text lg:text-wedgies-text leading-none font-black">
+          <div className="text-wedgies-text-mobile text-cream md:text-wedgies-text lg:text-wedgies-text text-shadow-badge leading-none font-black">
             WEDGIES
           </div>
         </div>
@@ -181,7 +181,7 @@ export function Stats({ stats, isLoading }: StatsProps) {
         <div className="absolute top-0 left-[50%] z-10 translate-x-[-50%] translate-y-[-50%]">
           <Link
             href="/stats-for-nerds"
-            className="border-yellow bg-yellow text-button-text text-darkpurple hover:bg-darkpurple hover:text-yellow block min-w-48 rounded-full border-2 px-8 py-1 text-center font-bold transition-all duration-300"
+            className="bg-cream text-button-text text-night hover:bg-cream/90 block min-w-48 rounded-full px-8 py-1.5 text-center font-black shadow-[0_6px_18px_rgb(20_10_46/0.45)] transition-colors duration-300"
           >
             MORE STATS
           </Link>

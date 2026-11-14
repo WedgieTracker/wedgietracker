@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useId, useState, useRef } from "react";
 import Confetti from "react-confetti";
 
 export function Wave({
@@ -10,6 +10,8 @@ export function Wave({
   fillPercentage: number;
   showConfetti?: boolean;
 }) {
+  // Colons from useId are not safe inside url(#...) references.
+  const waveId = `wave${useId().replace(/:/g, "")}`;
   const [currentHeight, setCurrentHeight] = useState(0);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const [confettiVisible, setConfettiVisible] = useState(false);
@@ -48,7 +50,7 @@ export function Wave({
   return (
     <div
       ref={enableConfetti ? containerRef : undefined}
-      className="bg-pink absolute bottom-0 left-0 z-0 w-full transition-all duration-1000"
+      className="bg-glow-x absolute bottom-0 left-0 z-0 w-full transition-[height] duration-1000"
       style={{ height: `${currentHeight}%` }}
     >
       <div className="absolute bottom-full left-0 z-0 h-[50px] w-full overflow-hidden transition-all duration-1000">
@@ -66,33 +68,67 @@ export function Wave({
                 id="gentle-wave"
                 d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z"
               />
+              {/*
+                The front wave drifts sideways, so its gradient is painted on a
+                still rectangle and the moving wave only masks it. That keeps it
+                lined up with the fill below.
+              */}
+              <linearGradient
+                id={`${waveId}-glow`}
+                gradientUnits="userSpaceOnUse"
+                x1="0"
+                x2="150"
+                y1="0"
+                y2="0"
+              >
+                <stop offset="0" stopColor="#5f84e6" />
+                <stop offset="0.5" stopColor="#7b6bf0" />
+                <stop offset="1" stopColor="#a65ff5" />
+              </linearGradient>
+              <mask
+                id={`${waveId}-front`}
+                maskUnits="userSpaceOnUse"
+                x="0"
+                y="0"
+                width="150"
+                height="60"
+              >
+                <g className="parallax">
+                  <use xlinkHref="#gentle-wave" x="48" y="0" fill="none" />
+                  <use xlinkHref="#gentle-wave" x="48" y="3" fill="none" />
+                  <use xlinkHref="#gentle-wave" x="48" y="5" fill="none" />
+                  <use xlinkHref="#gentle-wave" x="48" y="7" fill="white" />
+                </g>
+              </mask>
             </defs>
             <g className="parallax">
               <use
                 xlinkHref="#gentle-wave"
                 x="48"
                 y="0"
-                style={{ fill: "hsl(var(--pink) / 0.7)" }}
+                fill="rgb(95 132 230 / 0.4)"
               />
               <use
                 xlinkHref="#gentle-wave"
                 x="48"
                 y="3"
-                style={{ fill: "hsl(var(--pink) / 0.5)" }}
+                fill="rgb(166 95 245 / 0.3)"
               />
               <use
                 xlinkHref="#gentle-wave"
                 x="48"
                 y="5"
-                style={{ fill: "hsl(var(--pink) / 0.3)" }}
-              />
-              <use
-                xlinkHref="#gentle-wave"
-                x="48"
-                y="7"
-                style={{ fill: "hsl(var(--pink))" }}
+                fill="rgb(123 107 240 / 0.2)"
               />
             </g>
+            <rect
+              x="0"
+              y="0"
+              width="150"
+              height="60"
+              fill={`url(#${waveId}-glow)`}
+              mask={`url(#${waveId}-front)`}
+            />
           </svg>
         </div>
       </div>
@@ -106,7 +142,7 @@ export function Wave({
               height={dimensions.height}
               numberOfPieces={150}
               gravity={0.05}
-              colors={["#eaff00", "#ff03ff", "#180138", "#542299", "#efff40"]}
+              colors={["#f0e1b6", "#9a5cf5", "#5f84e6", "#ff6fd8", "#ffffff"]}
               drawShape={(ctx) => {
                 ctx.beginPath();
                 ctx.arc(0, 0, 4, 0, 2 * Math.PI);
