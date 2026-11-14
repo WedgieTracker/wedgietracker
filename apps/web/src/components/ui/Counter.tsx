@@ -32,15 +32,15 @@ export function Counter({
     return () => cancelAnimationFrame(animationFrame);
   }, [end, duration]);
 
-  // Hold the final number's width from the first frame, with equal-width
-  // digits, so counting up doesn't nudge what's around it.
-  const final = String(format ? format(end) : end);
+  // The final value sits invisibly underneath and sets the exact size, with
+  // the counting value laid over it, so counting up never moves anything.
+  const final = format ? format(end) : end;
   return (
-    <span
-      className="inline-block tabular-nums"
-      style={{ minWidth: `${final.length}ch` }}
-    >
-      {format ? format(count) : count}
+    <span className="inline-grid justify-items-center tabular-nums [&>*]:[grid-area:1/1]">
+      <span aria-hidden="true" className="invisible">
+        {final}
+      </span>
+      <span>{format ? format(count) : count}</span>
     </span>
   );
 }

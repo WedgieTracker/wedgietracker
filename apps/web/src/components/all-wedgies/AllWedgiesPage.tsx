@@ -3,10 +3,10 @@
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { WedgieFilters } from "./WedgieFilters";
+import { AllWedgiesSkeleton } from "./AllWedgiesSkeleton";
 import { WedgieGrid } from "./WedgieGrid";
 import { WedgieModal } from "~/components/home/WedgieModal";
 import type { WedgieWithTypes } from "@wedgietracker/core/types/wedgie";
-import { Cta } from "~/components/shared/Cta";
 import { api } from "~/trpc/react";
 import { useSeasonFallback } from "~/hooks/use-season-fallback";
 import { matchesFilter } from "@wedgietracker/core/utils/wedgieFilter";
@@ -139,18 +139,7 @@ export function AllWedgiesPage() {
 
   // Only show loading state while data is loading
   if (isLoadingAll || isLoadingSeason || isLoadingSeasonData) {
-    return (
-      <div className="container mx-auto max-w-7xl text-white">
-        <WedgieFilters
-          filters={filters}
-          setFilters={setFilters}
-          visibleWedgies={0}
-        />
-        <div className="mt-8">
-          <WedgieGrid wedgies={[]} isLoading={true} />
-        </div>
-      </div>
-    );
+    return <AllWedgiesSkeleton />;
   }
 
   // Show no wedgies message only after loading is complete and there's no data
@@ -225,15 +214,6 @@ export function AllWedgiesPage() {
           }
         />
       )}
-      <div className="mt-8 md:mt-16">
-        <Cta
-          links={[
-            { title: "Standings", url: "/standings" },
-            { title: "Stats for nerds", url: "/stats-for-nerds" },
-            { title: "Seasons history", url: "/seasons-history" },
-          ]}
-        />
-      </div>
     </div>
   );
 }

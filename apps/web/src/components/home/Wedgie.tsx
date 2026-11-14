@@ -1,5 +1,7 @@
 "use client";
 
+import { Matchup } from "~/components/shared/Matchup";
+
 import { useState } from "react";
 import { WedgieModal } from "./WedgieModal";
 import { CourtPositionDiagram } from "./CourtPositionDiagram";
@@ -30,15 +32,11 @@ export function Wedgie({
 }: WedgieProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const opponent = wedgie.teamAgainstName.includes("Unknown")
-    ? null
-    : wedgie.teamAgainstName;
-
   return (
     <>
       <button
         type="button"
-        className={`group bg-panel border-violet/20 hover:border-violet/45 focus-visible:outline-cream grid w-full grid-cols-[58px_minmax(0,1fr)_76px_30px] items-center gap-3 rounded-[20px] border py-3.5 pr-3.5 pl-[18px] text-left transition-colors duration-300 focus-visible:outline-2 focus-visible:outline-offset-2 ${
+        className={`group bg-panel border-violet/20 hover:border-violet/60 focus-visible:outline-cream grid w-full grid-cols-[62px_minmax(0,1fr)_76px_30px] items-center gap-3 rounded-[20px] border py-3.5 pr-3.5 pl-[18px] text-left transition-[background-color,border-color,box-shadow] duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 ${
           variant === "small" ? "min-h-20" : "min-h-[84px]"
         }`}
         onClick={() => {
@@ -49,7 +47,7 @@ export function Wedgie({
           }
         }}
       >
-        <span className="text-cream text-4xl leading-none font-black tracking-[-0.04em] whitespace-nowrap italic">
+        <span className="text-cream group-hover:text-violet text-4xl leading-none font-black tracking-[-0.04em] whitespace-nowrap italic transition-colors duration-200">
           <span className="mr-[0.06em] text-[0.42em] tracking-normal opacity-55">
             #
           </span>
@@ -65,8 +63,7 @@ export function Wedgie({
             {wedgie.playerName}
           </span>
           <span className="text-cream/80 mt-1 block text-[13.5px] font-bold whitespace-nowrap">
-            <span className="text-violet font-black">{wedgie.teamName}</span>
-            {opponent && ` vs ${opponent}`}
+            <Matchup wedgie={wedgie} teamClassName="text-violet font-black" />
             {showSeason && (
               <span className="text-cream/50 ml-2 text-xs">
                 {wedgie.seasonName}

@@ -4,7 +4,7 @@ import { cacheTag, cacheLife } from "next/cache";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 
 import { db } from "~/server/db";
-import { season, wedgie } from "@wedgietracker/core/schema";
+import { global, season, wedgie } from "@wedgietracker/core/schema";
 import { CACHE_TAGS } from "~/server/cache";
 import { buildTeamStandings } from "~/server/db-helpers";
 
@@ -19,6 +19,15 @@ async function getCachedAll() {
   return seasons;
 }
 
+/** The entries tied for the highest count, in the order given. */
+function leaders(list: { name: string; count: number }[]) {
+  const top = list[0]?.count ?? 0;
+  return {
+    names: top ? list.filter((e) => e.count === top).map((e) => e.name) : [],
+    count: top,
+  };
+}
+
 async function getCachedAllWithStats() {
   "use cache";
   cacheTag(CACHE_TAGS.WEDGIE_DATA);
@@ -29,9 +38,15 @@ async function getCachedAllWithStats() {
     orderBy: desc(season.name),
   });
 
+  const globalRow = await db.query.global.findFirst({
+    where: eq(global.id, 1),
+    with: { currentSeason: true },
+  });
+  const currentSeason = globalRow?.currentSeason?.name;
+
   const seasonsWithStats = await Promise.all(
     seasons.map(async (s) => {
-      const [wedgies, topPlayers] = await Promise.all([
+      const [wedgies, players] = await Promise.all([
         db
           .select({
             teamName: wedgie.teamName,
@@ -47,18 +62,23 @@ async function getCachedAllWithStats() {
           .from(wedgie)
           .where(eq(wedgie.seasonName, s.name))
           .groupBy(wedgie.playerName)
-          .orderBy(desc(count()))
-          .limit(5),
+          .orderBy(desc(count()), wedgie.playerName),
       ]);
+      const teams = buildTeamStandings(wedgies);
+      const topPlayers = players.map((p) => ({
+        name: p.playerName,
+        count: p.count,
+      }));
 
       return {
         ...s,
         totalWedgies: wedgies.length,
-        topPlayers: topPlayers.map((p) => ({
-          name: p.playerName,
-          count: p.count,
-        })),
-        topTeams: buildTeamStandings(wedgies, { limit: 5 }),
+        isCurrent: s.name === currentSeason,
+        topPlayers: topPlayers.slice(0, 5),
+        topTeams: teams.slice(0, 5),
+        // Everyone tied for the most wedgies, which can be more than five.
+        leadPlayers: leaders(topPlayers),
+        leadTeams: leaders(teams),
       };
     }),
   );

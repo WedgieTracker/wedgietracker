@@ -1,5 +1,11 @@
+"use client";
+
+import { Matchup } from "~/components/shared/Matchup";
+
+import { useEffect, useId, useRef, useState } from "react";
 import type { Wedgie } from "@wedgietracker/core/types/wedgie";
-import { GEMS_EMOJI, isGemsDate } from "@wedgietracker/core/utils/formatDate";
+import { isGemsDate } from "@wedgietracker/core/utils/formatDate";
+import { GemTag } from "~/components/shared/GemTag";
 import { gameTimeline } from "@wedgietracker/core/utils/gameMoment";
 import {
   shoutoutNetwork,
@@ -14,50 +20,134 @@ interface WedgieInfoPanelProps {
   };
 }
 
-function formatDate(date: string | Date) {
-  const d = new Date(date);
-  if (isGemsDate(d)) {
-    return GEMS_EMOJI;
+/**
+ * The night of the wedgie in the visitor's own format, with the weekday, e.g.
+ * "Fri 13 Nov 2026" in the UK and "Fri, Nov 13, 2026" in the US. Filled in
+ * once mounted, since the server can't know the visitor's locale.
+ */
+function NightDate({ date }: { date: string | Date }) {
+  const [text, setText] = useState<string | null>(null);
+  // GEMS have no real date: they get a GEM tag, which needs no locale.
+  const gem = isGemsDate(new Date(date));
+  useEffect(() => {
+    setText(
+      new Date(date).toLocaleDateString(undefined, {
+        weekday: "short",
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+        timeZone: "UTC",
+      }),
+    );
+  }, [date]);
+  if (gem) {
+    return (
+      <span className="inline-flex items-center gap-2">
+        <GemTag />
+        Not part of a season
+      </span>
+    );
   }
-  return d.toLocaleDateString("en-US", {
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  });
+  return <span suppressHydrationWarning>{text ?? "\u00a0"}</span>;
+}
+
+/** A shoutouts label with an ⓘ that explains how to get one. */
+function ShoutoutLabel() {
+  const [pinned, setPinned] = useState(false);
+  const [hovered, setHovered] = useState(false);
+  const open = pinned || hovered;
+  const id = useId();
+  const leaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // With a mouse it opens on hover and stays while the pointer is on the ⓘ or
+  // the note; a short delay lets the pointer cross the gap between them.
+  const hover = (on: boolean) => (e: React.PointerEvent) => {
+    if (e.pointerType !== "mouse") return;
+    if (leaveTimer.current) clearTimeout(leaveTimer.current);
+    if (on) setHovered(true);
+    else leaveTimer.current = setTimeout(() => setHovered(false), 150);
+  };
+  useEffect(
+    () => () => {
+      if (leaveTimer.current) clearTimeout(leaveTimer.current);
+    },
+    [],
+  );
+  return (
+    <div className="flex items-center justify-end gap-1.5">
+      <button
+        type="button"
+        aria-expanded={open}
+        aria-controls={id}
+        onClick={() => setPinned((o) => !o)}
+        onPointerEnter={hover(true)}
+        onPointerLeave={hover(false)}
+        className="border-cream/50 text-cream/70 hover:border-cream hover:text-cream focus-visible:outline-cream grid size-[17px] shrink-0 place-items-center rounded-full border-[1.5px] font-serif text-[10px] font-black italic focus-visible:outline-2"
+      >
+        i<span className="sr-only">How do shoutouts work?</span>
+      </button>
+      <p className="text-right text-[.75em] font-bold tracking-wider text-white/60 uppercase">
+        Shoutout
+      </p>
+      {open && (
+        <p
+          id={id}
+          role="note"
+          onPointerEnter={hover(true)}
+          onPointerLeave={hover(false)}
+          className="bg-cream text-night absolute right-4 left-4 z-20 mt-24 rounded-[14px] px-3.5 py-3 text-left text-[13px] leading-snug font-bold normal-case shadow-[0_12px_28px_rgb(5_2_20/0.5)] sm:right-6 sm:left-6 md:right-8 md:left-8"
+        >
+          Shoutouts go to whoever tags the wedgie first. Spot one in a game? Tag{" "}
+          <a
+            href="https://x.com/wedgietracker"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline"
+          >
+            @wedgietracker on X
+          </a>{" "}
+          or{" "}
+          <a
+            href="https://bsky.app/profile/wedgietracker.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline"
+          >
+            wedgietracker.com on Bluesky
+          </a>{" "}
+          and your name goes here.
+        </p>
+      )}
+    </div>
+  );
 }
 
 export function WedgieInfoPanel({ wedgie }: WedgieInfoPanelProps) {
   const timeline = gameTimeline(wedgie);
   return (
-    <div className="relative flex min-h-full w-full flex-col p-6 px-4 max-lg:min-h-[320px] sm:px-6 sm:pb-24 md:px-8 lg:pb-6">
+    <div className="relative flex min-h-full w-full flex-col p-6 px-4 max-lg:min-h-[320px] sm:px-6 sm:max-lg:min-h-[460px] md:px-8 lg:pt-3.5 lg:pb-0">
       <div className="space-y-2 sm:space-y-4">
-        <div className="sm:text-wedgie-number flex flex-row items-center justify-start gap-4 text-xl leading-none">
-          <h2 className="bg-pink text-yellow mb-2 flex size-[70px] flex-row items-center justify-center rounded-xl px-4 py-2 text-[1.6em] font-black">
-            <span className="text-darkpurple mt-[.75em] text-[.5em]">#</span>
+        <div className="sm:text-wedgie-number from-darkpurple via-darkpurple/95 sticky top-0 z-10 -mx-4 flex flex-row items-center justify-start gap-4 bg-gradient-to-b to-transparent px-4 pb-1 text-xl leading-none sm:-mx-6 sm:px-6 md:-mx-8 md:px-8">
+          <h2 className="bg-button text-cream text-shadow-badge flex size-[70px] flex-row items-center justify-center rounded-xl px-4 py-2 text-[1.6em] font-black italic">
+            <span className="mt-[.75em] mr-[0.06em] text-[.45em] opacity-60 [text-shadow:none]">
+              #
+            </span>
             {wedgie.number ?? "1"}
           </h2>
           <div>
-            <p className="text-yellow text-[.9em] font-bold tracking-wider">
-              {formatDate(wedgie.wedgieDate)}
+            <p className="text-cream text-[.9em] font-extrabold">
+              <NightDate date={wedgie.wedgieDate} />
             </p>
             {wedgie.seasonName && wedgie.seasonName !== "GEMS" && (
-              <p className="mt-[.5em] text-[.5em] tracking-wider text-white uppercase">
-                {`${wedgie.seasonName} Season`}
+              <p className="text-cream/60 mt-[.5em] text-[.5em] font-bold tracking-wider uppercase">
+                {`${wedgie.seasonName} season`}
               </p>
             )}
-          </div>
-          {/* On phones the diagram sits in the header row, leaving the rows below full width. */}
-          <div className="relative ml-auto w-[64px] shrink-0 self-start sm:hidden">
-            <CourtPositionDiagram
-              position={wedgie.position}
-              dotClassName="size-2"
-            />
           </div>
         </div>
 
         <div
           className="sm:text-wedgie-number grid items-baseline gap-2 text-sm sm:gap-3"
-          style={{ gridTemplateColumns: "70px 1fr" }}
+          style={{ gridTemplateColumns: "88px 1fr" }}
         >
           <p className="text-right text-[.75em] font-bold tracking-wider text-white/60 uppercase">
             Player
@@ -70,10 +160,7 @@ export function WedgieInfoPanel({ wedgie }: WedgieInfoPanelProps) {
             Teams
           </p>
           <p className="text-[1.25em] font-bold text-white">
-            <span className="text-pink">{wedgie.teamName}</span>{" "}
-            {!wedgie.teamAgainstName.includes("Unknown")
-              ? `vs ${wedgie.teamAgainstName}`
-              : ""}
+            <Matchup wedgie={wedgie} teamClassName="text-violet" />
           </p>
 
           <p className="text-right text-[.75em] font-bold tracking-wider text-white/60 uppercase">
@@ -85,9 +172,7 @@ export function WedgieInfoPanel({ wedgie }: WedgieInfoPanelProps) {
 
           {wedgie.shoutouts?.length > 0 && (
             <>
-              <p className="text-right text-[.75em] font-bold tracking-wider text-white/60 uppercase">
-                Shoutout
-              </p>
+              <ShoutoutLabel />
               <ul className="flex flex-wrap gap-1.5">
                 {wedgie.shoutouts.map((handle) => (
                   <li key={handle}>
@@ -121,9 +206,16 @@ export function WedgieInfoPanel({ wedgie }: WedgieInfoPanelProps) {
         </div>
       </div>
 
-      {/* Between phone and desktop widths; on desktop the modal pins it instead. */}
-      <div className="absolute bottom-6 left-6 hidden w-[70px] sm:block md:left-8 lg:hidden">
-        <CourtPositionDiagram position={wedgie.position} />
+      {/* Sticky to the bottom-left while the details scroll, on a fade of the
+          panel's background. It stays in the flow, so at the end of a long
+          list it sits below the details instead of over them. */}
+      <div className="to-darkpurple via-darkpurple/90 pointer-events-none sticky bottom-0 -mx-4 mt-auto bg-gradient-to-b from-transparent pt-4 pr-4 pb-2 pl-2 sm:-mx-6 sm:pr-6 sm:pl-3 md:-mx-8 md:pr-8 md:pl-3 lg:pt-2 lg:pb-3">
+        <div className="relative w-[120px] sm:w-[150px] lg:w-[140px]">
+          <CourtPositionDiagram
+            position={wedgie.position}
+            dotClassName="size-3"
+          />
+        </div>
       </div>
     </div>
   );

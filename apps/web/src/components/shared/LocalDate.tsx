@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { GEMS_EMOJI, isGemsDate } from "@wedgietracker/core/utils/formatDate";
+import { isGemsDate } from "@wedgietracker/core/utils/formatDate";
+import { GemTag } from "./GemTag";
 
 /**
  * Day and month in the visitor's own order and separator (09/11 in the UK,
@@ -17,15 +18,26 @@ export function LocalDate({
   className?: string;
 }) {
   const [text, setText] = useState<string | null>(null);
+  // GEMS have no real date, so they show a GEM tag instead. That doesn't
+  // depend on the locale, so it renders straight away.
+  const gem = isGemsDate(new Date(date));
 
   useEffect(() => {
-    const d = new Date(date);
     setText(
-      isGemsDate(d)
-        ? GEMS_EMOJI
-        : d.toLocaleDateString(undefined, { day: "2-digit", month: "2-digit" }),
+      new Date(date).toLocaleDateString(undefined, {
+        day: "2-digit",
+        month: "2-digit",
+      }),
     );
   }, [date]);
+
+  if (gem) {
+    return (
+      <span className={className}>
+        <GemTag />
+      </span>
+    );
+  }
 
   return (
     <span className={className} suppressHydrationWarning>

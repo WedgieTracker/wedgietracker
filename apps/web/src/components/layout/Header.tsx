@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { LogoComponent } from "~/components/shared/Logo";
+import { CoffeeCup } from "~/components/support/CoffeeCup";
 import { useMenu } from "~/context/MenuContext";
 import { CircleMenu } from "./CircleMenu";
 
@@ -30,12 +31,12 @@ export function Header() {
           <div className="justify-self-start">
             <Link
               href="/support-us"
-              className={`store-CTA border-yellow text-yellow before:animate-gradient before:via-yellow/20 hover:bg-yellow hover:text-darkpurple relative mb-0.5 inline-block rounded-md border px-2 py-1.5 text-[10px] font-bold tracking-wider uppercase transition-all duration-300 before:absolute before:inset-0 before:-z-10 before:bg-linear-to-r before:from-transparent before:to-transparent before:bg-size-[200%_100%] md:px-3 md:text-xs ${
+              className={`btn-sticker btn-sticker-sm wt-nudge mb-0.5 gap-1.5 px-2.5 text-[11px] tracking-wider uppercase md:px-3 md:text-xs ${
                 isMenuOpen ? "opacity-0" : "opacity-100"
               }`}
             >
-              <span className="inline md:hidden">Support</span>
-              <span className="hidden md:inline">Support</span>
+              <CoffeeCup className="h-[18px] w-[14px]" />
+              Support
             </Link>
           </div>
 

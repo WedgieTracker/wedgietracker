@@ -23,7 +23,8 @@ import {
 // season + number: a second POST returns the wedgie already there. PATCH fills in video links
 // once the clip is posted, and replaces the shoutouts when more fans turn up after the wedgie was
 // added, and corrects a record that went on wrong (player, court position, types, period, clock,
-// score); DELETE undoes a wedgie added by mistake.
+// score), and attaches NoDunks' tweet to a wedgie added before he tweeted it; DELETE undoes a
+// wedgie added by mistake.
 
 function authorised(request: Request) {
   const given = Buffer.from(request.headers.get("x-api-key") ?? "");
@@ -179,6 +180,8 @@ const updateInput = key
     gameClock: gameClock.optional(),
     teamScore: z.number().int().nullable().optional(),
     opponentScore: z.number().int().nullable().optional(),
+    // a wedgie added from the live feed before NoDunks tweeted it gets his tweet once it comes
+    noDunksTweet: z.object({ id: z.string() }).nullable().optional(),
   })
   .refine(
     (u) => Object.keys(u).some((k) => k !== "seasonName" && k !== "number"),

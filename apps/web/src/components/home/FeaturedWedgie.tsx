@@ -1,3 +1,4 @@
+import { Matchup } from "~/components/shared/Matchup";
 import type { WedgieWithTypes } from "@wedgietracker/core/types/wedgie";
 import { gameTimeline } from "@wedgietracker/core/utils/gameMoment";
 import { CourtPositionDiagram } from "./CourtPositionDiagram";
@@ -19,7 +20,7 @@ function QuartersBar({ wedgie }: { wedgie: WedgieWithTypes }) {
     <span
       role="img"
       aria-label={`When: ${timeline.label}`}
-      className="border-cream/20 mt-3 block border-t pt-3.5"
+      className="mt-4 block"
     >
       <span className="flex gap-[5px]">
         {timeline.segments.map((segment, i) => {
@@ -54,9 +55,6 @@ function QuartersBar({ wedgie }: { wedgie: WedgieWithTypes }) {
           );
         })}
       </span>
-      <span className="text-cream mt-2 block text-[13px] font-black">
-        {timeline.label}
-      </span>
     </span>
   );
 }
@@ -72,18 +70,14 @@ export function FeaturedWedgie({
   wedgie: WedgieWithTypes;
   onOpen: () => void;
 }) {
-  const opponent = wedgie.teamAgainstName.includes("Unknown")
-    ? null
-    : wedgie.teamAgainstName;
-
   return (
     <button
       type="button"
       onClick={onOpen}
-      className="bg-glow focus-visible:outline-cream block w-full overflow-hidden rounded-3xl p-[1.5px] text-left focus-visible:outline-2 focus-visible:outline-offset-2 md:grid"
+      className="group bg-glow focus-visible:outline-cream block w-full overflow-hidden rounded-3xl p-[1.5px] text-left transition-shadow duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 md:grid"
     >
       <span className="bg-panel block overflow-hidden rounded-[22.5px] md:grid md:grid-cols-[240px_1fr]">
-        <span className="bg-badge grain block px-[18px] pt-[18px] pb-4 md:flex md:flex-col md:justify-between">
+        <span className="bg-badge grain block px-[18px] pt-[18px] pb-4 transition-[filter] duration-200 group-hover:brightness-115 md:flex md:flex-col md:justify-between">
           <span className="grid grid-cols-[1fr_auto] items-end gap-3 md:block">
             <span className="block">
               <span className="text-cream text-shadow-badge block text-[58px] leading-[0.95] font-black tracking-[-0.04em] italic md:text-[48px]">
@@ -97,7 +91,7 @@ export function FeaturedWedgie({
                 className="text-cream/70 mt-1.5 block text-xs font-bold whitespace-nowrap"
               />
             </span>
-            <span className="relative block w-[150px] md:mx-auto md:mt-2 md:w-[150px]">
+            <span className="relative block w-[150px] md:mx-auto md:-mt-4 md:w-[132px]">
               <CourtPositionDiagram
                 position={wedgie.position}
                 dotClassName="size-2.5"
@@ -109,7 +103,7 @@ export function FeaturedWedgie({
           </span>
         </span>
 
-        <span className="relative block p-[18px] md:flex md:flex-col md:px-6 md:py-5">
+        <span className="relative block p-[18px] md:flex md:flex-col md:px-6 md:py-4">
           <span className="absolute top-[22px] right-[18px]">
             <PlayButton size="lg" />
           </span>
@@ -117,20 +111,19 @@ export function FeaturedWedgie({
             {wedgie.playerName}
           </span>
           <span className="text-cream/80 mt-1 block text-[14.5px] font-bold">
-            <span className="text-violet font-black">{wedgie.teamName}</span>
-            {opponent && ` vs ${opponent}`}
+            <Matchup wedgie={wedgie} teamClassName="text-violet font-black" />
           </span>
-          <span className="mt-3 flex flex-wrap gap-1.5">
+          <span className="mt-2.5 flex flex-wrap gap-1.5">
             {wedgie.types.map((type) => (
               <span
                 key={type.name}
-                className="bg-violet/15 text-cream rounded-full px-[11px] py-1.5 text-[12.5px] font-extrabold"
+                className="bg-violet/15 group-hover:bg-violet/40 text-cream rounded-full px-[11px] py-1.5 text-[12.5px] font-extrabold transition-colors duration-200"
               >
                 {type.name}
               </span>
             ))}
           </span>
-          <span className="mt-1 hidden md:block">
+          <span className="hidden md:block">
             <QuartersBar wedgie={wedgie} />
           </span>
           <span className="sr-only">Watch wedgie {wedgie.number}</span>

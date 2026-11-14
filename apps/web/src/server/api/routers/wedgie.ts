@@ -23,6 +23,7 @@ import {
   game,
 } from "@wedgietracker/core/schema";
 import { CACHE_TAGS, invalidateWedgieData } from "~/server/cache";
+import { getNerdExtras } from "~/server/nerd-extras";
 import {
   buildTeamStandings,
   maybeUpdateGlobalWedgieCount,
@@ -598,6 +599,7 @@ export const wedgieRouter = createTRPCRouter({
     ),
 
   getNerdStats: publicProcedure.query(() => getCachedNerdStats()),
+  getNerdExtras: publicProcedure.query(() => getNerdExtras()),
 
   getPaceBreakdown: publicProcedure.query(() => getCachedPaceBreakdown()),
 
