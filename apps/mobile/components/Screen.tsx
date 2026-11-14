@@ -1,10 +1,9 @@
-import {
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-  type RefreshControlProps,
-} from "react-native";
+import { StyleSheet, Text, View, type RefreshControlProps } from "react-native";
+import Animated, {
+  useAnimatedScrollHandler,
+  useSharedValue,
+  type SharedValue,
+} from "react-native-reanimated";
 
 import { TopSafeArea } from "@/components/TopSafeArea";
 import { useTabBarClearance } from "@/lib/layout";
@@ -16,6 +15,8 @@ interface ScreenProps {
   refreshControl?: React.ReactElement<RefreshControlProps>;
   /** A stack screen whose navigation header already clears the status bar. */
   underHeader?: boolean;
+  /** Follows the scroll position, for anything pinned while scrolling. */
+  scrollY?: SharedValue<number>;
 }
 
 export function Screen({
@@ -23,18 +24,26 @@ export function Screen({
   children,
   refreshControl,
   underHeader = false,
+  scrollY,
 }: ScreenProps) {
   const tabBar = useTabBarClearance();
+  const fallback = useSharedValue(0);
+  const offset = scrollY ?? fallback;
+  const onScroll = useAnimatedScrollHandler((e) => {
+    offset.value = e.contentOffset.y;
+  });
 
   const scroll = (
-    <ScrollView
+    <Animated.ScrollView
       contentContainerStyle={[styles.content, { paddingBottom: tabBar }]}
       refreshControl={refreshControl}
       showsVerticalScrollIndicator={false}
+      onScroll={onScroll}
+      scrollEventThrottle={16}
     >
       {heading}
       {children}
-    </ScrollView>
+    </Animated.ScrollView>
   );
 
   return underHeader ? (
@@ -51,7 +60,13 @@ export function SectionLabel({ children }: { children: string }) {
 const styles = StyleSheet.create({
   // The site's pages sit on night.
   safe: { flex: 1, backgroundColor: colors.night },
-  content: { padding: space.lg },
+  // Capped and centred on a wide screen, like the iPhone Duo opened up.
+  content: {
+    width: "100%",
+    maxWidth: 1000,
+    alignSelf: "center",
+    padding: space.lg,
+  },
   sectionLabel: {
     ...type.section,
     color: colors.yellow,

@@ -1,19 +1,20 @@
 import { keepPreviousData } from "@tanstack/react-query";
-import { useRouter } from "expo-router";
-import { useState } from "react";
-import {
-  Pressable,
-  RefreshControl,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect, useState } from "react";
+import { RefreshControl, StyleSheet, Text, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
+  useSharedValue,
   withTiming,
 } from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import {
+  CountRow,
+  FilterPill,
+  FilterSheet,
+  GroupLabel,
+} from "@/components/FilterSheet";
 import { GradientFill } from "@/components/Gradient";
 import { PageHeading } from "@/components/PageHeading";
 import { PlayersTeams } from "@/components/PlayersTeams";
@@ -22,17 +23,24 @@ import { ErrorState } from "@/components/States";
 import { api } from "@/lib/api";
 import { track } from "@/lib/observability";
 import { useSeasonFallback } from "@/lib/use-season-fallback";
+import { useWide } from "@/lib/wide";
 import { colors, fonts } from "@/lib/theme";
+import { seasonFromParam } from "@wedgietracker/core/utils/allWedgiesUrl";
 
 /**
- * Port of apps/web/src/components/standings/StandingsPage.tsx: season chips,
- * the Including opponents switch, then players and teams, top 20 first.
+ * Port of apps/web/src/components/standings/StandingsPage.tsx: a Season pill
+ * that opens the seasons with their counts, the Including opponents switch
+ * with a line saying what it does, then players and teams, top 20 first.
+ * Opens on `?season=` (2025-26, or "all") when a link brings one.
  */
 export default function StandingsScreen() {
   const router = useRouter();
+  const { top } = useSafeAreaInsets();
+  const { wide } = useWide();
+  const scrollY = useSharedValue(0);
+  const params = useLocalSearchParams<{ season?: string }>();
   const {
     global,
-    seasons,
     previousSeason,
     shouldShowPreviousSeason,
     isLoading: isLoadingSeasonData,
@@ -42,10 +50,19 @@ export default function StandingsScreen() {
     (shouldShowPreviousSeason ? previousSeason?.name : undefined) ??
     global?.currentSeason?.name;
 
+  const fromParam = (p: string | undefined) =>
+    p === undefined ? undefined : p === "all" ? "" : seasonFromParam(p);
   const [selectedSeason, setSelectedSeason] = useState<string | undefined>(
-    undefined,
+    fromParam(params.season),
   );
+  // A link from Seasons history names a season; follow it each time.
+  useEffect(() => {
+    const next = fromParam(params.season);
+    if (next !== undefined) setSelectedSeason(next);
+  }, [params.season]);
+
   const [includeOpponents, setIncludeOpponents] = useState(true);
+  const [open, setOpen] = useState(false);
 
   // Until a season is picked by hand, follow the one the page opens on.
   const season = selectedSeason ?? initialSeason;
@@ -56,24 +73,43 @@ export default function StandingsScreen() {
     // and everything below it jumps while the next one loads.
     { enabled: season !== undefined, placeholderData: keepPreviousData },
   );
+  const all = api.wedgie.getAll.useQuery();
 
-  const named = (seasons ?? []).map((s) => s.name);
-  // Newest season first, GEMS last.
-  const chips: [string, string][] = [
-    ["", "All time"],
-    ...named
-      .filter((s) => s !== "GEMS")
-      .sort()
-      .reverse()
-      .map((s): [string, string] => [s, s]),
-    ...(named.includes("GEMS") ? [["GEMS", "GEMS"] as [string, string]] : []),
-  ];
+  const counts = new Map<string, number>();
+  for (const w of all.data ?? []) {
+    if (w.seasonName)
+      counts.set(w.seasonName, (counts.get(w.seasonName) ?? 0) + 1);
+  }
+  // Newest season first, GEMS on their own at the end.
+  const seasons = [...counts.keys()]
+    .filter((s) => s !== "GEMS")
+    .sort()
+    .reverse();
+  const max = Math.max(0, ...counts.values());
+
+  const pick = (value: string) => {
+    track("wt_filter_applied", { filter: "season", value });
+    setSelectedSeason(value);
+    setOpen(false);
+  };
+  const row = (value: string, label: string, count: number) => (
+    <CountRow
+      key={label}
+      value={value}
+      label={label}
+      count={count}
+      max={max}
+      on={season === value}
+      onPick={() => pick(value)}
+    />
+  );
 
   const loading = isLoadingSeasonData || standings.isPending;
 
   return (
     <Screen
-      heading={<PageHeading title="Standings" />}
+      heading={<PageHeading title="Wedgie leaderboard" />}
+      scrollY={scrollY}
       refreshControl={
         <RefreshControl
           refreshing={standings.isRefetching}
@@ -82,59 +118,57 @@ export default function StandingsScreen() {
         />
       }
     >
-      <View style={styles.filters}>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.chipScroll}
-          contentContainerStyle={styles.chips}
-          accessibilityLabel="Season"
-        >
-          {chips.map(([value, label]) => {
-            const on = !isLoadingSeasonData && season === value;
-            return (
-              <Pressable
-                key={label}
-                onPress={() => {
-                  track("wt_filter_applied", { filter: "season", value });
-                  setSelectedSeason(value);
-                }}
-                accessibilityRole="button"
-                accessibilityState={{ selected: on }}
-                style={[styles.chip, on && styles.chipOn]}
-              >
-                <Text
-                  style={[styles.chipText, on && styles.chipTextOn]}
-                  allowFontScaling={false}
-                >
-                  {label}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </ScrollView>
-
-        <View style={styles.opponents}>
-          <View style={styles.opponentsText}>
-            <Text style={styles.opponentsTitle} allowFontScaling={false}>
-              Including opponents
-            </Text>
-            <Text style={styles.opponentsNote} allowFontScaling={false}>
-              Teams also count the other side&apos;s wedgies in their games
-            </Text>
-          </View>
-          <Toggle
-            value={includeOpponents}
-            onChange={(next) => {
+      <View style={[styles.filters, isLoadingSeasonData && styles.dim]}>
+        <View style={styles.pills}>
+          <FilterPill
+            label={(isLoadingSeasonData ? "" : season) || "All time"}
+            set={!isLoadingSeasonData && !!season}
+            open={open}
+            disabled={isLoadingSeasonData || !all.data}
+            onPress={() => setOpen(true)}
+            accessibilityLabel={`Season: ${season || "All time"}`}
+            sizeFor="0000/00"
+          />
+          <FilterPill
+            label="Including opponents"
+            set={false}
+            open={false}
+            onPress={() => {
               track("wt_filter_applied", {
                 filter: "includeOpponents",
-                value: String(next),
+                value: String(!includeOpponents),
               });
-              setIncludeOpponents(next);
+              setIncludeOpponents(!includeOpponents);
             }}
-          />
+            accessibilityLabel="Including opponents"
+          >
+            <Toggle value={includeOpponents} />
+          </FilterPill>
         </View>
+        <Text style={styles.note} allowFontScaling={false}>
+          {includeOpponents
+            ? "Teams also count the other side's wedgies in their games."
+            : "Teams only count their own players' wedgies."}
+        </Text>
       </View>
+
+      {all.data ? (
+        <FilterSheet
+          title="Season"
+          visible={open}
+          onClose={() => setOpen(false)}
+        >
+          {row("", "All time", all.data.length)}
+          <GroupLabel>Seasons</GroupLabel>
+          {seasons.map((s) => row(s, s, counts.get(s) ?? 0))}
+          {counts.has("GEMS") ? (
+            <>
+              <GroupLabel>Outside the seasons</GroupLabel>
+              {row("GEMS", "GEMS", counts.get("GEMS") ?? 0)}
+            </>
+          ) : null}
+        </FilterSheet>
+      ) : null}
 
       {shouldShowPreviousSeason && season === previousSeason?.name ? (
         <View style={styles.notice}>
@@ -154,6 +188,8 @@ export default function StandingsScreen() {
             players={standings.data?.players ?? []}
             teams={standings.data?.teams ?? []}
             limit={20}
+            sideBySide={wide}
+            sticky={{ scrollY, top: top + 8 }}
             onPressItem={(name, kind) =>
               router.push({
                 pathname: "/all-wedgies",
@@ -170,91 +206,46 @@ export default function StandingsScreen() {
   );
 }
 
-/** The switch: cream knob on the button gradient when on, faded when off. */
-function Toggle({
-  value,
-  onChange,
-}: {
-  value: boolean;
-  onChange: (next: boolean) => void;
-}) {
+/** The pill's small switch: cream knob on the button gradient when on. */
+function Toggle({ value }: { value: boolean }) {
   const knob = useAnimatedStyle(() => ({
-    transform: [{ translateX: withTiming(value ? 20 : 0, { duration: 150 }) }],
+    transform: [{ translateX: withTiming(value ? 14 : 0, { duration: 150 }) }],
   }));
 
   return (
-    <Pressable
-      onPress={() => onChange(!value)}
-      accessibilityRole="switch"
-      accessibilityLabel="Including opponents"
-      accessibilityState={{ checked: value }}
-      hitSlop={8}
+    <View
       style={[styles.toggle, !value && styles.toggleOff]}
+      accessibilityRole="switch"
+      accessibilityState={{ checked: value }}
     >
-      {value ? <GradientFill name="button" radius={15} /> : null}
+      {value ? <GradientFill name="button" radius={11} /> : null}
       <Animated.View style={[styles.knob, !value && styles.knobOff, knob]} />
-    </Pressable>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   filters: { marginTop: 32, marginBottom: 16 },
-  // Bleeds to the screen edges so the chips scroll out from under them.
-  chipScroll: { marginHorizontal: -16 },
-  chips: { gap: 8, paddingHorizontal: 16, paddingTop: 2, paddingBottom: 6 },
-  // `bg-panel border-violet/20 min-h-10 rounded-full border px-[15px]`
-  chip: {
-    minHeight: 40,
-    justifyContent: "center",
-    paddingHorizontal: 15,
-    borderRadius: 999,
-    borderWidth: 1,
-    borderColor: colors.violet20,
-    backgroundColor: colors.panel,
-  },
-  chipOn: { backgroundColor: colors.cream, borderColor: colors.cream },
-  chipText: {
-    fontFamily: fonts.extraBold,
-    fontSize: 14,
-    color: colors.cream70,
-  },
-  chipTextOn: { color: colors.night },
-
-  opponents: {
-    marginTop: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: colors.violet20,
-    backgroundColor: colors.panel,
-  },
-  opponentsText: { flex: 1 },
-  opponentsTitle: {
-    fontFamily: fonts.extraBold,
-    fontSize: 14.5,
-    color: colors.cream,
-  },
-  opponentsNote: {
-    marginTop: 2,
+  dim: { opacity: 0.4 },
+  pills: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
+  note: {
+    marginTop: 8,
+    paddingLeft: 2,
     fontFamily: fonts.bold,
     fontSize: 12.5,
     lineHeight: 16,
     color: colors.cream50,
   },
-  toggle: { width: 50, height: 30, borderRadius: 15 },
+  // `h-[22px] w-9 rounded-full`, the knob `size-4` at 3pt.
+  toggle: { width: 36, height: 22, borderRadius: 11, marginLeft: 4 },
   toggleOff: { backgroundColor: colors.cream20 },
   knob: {
     position: "absolute",
     top: 3,
     left: 3,
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    width: 16,
+    height: 16,
+    borderRadius: 8,
     backgroundColor: colors.cream,
   },
   knobOff: { backgroundColor: colors.cream70 },

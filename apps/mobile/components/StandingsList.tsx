@@ -6,6 +6,12 @@ import {
   View,
   type ViewStyle,
 } from "react-native";
+import Animated, {
+  measure,
+  useAnimatedRef,
+  useAnimatedStyle,
+  type SharedValue,
+} from "react-native-reanimated";
 
 import { track } from "@/lib/observability";
 import { colors, fonts } from "@/lib/theme";
@@ -48,6 +54,7 @@ export function StandingsList({
   limit,
   showCount = true,
   style,
+  sticky,
 }: {
   title?: string;
   items: StandingsItem[];
@@ -57,6 +64,11 @@ export function StandingsList({
   limit?: number;
   showCount?: boolean;
   style?: ViewStyle;
+  /**
+   * The screen's scroll position and how far from the top of the window a
+   * tied rank should stop, so it stays in view while a long tie scrolls by.
+   */
+  sticky?: Sticky;
 }) {
   const [showAll, setShowAll] = useState(false);
   const shown = limit && !showAll ? items.slice(0, limit) : items;
@@ -115,29 +127,21 @@ export function StandingsList({
               <View style={styles.flex}>{row(group[0]!)}</View>
             </View>
           ) : (
-            <View
+            <TieGroup
               key={`rank-${rank}`}
-              accessibilityLabel={`Tied ${rank}`}
-              style={[styles.tie, index > 0 && styles.divider]}
+              rank={rank}
+              divider={index > 0}
+              sticky={sticky}
             >
-              <Text
-                style={[styles.rank, styles.tieRank]}
-                allowFontScaling={false}
-              >
-                {rank}
-              </Text>
-              <View style={styles.bracket} />
-              <View style={styles.flex}>
-                {group.map((item, i) => (
-                  <View
-                    key={item.name}
-                    style={[styles.tieRow, i > 0 && styles.divider]}
-                  >
-                    {row(item)}
-                  </View>
-                ))}
-              </View>
-            </View>
+              {group.map((item, i) => (
+                <View
+                  key={item.name}
+                  style={[styles.tieRow, i > 0 && styles.divider]}
+                >
+                  {row(item)}
+                </View>
+              ))}
+            </TieGroup>
           ),
         )
       )}
@@ -156,6 +160,63 @@ export function StandingsList({
         </Pressable>
       ) : null}
     </View>
+  );
+}
+
+export interface Sticky {
+  scrollY: SharedValue<number>;
+  top: number;
+}
+
+// The rank's line plus its 3pt nudge down.
+const RANK_HEIGHT = ROW_HEIGHT + 3;
+
+/**
+ * A tie: the shared rank, a rounded bracket spanning the tied rows, then the
+ * rows. With `sticky`, the rank follows the window's top edge down the group
+ * while the group scrolls past, as the site's `position: sticky` does. React
+ * Native has no sticky inside a list item, so it is measured on each scroll
+ * frame and moved within the group.
+ */
+function TieGroup({
+  rank,
+  divider,
+  sticky,
+  children,
+}: {
+  rank: number;
+  divider: boolean;
+  sticky?: Sticky;
+  children: React.ReactNode;
+}) {
+  const ref = useAnimatedRef<Animated.View>();
+  const scrollY = sticky?.scrollY;
+  const top = sticky?.top ?? 0;
+  const follow = useAnimatedStyle(() => {
+    // Read so this reruns on every scroll frame.
+    if (!scrollY || scrollY.value === undefined) return {};
+    const box = measure(ref);
+    if (!box) return {};
+    const room = box.height - RANK_HEIGHT;
+    const shift = Math.min(Math.max(top - box.pageY, 0), Math.max(room, 0));
+    return { transform: [{ translateY: shift }] };
+  });
+
+  return (
+    <Animated.View
+      ref={ref}
+      accessibilityLabel={`Tied ${rank}`}
+      style={[styles.tie, divider && styles.divider]}
+    >
+      <Animated.Text
+        style={[styles.rank, styles.tieRank, follow]}
+        allowFontScaling={false}
+      >
+        {rank}
+      </Animated.Text>
+      <View style={styles.bracket} />
+      <View style={styles.flex}>{children}</View>
+    </Animated.View>
   );
 }
 
@@ -204,6 +265,7 @@ const styles = StyleSheet.create({
   // `grid-cols-[38px_10px_1fr]`: rank, bracket, rows.
   tie: { flexDirection: "row" },
   tieRank: {
+    alignSelf: "flex-start",
     width: 38,
     paddingRight: 14,
     lineHeight: ROW_HEIGHT,

@@ -2,7 +2,11 @@ import { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { Loader } from "@/components/Loader";
-import { StandingsList, type StandingsItem } from "@/components/StandingsList";
+import {
+  StandingsList,
+  type StandingsItem,
+  type Sticky,
+} from "@/components/StandingsList";
 import { colors, fonts } from "@/lib/theme";
 
 type Tab = "players" | "teams";
@@ -19,6 +23,8 @@ export function PlayersTeams({
   limit,
   showCount,
   loading = false,
+  sideBySide = false,
+  sticky,
 }: {
   /** While the lists load: the switch and an empty card with the loader. */
   loading?: boolean;
@@ -27,8 +33,39 @@ export function PlayersTeams({
   onPressItem?: (name: string, kind: Tab) => void;
   limit?: number;
   showCount?: boolean;
+  /** Both lists at once, with no switch, on a wide screen. */
+  sideBySide?: boolean;
+  sticky?: Sticky;
 }) {
   const [tab, setTab] = useState<Tab>("players");
+
+  if (sideBySide) {
+    return (
+      <View style={styles.side}>
+        {(["players", "teams"] as const).map((kind) =>
+          loading ? (
+            <View key={kind} style={[styles.loading, styles.flex]}>
+              <Loader size={96} />
+            </View>
+          ) : (
+            <StandingsList
+              key={kind}
+              style={styles.flex}
+              title={kind === "players" ? "Players" : "Teams"}
+              kind={kind}
+              items={kind === "players" ? players : teams}
+              onPressItem={
+                onPressItem ? (name) => onPressItem(name, kind) : undefined
+              }
+              limit={limit}
+              showCount={showCount}
+              sticky={sticky}
+            />
+          ),
+        )}
+      </View>
+    );
+  }
 
   return (
     <View>
@@ -49,6 +86,7 @@ export function PlayersTeams({
           }
           limit={limit}
           showCount={showCount}
+          sticky={sticky}
         />
       )}
     </View>
@@ -88,6 +126,8 @@ function Switch({
 }
 
 const styles = StyleSheet.create({
+  side: { flexDirection: "row", alignItems: "flex-start", gap: 14 },
+  flex: { flex: 1 },
   // `mb-2.5 flex rounded-full bg-black/25 p-1`
   switch: {
     flexDirection: "row",
