@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState, type ComponentRef, type RefObject } from "react";
 import {
   Pressable,
   StyleSheet,
@@ -7,9 +7,8 @@ import {
   type ViewStyle,
 } from "react-native";
 import Animated, {
-  measure,
-  useAnimatedRef,
   useAnimatedStyle,
+  useSharedValue,
   type SharedValue,
 } from "react-native-reanimated";
 
@@ -164,7 +163,13 @@ export function StandingsList({
 }
 
 export interface Sticky {
+  /** The scroll view's offset, updated on every scroll frame. */
   scrollY: SharedValue<number>;
+  /** The view that holds the scrolling content, to measure groups against. */
+  content: RefObject<ComponentRef<typeof View> | null>;
+  /** Where the content view starts inside the scroll view. */
+  contentTop: number;
+  /** How far below the scroll view's top edge a pinned rank stops. */
   top: number;
 }
 
@@ -173,10 +178,11 @@ const RANK_HEIGHT = ROW_HEIGHT + 3;
 
 /**
  * A tie: the shared rank, a rounded bracket spanning the tied rows, then the
- * rows. With `sticky`, the rank follows the window's top edge down the group
+ * rows. With `sticky`, the rank follows the top of the screen down the group
  * while the group scrolls past, as the site's `position: sticky` does. React
- * Native has no sticky inside a list item, so it is measured on each scroll
- * frame and moved within the group.
+ * Native has no sticky inside a list item, so the group's place in the
+ * content is measured on layout and the rank moved within it as the screen
+ * scrolls.
  */
 function TieGroup({
   rank,
@@ -189,22 +195,34 @@ function TieGroup({
   sticky?: Sticky;
   children: React.ReactNode;
 }) {
-  const ref = useAnimatedRef<Animated.View>();
+  const ref = useRef<ComponentRef<typeof View>>(null);
+  const groupY = useSharedValue(Number.NaN);
+  const groupH = useSharedValue(0);
   const scrollY = sticky?.scrollY;
-  const top = sticky?.top ?? 0;
+  const top = (sticky?.top ?? 0) - (sticky?.contentTop ?? 0);
+
+  const place = () => {
+    const content = sticky?.content.current;
+    if (!content || !ref.current) return;
+    ref.current.measureLayout(content, (_x, y, _w, h) => {
+      groupY.value = y;
+      groupH.value = h;
+    });
+  };
+
   const follow = useAnimatedStyle(() => {
-    // Read so this reruns on every scroll frame.
-    if (!scrollY || scrollY.value === undefined) return {};
-    const box = measure(ref);
-    if (!box) return {};
-    const room = box.height - RANK_HEIGHT;
-    const shift = Math.min(Math.max(top - box.pageY, 0), Math.max(room, 0));
+    if (!scrollY || Number.isNaN(groupY.value)) return {};
+    // Where the group's top is now, from the top of the scroll view.
+    const onScreen = groupY.value - scrollY.value;
+    const room = Math.max(groupH.value - RANK_HEIGHT, 0);
+    const shift = Math.min(Math.max(top - onScreen, 0), room);
     return { transform: [{ translateY: shift }] };
   });
 
   return (
-    <Animated.View
+    <View
       ref={ref}
+      onLayout={sticky ? place : undefined}
       accessibilityLabel={`Tied ${rank}`}
       style={[styles.tie, divider && styles.divider]}
     >
@@ -216,7 +234,7 @@ function TieGroup({
       </Animated.Text>
       <View style={styles.bracket} />
       <View style={styles.flex}>{children}</View>
-    </Animated.View>
+    </View>
   );
 }
 

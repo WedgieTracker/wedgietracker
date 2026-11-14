@@ -1,13 +1,12 @@
 import { keepPreviousData } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { RefreshControl, StyleSheet, Text, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import {
   CountRow,
@@ -35,9 +34,9 @@ import { seasonFromParam } from "@wedgietracker/core/utils/allWedgiesUrl";
  */
 export default function StandingsScreen() {
   const router = useRouter();
-  const { top } = useSafeAreaInsets();
   const { wide } = useWide();
   const scrollY = useSharedValue(0);
+  const contentRef = useRef<React.ComponentRef<typeof View>>(null);
   const params = useLocalSearchParams<{ season?: string }>();
   const {
     global,
@@ -110,6 +109,7 @@ export default function StandingsScreen() {
     <Screen
       heading={<PageHeading title="Wedgie leaderboard" />}
       scrollY={scrollY}
+      contentRef={contentRef}
       refreshControl={
         <RefreshControl
           refreshing={standings.isRefetching}
@@ -189,7 +189,9 @@ export default function StandingsScreen() {
             teams={standings.data?.teams ?? []}
             limit={20}
             sideBySide={wide}
-            sticky={{ scrollY, top: top + 8 }}
+            // The content starts 16pt into the scroll view; ranks stop 8pt
+            // below its top edge, which already clears the status bar.
+            sticky={{ scrollY, content: contentRef, contentTop: 16, top: 8 }}
             onPressItem={(name, kind) =>
               router.push({
                 pathname: "/all-wedgies",
