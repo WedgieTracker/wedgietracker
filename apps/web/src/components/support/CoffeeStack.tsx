@@ -21,7 +21,6 @@ const ATTRIBUTES: { name: string; down?: boolean }[] = [
   { name: "Basketball IQ", down: true },
   { name: "Shooting touch", down: true },
   { name: "Rim respect", down: true },
-  { name: "Backboard trust", down: true },
   { name: "Sleep", down: true },
   { name: "Shot selection", down: true },
 ];
