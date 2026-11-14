@@ -62,6 +62,10 @@ export function WaveCounterPanel({
               fontSize: t.bigNumber,
               lineHeight: t.bigNumber * 0.88,
               paddingTop: t.bigNumber * 0.12,
+              // The digits' ink sits high in the line box, close under the
+              // headline and far above WEDGIES. Nudging it down by the
+              // difference evens the two gaps without moving anything else.
+              transform: [{ translateY: t.bigNumber * 0.165 }],
             },
             badgeTextShadow(t.bigNumber),
             value === null && styles.hidden,
