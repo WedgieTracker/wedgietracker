@@ -25,6 +25,11 @@ const ATTRIBUTES: { name: string; down?: boolean }[] = [
   { name: "Rim respect", down: true },
   { name: "Backboard trust", down: true },
   { name: "Sleep", down: true },
+  { name: "Shot selection", down: true },
+  { name: "Arc", down: true },
+  { name: "Faith in physics", down: true },
+  { name: "Neck health", down: true },
+  { name: "Social life", down: true },
 ];
 
 const MAX = 99;
