@@ -19,7 +19,7 @@ const ATTRIBUTES: { name: string; down?: boolean }[] = [
   { name: "Rim stickiness" },
   // Wedgie watching has its costs.
   { name: "Basketball IQ", down: true },
-  { name: "Shooting touch", down: true },
+  { name: "Shooting", down: true },
   { name: "Rim respect", down: true },
   { name: "Sleep", down: true },
   { name: "Shot selection", down: true },
