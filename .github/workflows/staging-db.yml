@@ -1,0 +1,100 @@
+name: Staging database
+
+# Keeps wedgietracker-staging, the database Vercel previews use, in step with
+# live. Data only ever flows live -> staging.
+#
+# - A PR that adds a migration applies it to staging, so its preview runs on
+#   the new schema before production gets it.
+# - Every Monday, and on demand, staging is rebuilt as a fresh copy of live
+#   and the migrations on main are applied.
+on:
+  pull_request:
+    paths:
+      - "apps/web/migrations/**"
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+concurrency:
+  group: staging-db
+  cancel-in-progress: false
+
+env:
+  STAGING_DB: wedgietracker-staging
+  STAGING_GROUP: staging
+  LIVE_DB: wedgietracker
+
+jobs:
+  refresh:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    env:
+      TURSO_API_TOKEN: ${{ secrets.TURSO_API_TOKEN }}
+    steps:
+      - name: Check for the Turso API token
+        run: |
+          if [ -z "$TURSO_API_TOKEN" ]; then
+            echo "::error::Add the TURSO_API_TOKEN secret (turso auth api-tokens mint) to refresh staging."
+            exit 1
+          fi
+
+      - name: Install the Turso CLI
+        run: |
+          curl -sSfL https://get.tur.so/install.sh | bash
+          echo "$HOME/.turso" >> "$GITHUB_PATH"
+
+      - name: Copy live into staging
+        run: |
+          set -euo pipefail
+          # Never delete anything but the staging database in the staging group.
+          [ "$STAGING_DB" = "wedgietracker-staging" ] || { echo "Refusing: $STAGING_DB"; exit 1; }
+          group=$(turso db show "$STAGING_DB" 2>/dev/null | awk '/^Group:/ {print $2}' || true)
+          if [ -n "$group" ] && [ "$group" != "$STAGING_GROUP" ]; then
+            echo "Refusing: $STAGING_DB is in group $group, not $STAGING_GROUP"
+            exit 1
+          fi
+
+          turso db shell "$LIVE_DB" .dump > live.sql
+          echo "Dumped $(grep -c '^INSERT' live.sql) rows from $LIVE_DB"
+
+          if [ -n "$group" ]; then
+            turso db destroy "$STAGING_DB" --yes
+          fi
+          turso db create "$STAGING_DB" --group "$STAGING_GROUP" --wait
+          turso db shell "$STAGING_DB" < live.sql
+          rm -f live.sql
+          turso db shell "$STAGING_DB" "SELECT count(*) AS wedgies FROM wedgie"
+
+  migrate:
+    needs: refresh
+    # After a refresh, or on a PR from this repo that adds a migration (fork PRs
+    # get no secrets).
+    if: >-
+      always() &&
+      (needs.refresh.result == 'success' ||
+       (github.event_name == 'pull_request' &&
+        github.event.pull_request.head.repo.full_name == github.repository))
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up pnpm
+        # Reads the version from packageManager in package.json.
+        uses: pnpm/action-setup@v6
+
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --filter @wedgietracker/web...
+
+      - name: Apply migrations to staging
+        env:
+          TURSO_DATABASE_URL: ${{ secrets.STAGING_TURSO_DATABASE_URL }}
+          TURSO_AUTH_TOKEN: ${{ secrets.STAGING_TURSO_AUTH_TOKEN }}
+        working-directory: apps/web
+        run: node scripts/migrate.mjs
