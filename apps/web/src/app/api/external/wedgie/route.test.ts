@@ -178,6 +178,21 @@ describe("/api/external/wedgie", () => {
     });
   });
 
+  it("attaches NoDunks' tweet to a wedgie added before it", async () => {
+    wedgieFindFirst.mockResolvedValue({ id: 9, videoUrl: {} });
+    const res = await PATCH(
+      call("PATCH", {
+        seasonName: "2026/27",
+        number: 13,
+        noDunksTweet: { id: "2120313054206234902", text: "dropped" },
+      }),
+    );
+    expect(res.status).toBe(200);
+    expect(updateSet).toHaveBeenCalledWith({
+      noDunksTweet: { id: "2120313054206234902" },
+    });
+  });
+
   it("refuses an update with nothing to change or a bad handle", async () => {
     wedgieFindFirst.mockResolvedValue({ id: 9, videoUrl: {} });
     const empty = await PATCH(
