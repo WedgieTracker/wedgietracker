@@ -1,0 +1,62 @@
+name: Update pnpm
+
+# Dependabot keeps packages and actions current but not the pnpm pinned in
+# packageManager, so this opens a PR when a newer pnpm is out. Comment /ci on
+# the PR to run the checks, as with Dependabot's.
+on:
+  schedule:
+    - cron: "0 7 1 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      - name: Compare versions
+        id: versions
+        run: |
+          current=$(node -p 'require("./package.json").packageManager.replace(/^pnpm@/, "").split("+")[0]')
+          latest=$(npm view pnpm dist-tags.latest)
+          echo "current=$current" >> "$GITHUB_OUTPUT"
+          echo "latest=$latest" >> "$GITHUB_OUTPUT"
+          echo "pnpm $current pinned, $latest released"
+
+      - name: Open a PR
+        if: steps.versions.outputs.current != steps.versions.outputs.latest
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CURRENT: ${{ steps.versions.outputs.current }}
+          LATEST: ${{ steps.versions.outputs.latest }}
+        run: |
+          branch="pnpm-$LATEST"
+          if git ls-remote --exit-code --heads origin "$branch" > /dev/null; then
+            echo "A PR for pnpm $LATEST is already open."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          node -e 'const f="package.json",p=require("./"+f);p.packageManager="pnpm@"+process.env.LATEST;require("fs").writeFileSync(f,JSON.stringify(p,null,2)+"\n")'
+          npx -y "pnpm@$LATEST" install --lockfile-only --ignore-scripts
+          git commit -am "Update pnpm to $LATEST"
+          git push -u origin "$branch"
+          major() { echo "${1%%.*}"; }
+          note=""
+          if [ "$(major "$CURRENT")" != "$(major "$LATEST")" ]; then
+            note=$'\n\nThis is a new major version: read the release notes for breaking changes before merging.'
+          fi
+          gh pr create --base main --head "$branch" --label dependencies --label ci \
+            --title "Update pnpm to $LATEST" \
+            --body "Moves the pinned pnpm from $CURRENT to $LATEST ([release notes](https://github.com/pnpm/pnpm/releases/tag/v$LATEST)) and refreshes the lockfile. Comment \`/ci\` to run the checks.$note"

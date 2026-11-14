@@ -1,3 +1,13 @@
 packages:
   - "apps/*"
   - "packages/*"
+
+# Dependencies allowed to run their install scripts; any other dependency with
+# one fails the install until it is listed here (true) or denied (false).
+allowBuilds:
+  canvas: true
+  lefthook: true
+  # Never ran under pnpm 9 either, and nothing needs them to.
+  "@prisma/client": false
+  "@sentry/cli": false
+  esbuild: false

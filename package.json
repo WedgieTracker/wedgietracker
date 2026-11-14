@@ -27,11 +27,5 @@
     "prettier": "^3.9.10",
     "prettier-plugin-tailwindcss": "^0.8.1"
   },
-  "packageManager": "pnpm@9.15.9",
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "canvas",
-      "lefthook"
-    ]
-  }
+  "packageManager": "pnpm@12.18.0"
 }
