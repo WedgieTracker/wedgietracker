@@ -128,6 +128,35 @@ export function WedgieFilters({
             </span>
           </span>
         }
+        badgeAction={
+          anySet && (
+            <button
+              type="button"
+              onClick={() =>
+                setFilters({
+                  season: "",
+                  type: "",
+                  moment: "",
+                  playerOrTeam: "",
+                })
+              }
+              aria-label="Clear filters"
+              title="Clear filters"
+              className="bg-cream text-night hover:bg-violet hover:text-cream focus-visible:outline-cream absolute -top-2.5 -right-2.5 grid size-6 place-items-center rounded-full shadow-[0_2px_6px_rgb(5_2_20/0.5)] transition-colors focus-visible:outline-2"
+            >
+              <svg
+                viewBox="0 0 12 12"
+                aria-hidden="true"
+                className="size-2.5"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+              >
+                <path d="M2 2l8 8M10 2l-8 8" />
+              </svg>
+            </button>
+          )
+        }
       />
       <div className={`mt-8 ${isLoading ? "opacity-40" : ""}`}>
         <label className="border-violet/40 bg-night focus-within:border-cream flex min-h-[50px] items-center gap-2.5 rounded-2xl border-2 px-3.5 transition-colors">
@@ -170,7 +199,7 @@ export function WedgieFilters({
                     : "bg-panel border-violet/30 text-cream hover:border-cream/60"
                 }`}
               >
-                {value || LABELS[kind].label}
+                <PillLabel kind={kind}>{value || LABELS[kind].label}</PillLabel>
                 <span aria-hidden="true" className="text-[11px] opacity-60">
                   ▾
                 </span>
@@ -187,24 +216,31 @@ export function WedgieFilters({
               {choices[open].map((v) => chip(open, v, v))}
             </div>
           )}
-          {anySet && (
-            <button
-              type="button"
-              onClick={() =>
-                setFilters({
-                  season: "",
-                  type: "",
-                  moment: "",
-                  playerOrTeam: "",
-                })
-              }
-              className="text-violet hover:text-cream ml-auto self-center text-[13px] font-extrabold"
-            >
-              Clear all
-            </button>
-          )}
         </div>
       </div>
     </div>
+  );
+}
+
+/**
+ * A pill's label. The Season pill is sized for its widest value (a season
+ * like 2026/27) so it doesn't grow, and push Type and When along, when the
+ * default season fills in after loading.
+ */
+export function PillLabel({
+  kind,
+  children,
+}: {
+  kind: string;
+  children: React.ReactNode;
+}) {
+  if (kind !== "season") return <>{children}</>;
+  return (
+    <span className="inline-grid">
+      <span aria-hidden="true" className="invisible [grid-area:1/1]">
+        0000/00
+      </span>
+      <span className="[grid-area:1/1]">{children}</span>
+    </span>
   );
 }

@@ -1,4 +1,5 @@
 import { PageHeading } from "~/components/shared/PageHeading";
+import { PillLabel } from "./WedgieFilters";
 
 /**
  * What All wedgies shows while it loads: the same heading, search, pills and
@@ -19,12 +20,18 @@ export function AllWedgiesSkeleton() {
       <div className="mt-8">
         <div className="border-violet/40 bg-night min-h-[50px] rounded-2xl border-2" />
         <div className="mt-2.5 flex gap-1.5">
-          {["Season", "Type", "When"].map((label) => (
+          {(
+            [
+              ["season", "Season"],
+              ["type", "Type"],
+              ["moment", "When"],
+            ] as const
+          ).map(([kind, label]) => (
             <span
-              key={label}
+              key={kind}
               className="bg-panel border-violet/30 text-cream/40 inline-flex min-h-10 items-center gap-1.5 rounded-xl border px-3 text-[13.5px] font-extrabold"
             >
-              {label}
+              <PillLabel kind={kind}>{label}</PillLabel>
               <span aria-hidden="true" className="text-[11px] opacity-60">
                 ▾
               </span>
