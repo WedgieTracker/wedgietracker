@@ -362,11 +362,28 @@ export function StatsForNerds({
           <Card>
             <Kicker>All time</Kicker>
             <Big>{nf(stats.totalWedgiesOverall)}</Big>
-            <Line>
-              wedgies over <b>{stats.totalSeasonsOverall} seasons</b> and{" "}
-              <b>{nf(stats.totalGamesOverall)} games</b>. One every{" "}
-              <b>{perGames} games</b>.
-            </Line>
+            <p className="text-cream/60 mt-1.5 text-[11.5px] font-black tracking-[0.14em] uppercase">
+              Wedgies
+            </p>
+            <dl className="mt-4 grid gap-2.5">
+              {[
+                [String(stats.totalSeasonsOverall), "seasons"],
+                [nf(stats.totalGamesOverall), "games"],
+                [String(perGames), "games per wedgie"],
+              ].map(([n, label]) => (
+                <div
+                  key={label}
+                  className="border-violet/20 flex items-baseline justify-between gap-3 border-t pt-2.5"
+                >
+                  <dt className="text-cream/60 text-[11.5px] font-black tracking-[0.1em] uppercase">
+                    {label}
+                  </dt>
+                  <dd className="text-cream pr-[0.1em] text-[26px] leading-none font-black whitespace-nowrap italic">
+                    {n}
+                  </dd>
+                </div>
+              ))}
+            </dl>
             <div className="mt-auto pt-4">
               <More href="/seasons-history">Seasons history</More>
             </div>
@@ -377,23 +394,7 @@ export function StatsForNerds({
           </Card>
         </section>
 
-        <Section title="Shot types">
-          <Card>
-            <Bars
-              rows={extras.types
-                .slice(0, 8)
-                .map((t) => ({ label: t.name, count: t.count }))}
-            />
-          </Card>
-        </Section>
-
-        <Section title="When in the game">
-          <Card>
-            <Columns rows={extras.quarters} />
-          </Card>
-        </Section>
-
-        <Section title="Records">
+        <Section title="Records" hideTitle>
           <Card>
             <dl className="grid gap-3">
               {[
@@ -426,6 +427,22 @@ export function StatsForNerds({
                   </div>
                 ))}
             </dl>
+          </Card>
+        </Section>
+
+        <Section title="Shot types">
+          <Card>
+            <Bars
+              rows={extras.types
+                .slice(0, 8)
+                .map((t) => ({ label: t.name, count: t.count }))}
+            />
+          </Card>
+        </Section>
+
+        <Section title="When in the game">
+          <Card>
+            <Columns rows={extras.quarters} />
           </Card>
         </Section>
 
