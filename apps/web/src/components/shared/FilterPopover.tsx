@@ -164,3 +164,30 @@ export function CountRow({
     </button>
   );
 }
+
+/** One plain choice in a popover, like a sort order, with a tick when chosen. */
+export function OptionRow({
+  label,
+  on,
+  onPick,
+}: {
+  label: string;
+  on: boolean;
+  onPick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      aria-pressed={on}
+      onClick={onPick}
+      className={`focus-visible:outline-cream flex min-h-10 w-full items-center justify-between gap-2.5 rounded-[10px] px-2.5 text-left text-sm font-extrabold transition-colors focus-visible:outline-2 ${
+        on ? "bg-cream text-night" : "text-cream/85 hover:bg-violet/15"
+      }`}
+    >
+      {label}
+      <span aria-hidden="true" className="text-[13px]">
+        {on ? "✓" : ""}
+      </span>
+    </button>
+  );
+}

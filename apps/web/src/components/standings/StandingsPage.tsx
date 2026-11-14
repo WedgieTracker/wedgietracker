@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { seasonFromParam } from "@wedgietracker/core/utils/allWedgiesUrl";
 import { api } from "~/trpc/react";
 import { StandingsFilters } from "./StandingsFilters";
 import { StandingsGrid } from "./StandingsGrid";
@@ -17,9 +18,19 @@ export function StandingsPage() {
 
   const [selectedSeason, setSelectedSeason] = useState(defaultSeason);
   const [includeOpponents, setIncludeOpponents] = useState(true);
+  // A season in the address (?season=2025-26, or "all") wins over the default.
+  const fromUrl = useRef(false);
+  useEffect(() => {
+    const param = new URLSearchParams(window.location.search).get("season");
+    if (param) {
+      fromUrl.current = true;
+      setSelectedSeason(param === "all" ? "" : seasonFromParam(param));
+    }
+  }, []);
 
   // Update selected season when data loads
   useEffect(() => {
+    if (fromUrl.current) return;
     if (shouldShowPreviousSeason && previousSeason) {
       setSelectedSeason(previousSeason.name);
     } else if (global?.currentSeason?.name) {
