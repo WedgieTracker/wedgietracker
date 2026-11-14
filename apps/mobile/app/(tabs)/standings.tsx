@@ -1,94 +1,142 @@
 import { keepPreviousData } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
-import { useEffect, useState } from "react";
-import { RefreshControl, StyleSheet, Switch, Text, View } from "react-native";
+import { useState } from "react";
+import {
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  withTiming,
+} from "react-native-reanimated";
 
-import { ClearFilters, FilterSelect } from "@/components/FilterSelect";
+import { GradientFill } from "@/components/Gradient";
 import { PageHeading } from "@/components/PageHeading";
+import { PlayersTeams } from "@/components/PlayersTeams";
 import { Screen } from "@/components/Screen";
-import { StandingsList } from "@/components/StandingsList";
-import { Empty, ErrorState, ScreenLoading } from "@/components/States";
+import { ErrorState } from "@/components/States";
 import { api } from "@/lib/api";
+import { track } from "@/lib/observability";
 import { useSeasonFallback } from "@/lib/use-season-fallback";
-import { colors, fonts, radius, space } from "@/lib/theme";
+import { colors, fonts } from "@/lib/theme";
 
 /**
- * Port of apps/web/src/components/standings/StandingsPage.tsx - season filter,
- * the opponent-counting switch, and the full PLAYERS / TEAMS tables.
+ * Port of apps/web/src/components/standings/StandingsPage.tsx: season chips,
+ * the Including opponents switch, then players and teams, top 20 first.
  */
 export default function StandingsScreen() {
   const router = useRouter();
   const {
     global,
     seasons,
-    defaultSeason,
     previousSeason,
     shouldShowPreviousSeason,
     isLoading: isLoadingSeasonData,
   } = useSeasonFallback();
 
-  const [selectedSeason, setSelectedSeason] = useState(defaultSeason);
-  const [includeOpponents, setIncludeOpponents] = useState(true);
-  // A hand-picked season has to survive the effect below, which otherwise
-  // reasserts the default every time the season data settles.
-  const [seasonTouched, setSeasonTouched] = useState(false);
-
-  // There is no "all seasons" option here, so the season the page opens on is
-  // the thing reset returns to, and both this and reset read it from one place.
   const initialSeason =
     (shouldShowPreviousSeason ? previousSeason?.name : undefined) ??
-    global?.currentSeason?.name ??
-    defaultSeason;
+    global?.currentSeason?.name;
 
-  useEffect(() => {
-    if (seasonTouched) return;
-    setSelectedSeason(initialSeason);
-  }, [initialSeason, seasonTouched]);
+  const [selectedSeason, setSelectedSeason] = useState<string | undefined>(
+    undefined,
+  );
+  const [includeOpponents, setIncludeOpponents] = useState(true);
 
-  const isFiltered = selectedSeason !== initialSeason || !includeOpponents;
-
-  const resetFilters = () => {
-    setSeasonTouched(false);
-    setSelectedSeason(initialSeason);
-    setIncludeOpponents(true);
-  };
+  // Until a season is picked by hand, follow the one the page opens on.
+  const season = selectedSeason ?? initialSeason;
 
   const standings = api.wedgie.getSeasonStandings.useQuery(
-    { season: selectedSeason, includeOpponents },
-    // Changing a filter makes a new query key; without this the table blanks
+    { season: season ?? "", includeOpponents },
+    // Changing a filter makes a new query key; without this the list blanks
     // and everything below it jumps while the next one loads.
-    { placeholderData: keepPreviousData },
+    { enabled: season !== undefined, placeholderData: keepPreviousData },
   );
 
-  const seasonNames = (seasons ?? [])
-    .map((s) => s.name)
-    .sort()
-    .reverse();
+  const named = (seasons ?? []).map((s) => s.name);
+  // Newest season first, GEMS last.
+  const chips: [string, string][] = [
+    ["", "All time"],
+    ...named
+      .filter((s) => s !== "GEMS")
+      .sort()
+      .reverse()
+      .map((s): [string, string] => [s, s]),
+    ...(named.includes("GEMS") ? [["GEMS", "GEMS"] as [string, string]] : []),
+  ];
 
-  // Nothing renders until the first table is ready, so the filters do not
-  // appear over an empty page and then shove it down.
-  if (standings.isPending || isLoadingSeasonData) return <ScreenLoading />;
+  const loading = isLoadingSeasonData || standings.isPending;
 
   return (
     <Screen
-      heading={
-        <PageHeading
-          top="Players/Teams"
-          bottom="Standings"
-          base={24}
-          bottomScale={1.5}
-          liftEm={0.25}
-        />
-      }
+      heading={<PageHeading title="Standings" />}
       refreshControl={
         <RefreshControl
           refreshing={standings.isRefetching}
           onRefresh={() => void standings.refetch()}
-          tintColor={colors.yellow}
+          tintColor={colors.cream}
         />
       }
     >
-      {shouldShowPreviousSeason ? (
+      <View style={styles.filters}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.chipScroll}
+          contentContainerStyle={styles.chips}
+          accessibilityLabel="Season"
+        >
+          {chips.map(([value, label]) => {
+            const on = !isLoadingSeasonData && season === value;
+            return (
+              <Pressable
+                key={label}
+                onPress={() => {
+                  track("wt_filter_applied", { filter: "season", value });
+                  setSelectedSeason(value);
+                }}
+                accessibilityRole="button"
+                accessibilityState={{ selected: on }}
+                style={[styles.chip, on && styles.chipOn]}
+              >
+                <Text
+                  style={[styles.chipText, on && styles.chipTextOn]}
+                  allowFontScaling={false}
+                >
+                  {label}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </ScrollView>
+
+        <View style={styles.opponents}>
+          <View style={styles.opponentsText}>
+            <Text style={styles.opponentsTitle} allowFontScaling={false}>
+              Including opponents
+            </Text>
+            <Text style={styles.opponentsNote} allowFontScaling={false}>
+              Teams also count the other side&apos;s wedgies in their games
+            </Text>
+          </View>
+          <Toggle
+            value={includeOpponents}
+            onChange={(next) => {
+              track("wt_filter_applied", {
+                filter: "includeOpponents",
+                value: String(next),
+              });
+              setIncludeOpponents(next);
+            }}
+          />
+        </View>
+      </View>
+
+      {shouldShowPreviousSeason && season === previousSeason?.name ? (
         <View style={styles.notice}>
           <Text style={styles.noticeText}>
             Current season has no wedgies yet. Showing {previousSeason?.name}{" "}
@@ -97,149 +145,133 @@ export default function StandingsScreen() {
         </View>
       ) : null}
 
-      <View style={styles.filters}>
-        <Text style={styles.filterLabel}>FILTER BY ›</Text>
-
-        {/* Side by side, as the two filter cards sit on the web. */}
-        <View style={styles.filterRow}>
-          <FilterSelect
-            label="Season"
-            value={selectedSeason}
-            options={seasonNames.map((name) => ({ value: name, label: name }))}
-            onSelect={(next) => {
-              setSeasonTouched(true);
-              setSelectedSeason(next);
-            }}
-          />
-
-          <View style={styles.toggleCard}>
-            <Text style={styles.toggleLabel} allowFontScaling={false}>
-              Team Counting
-            </Text>
-            <View style={styles.toggleRow}>
-              <Switch
-                value={includeOpponents}
-                onValueChange={setIncludeOpponents}
-                trackColor={{
-                  false: colors.darkpurpleLighter,
-                  true: colors.darkpurpleLighter,
-                }}
-                thumbColor={includeOpponents ? colors.yellow : colors.pink}
-                ios_backgroundColor={colors.darkpurpleLighter}
-                style={styles.switch}
-              />
-              <Text style={styles.toggleText}>
-                {includeOpponents
-                  ? "INCLUDING OPPONENTS"
-                  : "PLAYER'S TEAM ONLY"}
-              </Text>
-            </View>
-          </View>
-        </View>
-
-        {isFiltered ? (
-          <ClearFilters label="RESET FILTERS" onPress={resetFilters} />
-        ) : null}
-      </View>
-
       {standings.error ? (
         <ErrorState onRetry={() => void standings.refetch()} />
-      ) : null}
-
-      {standings.data ? (
-        standings.data.players.length === 0 ? (
-          <Empty label={`No wedgies in ${selectedSeason}.`} />
-        ) : (
-          <View style={styles.grid}>
-            <View style={styles.players}>
-              <StandingsList
-                title="PLAYERS"
-                items={standings.data.players}
-                onPressItem={(name) =>
-                  router.push({
-                    pathname: "/all-wedgies",
-                    params: { wp: name, ws: selectedSeason || "all" },
-                  })
-                }
-              />
-            </View>
-            <View style={styles.teams}>
-              <StandingsList
-                title="TEAMS"
-                items={standings.data.teams}
-                onPressItem={(name) =>
-                  router.push({
-                    pathname: "/all-wedgies",
-                    params: { wt: name, ws: selectedSeason || "all" },
-                  })
-                }
-              />
-            </View>
-          </View>
-        )
-      ) : null}
+      ) : (
+        <View style={[standings.isPlaceholderData && styles.stale]}>
+          <PlayersTeams
+            loading={loading}
+            players={standings.data?.players ?? []}
+            teams={standings.data?.teams ?? []}
+            limit={20}
+            onPressItem={(name, kind) =>
+              router.push({
+                pathname: "/all-wedgies",
+                params: {
+                  ...(kind === "teams" ? { wt: name } : { wp: name }),
+                  ws: season || "all",
+                },
+              })
+            }
+          />
+        </View>
+      )}
     </Screen>
   );
 }
 
+/** The switch: cream knob on the button gradient when on, faded when off. */
+function Toggle({
+  value,
+  onChange,
+}: {
+  value: boolean;
+  onChange: (next: boolean) => void;
+}) {
+  const knob = useAnimatedStyle(() => ({
+    transform: [{ translateX: withTiming(value ? 20 : 0, { duration: 150 }) }],
+  }));
+
+  return (
+    <Pressable
+      onPress={() => onChange(!value)}
+      accessibilityRole="switch"
+      accessibilityLabel="Including opponents"
+      accessibilityState={{ checked: value }}
+      hitSlop={8}
+      style={[styles.toggle, !value && styles.toggleOff]}
+    >
+      {value ? <GradientFill name="button" radius={15} /> : null}
+      <Animated.View style={[styles.knob, !value && styles.knobOff, knob]} />
+    </Pressable>
+  );
+}
+
 const styles = StyleSheet.create({
-  notice: {
+  filters: { marginTop: 32, marginBottom: 16 },
+  // Bleeds to the screen edges so the chips scroll out from under them.
+  chipScroll: { marginHorizontal: -16 },
+  chips: { gap: 8, paddingHorizontal: 16, paddingTop: 2, paddingBottom: 6 },
+  // `bg-panel border-violet/20 min-h-10 rounded-full border px-[15px]`
+  chip: {
+    minHeight: 40,
+    justifyContent: "center",
+    paddingHorizontal: 15,
+    borderRadius: 999,
     borderWidth: 1,
-    borderColor: "rgba(255, 0, 255, 0.3)",
-    backgroundColor: "rgba(255, 0, 255, 0.2)",
-    borderRadius: radius.md,
-    padding: space.lg,
-    marginBottom: space.lg,
+    borderColor: colors.violet20,
+    backgroundColor: colors.panel,
+  },
+  chipOn: { backgroundColor: colors.cream, borderColor: colors.cream },
+  chipText: {
+    fontFamily: fonts.extraBold,
+    fontSize: 14,
+    color: colors.cream70,
+  },
+  chipTextOn: { color: colors.night },
+
+  opponents: {
+    marginTop: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.violet20,
+    backgroundColor: colors.panel,
+  },
+  opponentsText: { flex: 1 },
+  opponentsTitle: {
+    fontFamily: fonts.extraBold,
+    fontSize: 14.5,
+    color: colors.cream,
+  },
+  opponentsNote: {
+    marginTop: 2,
+    fontFamily: fonts.bold,
+    fontSize: 12.5,
+    lineHeight: 16,
+    color: colors.cream50,
+  },
+  toggle: { width: 50, height: 30, borderRadius: 15 },
+  toggleOff: { backgroundColor: colors.cream20 },
+  knob: {
+    position: "absolute",
+    top: 3,
+    left: 3,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: colors.cream,
+  },
+  knobOff: { backgroundColor: colors.cream70 },
+
+  notice: {
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: "rgba(154, 92, 245, 0.3)",
+    backgroundColor: "rgba(154, 92, 245, 0.2)",
+    borderRadius: 12,
+    padding: 12,
   },
   noticeText: {
     fontFamily: fonts.bold,
-    color: colors.pink,
+    color: colors.violet,
     fontSize: 13,
     textAlign: "center",
   },
-
-  filters: {
-    backgroundColor: "rgba(31, 0, 77, 0.4)",
-    borderRadius: radius.lg,
-    padding: space.lg,
-    gap: space.md,
-    marginBottom: space.lg,
-  },
-  filterLabel: {
-    fontFamily: fonts.bold,
-    color: colors.yellow,
-    fontSize: 12,
-    letterSpacing: 1.2,
-  },
-
-  filterRow: { flexDirection: "row", gap: space.sm, alignItems: "stretch" },
-  // Mirrors FilterSelect's card so the pair reads as one control group.
-  toggleCard: {
-    flex: 1,
-    backgroundColor: "rgba(234, 255, 0, 0.12)",
-    borderRadius: radius.sm,
-    padding: space.sm,
-    gap: space.sm,
-    justifyContent: "space-between",
-  },
-  toggleLabel: {
-    fontFamily: fonts.bold,
-    color: colors.yellow,
-    fontSize: 13,
-    letterSpacing: 0.4,
-  },
-  toggleRow: { flexDirection: "row", alignItems: "center", gap: space.sm },
-  switch: { transform: [{ scale: 0.8 }] },
-  toggleText: {
-    // Wraps rather than clipping, like the web's fixed-width `w-16` label.
-    flex: 1,
-    fontFamily: fonts.bold,
-    color: colors.white,
-    fontSize: 10,
-    letterSpacing: 0.4,
-  },
-
-  grid: { flexDirection: "row", gap: space.lg },
-  players: { flex: 3 },
-  teams: { flex: 2 },
+  stale: { opacity: 0.6 },
 });

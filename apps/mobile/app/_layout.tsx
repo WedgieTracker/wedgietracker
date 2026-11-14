@@ -3,12 +3,15 @@ import {
   Inter_700Bold,
   Inter_800ExtraBold,
   Inter_900Black,
+  Inter_900Black_Italic,
   useFonts,
 } from "@expo-google-fonts/inter";
+import { PermanentMarker_400Regular } from "@expo-google-fonts/permanent-marker";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
+import { LogBox } from "react-native";
 import "react-native-reanimated";
 
 import { initSentry, report, useScreenTracking } from "@/lib/observability";
@@ -24,14 +27,21 @@ export const unstable_settings = {
 // Before the first render, so a crash during startup is still reported.
 initSentry();
 
+// Development only: iOS layout advice about shadows on gradient-backed views,
+// which draw the shadow correctly anyway.
+LogBox.ignoreLogs(["(ADVICE)", "App Start Span"]);
+
 void SplashScreen.preventAutoHideAsync();
 
 function RootLayout() {
-  // The site is set in Inter; the heavy weights carry most of its character.
+  // The site is set in Inter; the heavy weights carry most of its character,
+  // the numbers are black italic, and the calendar's stamp is hand lettered.
   const [loaded, error] = useFonts({
     Inter_700Bold,
     Inter_800ExtraBold,
     Inter_900Black,
+    Inter_900Black_Italic,
+    PermanentMarker_400Regular,
   });
 
   useScreenTracking();
@@ -50,10 +60,11 @@ function RootLayout() {
       <StatusBar style="light" />
       <Stack
         screenOptions={{
-          headerStyle: { backgroundColor: colors.darkpurple },
-          headerTintColor: colors.yellow,
+          headerStyle: { backgroundColor: colors.night },
+          headerTintColor: colors.cream,
           headerTitleStyle: { fontFamily: fonts.black },
-          contentStyle: { backgroundColor: colors.darkpurple },
+          headerShadowVisible: false,
+          contentStyle: { backgroundColor: colors.night },
         }}
       >
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -62,7 +73,8 @@ function RootLayout() {
           so the label belongs to whoever pushed it. seasons.tsx sets it from
           the `from` param.
         */}
-        <Stack.Screen name="seasons" options={{ title: "SEASONS HISTORY" }} />
+        {/* The page carries its own heading, so the bar only holds the back button. */}
+        <Stack.Screen name="seasons" options={{ title: "" }} />
         {/*
           A sheet sized to its content rather than a full-height modal, and no
           header: the title said nothing the screen does not already show.

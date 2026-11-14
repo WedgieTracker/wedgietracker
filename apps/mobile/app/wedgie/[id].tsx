@@ -13,14 +13,15 @@ import {
 import Svg, { Path } from "react-native-svg";
 
 import { CourtPositionDiagram } from "@/components/CourtPositionDiagram";
+import { GradientFill } from "@/components/Gradient";
 import { GameTimeline } from "@/components/GameTimeline";
 import { ErrorState, Loading } from "@/components/States";
 import { WedgiePlayer, pickVideoForApp } from "@/components/WedgiePlayer";
 import { WedgieVideoTabs } from "@/components/WedgieVideoTabs";
 import { api, type RouterOutputs } from "@/lib/api";
 import { track } from "@/lib/observability";
-import { colors, fonts, radius, space } from "@/lib/theme";
-import { GEMS_EMOJI, isGemsDate } from "@wedgietracker/core/utils/formatDate";
+import { nightDate } from "@/lib/dates";
+import { badgeTextShadow, colors, fonts, radius, space } from "@/lib/theme";
 import { gameTimeline } from "@wedgietracker/core/utils/gameMoment";
 import {
   shoutoutNetwork,
@@ -34,12 +35,12 @@ type Wedgie = RouterOutputs["wedgie"]["getAll"][number];
 /** Matches `sheetCornerRadius` in the route's options. */
 const SHEET_RADIUS = 24;
 
-/** The web badge is `text-[1.6em]` with a `text-[.5em]` hash. */
+/** The web badge is `text-[1.6em]` with a `text-[.45em]` hash. */
 const BADGE_NUMBER = 32;
-const BADGE_HASH = BADGE_NUMBER * 0.5;
+const BADGE_HASH = BADGE_NUMBER * 0.45;
 
-/** Wide enough for the longest label, SHOUTOUT, on one line. */
-const LABEL_WIDTH = 84;
+/** Wide enough for the longest label, SHOUTOUT with its ⓘ, on one line. */
+const LABEL_WIDTH = 106;
 
 /**
  * Port of apps/web/src/components/home/WedgieModal.tsx and WedgieInfoPanel.
@@ -115,6 +116,7 @@ function WedgieDetail({
   onClose: () => void;
 }) {
   const { height } = useWindowDimensions();
+  const [shoutoutNote, setShoutoutNote] = useState(false);
   const [active, setActive] = useState<ActiveVideo | null>(() =>
     pickVideoForApp(wedgie.videoUrl),
   );
@@ -122,7 +124,7 @@ function WedgieDetail({
   // The sheet is sized to its content, so on a shorter screen the court is the
   // piece that gives way - everything above it carries information the court
   // only illustrates.
-  const courtWidth = height >= 820 ? 124 : height >= 720 ? 104 : 84;
+  const courtWidth = height >= 820 ? 130 : height >= 720 ? 112 : 92;
   const timeline = gameTimeline(wedgie);
 
   // Reset the chosen source when stepping to another wedgie.
@@ -173,6 +175,7 @@ function WedgieDetail({
         {/* Number badge beside the date and season, as the info panel has it. */}
         <View style={styles.headerRow}>
           <View style={styles.badge}>
+            <GradientFill name="button" radius={radius.md} />
             <Text
               style={[
                 styles.badgeHash,
@@ -190,7 +193,8 @@ function WedgieDetail({
             <Text
               style={[
                 styles.badgeNumber,
-                { fontSize: BADGE_NUMBER, lineHeight: BADGE_NUMBER },
+                { fontSize: BADGE_NUMBER, lineHeight: BADGE_NUMBER + 4 },
+                badgeTextShadow(BADGE_NUMBER),
               ]}
               allowFontScaling={false}
             >
@@ -199,7 +203,7 @@ function WedgieDetail({
           </View>
           <View style={styles.headerText}>
             <Text style={styles.date} allowFontScaling={false}>
-              {formatDate(wedgie.wedgieDate)}
+              {nightDate(wedgie.wedgieDate)}
             </Text>
             {wedgie.seasonName && wedgie.seasonName !== "GEMS" ? (
               <Text style={styles.season} allowFontScaling={false}>
@@ -229,7 +233,13 @@ function WedgieDetail({
             </Fact>
           ) : null}
           {wedgie.shoutouts.length > 0 ? (
-            <Fact label="Shoutout">
+            <Fact
+              label="Shoutout"
+              info={{
+                open: shoutoutNote,
+                onToggle: () => setShoutoutNote((o) => !o),
+              }}
+            >
               {/* The X and Bluesky accounts that tagged the wedgie, as pills like the site's. */}
               <View style={styles.shoutouts}>
                 {wedgie.shoutouts.map((handle) => (
@@ -266,6 +276,10 @@ function WedgieDetail({
             </Fact>
           ) : null}
         </View>
+
+        {shoutoutNote ? (
+          <ShoutoutNote onClose={() => setShoutoutNote(false)} />
+        ) : null}
 
         {/* Lined up with the values above (Player, Teams...), not the labels. */}
         {timeline || wedgie.noDunksTweet ? (
@@ -307,18 +321,70 @@ function WedgieDetail({
 
 function Fact({
   label,
+  info,
   children,
 }: {
   label: string;
+  /** An ⓘ before the label that opens a note under the facts. */
+  info?: { open: boolean; onToggle: () => void };
   children: React.ReactNode;
 }) {
   return (
     <View style={styles.fact}>
-      <Text style={styles.factLabel} numberOfLines={1} allowFontScaling={false}>
-        {label.toUpperCase()}
-      </Text>
+      <View style={styles.factLabelBox}>
+        {info ? (
+          <Pressable
+            onPress={info.onToggle}
+            hitSlop={10}
+            accessibilityRole="button"
+            accessibilityLabel="How do shoutouts work?"
+            accessibilityState={{ expanded: info.open }}
+            style={[styles.info, info.open && styles.infoOpen]}
+          >
+            <Text style={styles.infoText} allowFontScaling={false}>
+              i
+            </Text>
+          </Pressable>
+        ) : null}
+        <Text
+          style={styles.factLabel}
+          numberOfLines={1}
+          allowFontScaling={false}
+        >
+          {label.toUpperCase()}
+        </Text>
+      </View>
       <View style={styles.factValue}>{children}</View>
     </View>
+  );
+}
+
+/** How a name gets onto a wedgie, opened from the ⓘ by Shoutout. */
+function ShoutoutNote({ onClose }: { onClose: () => void }) {
+  return (
+    <Pressable onPress={onClose} style={styles.note} accessibilityRole="text">
+      <Text style={styles.noteText}>
+        Shoutouts go to whoever tags the wedgie first. Spot one in a game? Tag{" "}
+        <Text
+          style={styles.noteLink}
+          accessibilityRole="link"
+          onPress={() => void Linking.openURL("https://x.com/wedgietracker")}
+        >
+          @wedgietracker on X
+        </Text>{" "}
+        or{" "}
+        <Text
+          style={styles.noteLink}
+          accessibilityRole="link"
+          onPress={() =>
+            void Linking.openURL("https://bsky.app/profile/wedgietracker.com")
+          }
+        >
+          wedgietracker.com on Bluesky
+        </Text>{" "}
+        and your name goes here.
+      </Text>
+    </Pressable>
   );
 }
 
@@ -399,25 +465,13 @@ function CloseButton({ onPress }: { onPress: () => void }) {
   );
 }
 
-/** The info panel shows a long en-US date, or the GEMS emoji on those days. */
-function formatDate(value: string): string {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  if (isGemsDate(date)) return GEMS_EMOJI;
-  return date.toLocaleDateString("en-US", {
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  });
-}
-
 const styles = StyleSheet.create({
   sheet: {
     // No shadow here: on iOS a shadow on a view that also clips its children
     // casts each child's silhouette onto the content below it. Separation
     // comes from the dimmed backdrop (see the route's sheet options) and from
     // this being a shade darker than the pages it opens over.
-    backgroundColor: colors.darkpurpleDark,
+    backgroundColor: colors.night,
     borderTopLeftRadius: SHEET_RADIUS,
     borderTopRightRadius: SHEET_RADIUS,
   },
@@ -458,31 +512,35 @@ const styles = StyleSheet.create({
     width: 70,
     height: 70,
     borderRadius: radius.md,
-    backgroundColor: colors.pink,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
   },
-  badgeHash: { fontFamily: fonts.black, color: colors.darkpurple },
-  badgeNumber: { fontFamily: fonts.black, color: colors.yellow },
-  headerText: { flex: 1, gap: 4 },
-  date: {
-    fontFamily: fonts.bold,
-    color: colors.yellow,
-    fontSize: 18,
-    letterSpacing: 0.8,
+  badgeHash: {
+    fontFamily: fonts.blackItalic,
+    color: "rgba(240, 225, 182, 0.6)",
   },
+  badgeNumber: { fontFamily: fonts.blackItalic, color: colors.cream },
+  headerText: { flex: 1, gap: 6 },
+  date: { fontFamily: fonts.extraBold, color: colors.cream, fontSize: 18 },
   season: {
     fontFamily: fonts.bold,
-    color: colors.white,
-    fontSize: 11,
+    color: "rgba(240, 225, 182, 0.6)",
+    fontSize: 10,
     letterSpacing: 1,
   },
 
   facts: { gap: space.md },
   fact: { flexDirection: "row", alignItems: "baseline", gap: space.md },
-  factLabel: {
+  factLabelBox: {
     width: LABEL_WIDTH,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    gap: 6,
+  },
+  factLabel: {
+    flexShrink: 1,
     textAlign: "right",
     fontFamily: fonts.bold,
     color: colors.white60,
@@ -505,9 +563,39 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
   },
   shoutoutPressed: {
-    backgroundColor: colors.yellow,
-    borderColor: colors.yellow,
+    backgroundColor: colors.cream,
+    borderColor: colors.cream,
   },
+  // The ⓘ: a ringed italic i, as on the web.
+  info: {
+    width: 17,
+    height: 17,
+    borderRadius: 9,
+    borderWidth: 1.5,
+    borderColor: colors.cream50,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  infoOpen: { borderColor: colors.cream },
+  infoText: {
+    fontFamily: "Georgia-BoldItalic",
+    fontSize: 10,
+    lineHeight: 12,
+    color: colors.cream70,
+  },
+  note: {
+    backgroundColor: colors.cream,
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+  },
+  noteText: {
+    fontFamily: fonts.bold,
+    fontSize: 13,
+    lineHeight: 18,
+    color: colors.night,
+  },
+  noteLink: { textDecorationLine: "underline" },
   shoutoutText: { fontFamily: fonts.bold, color: colors.white, fontSize: 13 },
   shoutoutTextPressed: { color: colors.darkpurple },
   // The facts' label column plus the gap between label and value.
@@ -515,7 +603,8 @@ const styles = StyleSheet.create({
   noDunks: { alignSelf: "flex-start" },
   noDunksLogo: { width: 32, height: 32, borderRadius: 6 },
 
-  courtWrap: { alignItems: "center" },
+  // Bottom left under the details, as the web panel pins it.
+  courtWrap: { alignItems: "flex-start", paddingTop: space.sm },
 
   navButton: {
     width: 42,
@@ -525,5 +614,5 @@ const styles = StyleSheet.create({
   // Only the chevron dims: the container keeps its shape at either end of the
   // list, so the control never looks half-missing.
   navButtonDisabled: { opacity: 0.28 },
-  navButtonPressed: { backgroundColor: colors.darkpurple },
+  navButtonPressed: { backgroundColor: colors.night },
 });

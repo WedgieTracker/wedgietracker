@@ -4,37 +4,44 @@ import { useEffect, useMemo, useState } from "react";
 import {
   FlatList,
   RefreshControl,
+  ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from "react-native";
 
-import { useCountUp } from "@/components/Counter";
-import { ClearFilters, FilterSelect } from "@/components/FilterSelect";
-import { PageHeading } from "@/components/PageHeading";
-import { Empty, ErrorState, ScreenLoading } from "@/components/States";
+import { Empty, ErrorState } from "@/components/States";
 import { TopSafeArea } from "@/components/TopSafeArea";
-import { WedgieRow } from "@/components/WedgieRow";
+import {
+  NO_FILTERS,
+  WedgieFilters,
+  type Filters,
+} from "@/components/WedgieFilters";
+import {
+  WEDGIE_ROW_HEIGHT,
+  WedgieRow,
+  WedgieRowPlaceholder,
+} from "@/components/WedgieRow";
 import { api } from "@/lib/api";
 import { useTabBarClearance } from "@/lib/layout";
 import { useSeasonFallback } from "@/lib/use-season-fallback";
-import { colors, fonts, radius, space } from "@/lib/theme";
+import { colors, fonts } from "@/lib/theme";
 import {
   MOMENT_FILTERS,
   matchesFilter,
-  shortFilterLabel,
 } from "@wedgietracker/core/utils/wedgieFilter";
 
+const GAP = 12;
+
 /**
- * Port of apps/web/src/components/all-wedgies - the full list with the season,
- * type and team/player filters, and the running count of what is visible.
+ * Port of apps/web/src/components/all-wedgies: the heading with its live
+ * count, the filters, and every wedgie that matches.
  */
 export default function AllWedgiesScreen() {
   const router = useRouter();
+  const tabBar = useTabBarClearance();
   const {
     global,
-    defaultSeason,
     previousSeason,
     shouldShowPreviousSeason,
     isLoading: isLoadingSeasonData,
@@ -47,120 +54,126 @@ export default function AllWedgiesScreen() {
     wt?: string;
     ws?: string;
   }>();
-  const hasSeasonFromUrl = params.ws !== undefined;
 
-  const [season, setSeason] = useState(
-    params.ws === "all" ? "" : (params.ws ?? defaultSeason),
-  );
-  const [type, setType] = useState("");
-  const [when, setWhen] = useState("");
-  const [playerOrTeam, setPlayerOrTeam] = useState(
-    params.wp ?? params.wt ?? "",
-  );
+  const [filters, setFilters] = useState<Filters>(() => ({
+    ...NO_FILTERS,
+    season: params.ws === "all" ? "" : (params.ws ?? ""),
+    playerOrTeam: params.wp ?? params.wt ?? "",
+  }));
   // Once the season has been chosen by hand, or cleared, the default-season
-  // effect below must stop reasserting itself. Keyed off a flag rather than
-  // the current value, because "" is a legitimate choice meaning all seasons.
-  const [seasonTouched, setSeasonTouched] = useState(hasSeasonFromUrl);
+  // effect below must stop reasserting itself.
+  const [seasonTouched, setSeasonTouched] = useState(params.ws !== undefined);
 
   // Re-apply whenever we are navigated to with a new filter.
   useEffect(() => {
-    setPlayerOrTeam(params.wp ?? params.wt ?? "");
-    if (params.ws !== undefined) {
-      setSeason(params.ws === "all" ? "" : params.ws);
-      setSeasonTouched(true);
-    }
+    if (
+      params.wp === undefined &&
+      params.wt === undefined &&
+      params.ws === undefined
+    )
+      return;
+    setFilters((prev) => ({
+      ...prev,
+      playerOrTeam: params.wp ?? params.wt ?? "",
+      ...(params.ws !== undefined
+        ? { season: params.ws === "all" ? "" : params.ws }
+        : {}),
+    }));
+    if (params.ws !== undefined) setSeasonTouched(true);
   }, [params.wp, params.wt, params.ws]);
 
-  useEffect(() => {
-    if (seasonTouched) return;
-    if (shouldShowPreviousSeason && previousSeason) {
-      setSeason(previousSeason.name);
-    } else if (global?.currentSeason?.name) {
-      setSeason(global.currentSeason.name);
-    }
-  }, [
-    shouldShowPreviousSeason,
-    previousSeason,
-    global?.currentSeason?.name,
-    seasonTouched,
-  ]);
-
-  /**
-   * The season the page opens on, which is what "unfiltered" means here. This
-   * page defaults to a season rather than to nothing, so comparing against ""
-   * would mark the default view as filtered and show the reset control on a
-   * screen nobody has touched.
-   */
+  // The page opens on the current season, or the last one with wedgies when
+  // the current one has none yet.
   const openingSeason =
     (shouldShowPreviousSeason ? previousSeason?.name : undefined) ??
-    global?.currentSeason?.name ??
-    defaultSeason;
+    global?.currentSeason?.name;
+  useEffect(() => {
+    if (seasonTouched || !openingSeason) return;
+    setFilters((prev) => ({ ...prev, season: openingSeason }));
+  }, [openingSeason, seasonTouched]);
 
-  const isFiltered =
-    season !== openingSeason ||
-    type !== "" ||
-    when !== "" ||
-    playerOrTeam !== "";
-
-  // Back to how the page opened, so the control disappears once used. "All
-  // Seasons" is still a choice in the dropdown, it is just not the default.
-  const resetFilters = () => {
-    setSeasonTouched(false);
-    setSeason(openingSeason);
-    setType("");
-    setWhen("");
-    setPlayerOrTeam("");
+  const onChange = (next: Filters) => {
+    if (next.season !== filters.season) setSeasonTouched(true);
+    setFilters(next);
   };
 
   // The web app queries by season when one is picked, and everything otherwise.
   const all = api.wedgie.getAll.useQuery();
   const bySeason = api.wedgie.getBySeason.useQuery(
-    { season },
-    { enabled: !!season, placeholderData: keepPreviousData },
+    { season: filters.season },
+    { enabled: !!filters.season, placeholderData: keepPreviousData },
   );
 
-  const source = season ? bySeason.data : all.data;
-  const isPending = season ? bySeason.isPending : all.isPending;
-  const error = season ? bySeason.error : all.error;
+  const source = filters.season ? bySeason.data : all.data;
+  const isPending = filters.season ? bySeason.isPending : all.isPending;
+  const error = filters.season ? bySeason.error : all.error;
 
-  const seasons = useMemo(
-    () =>
-      Array.from(
-        new Set(
-          (all.data ?? []).flatMap((w) => (w.seasonName ? [w.seasonName] : [])),
-        ),
-      )
+  const choices = useMemo(() => {
+    if (!all.data) return null;
+    const named = Array.from(
+      new Set(all.data.flatMap((w) => (w.seasonName ? [w.seasonName] : []))),
+    );
+    // Newest season first, GEMS last.
+    const seasons = [
+      ...named
+        .filter((s) => s !== "GEMS")
         .sort()
         .reverse(),
-    [all.data],
-  );
-
-  const types = useMemo(
-    () =>
-      Array.from(
-        new Set(
-          (all.data ?? []).flatMap((w) =>
-            (w.types ?? []).flatMap((t) => (t.name ? [t.name] : [])),
-          ),
+      ...(named.includes("GEMS") ? ["GEMS"] : []),
+    ];
+    const types = Array.from(
+      new Set(
+        all.data.flatMap((w) =>
+          (w.types ?? []).flatMap((t) => (t.name ? [t.name] : [])),
         ),
-      ).sort(),
-    [all.data],
-  );
+      ),
+    ).sort();
+    return { season: seasons, type: types, moment: [...MOMENT_FILTERS] };
+  }, [all.data]);
 
   const wedgies = useMemo(() => {
-    const rows = (source ?? []).filter((w) =>
-      matchesFilter(w, { type, playerOrTeam, moment: when }),
-    );
+    const rows = (source ?? []).filter((w) => matchesFilter(w, filters));
     return rows.sort(
       (a, b) =>
-        new Date(b.wedgieDate).getTime() - new Date(a.wedgieDate).getTime(),
+        new Date(b.wedgieDate).getTime() - new Date(a.wedgieDate).getTime() ||
+        b.number - a.number,
     );
-  }, [source, type, playerOrTeam, when]);
+  }, [source, filters]);
 
-  const visible = useCountUp(wedgies.length, 200);
-  const tabBar = useTabBarClearance();
+  // Until the opening season is applied, the list would show every season for
+  // a frame and then swap, so that counts as loading too.
+  const seasonPending =
+    !seasonTouched && !!openingSeason && filters.season !== openingSeason;
+  const loading =
+    isPending ||
+    all.isPending ||
+    isLoadingSeasonData ||
+    seasonPending ||
+    !choices;
 
-  if (isPending || isLoadingSeasonData) return <ScreenLoading />;
+  if (loading) {
+    return (
+      <TopSafeArea style={styles.safe}>
+        <ScrollView
+          contentContainerStyle={[styles.content, { paddingBottom: tabBar }]}
+          scrollEnabled={false}
+        >
+          <WedgieFilters
+            filters={NO_FILTERS}
+            onChange={() => undefined}
+            visible={null}
+            total={null}
+            choices={null}
+          />
+          <View style={styles.list}>
+            {Array.from({ length: 12 }, (_, i) => (
+              <WedgieRowPlaceholder key={i} />
+            ))}
+          </View>
+        </ScrollView>
+      </TopSafeArea>
+    );
+  }
 
   return (
     <TopSafeArea style={styles.safe}>
@@ -171,27 +184,35 @@ export default function AllWedgiesScreen() {
         keyExtractor={(w) => String(w.id)}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+        ItemSeparatorComponent={Separator}
+        getItemLayout={(_, index) => ({
+          length: WEDGIE_ROW_HEIGHT + GAP,
+          offset: (WEDGIE_ROW_HEIGHT + GAP) * index,
+          index,
+        })}
         refreshControl={
           <RefreshControl
             refreshing={all.isRefetching || bySeason.isRefetching}
             onRefresh={() => {
               void all.refetch();
-              if (season) void bySeason.refetch();
+              if (filters.season) void bySeason.refetch();
             }}
-            tintColor={colors.yellow}
+            tintColor={colors.cream}
           />
         }
         ListHeaderComponent={
-          <View>
-            <PageHeading
-              top="All"
-              bottom="Wedgies"
-              base={60}
-              bottomScale={0.5}
-              liftEm={0.4}
+          <View style={styles.header}>
+            <WedgieFilters
+              filters={filters}
+              onChange={onChange}
+              visible={wedgies.length}
+              total={all.data?.length ?? null}
+              choices={choices}
             />
 
-            {shouldShowPreviousSeason ? (
+            {shouldShowPreviousSeason &&
+            filters.season === previousSeason?.name ? (
               <View style={styles.notice}>
                 <Text style={styles.noticeText}>
                   Current season has no wedgies yet. Showing{" "}
@@ -200,79 +221,11 @@ export default function AllWedgiesScreen() {
               </View>
             ) : null}
 
-            <View style={styles.filters}>
-              <View style={styles.filterHead}>
-                <Text style={styles.filterLabel}>FILTER BY ›</Text>
-                <View style={styles.counter}>
-                  <Text style={styles.counterValue} allowFontScaling={false}>
-                    {visible}
-                  </Text>
-                  <Text style={styles.counterLabel} allowFontScaling={false}>
-                    TOTAL
-                  </Text>
-                </View>
-              </View>
-
-              <View style={styles.selects}>
-                <FilterSelect
-                  label="Season"
-                  value={season}
-                  options={[
-                    { value: "", label: "All Seasons" },
-                    ...seasons.map((name) => ({ value: name, label: name })),
-                  ]}
-                  onSelect={(next) => {
-                    setSeasonTouched(true);
-                    setSeason(next);
-                  }}
-                  shortLabel={(v) => shortFilterLabel("season", v)}
-                />
-                <FilterSelect
-                  label="Type"
-                  value={type}
-                  options={[
-                    { value: "", label: "All Types" },
-                    ...types.map((name) => ({ value: name, label: name })),
-                  ]}
-                  onSelect={setType}
-                  tone="pink"
-                  shortLabel={(v) => shortFilterLabel("type", v)}
-                />
-                <FilterSelect
-                  label="When"
-                  value={when}
-                  options={[
-                    { value: "", label: "Anytime" },
-                    ...MOMENT_FILTERS.map((m) => ({ value: m, label: m })),
-                  ]}
-                  onSelect={setWhen}
-                  tone="pink"
-                  shortLabel={(v) => shortFilterLabel("when", v)}
-                />
-              </View>
-
-              <TextInput
-                value={playerOrTeam}
-                onChangeText={setPlayerOrTeam}
-                placeholder="Search teams or players..."
-                placeholderTextColor="rgba(18, 0, 46, 0.5)"
-                style={styles.search}
-                autoCorrect={false}
-                autoCapitalize="none"
-                returnKeyType="search"
-                clearButtonMode="while-editing"
-              />
-
-              {isFiltered ? (
-                <ClearFilters label="RESET FILTERS" onPress={resetFilters} />
-              ) : null}
-            </View>
-
             {/* A failed load is not an empty result, so never show both. */}
             {error ? (
               <ErrorState
                 onRetry={() =>
-                  void (season ? bySeason.refetch() : all.refetch())
+                  void (filters.season ? bySeason.refetch() : all.refetch())
                 }
               />
             ) : wedgies.length === 0 ? (
@@ -283,7 +236,6 @@ export default function AllWedgiesScreen() {
         renderItem={({ item }) => (
           <WedgieRow
             wedgie={item}
-            variant="small"
             onPress={() => router.push(`/wedgie/${item.id}`)}
           />
         )}
@@ -292,61 +244,28 @@ export default function AllWedgiesScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.darkpurpleDark },
-  screen: { flex: 1, backgroundColor: colors.darkpurpleDark },
-  content: { padding: space.lg },
+function Separator() {
+  return <View style={{ height: GAP }} />;
+}
 
+const styles = StyleSheet.create({
+  safe: { flex: 1, backgroundColor: colors.night },
+  screen: { flex: 1, backgroundColor: colors.night },
+  content: { paddingHorizontal: 16, paddingTop: 16 },
+  header: { marginBottom: 32 },
+  list: { marginTop: 32, gap: GAP },
   notice: {
+    marginTop: 16,
     borderWidth: 1,
-    borderColor: "rgba(255, 0, 255, 0.3)",
-    backgroundColor: "rgba(255, 0, 255, 0.2)",
-    borderRadius: radius.md,
-    padding: space.md,
-    marginBottom: space.md,
+    borderColor: "rgba(154, 92, 245, 0.3)",
+    backgroundColor: "rgba(154, 92, 245, 0.2)",
+    borderRadius: 12,
+    padding: 12,
   },
   noticeText: {
     fontFamily: fonts.bold,
-    color: colors.pink,
+    color: colors.violet,
     fontSize: 13,
     textAlign: "center",
-  },
-
-  selects: { flexDirection: "row", gap: space.sm },
-  filters: {
-    backgroundColor: "rgba(31, 0, 77, 0.4)",
-    borderRadius: radius.lg,
-    padding: space.md,
-    gap: space.sm,
-    marginBottom: space.lg,
-  },
-  filterHead: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  filterLabel: {
-    fontFamily: fonts.bold,
-    color: colors.yellow,
-    fontSize: 12,
-    letterSpacing: 1.2,
-  },
-  counter: { alignItems: "center" },
-  counterValue: { fontFamily: fonts.black, color: colors.yellow, fontSize: 30 },
-  counterLabel: {
-    fontFamily: fonts.black,
-    color: colors.pink,
-    fontSize: 11,
-    marginTop: -4,
-  },
-
-  search: {
-    backgroundColor: colors.yellow,
-    borderRadius: radius.sm,
-    paddingHorizontal: space.md,
-    paddingVertical: space.sm,
-    fontFamily: fonts.bold,
-    color: colors.darkpurple,
-    fontSize: 15,
   },
 });

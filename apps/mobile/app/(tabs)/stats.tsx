@@ -8,7 +8,7 @@ import {
 } from "react-native";
 
 import { PageHeading } from "@/components/PageHeading";
-import { PillButton } from "@/components/PillButton";
+import { StickerButton } from "@/components/StickerButton";
 import { ErrorState, ScreenLoading } from "@/components/States";
 import { TopSafeArea } from "@/components/TopSafeArea";
 import { TypingStats } from "@/components/TypingStats";
@@ -38,7 +38,7 @@ export default function StatsScreen() {
           <RefreshControl
             refreshing={nerd.isRefetching}
             onRefresh={() => void nerd.refetch()}
-            tintColor={colors.yellow}
+            tintColor={colors.cream}
           />
         }
       >
@@ -65,13 +65,7 @@ function NerdContent({ stats }: { stats: NerdStats }) {
   return (
     <>
       <View style={styles.headingWrap}>
-        <PageHeading
-          top="Stats"
-          bottom="For Nerds"
-          base={60}
-          bottomScale={0.6}
-          liftEm={0.4}
-        />
+        <PageHeading title="Stats for nerds" />
       </View>
 
       <View style={styles.seasonHeader}>
@@ -231,7 +225,7 @@ function LastWedgie({
         </Text>
         <Text style={styles.sentence}>WEDGIE</Text>
       </View>
-      <PillButton label="VIEW ALL WEDGIES" variant="bar" onPress={onViewAll} />
+      <StickerButton label="All wedgies" onPress={onViewAll} />
     </View>
   );
 }
@@ -244,7 +238,7 @@ function Leaders({
   onStandings: () => void;
 }) {
   if (stats.wedgiesThisSeason === 0) {
-    return <PillButton label="SEE STANDINGS" onPress={onStandings} />;
+    return <StickerButton label="Standings" onPress={onStandings} />;
   }
 
   const maxWedgies = stats.leaders.teams[0]?.wedgies ?? 0;
@@ -281,7 +275,7 @@ function Leaders({
           ))}
         </View>
       </View>
-      <PillButton label="SEE STANDINGS" variant="bar" onPress={onStandings} />
+      <StickerButton label="Standings" onPress={onStandings} />
     </View>
   );
 }
@@ -313,11 +307,7 @@ function SeasonTotals({
           GAMES
         </Text>
       </View>
-      <PillButton
-        label="SEE SEASONS HISTORY"
-        variant="bar"
-        onPress={onSeasonsHistory}
-      />
+      <StickerButton label="Seasons history" onPress={onSeasonsHistory} />
     </View>
   );
 }
@@ -348,7 +338,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: space.xl,
     paddingTop: space.lg,
   },
-  safe: { flex: 1, backgroundColor: colors.darkpurple },
+  safe: { flex: 1, backgroundColor: colors.night },
   content: {},
   padded: { padding: space.lg },
 
@@ -362,7 +352,7 @@ const styles = StyleSheet.create({
   },
   seasonHeaderText: {
     fontFamily: fonts.bold,
-    color: colors.white,
+    color: colors.cream,
     fontSize: 17,
   },
   seasonChip: {
@@ -378,12 +368,14 @@ const styles = StyleSheet.create({
   },
 
   // The counter and the typewriter read as one card, clipped together.
-  counterGroup: { borderRadius: radius.xl, overflow: "hidden" },
+  counterGroup: { borderRadius: 20, overflow: "hidden" },
 
   blocks: { padding: space.lg, gap: space.xl },
   block: {
-    backgroundColor: colors.darkpurpleDark,
-    borderRadius: radius.xl,
+    backgroundColor: colors.panel,
+    borderWidth: 1,
+    borderColor: colors.violet20,
+    borderRadius: 20,
     padding: space.lg,
     alignItems: "center",
     gap: space.sm,
@@ -391,14 +383,14 @@ const styles = StyleSheet.create({
   centered: { alignItems: "center" },
 
   group: {
-    backgroundColor: colors.darkpurpleDark,
-    borderTopLeftRadius: radius.xl,
-    borderTopRightRadius: radius.xl,
-    borderBottomLeftRadius: radius.md,
-    borderBottomRightRadius: radius.md,
-    overflow: "hidden",
+    backgroundColor: colors.panel,
+    borderWidth: 1,
+    borderColor: colors.violet20,
+    borderRadius: 20,
+    padding: space.lg,
+    paddingBottom: space.lg + 6,
   },
-  groupBody: { padding: space.lg, alignItems: "center", gap: space.xs },
+  groupBody: { paddingBottom: space.lg, alignItems: "center", gap: space.xs },
 
   paceLabel: {
     fontFamily: fonts.black,
@@ -409,7 +401,7 @@ const styles = StyleSheet.create({
 
   sentence: {
     fontFamily: fonts.bold,
-    color: colors.white,
+    color: colors.cream,
     fontSize: 17,
     textAlign: "center",
     lineHeight: 24,
@@ -430,7 +422,7 @@ const styles = StyleSheet.create({
     borderRadius: 26,
     borderWidth: 2,
     borderColor: colors.yellow,
-    backgroundColor: colors.darkpurple,
+    backgroundColor: colors.night,
     alignItems: "center",
     justifyContent: "center",
   },

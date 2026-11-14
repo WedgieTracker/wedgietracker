@@ -43,19 +43,15 @@ export default function SeasonsScreen() {
       <Screen
         underHeader
         heading={
-          <PageHeading
-            top="Seasons"
-            bottom="History"
-            base={36}
-            bottomScale={1.1}
-            liftEm={0.3}
-          />
+          <View style={styles.heading}>
+            <PageHeading title="Seasons history" />
+          </View>
         }
         refreshControl={
           <RefreshControl
             refreshing={seasons.isRefetching}
             onRefresh={() => void seasons.refetch()}
-            tintColor={colors.yellow}
+            tintColor={colors.cream}
           />
         }
       >
@@ -142,9 +138,12 @@ function RankedList({ title, items }: { title: string; items: Ranked[] }) {
 }
 
 const styles = StyleSheet.create({
+  heading: { marginBottom: space.xl },
   card: {
-    backgroundColor: colors.darkpurple,
-    borderRadius: radius.md,
+    backgroundColor: colors.panel,
+    borderWidth: 1,
+    borderColor: colors.violet20,
+    borderRadius: 20,
     padding: space.lg,
     marginBottom: space.lg,
     gap: space.lg,
@@ -152,7 +151,7 @@ const styles = StyleSheet.create({
   headerRow: { flexDirection: "row", alignItems: "center", gap: space.sm },
   seasonName: { fontFamily: fonts.black, color: colors.yellow, fontSize: 26 },
   badge: {
-    backgroundColor: "rgba(234, 255, 0, 0.2)",
+    backgroundColor: "rgba(240, 225, 182, 0.2)",
     borderRadius: radius.pill,
     paddingHorizontal: space.sm,
     paddingVertical: 3,
@@ -198,7 +197,7 @@ const styles = StyleSheet.create({
     flexShrink: 1,
   },
   rank: { fontFamily: fonts.black, color: colors.pink, fontSize: 14 },
-  rankHash: { color: "rgba(255, 0, 255, 0.5)", fontSize: 11 },
+  rankHash: { color: "rgba(154, 92, 245, 0.5)", fontSize: 11 },
   listName: {
     fontFamily: fonts.black,
     color: colors.white,

@@ -1,11 +1,10 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { CourtPositionDiagram } from "@/components/CourtPositionDiagram";
-import { pickVideoForApp } from "@/components/WedgiePlayer";
-import { useFluidType } from "@/lib/fluid";
-import { colors, fonts, radius, space } from "@/lib/theme";
+import { PlayButton } from "@/components/PlayButton";
+import { shortDate } from "@/lib/dates";
+import { colors, fonts } from "@/lib/theme";
 import type { VideoUrls } from "@wedgietracker/core/types/wedgie";
-import { GEMS_EMOJI, isGemsDate } from "@wedgietracker/core/utils/formatDate";
 
 export interface WedgieRowData {
   id: number;
@@ -19,215 +18,146 @@ export interface WedgieRowData {
   videoUrl: VideoUrls | null;
 }
 
-const TILE_WIDTH = 74;
-const COURT_WIDTH = 68;
-
-/** Tailwind's `rounded-xl`, which the web rows use. */
-const XL = 12;
+const COURT_WIDTH = 76;
+const GAP = 12;
 
 /**
- * Port of apps/web/src/components/home/Wedgie.tsx.
- *
- * `default` is the home list, where the rows butt together and only the outer
- * corners of the stack round. `small` is the all-wedgies grid, where every
- * card is rounded on its own.
+ * Every row is this tall, so the skeleton's placeholders can match it and
+ * the list lands without moving.
+ */
+export const WEDGIE_ROW_HEIGHT = 88;
+
+/**
+ * Port of apps/web/src/components/home/Wedgie.tsx: number and date, the
+ * player (one line, allowed to run over the court), teams and types, the
+ * court, and the gradient play button.
  */
 export function WedgieRow({
   wedgie,
-  variant = "default",
-  first = false,
-  last = false,
   onPress,
 }: {
   wedgie: WedgieRowData;
-  variant?: "default" | "small";
-  first?: boolean;
-  last?: boolean;
   onPress: () => void;
 }) {
-  const t = useFluidType();
-  const small = variant === "small";
-
-  const rowShape = small
-    ? [styles.rowSmall]
-    : [first && styles.rowFirst, last && styles.rowLast];
-
-  const tileShape = small
-    ? [styles.tileSmall]
-    : [styles.tileDefault, first && styles.tileFirst, last && styles.tileLast];
+  const opponent = wedgie.teamAgainstName.includes("Unknown")
+    ? null
+    : wedgie.teamAgainstName;
 
   return (
     <Pressable
       onPress={onPress}
-      style={({ pressed }) => [
-        styles.row,
-        ...rowShape,
-        pressed && styles.rowPressed,
-      ]}
+      accessibilityRole="button"
+      accessibilityLabel={`Watch wedgie ${wedgie.number}, ${wedgie.playerName}`}
+      style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
     >
-      <View style={[styles.tile, ...tileShape]}>
-        {/*
-          The web renders the hash and the number as inline spans, so they
-          share a baseline and the small hash sits at the number's foot.
-        */}
-        <View style={styles.tileTop}>
-          <Text
-            style={[styles.hash, tight(t.wedgieHash)]}
-            allowFontScaling={false}
-          >
-            #
-          </Text>
-          <Text
-            style={[styles.number, tight(t.wedgieNumber)]}
-            allowFontScaling={false}
-          >
-            {wedgie.number ?? 1}
-          </Text>
-        </View>
-
-        <Text
-          style={[
-            styles.date,
-            tight(t.wedgieDate),
-            // Numerals have no descenders, so the space the font reserves
-            // below the baseline reads as a gap. Pull the date back up into it.
-            { marginTop: -0.12 * t.wedgieNumber },
-          ]}
-          allowFontScaling={false}
-        >
-          {formatTileDate(wedgie.wedgieDate)}
+      <View style={styles.numberCol}>
+        <Text style={styles.number} allowFontScaling={false}>
+          <Text style={styles.hash}>#</Text>
+          {wedgie.number ?? 1}
         </Text>
-
-        <View style={styles.watchBar}>
-          <Text
-            style={[styles.watchText, tight(t.watch)]}
-            allowFontScaling={false}
-          >
-            {pickVideoForApp(wedgie.videoUrl) ? "WATCH" : "NO CLIP"}
-          </Text>
-        </View>
+        <Text style={styles.date} allowFontScaling={false}>
+          {shortDate(wedgie.wedgieDate)}
+        </Text>
       </View>
 
       <View style={styles.body}>
-        <Text numberOfLines={1} style={[styles.player, tight(t.playerName)]}>
+        {/* Wider than its column, so a long name runs over the court. */}
+        <Text numberOfLines={1} style={styles.player} allowFontScaling={false}>
           {wedgie.playerName}
         </Text>
-
-        <Text numberOfLines={1} style={[styles.team, { fontSize: t.teamName }]}>
-          <Text style={styles.teamName}>{wedgie.teamName}</Text>
-          {wedgie.teamAgainstName.includes("Unknown")
-            ? ""
-            : ` - ${wedgie.teamAgainstName}`}
+        <Text numberOfLines={1} style={styles.teams} allowFontScaling={false}>
+          <Text style={styles.teamCode}>{wedgie.teamName}</Text>
+          {opponent ? ` vs ${opponent}` : ""}
         </Text>
-
-        {wedgie.types.length > 0 ? (
-          <Text numberOfLines={1} style={[styles.types, { fontSize: t.types }]}>
-            {wedgie.types
-              .map((type) => type.name)
-              .join(", ")
-              .toUpperCase()}
-          </Text>
-        ) : null}
+        <Text numberOfLines={1} style={styles.types} allowFontScaling={false}>
+          {wedgie.types.map((type) => type.name).join(", ")}
+        </Text>
       </View>
 
-      <View style={styles.court}>
-        <CourtPositionDiagram
-          position={wedgie.position}
-          width={COURT_WIDTH}
-          dotSize={10}
-        />
-      </View>
+      <CourtPositionDiagram
+        position={wedgie.position}
+        width={COURT_WIDTH}
+        dotSize={7}
+      />
+
+      <PlayButton />
     </Pressable>
   );
 }
 
-/** `leading-none`, so the hash and number share a predictable baseline. */
-function tight(fontSize: number) {
-  return { fontSize, lineHeight: fontSize };
-}
-
-/** The web tile shows a GEMS emoji on those dates, otherwise de-DE dd.mm.yy. */
-function formatTileDate(value: string): string {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "";
-  if (isGemsDate(date)) return GEMS_EMOJI;
-  return date.toLocaleDateString("de-DE", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "2-digit",
-  });
+/** A row-sized placeholder for skeletons. */
+export function WedgieRowPlaceholder() {
+  return <View style={[styles.row, styles.placeholder]} />;
 }
 
 const styles = StyleSheet.create({
+  // `grid-cols-[58px_minmax(0,1fr)_76px_30px] gap-3 rounded-[20px] border
+  // py-3.5 pr-3.5 pl-[18px]`
   row: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: space.sm,
-    overflow: "hidden",
-    backgroundColor: colors.rowIdle,
-  },
-  rowPressed: { backgroundColor: colors.rowActive },
-  // default: only the outer corners of the stack round
-  rowFirst: { borderTopLeftRadius: XL, borderTopRightRadius: XL },
-  rowLast: {
-    marginBottom: 0,
-    borderBottomLeftRadius: XL,
-    borderBottomRightRadius: XL,
-  },
-  // small: every card stands on its own
-  rowSmall: { borderRadius: XL, marginBottom: space.md },
-
-  tile: {
-    width: TILE_WIDTH,
-    alignItems: "center",
-    overflow: "hidden",
+    gap: GAP,
+    height: WEDGIE_ROW_HEIGHT,
+    paddingVertical: 14,
+    paddingRight: 14,
+    paddingLeft: 18,
+    borderRadius: 20,
     borderWidth: 1,
-    borderColor: colors.darkpurple,
-    backgroundColor: colors.pink,
+    borderColor: colors.violet20,
+    backgroundColor: colors.panel,
   },
-  tileDefault: { borderRadius: radius.xs },
-  tileFirst: { borderTopLeftRadius: XL },
-  tileLast: { borderBottomLeftRadius: XL },
-  tileSmall: { borderRadius: XL },
+  rowPressed: { borderColor: colors.violet60 },
+  placeholder: { backgroundColor: "rgba(29, 18, 66, 0.6)", borderWidth: 0 },
 
-  tileTop: {
-    flexDirection: "row",
-    // Shared baseline, as with the web's inline spans.
-    alignItems: "baseline",
-    marginTop: space.sm,
+  numberCol: { width: 58 },
+  number: {
+    fontFamily: fonts.blackItalic,
+    fontSize: 36,
+    lineHeight: 38,
+    letterSpacing: -1.4,
+    color: colors.cream,
   },
-  hash: {
-    fontFamily: fonts.bold,
-    color: "rgba(18, 0, 46, 0.5)",
-    marginRight: -3,
-  },
-  number: { fontFamily: fonts.black, color: colors.yellow },
+  // `text-[0.42em] opacity-55`, on the number's baseline.
+  hash: { fontSize: 15, letterSpacing: 0, color: "rgba(240, 225, 182, 0.55)" },
   date: {
-    fontFamily: fonts.black,
-    color: colors.darkpurple,
-    letterSpacing: 0.5,
-    marginBottom: space.xs,
-  },
-  watchBar: {
-    width: "100%",
-    backgroundColor: colors.yellow,
-    borderTopWidth: 1,
-    borderTopColor: colors.yellow,
-    paddingVertical: 3,
-    alignItems: "center",
-  },
-  watchText: { fontFamily: fonts.bold, color: colors.darkpurple },
-
-  body: { flex: 1, minWidth: 0, paddingHorizontal: space.sm },
-  player: { fontFamily: fonts.bold, color: colors.yellow, paddingBottom: 3 },
-  team: { fontFamily: fonts.bold, color: colors.white },
-  teamName: { color: colors.pink },
-  types: {
+    marginTop: 3,
     fontFamily: fonts.bold,
-    color: colors.white60,
-    letterSpacing: 0.5,
-    marginTop: 2,
+    fontSize: 10.5,
+    lineHeight: 13,
+    color: colors.cream50,
   },
 
-  court: { width: COURT_WIDTH, paddingRight: space.xs },
+  body: {
+    flex: 1,
+    minWidth: 0,
+    zIndex: 1,
+    marginRight: -(COURT_WIDTH + GAP),
+  },
+  // Kept clear of the court lines it runs over by a glow of the panel colour.
+  player: {
+    fontFamily: fonts.extraBold,
+    fontSize: 16.5,
+    lineHeight: 20,
+    color: colors.cream,
+    textShadowColor: colors.panel,
+    textShadowRadius: 6,
+    textShadowOffset: { width: 0, height: 0 },
+  },
+  teams: {
+    marginTop: 4,
+    marginRight: COURT_WIDTH + GAP,
+    fontFamily: fonts.bold,
+    fontSize: 13.5,
+    lineHeight: 18,
+    color: colors.cream80,
+  },
+  teamCode: { fontFamily: fonts.black, color: colors.violet },
+  types: {
+    marginTop: 2,
+    marginRight: COURT_WIDTH + GAP,
+    fontFamily: fonts.bold,
+    fontSize: 12.5,
+    lineHeight: 16,
+    color: colors.cream50,
+  },
 });
