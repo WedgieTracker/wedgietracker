@@ -155,7 +155,7 @@ export function CoffeeStack() {
           onClick={() => choose(count - 1)}
           disabled={count <= 1}
           aria-label="One fewer coffee"
-          className="border-cream/35 text-cream min-h-11 min-w-11 rounded-xl border-2 font-black disabled:opacity-40"
+          className="border-cream/35 text-cream hover:border-cream hover:bg-cream/10 focus-visible:outline-cream disabled:hover:border-cream/35 min-h-11 min-w-11 rounded-xl border-2 font-black transition-colors duration-150 focus-visible:outline-2 disabled:opacity-40 disabled:hover:bg-transparent"
         >
           −
         </button>
@@ -165,7 +165,7 @@ export function CoffeeStack() {
             type="button"
             onClick={() => choose(n)}
             aria-pressed={count === n}
-            className="border-cream/35 text-cream aria-pressed:bg-cream aria-pressed:border-cream aria-pressed:text-night min-h-11 min-w-11 rounded-xl border-2 px-3 font-black"
+            className="border-cream/35 text-cream hover:border-cream hover:bg-cream/10 focus-visible:outline-cream disabled:hover:border-cream/35 aria-pressed:bg-cream aria-pressed:border-cream aria-pressed:text-night min-h-11 min-w-11 rounded-xl border-2 px-3 font-black transition-colors duration-150 focus-visible:outline-2 disabled:hover:bg-transparent"
           >
             {n}
           </button>
@@ -175,7 +175,7 @@ export function CoffeeStack() {
           onClick={() => choose(count + 1)}
           disabled={count >= MAX}
           aria-label="One more coffee"
-          className="border-cream/35 text-cream min-h-11 min-w-11 rounded-xl border-2 font-black disabled:opacity-40"
+          className="border-cream/35 text-cream hover:border-cream hover:bg-cream/10 focus-visible:outline-cream disabled:hover:border-cream/35 min-h-11 min-w-11 rounded-xl border-2 font-black transition-colors duration-150 focus-visible:outline-2 disabled:opacity-40 disabled:hover:bg-transparent"
         >
           +
         </button>
