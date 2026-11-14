@@ -67,7 +67,7 @@ export function Stats({ stats, isLoading }: StatsProps) {
     <div className="md-min-h-[auto] relative flex min-h-[80svh] w-full flex-col md:sticky md:top-20 md:max-h-[calc(100svh-80px)] md:w-2/5 lg:w-1/2">
       {/* Top left section */}
 
-      <div className="bg-badge grain relative flex min-h-[25em] flex-2 flex-col justify-center overflow-hidden p-8 md:min-h-[28em]">
+      <div className="bg-badge grain relative flex min-h-[25em] flex-2 flex-col justify-center overflow-hidden p-8 md:min-h-[24em] md:flex-[1.6]">
         <ShareableStatsVideo stats={stats} />
 
         <Wave fillPercentage={fillPercentage} showConfetti />
@@ -75,26 +75,26 @@ export function Stats({ stats, isLoading }: StatsProps) {
         {/* A red animated dot when there are live games: centred below the stats on phones, bottom left from md up */}
 
         <div className="bg-panel/50 relative z-10 mx-auto w-[clamp(16rem,_13rem_+_16vw,_28rem)] rounded-lg p-4 text-center md:w-[90%] lg:w-[65%] lg:max-w-120 lg:min-w-[24rem]">
-          <div className="text-cream text-sm leading-none font-bold md:text-base">
+          <div className="text-cream mb-[0.15em] text-sm leading-none font-bold md:text-base">
             {stats.totalWedgies > stats.previousRecord
               ? "NEW ALL-TIME RECORD"
               : stats.totalWedgies === stats.previousRecord
                 ? "ALL-TIME RECORD TIED"
                 : "WE'RE AT"}
           </div>
-          <div className="text-big-number-mobile text-cream md:text-big-number-medium lg:text-big-number text-shadow-badge leading-none font-black whitespace-nowrap">
+          <div className="text-big-number-mobile text-cream md:text-big-number-medium lg:text-big-number text-shadow-badge leading-[0.88] font-black whitespace-nowrap">
             <Counter
               end={stats.totalWedgies}
               format={(n) => n.toLocaleString()}
             />
           </div>
-          <div className="text-wedgies-text-mobile text-cream md:text-wedgies-text lg:text-wedgies-text text-shadow-badge leading-none font-black">
+          <div className="text-wedgies-text-mobile text-cream md:text-wedgies-text lg:text-wedgies-text text-shadow-badge mt-[0.08em] leading-none font-black">
             WEDGIES
           </div>
         </div>
       </div>
 
-      <div className="bg-night relative flex min-h-[12em] flex-1 flex-col justify-center px-[18px] pt-12 pb-8 md:min-h-[14em] md:px-16 md:pt-14 md:pb-10">
+      <div className="bg-night relative flex min-h-[12em] flex-1 flex-col justify-center px-[18px] pt-12 pb-8 md:min-h-[17em] md:px-16 md:pt-14 md:pb-10">
         {stats.liveGames && (
           <div
             className="z-50 order-last mx-auto mt-4 flex w-fit flex-row items-center justify-center gap-2 rounded-full border border-red-500 bg-red-500/90 px-2 py-1 md:absolute md:bottom-4 md:left-4 md:order-none md:mx-0 md:mt-0 md:px-2 md:py-2"
