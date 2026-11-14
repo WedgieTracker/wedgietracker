@@ -10,7 +10,7 @@ export default {
         sans: ["var(--font-inter)", ...defaultTheme.fontFamily.sans],
       },
       fontSize: {
-        "big-number": "clamp(8rem, 7.5rem + 9vw, 18rem)",
+        "big-number": "clamp(8rem, 7rem + 8.4vw, 16.75rem)",
         "big-number-mobile": "clamp(7rem, 6rem + 16vw, 18rem)",
         "big-number-medium": "clamp(4rem, 1rem + 16vw, 12rem)",
         "button-text": "clamp(1rem, 0.8rem + 0.5vw, 2rem)",
