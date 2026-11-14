@@ -28,7 +28,8 @@ export const donationsRouter = createTRPCRouter({
           coffee: "true",
         },
         mode: "payment",
-        success_url: `${process.env.NEXTAUTH_URL}/support-us/thanks`,
+        // Stripe fills in the session id, so the thanks page can count the coffees.
+        success_url: `${process.env.NEXTAUTH_URL}/support-us/thanks?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${process.env.NEXTAUTH_URL}/support-us`,
       });
 

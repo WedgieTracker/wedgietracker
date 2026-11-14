@@ -1,60 +1,77 @@
-import { eq } from "drizzle-orm";
-import { cacheLife } from "next/cache";
-import { global } from "@wedgietracker/core/schema";
+import { eq, sql } from "drizzle-orm";
+import { cacheLife, cacheTag, revalidateTag } from "next/cache";
+import { coffeeCheckout, global, season } from "@wedgietracker/core/schema";
 import { db } from "~/server/db";
+import { CACHE_TAGS } from "~/server/cache";
 import { stripe } from "~/server/services/stripe";
 
-/**
- * When a season's coffees start counting: 1 July of its first year, the
- * off-season, so a coffee bought after the Finals goes to the next season.
- */
-export function seasonCoffeeStart(seasonName: string): Date | null {
-  const year = Number(/^(\d{4})/.exec(seasonName)?.[1]);
-  return Number.isFinite(year) && year > 0
-    ? new Date(Date.UTC(year, 6, 1))
-    : null;
-}
+/** Coffees are $1 each. */
+const COFFEE_CENTS = 100;
 
 /**
- * Coffees bought this season: every paid Stripe Checkout tagged as a coffee
- * since the season's start, at $1 a coffee. Read from Stripe and cached for
- * an hour; if Stripe can't be reached it counts as none rather than breaking
- * the page.
+ * This season's coffees, as stored on the season. Cached until a new coffee
+ * is recorded, which clears the tag.
  */
 export async function getSeasonCoffees(): Promise<{
   season: string | null;
   coffees: number;
 }> {
   "use cache";
-  cacheLife({ revalidate: 3600 });
+  cacheTag(CACHE_TAGS.COFFEES);
+  cacheLife("max");
 
   const settings = await db.query.global.findFirst({
     where: eq(global.id, 1),
     with: { currentSeason: true },
   });
-  const start = settings
-    ? seasonCoffeeStart(settings.currentSeason.name)
-    : null;
-  const season = settings?.currentSeason.name ?? null;
-  if (!start) return { season, coffees: 0 };
+  return {
+    season: settings?.currentSeason.name ?? null,
+    coffees: settings?.currentSeason.coffees ?? 0,
+  };
+}
 
-  try {
-    let cents = 0;
-    for await (const session of stripe.checkout.sessions.list({
-      created: { gte: Math.floor(start.getTime() / 1000) },
-      status: "complete",
-      limit: 100,
-    })) {
-      if (
-        session.metadata?.coffee === "true" &&
-        session.payment_status === "paid"
-      ) {
-        cents += session.amount_subtotal ?? 0;
-      }
-    }
-    return { season, coffees: Math.round(cents / 100) };
-  } catch (error) {
-    console.error("Couldn't count this season's coffees", error);
-    return { season, coffees: 0 };
+/**
+ * Adds a finished coffee checkout to the current season's total, once. The
+ * session is read back from Stripe, so only a paid coffee counts, and the
+ * session id is kept so a refreshed thanks page doesn't count it again.
+ * Returns how many coffees the checkout was for, or null if it isn't one.
+ */
+export async function recordCoffeeCheckout(
+  sessionId: string,
+): Promise<number | null> {
+  if (!/^cs_[A-Za-z0-9_]+$/.test(sessionId)) return null;
+
+  const session = await stripe.checkout.sessions.retrieve(sessionId);
+  if (
+    session.metadata?.coffee !== "true" ||
+    session.payment_status !== "paid"
+  ) {
+    return null;
   }
+  const coffees = Math.round((session.amount_subtotal ?? 0) / COFFEE_CENTS);
+  if (coffees < 1) return null;
+
+  const settings = await db.query.global.findFirst({
+    where: eq(global.id, 1),
+    with: { currentSeason: true },
+  });
+  if (!settings) return null;
+  const seasonName = settings.currentSeason.name;
+
+  const added = await db.transaction(async (tx) => {
+    const inserted = await tx
+      .insert(coffeeCheckout)
+      .values({ sessionId, seasonName, coffees })
+      .onConflictDoNothing()
+      .returning({ sessionId: coffeeCheckout.sessionId });
+    if (inserted.length === 0) return false;
+    await tx
+      .update(season)
+      .set({ coffees: sql`${season.coffees} + ${coffees}` })
+      .where(eq(season.name, seasonName));
+    return true;
+  });
+
+  if (added) revalidateTag(CACHE_TAGS.COFFEES, { expire: 0 });
+  return coffees;
 }

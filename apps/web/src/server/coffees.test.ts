@@ -1,19 +1,37 @@
 import { describe, expect, it, vi } from "vitest";
 
+const retrieve = vi.fn();
 vi.mock("~/server/db", () => ({ db: {} }));
-vi.mock("~/server/services/stripe", () => ({ stripe: {} }));
-vi.mock("next/cache", () => ({ cacheLife: () => undefined }));
+vi.mock("~/server/services/stripe", () => ({
+  stripe: { checkout: { sessions: { retrieve } } },
+}));
+vi.mock("next/cache", () => ({
+  cacheLife: () => undefined,
+  cacheTag: () => undefined,
+  revalidateTag: () => undefined,
+}));
 
-const { seasonCoffeeStart } = await import("./coffees");
+const { recordCoffeeCheckout } = await import("./coffees");
 
-describe("seasonCoffeeStart", () => {
-  it("starts a season's coffees on 1 July of its first year", () => {
-    expect(seasonCoffeeStart("2026/27")?.toISOString()).toBe(
-      "2026-07-01T00:00:00.000Z",
-    );
+describe("recordCoffeeCheckout", () => {
+  it("ignores anything that isn't a Checkout session id", async () => {
+    expect(await recordCoffeeCheckout("not-a-session")).toBeNull();
+    expect(retrieve).not.toHaveBeenCalled();
   });
 
-  it("has no start for a name without a year", () => {
-    expect(seasonCoffeeStart("GEMS")).toBeNull();
+  it("doesn't count a checkout that isn't a paid coffee", async () => {
+    retrieve.mockResolvedValueOnce({
+      metadata: { coffee: "true" },
+      payment_status: "unpaid",
+      amount_subtotal: 300,
+    });
+    expect(await recordCoffeeCheckout("cs_test_123")).toBeNull();
+
+    retrieve.mockResolvedValueOnce({
+      metadata: {},
+      payment_status: "paid",
+      amount_subtotal: 300,
+    });
+    expect(await recordCoffeeCheckout("cs_test_456")).toBeNull();
   });
 });
