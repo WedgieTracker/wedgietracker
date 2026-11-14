@@ -35,7 +35,7 @@ const BOX_W = 300;
  * that every cup still fits the box, up to 99.
  */
 function layout(n: number) {
-  const boxH = n > 10 ? 160 : 196;
+  const boxH = 180;
   let size = 40;
   let high = 4;
   for (size = 40; size >= 9; size -= 1) {
@@ -102,12 +102,6 @@ export function CoffeeStack() {
         aria-label={`${count} ${count === 1 ? "coffee" : "coffees"}`}
         className="bg-badge grain relative h-[250px] overflow-hidden rounded-[22px]"
       >
-        <span className="text-cream/85 absolute top-3.5 left-4 text-[13px] font-extrabold">
-          Coffees
-          <b className="text-cream text-shadow-badge block text-[34px] leading-none font-black italic">
-            {count}
-          </b>
-        </span>
         <span
           aria-live="polite"
           className="absolute top-4 right-4 flex items-center gap-2 text-right"
