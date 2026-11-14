@@ -8,7 +8,7 @@ import { CoffeeCup } from "./CoffeeCup";
 const ATTRIBUTES: { name: string; down?: boolean }[] = [
   { name: "Three-point shot" },
   { name: "Free throw" },
-  { name: "Ball handle" },
+  { name: "Ball handle", down: true },
   { name: "Offensive rebound" },
   { name: "Block" },
   { name: "Steal" },
@@ -16,7 +16,7 @@ const ATTRIBUTES: { name: string; down?: boolean }[] = [
   { name: "Vertical" },
   { name: "Stamina" },
   { name: "Hustle" },
-  { name: "Clutch" },
+  { name: "Clutch", down: true },
   { name: "Wedgie radar" },
   { name: "Rim stickiness" },
   // Wedgie watching has its costs.
