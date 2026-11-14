@@ -1,8 +1,10 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { CourtPositionDiagram } from "@/components/CourtPositionDiagram";
+import { GemTag } from "@/components/GemTag";
+import { Matchup } from "@/components/Matchup";
 import { PlayButton } from "@/components/PlayButton";
-import { shortDate } from "@/lib/dates";
+import { isGem, shortDate } from "@/lib/dates";
 import { colors, fonts } from "@/lib/theme";
 import type { VideoUrls } from "@wedgietracker/core/types/wedgie";
 
@@ -12,6 +14,7 @@ export interface WedgieRowData {
   playerName: string;
   teamName: string;
   teamAgainstName: string;
+  seasonName?: string | null;
   wedgieDate: string;
   position: { x: number; y: number };
   types: { name: string }[];
@@ -39,10 +42,6 @@ export function WedgieRow({
   wedgie: WedgieRowData;
   onPress: () => void;
 }) {
-  const opponent = wedgie.teamAgainstName.includes("Unknown")
-    ? null
-    : wedgie.teamAgainstName;
-
   return (
     <Pressable
       onPress={onPress}
@@ -55,9 +54,15 @@ export function WedgieRow({
           <Text style={styles.hash}>#</Text>
           {wedgie.number ?? 1}
         </Text>
-        <Text style={styles.date} allowFontScaling={false}>
-          {shortDate(wedgie.wedgieDate)}
-        </Text>
+        {isGem(wedgie.wedgieDate) ? (
+          <View style={styles.gem}>
+            <GemTag />
+          </View>
+        ) : (
+          <Text style={styles.date} allowFontScaling={false}>
+            {shortDate(wedgie.wedgieDate)}
+          </Text>
+        )}
       </View>
 
       <View style={styles.body}>
@@ -66,8 +71,7 @@ export function WedgieRow({
           {wedgie.playerName}
         </Text>
         <Text numberOfLines={1} style={styles.teams} allowFontScaling={false}>
-          <Text style={styles.teamCode}>{wedgie.teamName}</Text>
-          {opponent ? ` vs ${opponent}` : ""}
+          <Matchup wedgie={wedgie} teamStyle={styles.teamCode} />
         </Text>
         <Text numberOfLines={1} style={styles.types} allowFontScaling={false}>
           {wedgie.types.map((type) => type.name).join(", ")}
@@ -91,7 +95,7 @@ export function WedgieRowPlaceholder() {
 }
 
 const styles = StyleSheet.create({
-  // `grid-cols-[58px_minmax(0,1fr)_76px_30px] gap-3 rounded-[20px] border
+  // `grid-cols-[62px_minmax(0,1fr)_76px_30px] gap-3 rounded-[20px] border
   // py-3.5 pr-3.5 pl-[18px]`
   row: {
     flexDirection: "row",
@@ -109,7 +113,7 @@ const styles = StyleSheet.create({
   rowPressed: { borderColor: colors.violet60 },
   placeholder: { backgroundColor: "rgba(29, 18, 66, 0.6)", borderWidth: 0 },
 
-  numberCol: { width: 58 },
+  numberCol: { width: 62 },
   number: {
     fontFamily: fonts.blackItalic,
     fontSize: 36,
@@ -119,6 +123,7 @@ const styles = StyleSheet.create({
   },
   // `text-[0.42em] opacity-55`, on the number's baseline.
   hash: { fontSize: 15, letterSpacing: 0, color: "rgba(240, 225, 182, 0.55)" },
+  gem: { marginTop: 4 },
   date: {
     marginTop: 3,
     fontFamily: fonts.bold,

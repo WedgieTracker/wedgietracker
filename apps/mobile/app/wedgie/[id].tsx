@@ -20,7 +20,9 @@ import { WedgiePlayer, pickVideoForApp } from "@/components/WedgiePlayer";
 import { WedgieVideoTabs } from "@/components/WedgieVideoTabs";
 import { api, type RouterOutputs } from "@/lib/api";
 import { track } from "@/lib/observability";
-import { nightDate } from "@/lib/dates";
+import { GemTag } from "@/components/GemTag";
+import { Matchup } from "@/components/Matchup";
+import { isGem, nightDate } from "@/lib/dates";
 import { badgeTextShadow, colors, fonts, radius, space } from "@/lib/theme";
 import { gameTimeline } from "@wedgietracker/core/utils/gameMoment";
 import {
@@ -202,9 +204,19 @@ function WedgieDetail({
             </Text>
           </View>
           <View style={styles.headerText}>
-            <Text style={styles.date} allowFontScaling={false}>
-              {nightDate(wedgie.wedgieDate)}
-            </Text>
+            {isGem(wedgie.wedgieDate) ? (
+              // GEMS have no real date.
+              <View style={styles.gemRow}>
+                <GemTag />
+                <Text style={styles.date} allowFontScaling={false}>
+                  Not part of a season
+                </Text>
+              </View>
+            ) : (
+              <Text style={styles.date} allowFontScaling={false}>
+                {nightDate(wedgie.wedgieDate)}
+              </Text>
+            )}
             {wedgie.seasonName && wedgie.seasonName !== "GEMS" ? (
               <Text style={styles.season} allowFontScaling={false}>
                 {wedgie.seasonName} SEASON
@@ -219,10 +231,7 @@ function WedgieDetail({
           </Fact>
           <Fact label="Teams">
             <Text style={styles.teams}>
-              <Text style={styles.teamName}>{wedgie.teamName}</Text>
-              {wedgie.teamAgainstName.includes("Unknown")
-                ? ""
-                : ` vs ${wedgie.teamAgainstName}`}
+              <Matchup wedgie={wedgie} teamStyle={styles.teamName} />
             </Text>
           </Fact>
           {wedgie.types.length > 0 ? (
@@ -466,6 +475,7 @@ function CloseButton({ onPress }: { onPress: () => void }) {
 }
 
 const styles = StyleSheet.create({
+  gemRow: { flexDirection: "row", alignItems: "center", gap: 8 },
   sheet: {
     // No shadow here: on iOS a shadow on a view that also clips its children
     // casts each child's silhouette onto the content below it. Separation

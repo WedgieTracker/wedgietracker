@@ -87,6 +87,16 @@ export const gradients = {
       [1, "#A65FF5"],
     ],
   },
+  // `bg-gem`: the GEM tag on wedgies outside the seasons.
+  gem: {
+    angle: 135,
+    stops: [
+      [0, "#9BE7FF"],
+      [0.35, "#7FB2FF"],
+      [0.7, "#B58CFF"],
+      [1, "#F0B8FF"],
+    ],
+  },
   glowX: {
     angle: 90,
     stops: [

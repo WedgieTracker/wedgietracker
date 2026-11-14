@@ -1,10 +1,12 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { CourtPositionDiagram } from "@/components/CourtPositionDiagram";
+import { GemTag } from "@/components/GemTag";
 import { GradientFill, Grain } from "@/components/Gradient";
+import { Matchup } from "@/components/Matchup";
 import { PlayButton } from "@/components/PlayButton";
 import type { WedgieRowData } from "@/components/WedgieRow";
-import { shortDate } from "@/lib/dates";
+import { isGem, shortDate } from "@/lib/dates";
 import { badgeTextShadow, colors, fonts } from "@/lib/theme";
 import { gameTimeline } from "@wedgietracker/core/utils/gameMoment";
 
@@ -62,9 +64,6 @@ function QuartersBar({ wedgie }: { wedgie: FeaturedWedgieData }) {
           );
         })}
       </View>
-      <Text style={styles.quartersLabel} allowFontScaling={false}>
-        {timeline.label}
-      </Text>
     </View>
   );
 }
@@ -81,10 +80,6 @@ export function FeaturedWedgie({
   wedgie: FeaturedWedgieData;
   onPress: () => void;
 }) {
-  const opponent = wedgie.teamAgainstName.includes("Unknown")
-    ? null
-    : wedgie.teamAgainstName;
-
   return (
     <Pressable
       onPress={onPress}
@@ -107,9 +102,15 @@ export function FeaturedWedgie({
                 <Text style={styles.hash}>#</Text>
                 {wedgie.number ?? 1}
               </Text>
-              <Text style={styles.date} allowFontScaling={false}>
-                {shortDate(wedgie.wedgieDate)}
-              </Text>
+              {isGem(wedgie.wedgieDate) ? (
+                <View style={styles.gem}>
+                  <GemTag />
+                </View>
+              ) : (
+                <Text style={styles.date} allowFontScaling={false}>
+                  {shortDate(wedgie.wedgieDate)}
+                </Text>
+              )}
             </View>
             <CourtPositionDiagram
               position={wedgie.position}
@@ -132,8 +133,7 @@ export function FeaturedWedgie({
             {wedgie.playerName}
           </Text>
           <Text style={styles.teams} allowFontScaling={false}>
-            <Text style={styles.teamCode}>{wedgie.teamName}</Text>
-            {opponent ? ` vs ${opponent}` : ""}
+            <Matchup wedgie={wedgie} teamStyle={styles.teamCode} />
           </Text>
           <View style={styles.chips}>
             {wedgie.types.map((type) => (
@@ -179,6 +179,7 @@ const styles = StyleSheet.create({
     textShadowRadius: 0,
     textShadowOffset: { width: 0, height: 0 },
   },
+  gem: { marginTop: 8 },
   date: {
     marginTop: 6,
     fontFamily: fonts.bold,
@@ -187,12 +188,7 @@ const styles = StyleSheet.create({
     color: colors.cream70,
   },
 
-  quarters: {
-    marginTop: 12,
-    paddingTop: 14,
-    borderTopWidth: 1,
-    borderTopColor: colors.cream20,
-  },
+  quarters: { marginTop: 16 },
   segments: { flexDirection: "row", gap: 5 },
   segment: { flex: 1 },
   track: { height: 6, borderRadius: 3, backgroundColor: colors.cream20 },
@@ -228,12 +224,6 @@ const styles = StyleSheet.create({
     color: colors.cream50,
   },
   segmentActive: { color: colors.cream },
-  quartersLabel: {
-    marginTop: 8,
-    fontFamily: fonts.black,
-    fontSize: 13,
-    color: colors.cream,
-  },
 
   info: { padding: 18 },
   play: { position: "absolute", top: 22, right: 18 },
@@ -252,7 +242,7 @@ const styles = StyleSheet.create({
     color: colors.cream80,
   },
   teamCode: { fontFamily: fonts.black, color: colors.violet },
-  chips: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 12 },
+  chips: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 10 },
   chip: {
     backgroundColor: colors.violet15,
     borderRadius: 999,
