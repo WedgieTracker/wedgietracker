@@ -24,7 +24,6 @@ const ATTRIBUTES: { name: string; down?: boolean }[] = [
   { name: "Backboard trust", down: true },
   { name: "Sleep", down: true },
   { name: "Shot selection", down: true },
-  { name: "Arc", down: true },
 ];
 
 const MAX = 99;
