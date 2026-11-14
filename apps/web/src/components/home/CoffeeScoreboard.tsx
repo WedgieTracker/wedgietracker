@@ -18,7 +18,7 @@ function Board({
       ? "text-[#ffd36b] [text-shadow:0_0_10px_rgb(255_211_107/0.7)]"
       : "text-[#ff6fd8] [text-shadow:0_0_10px_rgb(255_111_216/0.7)]";
   return (
-    <div className="rounded-[10px] bg-[#150b30] px-2 py-2.5 text-center">
+    <div className="rounded-[10px] bg-[rgb(10_4_30/0.45)] px-2 py-2.5 text-center">
       <div className={`${LED} text-cream/75 text-[11px]`}>{label}</div>
       <div
         className={`${LED} text-[54px] leading-[1.1] font-black tabular-nums ${glow}`}
@@ -50,7 +50,7 @@ export function CoffeeScoreboard({
   return (
     <section
       aria-label={`Season score: coffees ${coffees}, wedgies ${wedgies}`}
-      className="w-full max-w-2xl rounded-[18px] border-2 border-[#2a1a5c] bg-[#0b0619] p-3.5 shadow-[inset_0_0_0_1px_rgb(255_211_107/0.08),0_12px_28px_rgb(5_2_20/0.45)]"
+      className="bg-badge grain w-full max-w-2xl overflow-hidden rounded-[18px] border-2 border-[rgb(240_225_182/0.35)] p-3.5 shadow-[0_12px_28px_rgb(5_2_20/0.45)]"
     >
       <div
         className={`${LED} text-center text-[11px] text-[#ffd36b] uppercase [text-shadow:0_0_6px_rgb(255_211_107/0.6)]`}
