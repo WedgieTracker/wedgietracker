@@ -69,7 +69,29 @@ export function ChipNumber({
   );
 }
 
+/**
+ * A heading kept for VoiceOver only, like the web's `sr-only` headings: it
+ * takes no room on screen.
+ */
+export function HiddenHeading({ children }: { children: string }) {
+  return (
+    <View style={styles.hidden}>
+      <Text accessibilityRole="header" style={styles.hiddenText}>
+        {children}
+      </Text>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
+  hidden: {
+    position: "absolute",
+    width: 1,
+    height: 1,
+    overflow: "hidden",
+  },
+  // Transparent rather than opacity 0, which VoiceOver may skip.
+  hiddenText: { color: "transparent" },
   heading: {
     flexDirection: "row",
     flexWrap: "wrap",

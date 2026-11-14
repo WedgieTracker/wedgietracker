@@ -2,9 +2,20 @@ import { useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import Svg, { Circle, Path } from "react-native-svg";
 
+import {
+  CountRow,
+  FilterPill,
+  FilterSheet,
+  GroupLabel,
+} from "@/components/FilterSheet";
 import { ChipNumber, PageHeading } from "@/components/PageHeading";
+import type { RouterOutputs } from "@/lib/api";
 import { track } from "@/lib/observability";
 import { colors, fonts } from "@/lib/theme";
+import {
+  MOMENT_FILTERS,
+  matchesFilter,
+} from "@wedgietracker/core/utils/wedgieFilter";
 
 export interface Filters {
   season: string;
@@ -21,10 +32,11 @@ export const NO_FILTERS: Filters = {
 };
 
 type Kind = "season" | "type" | "moment";
+type AllWedgies = RouterOutputs["wedgie"]["getAll"];
 
 const LABELS: Record<Kind, { label: string; any: string }> = {
   season: { label: "Season", any: "All time" },
-  type: { label: "Type", any: "Any" },
+  type: { label: "Type", any: "Any type" },
   moment: { label: "When", any: "Anytime" },
 };
 
@@ -33,27 +45,27 @@ const KINDS = Object.keys(LABELS) as Kind[];
 /**
  * Port of apps/web/src/components/all-wedgies/WedgieFilters.tsx: the heading
  * with a live count, a player or team search, then Season, Type and When
- * pills that each open their choices. A pill turns cream once it's set, and
- * the cream x on the count clears everything.
+ * pills. Each pill opens a sheet listing its choices with how many wedgies
+ * each would show given the other filters, as a count and a bar. A pill
+ * turns cream once it's set, and "Clear filters" under the count resets
+ * everything.
  *
- * Without `choices` it is the skeleton: the same heading, search and pills,
+ * Without `all` it is the skeleton: the same heading, search and pills,
  * empty and still.
  */
 export function WedgieFilters({
   filters,
   onChange,
   visible,
-  total,
-  choices,
+  all,
 }: {
   filters: Filters;
   onChange: (next: Filters) => void;
   visible: number | null;
-  total: number | null;
-  choices: Record<Kind, string[]> | null;
+  all: AllWedgies | null;
 }) {
   const [open, setOpen] = useState<Kind | null>(null);
-  const skeleton = choices === null;
+  const skeleton = all === null;
   const anySet =
     !skeleton &&
     Boolean(
@@ -67,7 +79,7 @@ export function WedgieFilters({
   };
 
   // As wide as the biggest number the chip can show, so it never resizes.
-  const widest = "0".repeat(String(total ?? 0).length || 3);
+  const widest = "0".repeat(String(all?.length ?? 0).length || 3);
 
   return (
     <View>
@@ -81,31 +93,37 @@ export function WedgieFilters({
         }
         badgeAction={
           anySet ? (
-            <Pressable
-              onPress={() => {
-                track("wt_filter_applied", { filter: "clear", value: "" });
-                onChange(NO_FILTERS);
-                setOpen(null);
-              }}
-              hitSlop={10}
-              accessibilityRole="button"
-              accessibilityLabel="Clear filters"
-              style={({ pressed }) => [
-                styles.clear,
-                pressed && styles.clearPressed,
-              ]}
-            >
-              {({ pressed }) => (
-                <Svg width={10} height={10} viewBox="0 0 12 12">
-                  <Path
-                    d="M2 2l8 8M10 2l-8 8"
-                    stroke={pressed ? colors.cream : colors.night}
-                    strokeWidth={2.2}
-                    strokeLinecap="round"
-                  />
-                </Svg>
-              )}
-            </Pressable>
+            <View style={styles.clearWrap} pointerEvents="box-none">
+              <Pressable
+                onPress={() => {
+                  track("wt_filter_applied", { filter: "clear", value: "" });
+                  onChange(NO_FILTERS);
+                  setOpen(null);
+                }}
+                hitSlop={10}
+                accessibilityRole="button"
+                style={styles.clear}
+              >
+                {({ pressed }) => (
+                  <>
+                    <Svg width={8} height={8} viewBox="0 0 12 12">
+                      <Path
+                        d="M2 2l8 8M10 2l-8 8"
+                        stroke={pressed ? colors.cream : colors.cream70}
+                        strokeWidth={2.4}
+                        strokeLinecap="round"
+                      />
+                    </Svg>
+                    <Text
+                      style={[styles.clearText, pressed && styles.clearPressed]}
+                      allowFontScaling={false}
+                    >
+                      Clear filters
+                    </Text>
+                  </>
+                )}
+              </Pressable>
+            </View>
           ) : null
         }
       />
@@ -148,114 +166,146 @@ export function WedgieFilters({
 
         <View style={styles.pills}>
           {KINDS.map((kind) => {
-            const value = filters[kind];
-            const on = Boolean(value) && !skeleton;
+            const value = skeleton ? "" : filters[kind];
             return (
-              <Pressable
+              <FilterPill
                 key={kind}
+                label={value || LABELS[kind].label}
+                set={Boolean(value)}
+                open={open === kind}
                 disabled={skeleton}
-                onPress={() => setOpen(open === kind ? null : kind)}
-                accessibilityRole="button"
+                onPress={() => setOpen(kind)}
                 accessibilityLabel={`${LABELS[kind].label}: ${value || LABELS[kind].any}`}
-                accessibilityState={{ expanded: open === kind }}
-                style={[styles.pill, on && styles.pillOn]}
-              >
-                <PillLabel kind={kind} on={on}>
-                  {(!skeleton && value) || LABELS[kind].label}
-                </PillLabel>
-                <Text
-                  style={[styles.caret, on && styles.pillTextOn]}
-                  allowFontScaling={false}
-                >
-                  ▾
-                </Text>
-              </Pressable>
+                // The Season pill is sized for a season like 2026/27, so it
+                // doesn't grow when the default season fills in.
+                sizeFor={kind === "season" ? "0000/00" : undefined}
+              />
             );
           })}
         </View>
-
-        {open && choices ? (
-          <View style={styles.popover} accessibilityLabel={LABELS[open].label}>
-            {["", ...choices[open]].map((value) => {
-              const on = filters[open] === value;
-              return (
-                <Pressable
-                  key={value || "__any__"}
-                  onPress={() => set(open, value)}
-                  accessibilityRole="button"
-                  accessibilityState={{ selected: on }}
-                  style={[styles.choice, on && styles.choiceOn]}
-                >
-                  <Text
-                    style={[styles.choiceText, on && styles.choiceTextOn]}
-                    allowFontScaling={false}
-                  >
-                    {value || LABELS[open].any}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </View>
-        ) : null}
       </View>
+
+      {all ? (
+        <FilterSheet
+          title={open ? LABELS[open].label : ""}
+          visible={open !== null}
+          onClose={() => setOpen(null)}
+        >
+          {open ? (
+            <Choices
+              kind={open}
+              all={all}
+              filters={filters}
+              onPick={(value) => set(open, value)}
+            />
+          ) : null}
+        </FilterSheet>
+      ) : null}
     </View>
   );
 }
 
 /**
- * A pill's label. The Season pill is sized for its widest value (a season
- * like 2026/27), so it doesn't grow, and push Type and When along, when the
- * default season fills in.
+ * The rows for one pill. Counts are taken against the other filters as they
+ * stand, so a choice shows how many wedgies picking it would leave.
  */
-function PillLabel({
+function Choices({
   kind,
-  on,
-  children,
+  all,
+  filters,
+  onPick,
 }: {
   kind: Kind;
-  on: boolean;
-  children: string;
+  all: AllWedgies;
+  filters: Filters;
+  onPick: (value: string) => void;
 }) {
-  const text = (
-    <Text
-      style={[styles.pillText, on && styles.pillTextOn]}
-      allowFontScaling={false}
-    >
-      {children}
-    </Text>
+  const countFor = (value: string) =>
+    all.filter(
+      (w) =>
+        (kind === "season"
+          ? !value || w.seasonName === value
+          : !filters.season || w.seasonName === filters.season) &&
+        matchesFilter(w, { ...filters, [kind]: value }),
+    ).length;
+
+  let values: string[];
+  if (kind === "season") {
+    const named = Array.from(
+      new Set(all.flatMap((w) => (w.seasonName ? [w.seasonName] : []))),
+    );
+    // Newest season first, GEMS on their own at the end.
+    values = [
+      ...named
+        .filter((s) => s !== "GEMS")
+        .sort()
+        .reverse(),
+      ...(named.includes("GEMS") ? ["GEMS"] : []),
+    ];
+  } else if (kind === "type") {
+    values = Array.from(
+      new Set(
+        all.flatMap((w) =>
+          (w.types ?? []).flatMap((t) => (t.name ? [t.name] : [])),
+        ),
+      ),
+    ).sort();
+  } else {
+    values = [...MOMENT_FILTERS];
+  }
+
+  const list = values.map((value) => ({ value, count: countFor(value) }));
+  // Most common types first.
+  if (kind === "type") list.sort((a, b) => b.count - a.count);
+  const regular = list.filter((c) => c.value !== "GEMS");
+  const gems = list.find((c) => c.value === "GEMS");
+  const max = Math.max(0, ...list.map((c) => c.count));
+  const any = countFor("");
+
+  const row = (value: string, label: string, count: number, top: number) => (
+    <CountRow
+      key={label}
+      value={value}
+      label={label}
+      count={count}
+      max={top}
+      on={filters[kind] === value}
+      onPick={() => onPick(value)}
+    />
   );
-  if (kind !== "season") return text;
+
   return (
-    <View>
-      <Text
-        style={[styles.pillText, styles.invisible]}
-        allowFontScaling={false}
-      >
-        0000/00
-      </Text>
-      <View style={styles.overlay}>{text}</View>
-    </View>
+    <>
+      {row("", LABELS[kind].any, any, any)}
+      {kind === "season" ? <GroupLabel>Seasons</GroupLabel> : null}
+      {regular.map((c) => row(c.value, c.value, c.count, max))}
+      {gems ? (
+        <>
+          <GroupLabel>Outside the seasons</GroupLabel>
+          {row(gems.value, gems.value, gems.count, max)}
+        </>
+      ) : null}
+    </>
   );
 }
 
 const styles = StyleSheet.create({
-  // On the chip's corner: `absolute -top-2.5 -right-2.5 size-6`.
-  clear: {
+  // Under the chip, out of the flow: `absolute top-full left-1/2 mt-2`.
+  clearWrap: {
     position: "absolute",
-    top: -10,
-    right: -10,
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    top: "100%",
+    left: -60,
+    right: -60,
+    marginTop: 8,
     alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: colors.cream,
-    shadowColor: "#050214",
-    shadowOpacity: 0.5,
-    shadowRadius: 3,
-    shadowOffset: { width: 0, height: 2 },
   },
-  clearPressed: { backgroundColor: colors.violet },
+  clear: { flexDirection: "row", alignItems: "center", gap: 4 },
+  clearText: {
+    fontFamily: fonts.extraBold,
+    fontSize: 12,
+    color: colors.cream70,
+  },
+  clearPressed: { color: colors.cream },
 
   controls: { marginTop: 32 },
   dim: { opacity: 0.4 },
@@ -281,59 +331,4 @@ const styles = StyleSheet.create({
   },
 
   pills: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 10 },
-  // `min-h-10 rounded-xl border px-3 text-[13.5px] font-extrabold`
-  pill: {
-    minHeight: 40,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    paddingHorizontal: 12,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "rgba(154, 92, 245, 0.3)",
-    backgroundColor: colors.panel,
-  },
-  pillOn: { backgroundColor: colors.cream, borderColor: colors.cream },
-  pillText: {
-    fontFamily: fonts.extraBold,
-    fontSize: 13.5,
-    color: colors.cream,
-  },
-  pillTextOn: { color: colors.night },
-  caret: { fontSize: 11, color: colors.cream, opacity: 0.6 },
-  invisible: { opacity: 0 },
-  overlay: { position: "absolute", left: 0, right: 0, top: 0, bottom: 0 },
-
-  // `bg-panel border-violet/35 rounded-2xl border p-3 gap-1.5`
-  popover: {
-    marginTop: 10,
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 6,
-    padding: 12,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: "rgba(154, 92, 245, 0.35)",
-    backgroundColor: colors.panel,
-    shadowColor: "#050214",
-    shadowOpacity: 0.6,
-    shadowRadius: 15,
-    shadowOffset: { width: 0, height: 14 },
-  },
-  choice: {
-    minHeight: 38,
-    justifyContent: "center",
-    paddingHorizontal: 13,
-    borderRadius: 999,
-    borderWidth: 1,
-    borderColor: "rgba(154, 92, 245, 0.25)",
-    backgroundColor: colors.panel,
-  },
-  choiceOn: { backgroundColor: colors.cream, borderColor: colors.cream },
-  choiceText: {
-    fontFamily: fonts.extraBold,
-    fontSize: 13.5,
-    color: "rgba(240, 225, 182, 0.75)",
-  },
-  choiceTextOn: { color: colors.night },
 });

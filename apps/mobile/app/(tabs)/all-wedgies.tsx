@@ -25,11 +25,9 @@ import {
 import { api } from "@/lib/api";
 import { useTabBarClearance } from "@/lib/layout";
 import { useSeasonFallback } from "@/lib/use-season-fallback";
+import { useWide } from "@/lib/wide";
 import { colors, fonts } from "@/lib/theme";
-import {
-  MOMENT_FILTERS,
-  matchesFilter,
-} from "@wedgietracker/core/utils/wedgieFilter";
+import { matchesFilter } from "@wedgietracker/core/utils/wedgieFilter";
 
 const GAP = 12;
 
@@ -40,6 +38,10 @@ const GAP = 12;
 export default function AllWedgiesScreen() {
   const router = useRouter();
   const tabBar = useTabBarClearance();
+  const { wide, width } = useWide();
+  // Two rows side by side, each half the content less half the gap.
+  const cellWidth = (Math.min(width, 1000) - 32 - GAP) / 2;
+  const cell = wide ? { width: cellWidth } : undefined;
   const {
     global,
     previousSeason,
@@ -108,29 +110,6 @@ export default function AllWedgiesScreen() {
   const isPending = filters.season ? bySeason.isPending : all.isPending;
   const error = filters.season ? bySeason.error : all.error;
 
-  const choices = useMemo(() => {
-    if (!all.data) return null;
-    const named = Array.from(
-      new Set(all.data.flatMap((w) => (w.seasonName ? [w.seasonName] : []))),
-    );
-    // Newest season first, GEMS last.
-    const seasons = [
-      ...named
-        .filter((s) => s !== "GEMS")
-        .sort()
-        .reverse(),
-      ...(named.includes("GEMS") ? ["GEMS"] : []),
-    ];
-    const types = Array.from(
-      new Set(
-        all.data.flatMap((w) =>
-          (w.types ?? []).flatMap((t) => (t.name ? [t.name] : [])),
-        ),
-      ),
-    ).sort();
-    return { season: seasons, type: types, moment: [...MOMENT_FILTERS] };
-  }, [all.data]);
-
   const wedgies = useMemo(() => {
     const rows = (source ?? []).filter((w) => matchesFilter(w, filters));
     return rows.sort(
@@ -145,11 +124,7 @@ export default function AllWedgiesScreen() {
   const seasonPending =
     !seasonTouched && !!openingSeason && filters.season !== openingSeason;
   const loading =
-    isPending ||
-    all.isPending ||
-    isLoadingSeasonData ||
-    seasonPending ||
-    !choices;
+    isPending || all.isPending || isLoadingSeasonData || seasonPending;
 
   if (loading) {
     return (
@@ -162,12 +137,13 @@ export default function AllWedgiesScreen() {
             filters={NO_FILTERS}
             onChange={() => undefined}
             visible={null}
-            total={null}
-            choices={null}
+            all={null}
           />
-          <View style={styles.list}>
+          <View style={[styles.list, wide && styles.listWide]}>
             {Array.from({ length: 12 }, (_, i) => (
-              <WedgieRowPlaceholder key={i} />
+              <View key={i} style={cell}>
+                <WedgieRowPlaceholder />
+              </View>
             ))}
           </View>
         </ScrollView>
@@ -185,12 +161,20 @@ export default function AllWedgiesScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
+        // Two columns on a wide screen, like the iPhone Duo opened up.
+        key={wide ? "wide" : "narrow"}
+        numColumns={wide ? 2 : 1}
+        columnWrapperStyle={wide ? styles.columns : undefined}
         ItemSeparatorComponent={Separator}
-        getItemLayout={(_, index) => ({
-          length: WEDGIE_ROW_HEIGHT + GAP,
-          offset: (WEDGIE_ROW_HEIGHT + GAP) * index,
-          index,
-        })}
+        getItemLayout={
+          wide
+            ? undefined
+            : (_, index) => ({
+                length: WEDGIE_ROW_HEIGHT + GAP,
+                offset: (WEDGIE_ROW_HEIGHT + GAP) * index,
+                index,
+              })
+        }
         refreshControl={
           <RefreshControl
             refreshing={all.isRefetching || bySeason.isRefetching}
@@ -207,8 +191,7 @@ export default function AllWedgiesScreen() {
               filters={filters}
               onChange={onChange}
               visible={wedgies.length}
-              total={all.data?.length ?? null}
-              choices={choices}
+              all={all.data ?? null}
             />
 
             {shouldShowPreviousSeason &&
@@ -234,10 +217,12 @@ export default function AllWedgiesScreen() {
           </View>
         }
         renderItem={({ item }) => (
-          <WedgieRow
-            wedgie={item}
-            onPress={() => router.push(`/wedgie/${item.id}`)}
-          />
+          <View style={cell}>
+            <WedgieRow
+              wedgie={item}
+              onPress={() => router.push(`/wedgie/${item.id}`)}
+            />
+          </View>
         )}
       />
     </TopSafeArea>
@@ -251,9 +236,17 @@ function Separator() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.night },
   screen: { flex: 1, backgroundColor: colors.night },
-  content: { paddingHorizontal: 16, paddingTop: 16 },
+  content: {
+    width: "100%",
+    maxWidth: 1000,
+    alignSelf: "center",
+    paddingHorizontal: 16,
+    paddingTop: 16,
+  },
   header: { marginBottom: 32 },
   list: { marginTop: 32, gap: GAP },
+  listWide: { flexDirection: "row", flexWrap: "wrap" },
+  columns: { gap: GAP },
   notice: {
     marginTop: 16,
     borderWidth: 1,
