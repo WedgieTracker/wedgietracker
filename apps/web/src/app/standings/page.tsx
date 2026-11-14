@@ -1,3 +1,4 @@
+import { ExploreFooter } from "~/components/shared/ExploreFooter";
 import { StandingsPage } from "~/components/standings/StandingsPage";
 import { PageLayout } from "~/components/layout/PageLayout";
 import { generateMetadata } from "~/config/metadata";
@@ -17,6 +18,13 @@ export default async function Page() {
           <PageHeading title="Standings" />
 
           <StandingsPage />
+          <ExploreFooter
+            links={[
+              { title: "All wedgies", url: "/all-wedgies" },
+              { title: "Stats for nerds", url: "/stats-for-nerds" },
+              { title: "Seasons history", url: "/seasons-history" },
+            ]}
+          />
         </div>
       </div>
     </PageLayout>

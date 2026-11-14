@@ -2,7 +2,8 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import type { Wedgie } from "@wedgietracker/core/types/wedgie";
-import { GEMS_EMOJI, isGemsDate } from "@wedgietracker/core/utils/formatDate";
+import { isGemsDate } from "@wedgietracker/core/utils/formatDate";
+import { GemTag } from "~/components/shared/GemTag";
 import { gameTimeline } from "@wedgietracker/core/utils/gameMoment";
 import {
   shoutoutNetwork,
@@ -24,20 +25,27 @@ interface WedgieInfoPanelProps {
  */
 function NightDate({ date }: { date: string | Date }) {
   const [text, setText] = useState<string | null>(null);
+  // GEMS have no real date: they get a GEM tag, which needs no locale.
+  const gem = isGemsDate(new Date(date));
   useEffect(() => {
-    const d = new Date(date);
     setText(
-      isGemsDate(d)
-        ? GEMS_EMOJI
-        : d.toLocaleDateString(undefined, {
-            weekday: "short",
-            day: "numeric",
-            month: "short",
-            year: "numeric",
-            timeZone: "UTC",
-          }),
+      new Date(date).toLocaleDateString(undefined, {
+        weekday: "short",
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+        timeZone: "UTC",
+      }),
     );
   }, [date]);
+  if (gem) {
+    return (
+      <span className="inline-flex items-center gap-2">
+        <GemTag />
+        Not part of a season
+      </span>
+    );
+  }
   return <span suppressHydrationWarning>{text ?? "\u00a0"}</span>;
 }
 

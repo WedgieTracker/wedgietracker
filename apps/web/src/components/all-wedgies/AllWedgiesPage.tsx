@@ -7,7 +7,6 @@ import { AllWedgiesSkeleton } from "./AllWedgiesSkeleton";
 import { WedgieGrid } from "./WedgieGrid";
 import { WedgieModal } from "~/components/home/WedgieModal";
 import type { WedgieWithTypes } from "@wedgietracker/core/types/wedgie";
-import { Cta } from "~/components/shared/Cta";
 import { api } from "~/trpc/react";
 import { useSeasonFallback } from "~/hooks/use-season-fallback";
 import { matchesFilter } from "@wedgietracker/core/utils/wedgieFilter";
@@ -215,15 +214,6 @@ export function AllWedgiesPage() {
           }
         />
       )}
-      <div className="mt-8 md:mt-16">
-        <Cta
-          links={[
-            { title: "Standings", url: "/standings" },
-            { title: "Stats for nerds", url: "/stats-for-nerds" },
-            { title: "Seasons history", url: "/seasons-history" },
-          ]}
-        />
-      </div>
     </div>
   );
 }

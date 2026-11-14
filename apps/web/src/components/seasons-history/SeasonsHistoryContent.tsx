@@ -3,7 +3,6 @@
 import { api } from "~/trpc/react";
 import { SeasonCard } from "./SeasonCard";
 import { Loader } from "~/components/shared/Loader";
-import { Cta } from "../shared/Cta";
 export function SeasonsHistoryContent() {
   const { data: seasons, isLoading } = api.season.getAllWithStats.useQuery();
 
@@ -21,15 +20,6 @@ export function SeasonsHistoryContent() {
       {seasonsWithWedgies.map((season) => (
         <SeasonCard key={season.name} season={season} />
       ))}
-      <div className="mt-16">
-        <Cta
-          links={[
-            { title: "All wedgies", url: "/all-wedgies" },
-            { title: "Stats for nerds", url: "/stats-for-nerds" },
-            { title: "Standings", url: "/standings" },
-          ]}
-        />
-      </div>
     </div>
   );
 }

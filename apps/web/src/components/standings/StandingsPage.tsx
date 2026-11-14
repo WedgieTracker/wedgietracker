@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { api } from "~/trpc/react";
 import { StandingsFilters } from "./StandingsFilters";
 import { StandingsGrid } from "./StandingsGrid";
-import { Cta } from "../shared/Cta";
 import { useSeasonFallback } from "~/hooks/use-season-fallback";
 
 export function StandingsPage() {
@@ -85,15 +84,6 @@ export function StandingsPage() {
           teams={standings?.teams ?? []}
           isLoading={isLoading}
           currentSeason={selectedSeason}
-        />
-      </div>
-      <div className="mt-8 md:mt-16">
-        <Cta
-          links={[
-            { title: "All wedgies", url: "/all-wedgies" },
-            { title: "Stats for nerds", url: "/stats-for-nerds" },
-            { title: "Seasons history", url: "/seasons-history" },
-          ]}
         />
       </div>
     </div>

@@ -448,6 +448,17 @@
 }
 
 /* Buttons with cream text: darker than the badge so the text stays at 4.5:1. */
+/* GEMS, the wedgies outside the seasons: an icy gem gradient. */
+@utility bg-gem {
+  background-image: linear-gradient(
+    135deg,
+    #9be7ff 0%,
+    #7fb2ff 35%,
+    #b58cff 70%,
+    #f0b8ff 100%
+  );
+}
+
 @utility bg-button {
   background-image: linear-gradient(
     135deg,

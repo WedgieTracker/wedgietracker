@@ -11,8 +11,7 @@ import { Loader } from "~/components/shared/Loader";
 import Link from "next/link";
 import { Newsletter } from "~/components/home/Newsletter";
 import { generateMetadata } from "~/config/metadata";
-import { CoffeeScoreboard } from "~/components/home/CoffeeScoreboard";
-import { getSeasonCoffees } from "~/server/coffees";
+import { CoffeeScoreboardLive } from "~/components/home/CoffeeScoreboardLive";
 
 export const metadata = generateMetadata({
   title: "NBA Wedgie Tracker | Count, pace and history",
@@ -31,7 +30,7 @@ export default async function Home() {
           <Suspense fallback={<LoaderWrapper />}>
             <WedgieListWrapper />
 
-            <CoffeeScoreboardWrapper />
+            <CoffeeScoreboardLive />
 
             <StandingsWrapper />
 
@@ -64,20 +63,6 @@ async function StatsWrapper() {
 async function WedgieListWrapper() {
   const wedgies = (await api.wedgie.getLatestWedgies()) as WedgieWithTypes[];
   return <WedgieList wedgies={wedgies} />;
-}
-
-async function CoffeeScoreboardWrapper() {
-  const [{ season, coffees }, stats] = await Promise.all([
-    getSeasonCoffees(),
-    api.wedgie.getStats(),
-  ]);
-  return (
-    <CoffeeScoreboard
-      season={season}
-      coffees={coffees}
-      wedgies={stats.currentSeasonWedgies}
-    />
-  );
 }
 
 async function StandingsWrapper() {

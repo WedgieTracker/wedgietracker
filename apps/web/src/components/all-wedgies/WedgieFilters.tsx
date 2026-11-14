@@ -1,6 +1,9 @@
 "use client";
 
-import { MOMENT_FILTERS } from "@wedgietracker/core/utils/wedgieFilter";
+import {
+  MOMENT_FILTERS,
+  matchesFilter,
+} from "@wedgietracker/core/utils/wedgieFilter";
 import { api } from "~/trpc/react";
 import { PageHeading } from "~/components/shared/PageHeading";
 import {
@@ -28,9 +31,24 @@ type Kind = "season" | "type" | "moment";
 
 const LABELS: Record<Kind, { label: string; any: string }> = {
   season: { label: "Season", any: "All time" },
-  type: { label: "Type", any: "Any" },
+  type: { label: "Type", any: "Any type" },
   moment: { label: "When", any: "Anytime" },
 };
+
+/** A small cut gem, marking GEMS (wedgies that sit outside the seasons). */
+function GemIcon() {
+  return (
+    <svg viewBox="0 0 12 12" aria-hidden="true" className="size-3">
+      <path d="M3 1.5h6L11 4.5 6 10.5 1 4.5z" fill="#9be7ff" />
+      <path
+        d="M1 4.5h10M4.2 1.5 6 4.5l1.8-3M6 4.5v6"
+        stroke="rgb(20 10 46 / 0.35)"
+        strokeWidth=".7"
+        fill="none"
+      />
+    </svg>
+  );
+}
 
 /**
  * A player or team search, then Season, Type and When pills that each open a
@@ -65,10 +83,23 @@ export function WedgieFilters({
       ) ?? [],
     ),
   ).sort();
-  const choices: Record<Kind, string[]> = {
-    season: seasons,
-    type: types,
-    moment: [...MOMENT_FILTERS],
+  // How many wedgies each choice would show, given the other filters as they
+  // are. "" stands for the Any row.
+  const countFor = (kind: Kind, value: string) =>
+    allWedgies?.filter(
+      (w) =>
+        (kind === "season"
+          ? !value || w.seasonName === value
+          : !filters.season || w.seasonName === filters.season) &&
+        matchesFilter(w, { ...filters, [kind]: value }),
+    ).length ?? 0;
+  const counted = (kind: Kind, values: string[]) =>
+    values.map((value) => ({ value, count: countFor(kind, value) }));
+  const choices: Record<Kind, { value: string; count: number }[]> = {
+    season: counted("season", seasons),
+    // Most common types first.
+    type: counted("type", types).sort((a, b) => b.count - a.count),
+    moment: counted("moment", [...MOMENT_FILTERS]),
   };
 
   useEffect(() => {
@@ -97,17 +128,82 @@ export function WedgieFilters({
   const anySet =
     filters.season || filters.type || filters.moment || filters.playerOrTeam;
 
-  const chip = (kind: Kind, value: string, label: string) => (
-    <button
-      key={label}
-      type="button"
-      aria-pressed={filters[kind] === value}
-      onClick={() => set(kind, value)}
-      className="bg-panel border-violet/25 text-cream/75 hover:border-cream/60 aria-pressed:bg-cream aria-pressed:border-cream aria-pressed:text-night focus-visible:outline-cream min-h-[38px] rounded-full border px-[13px] text-[13.5px] font-extrabold transition-colors focus-visible:outline-2"
-    >
-      {label}
-    </button>
+  const row = (
+    kind: Kind,
+    value: string,
+    label: string,
+    count: number,
+    max: number,
+  ) => {
+    const on = filters[kind] === value;
+    return (
+      <button
+        key={label}
+        type="button"
+        aria-pressed={on}
+        onClick={() => set(kind, value)}
+        className={`focus-visible:outline-cream grid min-h-10 w-full grid-cols-[7.5rem_1fr_30px_14px] items-center gap-2.5 rounded-[10px] px-2.5 text-left text-sm font-extrabold transition-colors focus-visible:outline-2 ${
+          on
+            ? "bg-cream text-night"
+            : `text-cream/85 hover:bg-violet/15 ${count ? "" : "opacity-40"}`
+        }`}
+      >
+        <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
+          {value === "GEMS" && <GemIcon />}
+          {label}
+        </span>
+        <span
+          aria-hidden="true"
+          className={`h-1.5 ${value ? "" : "invisible"} overflow-hidden rounded-full ${on ? "bg-night/15" : "bg-violet/20"}`}
+        >
+          <span
+            className={`block h-full rounded-full ${on ? "bg-night" : "bg-button"}`}
+            style={{
+              width: `${max ? Math.max(count ? 4 : 0, (count / max) * 100) : 0}%`,
+            }}
+          />
+        </span>
+        <span
+          className={`text-right text-[12.5px] tabular-nums ${on ? "text-night/60" : "text-cream/55"}`}
+        >
+          {count}
+        </span>
+        <span aria-hidden="true" className="text-[13px]">
+          {on ? "✓" : ""}
+        </span>
+      </button>
+    );
+  };
+  const groupLabel = (text: string) => (
+    <div className="text-cream/45 px-2.5 pt-2 pb-1 text-[11px] font-black tracking-[0.08em] uppercase">
+      {text}
+    </div>
   );
+  const popover = (kind: Kind) => {
+    const list = choices[kind];
+    const regular = list.filter((c) => c.value !== "GEMS");
+    const gems = list.find((c) => c.value === "GEMS");
+    const max = Math.max(0, ...list.map((c) => c.count));
+    return (
+      <>
+        {row(
+          kind,
+          "",
+          LABELS[kind].any,
+          countFor(kind, ""),
+          countFor(kind, ""),
+        )}
+        {kind === "season" && groupLabel("Seasons")}
+        {regular.map((c) => row(kind, c.value, c.value, c.count, max))}
+        {gems && (
+          <>
+            {groupLabel("Outside the seasons")}
+            {row(kind, gems.value, gems.value, gems.count, max)}
+          </>
+        )}
+      </>
+    );
+  };
 
   return (
     <div ref={wrapRef} className="w-full">
@@ -209,10 +305,9 @@ export function WedgieFilters({
             <div
               role="group"
               aria-label={LABELS[open].label}
-              className="bg-panel border-violet/35 absolute top-12 left-0 z-20 flex w-[min(320px,100%)] flex-wrap gap-1.5 rounded-2xl border p-3 shadow-[0_14px_30px_rgb(5_2_20/0.6)]"
+              className="bg-panel border-violet/35 scrollbar-wt absolute top-12 left-0 z-20 max-h-[min(340px,60svh)] w-full overflow-y-auto rounded-2xl border p-2 shadow-[0_14px_30px_rgb(5_2_20/0.6)] sm:w-[380px]"
             >
-              {chip(open, "", LABELS[open].any)}
-              {choices[open].map((v) => chip(open, v, v))}
+              {popover(open)}
             </div>
           )}
         </div>

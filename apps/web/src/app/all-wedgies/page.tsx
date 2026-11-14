@@ -1,3 +1,4 @@
+import { ExploreFooter } from "~/components/shared/ExploreFooter";
 import type { Metadata } from "next";
 import { connection } from "next/server";
 import {
@@ -92,6 +93,13 @@ export default async function Page() {
           <Suspense fallback={<AllWedgiesSkeleton />}>
             <AllWedgiesPage />
           </Suspense>
+          <ExploreFooter
+            links={[
+              { title: "Standings", url: "/standings" },
+              { title: "Stats for nerds", url: "/stats-for-nerds" },
+              { title: "Seasons history", url: "/seasons-history" },
+            ]}
+          />
           <Suspense>
             <Connection />
           </Suspense>

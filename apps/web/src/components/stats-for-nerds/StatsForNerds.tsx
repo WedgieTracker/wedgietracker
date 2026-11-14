@@ -2,7 +2,6 @@
 
 import { TypingStats } from "./TypingStats";
 import Link from "next/link";
-import { Cta } from "../shared/Cta";
 import { Wave } from "../home/Wave";
 import { Counter } from "../ui/Counter";
 
@@ -54,14 +53,6 @@ export function StatsForNerds({ stats }: StatsForNerdsProps) {
           <LastWedgieWrapper stats={stats} />
           <LeadersWrapper stats={stats} />
           <SeasonHistoryWrapper stats={stats} />
-          <Cta
-            links={[
-              { title: "All wedgies", url: "/all-wedgies" },
-              { title: "Standings", url: "/standings" },
-              { title: "Seasons history", url: "/seasons-history" },
-            ]}
-            variant="small"
-          />
         </div>
       </div>
     </div>
