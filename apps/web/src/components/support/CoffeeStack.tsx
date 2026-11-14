@@ -8,7 +8,7 @@ import { CoffeeCup } from "./CoffeeCup";
 const ATTRIBUTES: { name: string; down?: boolean }[] = [
   { name: "Three-point shot" },
   { name: "Ball handle", down: true },
-  { name: "Offensive rebound" },
+  { name: "Rebound" },
   { name: "Block" },
   { name: "Steal" },
   { name: "Speed" },
