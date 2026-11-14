@@ -55,7 +55,10 @@ export function DaysCalendar({
       <View style={[styles.sheet, styles.sheetMiddle]} />
 
       <View style={styles.binding}>
-        <GradientFill name="glow" />
+        {/* Clipped to the pad's top corners; the rings stand outside it. */}
+        <View style={styles.bindingFill}>
+          <GradientFill name="glow" />
+        </View>
         <View style={[styles.ring, { left: 26 }]} />
         <View style={[styles.ring, { right: 26 }]} />
       </View>
@@ -263,6 +266,16 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 14,
     overflow: "visible",
   },
+  bindingFill: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderTopLeftRadius: 14,
+    borderTopRightRadius: 14,
+    overflow: "hidden",
+  },
   // The two rings that hold the pad, standing proud of the binding.
   ring: {
     position: "absolute",
@@ -291,7 +304,9 @@ const styles = StyleSheet.create({
     fontFamily: fonts.blackItalic,
     fontSize: 64,
     lineHeight: 64,
-    letterSpacing: -2.5,
+    // No negative tracking, and a little room on the right, so the slanted
+    // digit looks centred rather than leaning off to the right.
+    paddingRight: 7,
     color: "#502394",
   },
   caption: {
