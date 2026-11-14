@@ -1,3 +1,4 @@
+import { Matchup } from "~/components/shared/Matchup";
 import type { WedgieWithTypes } from "@wedgietracker/core/types/wedgie";
 import { gameTimeline } from "@wedgietracker/core/utils/gameMoment";
 import { CourtPositionDiagram } from "./CourtPositionDiagram";
@@ -72,10 +73,6 @@ export function FeaturedWedgie({
   wedgie: WedgieWithTypes;
   onOpen: () => void;
 }) {
-  const opponent = wedgie.teamAgainstName.includes("Unknown")
-    ? null
-    : wedgie.teamAgainstName;
-
   return (
     <button
       type="button"
@@ -117,8 +114,7 @@ export function FeaturedWedgie({
             {wedgie.playerName}
           </span>
           <span className="text-cream/80 mt-1 block text-[14.5px] font-bold">
-            <span className="text-violet font-black">{wedgie.teamName}</span>
-            {opponent && ` vs ${opponent}`}
+            <Matchup wedgie={wedgie} teamClassName="text-violet font-black" />
           </span>
           <span className="mt-3 flex flex-wrap gap-1.5">
             {wedgie.types.map((type) => (

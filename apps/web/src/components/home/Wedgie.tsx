@@ -1,5 +1,7 @@
 "use client";
 
+import { Matchup } from "~/components/shared/Matchup";
+
 import { useState } from "react";
 import { WedgieModal } from "./WedgieModal";
 import { CourtPositionDiagram } from "./CourtPositionDiagram";
@@ -29,10 +31,6 @@ export function Wedgie({
   nextWedgie,
 }: WedgieProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const opponent = wedgie.teamAgainstName.includes("Unknown")
-    ? null
-    : wedgie.teamAgainstName;
 
   return (
     <>
@@ -65,8 +63,7 @@ export function Wedgie({
             {wedgie.playerName}
           </span>
           <span className="text-cream/80 mt-1 block text-[13.5px] font-bold whitespace-nowrap">
-            <span className="text-violet font-black">{wedgie.teamName}</span>
-            {opponent && ` vs ${opponent}`}
+            <Matchup wedgie={wedgie} teamClassName="text-violet font-black" />
             {showSeason && (
               <span className="text-cream/50 ml-2 text-xs">
                 {wedgie.seasonName}

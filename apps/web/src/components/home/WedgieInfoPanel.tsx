@@ -1,5 +1,7 @@
 "use client";
 
+import { Matchup } from "~/components/shared/Matchup";
+
 import { useEffect, useId, useRef, useState } from "react";
 import type { Wedgie } from "@wedgietracker/core/types/wedgie";
 import { isGemsDate } from "@wedgietracker/core/utils/formatDate";
@@ -158,10 +160,7 @@ export function WedgieInfoPanel({ wedgie }: WedgieInfoPanelProps) {
             Teams
           </p>
           <p className="text-[1.25em] font-bold text-white">
-            <span className="text-pink">{wedgie.teamName}</span>{" "}
-            {!wedgie.teamAgainstName.includes("Unknown")
-              ? `vs ${wedgie.teamAgainstName}`
-              : ""}
+            <Matchup wedgie={wedgie} teamClassName="text-violet" />
           </p>
 
           <p className="text-right text-[.75em] font-bold tracking-wider text-white/60 uppercase">
