@@ -17,7 +17,9 @@ const STATS: { key: keyof StatsPerWedgie; word: string }[] = [
 ];
 const NUM_FLAPS = 5;
 const WORD_FLAPS = 11;
-const CHARS = " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,";
+/** The figure's flaps only carry digits, the word's only letters. */
+const DIGITS = " 0123456789,";
+const LETTERS = " ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const STEP_MS = 45;
 const HOLD_MS = 4200;
 
@@ -31,7 +33,7 @@ function boardText(stats: StatsPerWedgie, i: number) {
   return [...num, ...s.word.padEnd(WORD_FLAPS, " ").slice(0, WORD_FLAPS)];
 }
 
-/** One flap. It steps through CHARS in order until it reaches `target`. */
+/** One flap. It steps through its characters in order until it reaches `target`. */
 function Flap({
   target,
   delay,
@@ -57,8 +59,9 @@ function Flap({
         setFlipping(false);
         return;
       }
+      const chars = amber ? DIGITS : LETTERS;
       const next =
-        CHARS[(CHARS.indexOf(shownRef.current) + 1) % CHARS.length] ?? " ";
+        chars[(chars.indexOf(shownRef.current) + 1) % chars.length] ?? " ";
       shownRef.current = next;
       setShown(next);
       setFlipping(true);
@@ -66,7 +69,7 @@ function Flap({
     };
     timer = setTimeout(step, delay);
     return () => clearTimeout(timer);
-  }, [target, delay]);
+  }, [target, delay, amber]);
 
   return (
     <span
