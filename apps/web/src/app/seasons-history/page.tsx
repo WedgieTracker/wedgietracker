@@ -19,6 +19,7 @@ export default async function SeasonsHistoryPage() {
 
           <SeasonsHistoryContent />
           <ExploreFooter
+            className="max-w-6xl md:grid-cols-[1.15fr_1fr]"
             links={[
               { title: "All wedgies", url: "/all-wedgies" },
               { title: "Stats for nerds", url: "/stats-for-nerds" },

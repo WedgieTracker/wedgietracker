@@ -20,7 +20,7 @@ function QuartersBar({ wedgie }: { wedgie: WedgieWithTypes }) {
     <span
       role="img"
       aria-label={`When: ${timeline.label}`}
-      className="border-cream/20 mt-3 block border-t pt-3.5"
+      className="mt-4 block"
     >
       <span className="flex gap-[5px]">
         {timeline.segments.map((segment, i) => {

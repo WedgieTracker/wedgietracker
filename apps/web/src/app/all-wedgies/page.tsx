@@ -94,6 +94,7 @@ export default async function Page() {
             <AllWedgiesPage />
           </Suspense>
           <ExploreFooter
+            className="max-w-7xl md:grid-cols-[1.15fr_1fr]"
             links={[
               { title: "Standings", url: "/standings" },
               { title: "Stats for nerds", url: "/stats-for-nerds" },

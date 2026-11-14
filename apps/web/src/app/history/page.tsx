@@ -2,6 +2,7 @@ import { Fragment } from "react";
 import Link from "next/link";
 import { buildAllWedgiesQuery } from "@wedgietracker/core/utils/allWedgiesUrl";
 import { PageLayout } from "~/components/layout/PageLayout";
+import { ExploreFooter } from "~/components/shared/ExploreFooter";
 import { APP_STORE_URL } from "~/components/shared/AppStoreBadge";
 import { generateMetadata } from "~/config/metadata";
 import { TweetEmbed } from "./TweetEmbed";
@@ -352,14 +353,14 @@ export default function HistoryPage() {
           ))}
         </ol>
 
-        <div className="flex flex-wrap justify-center gap-3">
-          <Link
-            href="/support-us"
-            className="bg-yellow text-darkpurple rounded-xl px-6 py-3 font-black uppercase"
-          >
-            Keep me awake ☕
-          </Link>
-        </div>
+        <ExploreFooter
+          className="max-w-2xl"
+          links={[
+            { title: "All wedgies", url: "/all-wedgies" },
+            { title: "Standings", url: "/standings" },
+            { title: "Seasons history", url: "/seasons-history" },
+          ]}
+        />
       </div>
     </PageLayout>
   );

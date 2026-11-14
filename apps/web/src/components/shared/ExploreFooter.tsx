@@ -11,14 +11,19 @@ import {
  */
 export function ExploreFooter({
   links,
+  className = "max-w-5xl md:grid-cols-[1.15fr_1fr]",
 }: {
   links: { title: string; url: string }[];
+  /** The width (to match the page's content) and the columns, if side by side. */
+  className?: string;
 }) {
   return (
-    <div className="mx-auto mt-8 grid w-full max-w-5xl items-start gap-6 md:mt-12 md:grid-cols-[1.15fr_1fr]">
+    <div
+      className={`mx-auto mt-8 grid w-full items-stretch gap-6 md:mt-12 ${className}`}
+    >
       <Cta links={links} />
       <Suspense fallback={<CoffeeScoreboardSkeleton />}>
-        <CoffeeScoreboardLive />
+        <CoffeeScoreboardLive className="flex h-full flex-col justify-between" />
       </Suspense>
     </div>
   );

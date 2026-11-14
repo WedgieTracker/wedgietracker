@@ -34,10 +34,12 @@ export function CoffeeScoreboard({
   season,
   coffees,
   wedgies,
+  className = "",
 }: {
   season: string | null;
   coffees: number;
   wedgies: number;
+  className?: string;
 }) {
   const lead = coffees - wedgies;
   const line =
@@ -50,7 +52,7 @@ export function CoffeeScoreboard({
   return (
     <section
       aria-label={`Season score: coffees ${coffees}, wedgies ${wedgies}`}
-      className="bg-badge grain w-full max-w-2xl overflow-hidden rounded-[18px] border-2 border-[rgb(240_225_182/0.35)] p-3.5 shadow-[0_12px_28px_rgb(5_2_20/0.45)]"
+      className={`bg-badge grain w-full max-w-2xl overflow-hidden rounded-[18px] border-2 border-[rgb(240_225_182/0.35)] p-3.5 shadow-[0_12px_28px_rgb(5_2_20/0.45)] ${className}`}
     >
       <div
         className={`${LED} text-center text-[11px] text-[#ffd36b] uppercase [text-shadow:0_0_6px_rgb(255_211_107/0.6)]`}

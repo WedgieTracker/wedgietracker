@@ -24,6 +24,7 @@ export default async function StatsForNerdsPage() {
             <StatsWrapper />
           </Suspense>
           <ExploreFooter
+            className="max-w-7xl md:grid-cols-[1.15fr_1fr]"
             links={[
               { title: "All wedgies", url: "/all-wedgies" },
               { title: "Standings", url: "/standings" },

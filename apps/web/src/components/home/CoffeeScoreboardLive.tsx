@@ -3,7 +3,11 @@ import { getSeasonCoffees } from "~/server/coffees";
 import { CoffeeScoreboard } from "./CoffeeScoreboard";
 
 /** The Coffees vs Wedgies board with this season's real numbers. */
-export async function CoffeeScoreboardLive() {
+export async function CoffeeScoreboardLive({
+  className,
+}: {
+  className?: string;
+} = {}) {
   const [{ season, coffees }, stats] = await Promise.all([
     getSeasonCoffees(),
     api.wedgie.getStats(),
@@ -13,6 +17,7 @@ export async function CoffeeScoreboardLive() {
       season={season}
       coffees={coffees}
       wedgies={stats.currentSeasonWedgies}
+      className={className}
     />
   );
 }

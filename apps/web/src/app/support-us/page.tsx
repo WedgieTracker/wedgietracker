@@ -1,5 +1,6 @@
 import { PageLayout } from "~/components/layout/PageLayout";
 import { CoffeeStack } from "~/components/support/CoffeeStack";
+import { ExploreFooter } from "~/components/shared/ExploreFooter";
 import { generateMetadata } from "~/config/metadata";
 
 export const metadata = generateMetadata({
@@ -22,6 +23,14 @@ export default function SupportUsPage() {
           </p>
         </div>
         <CoffeeStack />
+        <ExploreFooter
+          className="max-w-xl"
+          links={[
+            { title: "All wedgies", url: "/all-wedgies" },
+            { title: "Standings", url: "/standings" },
+            { title: "Stats for nerds", url: "/stats-for-nerds" },
+          ]}
+        />
       </div>
     </PageLayout>
   );
