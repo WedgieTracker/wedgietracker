@@ -7,7 +7,6 @@ import { CoffeeCup } from "./CoffeeCup";
 /** The boosts a round of coffees gives me, like a player's ratings. */
 const ATTRIBUTES: { name: string; down?: boolean }[] = [
   { name: "Three-point shot" },
-  { name: "Free throw" },
   { name: "Ball handle", down: true },
   { name: "Offensive rebound" },
   { name: "Block" },
@@ -17,7 +16,6 @@ const ATTRIBUTES: { name: string; down?: boolean }[] = [
   { name: "Stamina" },
   { name: "Hustle" },
   { name: "Clutch", down: true },
-  { name: "Wedgie radar" },
   { name: "Rim stickiness" },
   // Wedgie watching has its costs.
   { name: "Basketball IQ", down: true },
