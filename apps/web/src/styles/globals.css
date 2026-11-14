@@ -56,19 +56,29 @@
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
-    --yellow: 65 100% 50%;
-    --yellow-dark: 65 100% 40%;
-    --yellow-darker: 65 100% 30%;
-    --pink: 300 100% 50%;
-    --pink-dark: 300 100% 40%;
-    --pink-darker: 300 100% 30%;
-    --darkpurple: 264 100% 9%;
-    --darkpurple-light: 264 100% 15%;
-    --darkpurple-lighter: 264 100% 20%;
-    --darkpurple-dark: 264 100% 7%;
-    --darkpurple-darker: 264 100% 5%;
+    /*
+      Brand palette, from the No Dunks badge: cream lettering on a grainy
+      blue-to-purple gradient. The older token names stay so every page picks
+      the palette up: "yellow" is the cream, "pink" the violet accent and
+      "darkpurple" the night background with its panel shades.
+    */
+    --cream: 44 66% 82.7%; /* #F0E1B6 */
+    --violet: 264 88% 66.1%; /* #9A5CF5 */
+    --night: 257 64% 11%; /* #140A2E */
+    --panel: 254 57% 16.5%; /* #1D1242 */
+    --yellow: var(--cream);
+    --yellow-dark: 44 50% 70%;
+    --yellow-darker: 43 35% 56.9%;
+    --pink: var(--violet);
+    --pink-dark: 263 65% 54.3%;
+    --pink-darker: 263 59% 41.4%;
+    --darkpurple: var(--night);
+    --darkpurple-light: var(--panel);
+    --darkpurple-lighter: 255 56% 23.1%;
+    --darkpurple-dark: 257 64% 8.8%;
+    --darkpurple-darker: 256 65% 6.7%;
     /* rgb version */
-    --darkpurple-rgb: 23 0 45;
+    --darkpurple-rgb: 20 10 46;
   }
   .dark {
     --background: 0 0% 3.9%;
@@ -126,7 +136,7 @@
   /* background color */
   background-color: hsl(var(--yellow));
   /* text color */
-  color: #000;
+  color: hsl(var(--night));
 }
 
 .waves {
@@ -422,5 +432,53 @@
   .wt-shine,
   .wt-hof {
     animation: none;
+  }
+}
+
+/* The No Dunks badge: blue in the top-left to purple in the bottom-right. */
+@utility bg-badge {
+  background-image: linear-gradient(
+    150deg,
+    #4769c5 0%,
+    #3650a1 22%,
+    #36378d 45%,
+    #441c77 75%,
+    #502394 100%
+  );
+}
+
+/* Buttons with cream text: darker than the badge so the text stays at 4.5:1. */
+@utility bg-button {
+  background-image: linear-gradient(
+    135deg,
+    #3f5dc2 0%,
+    #5543c9 50%,
+    #7438cf 100%
+  );
+}
+
+/* The brighter blue-to-violet used for the wave and the gauges. */
+@utility bg-glow {
+  background-image: linear-gradient(
+    135deg,
+    #5f84e6 0%,
+    #7b6bf0 45%,
+    #a65ff5 100%
+  );
+}
+
+/* Film grain over a gradient, like the badge. */
+@utility grain {
+  position: relative;
+  isolation: isolate;
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.24;
+    mix-blend-mode: soft-light;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
 }

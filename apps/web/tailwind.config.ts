@@ -43,6 +43,10 @@ export default {
           dark: "hsl(var(--pink-dark))",
           darker: "hsl(var(--pink-darker))",
         },
+        cream: "hsl(var(--cream))",
+        violet: "hsl(var(--violet))",
+        night: "hsl(var(--night))",
+        panel: "hsl(var(--panel))",
         darkpurple: {
           DEFAULT: "hsl(var(--darkpurple))",
           light: "hsl(var(--darkpurple-light))",
