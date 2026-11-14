@@ -16,22 +16,21 @@ export const metadata = generateMetadata({
 export default async function StatsForNerdsPage() {
   return (
     <PageLayout>
-      <div className="w-full">
-        <div className="flex w-full flex-col items-center justify-center gap-8 px-4 py-4 md:gap-8 md:py-8 lg:px-8 lg:py-8">
-          <PageHeading title="Stats for nerds" />
-
-          <Suspense fallback={<LoaderWrapper />}>
-            <StatsWrapper />
-          </Suspense>
-          <ExploreFooter
-            className="max-w-7xl md:grid-cols-[1.15fr_1fr]"
-            links={[
-              { title: "All wedgies", url: "/all-wedgies" },
-              { title: "Standings", url: "/standings" },
-              { title: "Seasons history", url: "/seasons-history" },
-            ]}
-          />
-        </div>
+      <div className="flex w-full flex-col items-center pt-4 md:pt-8">
+        <PageHeading title="Stats for nerds" />
+        <Suspense fallback={<LoaderWrapper />}>
+          <StatsWrapper />
+        </Suspense>
+      </div>
+      <div className="px-4 pb-12 lg:px-8">
+        <ExploreFooter
+          className="max-w-7xl md:grid-cols-[1.15fr_1fr]"
+          links={[
+            { title: "All wedgies", url: "/all-wedgies" },
+            { title: "Standings", url: "/standings" },
+            { title: "Seasons history", url: "/seasons-history" },
+          ]}
+        />
       </div>
     </PageLayout>
   );
@@ -48,6 +47,9 @@ const LoaderWrapper = () => {
 };
 
 async function StatsWrapper() {
-  const stats = await api.wedgie.getNerdStats();
-  return <StatsForNerds stats={stats} />;
+  const [stats, extras] = await Promise.all([
+    api.wedgie.getNerdStats(),
+    api.wedgie.getNerdExtras(),
+  ]);
+  return <StatsForNerds stats={stats} extras={extras} />;
 }

@@ -17,10 +17,10 @@ type StatKey = keyof StatsPerWedgie;
 const STATS_ORDER: StatKey[] = ["fga", "possessions", "games", "minutes"];
 
 const LABELS: Record<StatKey, string> = {
-  fga: "FGA",
-  possessions: "POSSESSIONS",
-  games: "GAMES",
-  minutes: "MINUTES PLAYED",
+  fga: "shots",
+  possessions: "possessions",
+  games: "games",
+  minutes: "minutes played",
 };
 
 const wait = (ms: number) =>
@@ -74,13 +74,13 @@ export function TypingStats({ stats }: TypingStatsProps) {
   const [amount, ...rest] = text.split(" ");
 
   return (
-    <div className="from-darkpurple-light to-darkpurple-lighter w-full max-w-xl rounded-b-xl bg-linear-to-b text-base text-white md:text-xl">
-      <div className="relative flex min-h-18 flex-col items-center justify-center md:min-h-24">
-        <span className="block font-bold">THAT IS A WEDGIE EVERY</span>
-        <span className="text-xl font-black md:text-3xl">
-          <span className="text-yellow">{amount}</span>{" "}
-          <span className="text-pink font-bold">{rest.join(" ")}</span>
-          <span className="animate-blink mb-[-0.1em] ml-1 inline-block h-[1em] w-2 bg-white" />
+    <div className="text-cream w-full text-[15px]">
+      <div className="relative flex min-h-14 flex-col items-center justify-center text-center">
+        <span className="block font-extrabold">That&apos;s a wedgie every</span>
+        <span className="text-2xl font-black">
+          <span className="text-cream">{amount}</span>{" "}
+          <span className="text-cream/80 font-extrabold">{rest.join(" ")}</span>
+          <span className="animate-blink bg-cream mb-[-0.1em] ml-1 inline-block h-[1em] w-2" />
         </span>
       </div>
     </div>

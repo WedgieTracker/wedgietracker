@@ -23,10 +23,13 @@ export function PaceGauge({
   pace,
   record,
   recordSeason,
+  bare = false,
 }: {
   pace: number;
   record: number;
   recordSeason: string | null;
+  /** Leave out the gauge's own card, when it already sits inside one. */
+  bare?: boolean;
 }) {
   const id = `pace${useId().replace(/:/g, "")}`;
   const [pinned, setPinned] = useState(false);
@@ -76,7 +79,7 @@ export function PaceGauge({
   return (
     <div
       ref={wrapRef}
-      className="bg-panel border-violet/20 relative rounded-[20px] border px-3.5 pt-[18px] pb-3 text-center"
+      className={`relative text-center ${bare ? "" : "bg-panel border-violet/20 rounded-[20px] border px-3.5 pt-[18px] pb-3"}`}
     >
       <svg
         viewBox="0 0 140 80"
