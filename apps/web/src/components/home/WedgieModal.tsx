@@ -119,7 +119,7 @@ export function WedgieModal({
           {/* On desktop the row takes the video's height and the details scroll
               inside it, so the modal keeps one size from wedgie to wedgie. */}
           <div className="relative w-full lg:w-[35%]">
-            <div className="lg:absolute lg:inset-0 lg:overflow-y-auto">
+            <div className="scrollbar-wt lg:absolute lg:inset-0 lg:overflow-y-auto">
               <WedgieInfoPanel wedgie={wedgie} />
             </div>
           </div>

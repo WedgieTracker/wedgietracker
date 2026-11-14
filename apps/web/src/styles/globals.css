@@ -539,6 +539,7 @@
     inset: 0;
     z-index: -1;
     pointer-events: none;
+    border-radius: inherit;
     opacity: 0.24;
     mix-blend-mode: soft-light;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
@@ -584,5 +585,27 @@
 @keyframes wt-fade-in {
   from {
     opacity: 0;
+  }
+}
+
+/* Scrollbars in the palette: thin violet on night, for the page and any scrolling panel. */
+html {
+  scrollbar-color: rgb(154 92 245 / 0.45) hsl(var(--night));
+}
+@utility scrollbar-wt {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(154 92 245 / 0.5) transparent;
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: rgb(154 92 245 / 0.5);
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background: rgb(154 92 245 / 0.8);
   }
 }
