@@ -5,25 +5,26 @@ import { api } from "~/trpc/react";
 import { CoffeeCup } from "./CoffeeCup";
 
 /** The boosts a round of coffees gives me, like a player's ratings. */
-const ATTRIBUTES = [
-  "Three-point shot",
-  "Mid-range shot",
-  "Free throw",
-  "Ball handle",
-  "Pass accuracy",
-  "Offensive rebound",
-  "Perimeter defense",
-  "Interior defense",
-  "Block",
-  "Steal",
-  "Speed",
-  "Vertical",
-  "Stamina",
-  "Hustle",
-  "Clutch",
-  "Basketball IQ",
-  "Wedgie radar",
-  "Rim stickiness",
+const ATTRIBUTES: { name: string; down?: boolean }[] = [
+  { name: "Three-point shot" },
+  { name: "Free throw" },
+  { name: "Ball handle" },
+  { name: "Offensive rebound" },
+  { name: "Block" },
+  { name: "Steal" },
+  { name: "Speed" },
+  { name: "Vertical" },
+  { name: "Stamina" },
+  { name: "Hustle" },
+  { name: "Clutch" },
+  { name: "Wedgie radar" },
+  { name: "Rim stickiness" },
+  // Wedgie watching has its costs.
+  { name: "Basketball IQ", down: true },
+  { name: "Shooting touch", down: true },
+  { name: "Rim respect", down: true },
+  { name: "Backboard trust", down: true },
+  { name: "Sleep", down: true },
 ];
 
 const MAX = 99;
@@ -107,13 +108,18 @@ export function CoffeeStack() {
           className="absolute top-4 right-4 flex items-center gap-2 text-right"
         >
           <span
-            key={attribute}
+            key={attribute.name}
             className="wt-attr text-cream text-[13px] font-extrabold"
           >
-            {attribute}
+            {attribute.name}
           </span>
-          <span className="bg-cream text-night rounded-md px-1.5 py-0.5 text-sm font-black">
-            +{count}
+          <span
+            className={`rounded-md px-1.5 py-0.5 text-sm font-black ${
+              attribute.down ? "text-night bg-[#ff6fd8]" : "bg-cream text-night"
+            }`}
+          >
+            {attribute.down ? "−" : "+"}
+            {count}
           </span>
         </span>
         <div
