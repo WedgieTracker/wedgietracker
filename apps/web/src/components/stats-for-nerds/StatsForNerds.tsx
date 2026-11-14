@@ -83,14 +83,14 @@ function More({ href, children }: { href: string; children: React.ReactNode }) {
   return (
     <Link
       href={href}
-      className="text-cream border-violet/60 hover:border-cream mt-auto inline-flex items-center gap-1.5 self-start border-b-2 pb-px text-[13px] font-black transition-colors"
+      className="btn-sticker btn-sticker-sm inline-flex min-h-10 self-start px-4 text-[13px]"
     >
-      {children} <span aria-hidden="true">→</span>
+      {children}
     </Link>
   );
 }
 
-/** Tied leaders: a count when there are several, with the first few names. */
+/** Tied leaders: how many, then every name. */
 function Leaders({
   label,
   names,
@@ -122,7 +122,7 @@ function Leaders({
       </Line>
       {names.length > 1 && (
         <p className="mt-2.5 flex flex-wrap gap-1.5">
-          {names.slice(0, 3).map((n) => (
+          {names.map((n) => (
             <span
               key={n}
               className="bg-violet/20 text-cream rounded-full px-2.5 py-1 text-[12.5px] font-extrabold"
@@ -130,11 +130,6 @@ function Leaders({
               {n}
             </span>
           ))}
-          {names.length > 3 && (
-            <span className="text-cream/60 px-1 py-1 text-[12.5px] font-black">
-              +{names.length - 3} more
-            </span>
-          )}
         </p>
       )}
     </div>
@@ -326,24 +321,23 @@ export function StatsForNerds({
 
         <Section title={`${stats.currentSeason} so far`} hideTitle>
           <Card>
-            <div>
-              <Line>
-                <b>
-                  {stats.gamesSinceLastWedgie ?? 0}{" "}
-                  {stats.gamesSinceLastWedgie === 1 ? "game" : "games"}
-                </b>{" "}
-                played since{" "}
-                {stats.lastWedgiePlayer ? (
-                  <>
-                    <b>{stats.lastWedgiePlayer}</b>&apos;s wedgie
-                  </>
-                ) : (
-                  "the last wedgie"
+            <div className="flex items-center gap-4">
+              <div className="bg-badge grain text-cream text-shadow-badge grid size-20 shrink-0 place-items-center rounded-2xl text-[44px] leading-none font-black tracking-[-0.04em] italic">
+                {stats.gamesSinceLastWedgie ?? 0}
+              </div>
+              <div>
+                <Kicker>
+                  {stats.gamesSinceLastWedgie === 1 ? "Game" : "Games"} since
+                  the last wedgie
+                </Kicker>
+                {stats.lastWedgiePlayer && (
+                  <p className="text-cream mt-1 text-[22px] leading-tight font-black">
+                    {stats.lastWedgiePlayer}
+                  </p>
                 )}
-                .
-              </Line>
+              </div>
             </div>
-            <div className="border-violet/20 mt-4 grid gap-4 border-t pt-4 sm:grid-cols-2">
+            <div className="border-violet/20 mt-4 grid gap-4 border-t pt-4 sm:grid-cols-2 [&>div]:mt-0">
               <Leaders
                 label="Leading teams"
                 names={teamLeaders.map(nickname)}
@@ -363,28 +357,26 @@ export function StatsForNerds({
           </Card>
         </Section>
 
-        <Section title="All time">
+        <section className="grid w-full max-w-2xl gap-3.5 sm:grid-cols-[0.8fr_1.2fr]">
+          <h2 className="sr-only">All time</h2>
           <Card>
-            <div className="flex items-end gap-4">
-              <Big>{nf(stats.totalWedgiesOverall)}</Big>
-              <Line>
-                wedgies over <b>{stats.totalSeasonsOverall} seasons</b> and{" "}
-                <b>{nf(stats.totalGamesOverall)} games</b>. One every{" "}
-                <b>{perGames} games</b>.
-              </Line>
-            </div>
-            <div className="mt-4">
+            <Kicker>All time</Kicker>
+            <Big>{nf(stats.totalWedgiesOverall)}</Big>
+            <Line>
+              wedgies over <b>{stats.totalSeasonsOverall} seasons</b> and{" "}
+              <b>{nf(stats.totalGamesOverall)} games</b>. One every{" "}
+              <b>{perGames} games</b>.
+            </Line>
+            <div className="mt-auto pt-4">
               <More href="/seasons-history">Seasons history</More>
             </div>
           </Card>
-        </Section>
-
-        <Section title="Where they happen">
           <Card>
+            <h3 className="sr-only">Where they happen</h3>
             <CourtHeat points={extras.positions} />
             <Line>Every wedgie since 2014/15.</Line>
           </Card>
-        </Section>
+        </section>
 
         <Section title="Shot types">
           <Card>
