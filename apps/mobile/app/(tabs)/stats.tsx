@@ -1,6 +1,7 @@
 import { useRouter } from "expo-router";
-import { useRef } from "react";
+import { useMemo, useRef } from "react";
 import {
+  Animated,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -16,11 +17,11 @@ import { HiddenHeading, PageHeading } from "@/components/PageHeading";
 import { PaceGauge } from "@/components/PaceGauge";
 import { ErrorState } from "@/components/States";
 import { StickerButton } from "@/components/StickerButton";
+import { StickySplit } from "@/components/StickySplit";
 import { TopSafeArea } from "@/components/TopSafeArea";
 import { TypingStats } from "@/components/TypingStats";
 import { WaveCounterPanel } from "@/components/WaveCounterPanel";
 import { api, type RouterOutputs } from "@/lib/api";
-import { FluidWidth } from "@/lib/fluid";
 import { useTabBarClearance } from "@/lib/layout";
 import { useShotScroll } from "@/lib/screenshot";
 import { badgeTextShadow, colors, fonts } from "@/lib/theme";
@@ -64,7 +65,16 @@ export default function StatsScreen() {
   const tabBar = useTabBarClearance();
   const shotRef = useRef<React.ComponentRef<typeof ScrollView>>(null);
   useShotScroll(shotRef);
-  const { wide, width } = useWide();
+  const { wide } = useWide();
+  // Drives the pinned season card on a wide screen.
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const onScroll = useMemo(
+    () =>
+      Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], {
+        useNativeDriver: true,
+      }),
+    [scrollY],
+  );
   const router = useRouter();
 
   const season = (
@@ -85,8 +95,10 @@ export default function StatsScreen() {
 
   return (
     <TopSafeArea style={styles.safe}>
-      <ScrollView
+      <Animated.ScrollView
         ref={shotRef}
+        onScroll={onScroll}
+        scrollEventThrottle={16}
         contentContainerStyle={[styles.content, { paddingBottom: tabBar }]}
         showsVerticalScrollIndicator={false}
         refreshControl={
@@ -107,13 +119,14 @@ export default function StatsScreen() {
             <ErrorState onRetry={() => void nerd.refetch()} />
           </View>
         ) : wide ? (
-          <View style={styles.split}>
-            <View style={styles.half}>
-              <FluidWidth.Provider value={width / 2}>
-                {season}
-              </FluidWidth.Provider>
-            </View>
-            <View style={styles.half}>{rest}</View>
+          <View style={styles.splitWrap}>
+            <StickySplit
+              scrollY={scrollY}
+              left={season}
+              right={rest}
+              inset={16}
+              gap={16}
+            />
           </View>
         ) : (
           <View style={styles.column}>
@@ -126,7 +139,7 @@ export default function StatsScreen() {
           WedgieTracker is an independent fan project, not affiliated with or
           endorsed by the NBA or its teams.
         </Text>
-      </ScrollView>
+      </Animated.ScrollView>
     </TopSafeArea>
   );
 }
@@ -603,13 +616,7 @@ const styles = StyleSheet.create({
     paddingTop: 16,
   },
   error: { paddingTop: 24 },
-  split: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 16,
-    marginTop: 8,
-  },
-  half: { flex: 1 },
+  splitWrap: { marginTop: 8 },
   column: { gap: 14, marginTop: 8 },
   flex: { flex: 1 },
   centred: { alignItems: "center" },
