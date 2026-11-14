@@ -709,3 +709,16 @@ html {
     transform: translateY(6px);
   }
 }
+
+/* The All wedgies count chip pops when a filter changes the number. */
+@media (prefers-reduced-motion: no-preference) {
+  .wt-count-pop {
+    animation: wt-count-pop 0.28s cubic-bezier(0.2, 0.9, 0.3, 1.4);
+  }
+}
+@keyframes wt-count-pop {
+  from {
+    transform: scale(0.8);
+    opacity: 0.4;
+  }
+}

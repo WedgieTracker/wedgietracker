@@ -117,7 +117,7 @@ export function WedgieInfoPanel({ wedgie }: WedgieInfoPanelProps) {
     <div className="relative flex min-h-full w-full flex-col p-6 px-4 max-lg:min-h-[320px] sm:px-6 sm:max-lg:min-h-[460px] md:px-8 lg:pt-3.5 lg:pb-0">
       <div className="space-y-2 sm:space-y-4">
         <div className="sm:text-wedgie-number from-darkpurple via-darkpurple/95 sticky top-0 z-10 -mx-4 flex flex-row items-center justify-start gap-4 bg-gradient-to-b to-transparent px-4 pb-1 text-xl leading-none sm:-mx-6 sm:px-6 md:-mx-8 md:px-8">
-          <h2 className="bg-badge grain text-cream text-shadow-badge flex size-[70px] flex-row items-center justify-center rounded-xl px-4 py-2 text-[1.6em] font-black italic">
+          <h2 className="bg-button text-cream text-shadow-badge flex size-[70px] flex-row items-center justify-center rounded-xl px-4 py-2 text-[1.6em] font-black italic">
             <span className="mt-[.75em] mr-[0.06em] text-[.45em] opacity-60 [text-shadow:none]">
               #
             </span>
