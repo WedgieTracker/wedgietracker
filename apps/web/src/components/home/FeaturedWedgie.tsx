@@ -80,7 +80,7 @@ export function FeaturedWedgie({
     <button
       type="button"
       onClick={onOpen}
-      className="bg-glow focus-visible:outline-cream block w-full overflow-hidden rounded-3xl p-[1.5px] text-left focus-visible:outline-2 focus-visible:outline-offset-2 md:grid"
+      className="group bg-glow focus-visible:outline-cream block w-full overflow-hidden rounded-3xl p-[1.5px] text-left transition-shadow duration-200 hover:shadow-[0_14px_30px_rgb(5_2_20/0.5),0_0_24px_rgb(154_92_245/0.35)] focus-visible:outline-2 focus-visible:outline-offset-2 md:grid"
     >
       <span className="bg-panel block overflow-hidden rounded-[22.5px] md:grid md:grid-cols-[240px_1fr]">
         <span className="bg-badge grain block px-[18px] pt-[18px] pb-4 md:flex md:flex-col md:justify-between">

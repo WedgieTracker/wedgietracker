@@ -125,8 +125,11 @@ export function WedgieModal({
             </div>
             {/* Pinned to the bottom of the labels column, so it never covers
                 the details beside it. */}
-            <div className="pointer-events-none absolute bottom-6 left-8 hidden w-[70px] lg:block">
-              <CourtPositionDiagram position={wedgie.position} />
+            <div className="pointer-events-none absolute bottom-6 left-5 hidden w-[160px] lg:block">
+              <CourtPositionDiagram
+                position={wedgie.position}
+                dotClassName="size-3"
+              />
             </div>
           </div>
         </div>

@@ -23,7 +23,7 @@ export function PlayButton({ size = "sm" }: { size?: "sm" | "lg" }) {
   return (
     <span
       aria-hidden="true"
-      className={`bg-glow grid shrink-0 place-items-center rounded-full text-[#fff6de] shadow-[0_3px_8px_rgb(122_95_240/0.3)] ${
+      className={`bg-glow grid shrink-0 place-items-center rounded-full text-[#fff6de] shadow-[0_3px_8px_rgb(122_95_240/0.3)] transition-[transform,box-shadow] duration-200 group-hover:shadow-[0_4px_14px_rgb(166_95_245/0.6)] motion-safe:group-hover:scale-110 ${
         size === "lg" ? "size-10" : "size-[30px]"
       }`}
     >
