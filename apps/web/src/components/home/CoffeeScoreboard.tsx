@@ -54,7 +54,7 @@ export function CoffeeScoreboard({
       <div
         className={`${LED} text-center text-[11px] text-[#ffd36b] uppercase [text-shadow:0_0_6px_rgb(255_211_107/0.6)]`}
       >
-        ★ Season {season} ★
+        Season {season}
       </div>
       <div className="my-3 grid grid-cols-2 gap-2.5">
         <Board label="COFFEES" value={coffees} tone="amber" />
