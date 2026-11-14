@@ -109,7 +109,7 @@ export function Stats({ stats, isLoading }: StatsProps) {
             </div>
           </div>
         )}
-        <div className="mx-auto grid w-full max-w-[560px] grid-cols-[1.35fr_1fr] items-center gap-3 md:grid-cols-[340px_auto] md:justify-center md:gap-12">
+        <div className="mx-auto grid w-full max-w-[560px] grid-cols-[1.35fr_1fr] items-center gap-3 md:grid-cols-[300px_auto] md:justify-center md:gap-12">
           {showPace ? (
             <PaceGauge
               pace={stats.currentPace}

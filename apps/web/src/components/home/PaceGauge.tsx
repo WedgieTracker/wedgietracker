@@ -80,7 +80,7 @@ export function PaceGauge({
     >
       <svg
         viewBox="0 0 140 80"
-        className="mx-auto block w-full max-w-[280px] overflow-visible"
+        className="mx-auto block w-full max-w-[245px] overflow-visible"
         role="img"
         aria-label={`On pace for ${pace} wedgies this season. The record is ${record}.`}
       >
@@ -127,7 +127,7 @@ export function PaceGauge({
         </text>
       </svg>
 
-      <div className="relative mx-auto mt-1 h-[26px] max-w-[280px]">
+      <div className="relative mx-auto mt-1 h-[26px] max-w-[245px]">
         <span
           className="text-cream/50 absolute top-1/2 left-[8.57%] -translate-x-1/2 -translate-y-1/2 text-xs font-extrabold"
           aria-hidden="true"
