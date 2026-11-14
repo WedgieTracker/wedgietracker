@@ -742,3 +742,66 @@ html {
     opacity: 0.4;
   }
 }
+
+/* The split-flap board on Stats for nerds: fixed flaps, digits in amber. */
+.wt-board {
+  --flap-h: 19px;
+  display: inline-flex;
+  gap: 2px;
+  padding: 8px;
+  border-radius: 12px;
+  background: #0b0518;
+  box-shadow: inset 0 2px 8px rgb(0 0 0 / 0.6);
+}
+@media (min-width: 400px) {
+  .wt-board {
+    --flap-h: 22px;
+  }
+}
+@media (min-width: 768px) {
+  .wt-board {
+    --flap-h: 30px;
+    gap: 3px;
+    padding: 10px;
+  }
+}
+.wt-board-gap {
+  width: 8px;
+}
+.wt-flap {
+  position: relative;
+  display: inline-block;
+  width: calc(var(--flap-h) * 0.68);
+  height: var(--flap-h);
+  border-radius: 4px;
+  background: linear-gradient(#1c1236 0 49%, #120a26 51% 100%);
+  color: hsl(var(--cream));
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: calc(var(--flap-h) * 0.62);
+  font-weight: 800;
+  line-height: var(--flap-h);
+  text-align: center;
+  white-space: pre;
+}
+.wt-flap::after {
+  content: "";
+  position: absolute;
+  inset: 50% 0 auto;
+  height: 1px;
+  background: #05020c;
+}
+.wt-flap-amber {
+  color: #ffcf6b;
+  text-shadow: 0 0 8px rgb(255 207 107 / 0.45);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .wt-flap-flip {
+    animation: wt-flap 0.045s linear;
+  }
+}
+@keyframes wt-flap {
+  from {
+    transform: scaleY(0.6);
+    filter: brightness(0.7);
+  }
+}

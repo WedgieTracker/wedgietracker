@@ -9,79 +9,105 @@ interface StatsPerWedgie {
   minutes: number;
 }
 
-interface TypingStatsProps {
-  stats: StatsPerWedgie;
+const STATS: { key: keyof StatsPerWedgie; word: string }[] = [
+  { key: "possessions", word: "POSSESSIONS" },
+  { key: "fga", word: "SHOTS" },
+  { key: "games", word: "GAMES" },
+  { key: "minutes", word: "MINUTES" },
+];
+const NUM_FLAPS = 5;
+const WORD_FLAPS = 11;
+const CHARS = " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,";
+const STEP_MS = 45;
+const HOLD_MS = 4200;
+
+/** The board's text for one stat: the figure right-aligned, the word left. */
+function boardText(stats: StatsPerWedgie, i: number) {
+  const s = STATS[i % STATS.length]!;
+  const num = stats[s.key]
+    .toLocaleString("en-US")
+    .padStart(NUM_FLAPS, " ")
+    .slice(-NUM_FLAPS);
+  return [...num, ...s.word.padEnd(WORD_FLAPS, " ").slice(0, WORD_FLAPS)];
 }
 
-type StatKey = keyof StatsPerWedgie;
-const STATS_ORDER: StatKey[] = ["fga", "possessions", "games", "minutes"];
-
-const LABELS: Record<StatKey, string> = {
-  fga: "shots",
-  possessions: "possessions",
-  games: "games",
-  minutes: "minutes played",
-};
-
-const wait = (ms: number) =>
-  new Promise<void>((resolve) => setTimeout(resolve, ms));
-
-export function TypingStats({ stats }: TypingStatsProps) {
-  const [index, setIndex] = useState(0);
-  const [text, setText] = useState("");
-  // What is on screen right now, so a new phrase erases from there
-  const shownRef = useRef("");
-
-  const key = STATS_ORDER[index % STATS_ORDER.length]!;
-  const value = stats[key];
-  const target = `${Number.isNaN(value) ? 0 : value.toLocaleString()} ${LABELS[key]}`;
+/** One flap. It steps through CHARS in order until it reaches `target`. */
+function Flap({
+  target,
+  delay,
+  amber,
+}: {
+  target: string;
+  delay: number;
+  amber: boolean;
+}) {
+  const [shown, setShown] = useState(" ");
+  const [flipping, setFlipping] = useState(false);
+  const shownRef = useRef(" ");
 
   useEffect(() => {
-    // Each run has its own flag. A flag shared between runs was reset by the
-    // next run, so an interrupted run kept typing over it and cut it short.
-    let cancelled = false;
-    const show = (t: string) => {
-      shownRef.current = t;
-      setText(t);
-    };
-
-    const run = async () => {
-      const shown = shownRef.current;
-      for (let i = shown.length - 1; i >= 0; i--) {
-        await wait(50);
-        if (cancelled) return;
-        show(shown.slice(0, i));
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      shownRef.current = target;
+      setShown(target);
+      return;
+    }
+    let timer: ReturnType<typeof setTimeout>;
+    const step = () => {
+      if (shownRef.current === target) {
+        setFlipping(false);
+        return;
       }
-      await wait(500);
-      for (let i = 1; i <= target.length; i++) {
-        if (cancelled) return;
-        show(target.slice(0, i));
-        await wait(100);
-      }
-      await wait(2500);
-      if (cancelled) return;
-      setIndex((n) => n + 1);
+      const next =
+        CHARS[(CHARS.indexOf(shownRef.current) + 1) % CHARS.length] ?? " ";
+      shownRef.current = next;
+      setShown(next);
+      setFlipping(true);
+      timer = setTimeout(step, STEP_MS);
     };
-
-    void run();
-    return () => {
-      cancelled = true;
-    };
-    // The phrase, not the stats object, so a new object with the same numbers
-    // does not restart it
-  }, [target]);
-
-  const [amount, ...rest] = text.split(" ");
+    timer = setTimeout(step, delay);
+    return () => clearTimeout(timer);
+  }, [target, delay]);
 
   return (
-    <div className="text-cream w-full text-[15px]">
-      <div className="relative flex min-h-14 flex-col items-center justify-center text-center">
-        <span className="block font-extrabold">That&apos;s a wedgie every</span>
-        <span className="text-2xl font-black">
-          <span className="text-cream">{amount}</span>{" "}
-          <span className="text-cream/80 font-extrabold">{rest.join(" ")}</span>
-          <span className="animate-blink bg-cream mb-[-0.1em] ml-1 inline-block h-[1em] w-2" />
-        </span>
+    <span
+      aria-hidden="true"
+      className={`wt-flap ${amber ? "wt-flap-amber" : ""} ${flipping ? "wt-flap-flip" : ""}`}
+    >
+      {shown}
+    </span>
+  );
+}
+
+/**
+ * "That's a wedgie every 2,837 possessions" on a split-flap board that cycles
+ * through possessions, shots, games and minutes. The board has a fixed number
+ * of flaps, so it never changes width.
+ */
+export function TypingStats({ stats }: { stats: StatsPerWedgie }) {
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    const id = setInterval(() => setIndex((i) => i + 1), HOLD_MS);
+    return () => clearInterval(id);
+  }, []);
+
+  const text = boardText(stats, index);
+  const current = STATS[index % STATS.length]!;
+
+  return (
+    <div className="text-cream flex flex-col items-center gap-3 text-center">
+      <p className="text-[15px] font-extrabold">That&apos;s a wedgie every</p>
+      <p className="sr-only" aria-live="polite">
+        {stats[current.key].toLocaleString("en-US")}{" "}
+        {current.word.toLowerCase()}
+      </p>
+      <div className="wt-board">
+        {text.map((ch, i) => (
+          <span key={i} className="contents">
+            {i === NUM_FLAPS && <span className="wt-board-gap" />}
+            <Flap target={ch} delay={i * 25} amber={i < NUM_FLAPS} />
+          </span>
+        ))}
       </div>
     </div>
   );

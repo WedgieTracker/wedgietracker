@@ -192,7 +192,7 @@ function CourtHeat({ points }: { points: { x: number; y: number }[] }) {
       viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
       role="img"
       aria-label={`Where ${points.length} wedgies happened on the court`}
-      className="mt-3 block w-full"
+      className="my-auto block w-full"
     >
       {COURT_PATHS.map((d) => (
         <path key={d.slice(0, 12)} d={d} fill="rgb(240 225 182 / 0.55)" />
@@ -322,7 +322,7 @@ export function StatsForNerds({
         <Section title={`${stats.currentSeason} so far`} hideTitle>
           <Card>
             <div className="flex items-center gap-4">
-              <div className="bg-badge grain text-cream text-shadow-badge grid size-20 shrink-0 place-items-center rounded-2xl text-[44px] leading-none font-black tracking-[-0.04em] italic">
+              <div className="bg-badge grain text-cream text-shadow-badge grid size-20 shrink-0 place-items-center rounded-2xl pr-[0.12em] text-[44px] leading-none font-black italic">
                 {stats.gamesSinceLastWedgie ?? 0}
               </div>
               <div>
@@ -374,7 +374,6 @@ export function StatsForNerds({
           <Card>
             <h3 className="sr-only">Where they happen</h3>
             <CourtHeat points={extras.positions} />
-            <Line>Every wedgie since 2014/15.</Line>
           </Card>
         </section>
 
