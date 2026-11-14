@@ -114,7 +114,7 @@ function ShoutoutLabel() {
 export function WedgieInfoPanel({ wedgie }: WedgieInfoPanelProps) {
   const timeline = gameTimeline(wedgie);
   return (
-    <div className="relative flex min-h-full w-full flex-col p-6 px-4 max-lg:min-h-[320px] sm:min-h-[460px] sm:px-6 sm:pb-24 md:px-8 lg:pb-6">
+    <div className="relative flex min-h-full w-full flex-col p-6 px-4 max-lg:min-h-[320px] sm:min-h-[460px] sm:px-6 md:px-8">
       <div className="space-y-2 sm:space-y-4">
         <div className="sm:text-wedgie-number flex flex-row items-center justify-start gap-4 text-xl leading-none">
           <h2 className="bg-badge grain text-cream text-shadow-badge mb-2 flex size-[70px] flex-row items-center justify-center rounded-xl px-4 py-2 text-[1.6em] font-black italic">
@@ -132,13 +132,6 @@ export function WedgieInfoPanel({ wedgie }: WedgieInfoPanelProps) {
                 {`${wedgie.seasonName} season`}
               </p>
             )}
-          </div>
-          {/* On phones the diagram sits in the header row, leaving the rows below full width. */}
-          <div className="relative ml-auto w-[96px] shrink-0 self-start sm:hidden">
-            <CourtPositionDiagram
-              position={wedgie.position}
-              dotClassName="size-2.5"
-            />
           </div>
         </div>
 
@@ -206,12 +199,16 @@ export function WedgieInfoPanel({ wedgie }: WedgieInfoPanelProps) {
         </div>
       </div>
 
-      {/* Between phone and desktop widths; on desktop the modal pins it instead. */}
-      <div className="absolute bottom-6 left-4 hidden w-[150px] sm:block md:left-6 lg:hidden">
-        <CourtPositionDiagram
-          position={wedgie.position}
-          dotClassName="size-3"
-        />
+      {/* Sticky to the bottom-left while the details scroll, on a fade of the
+          panel's background. It stays in the flow, so at the end of a long
+          list it sits below the details instead of over them. */}
+      <div className="to-darkpurple via-darkpurple/90 pointer-events-none sticky bottom-0 -mx-4 mt-auto bg-gradient-to-b from-transparent px-4 pt-8 pb-4 sm:-mx-6 sm:px-6 md:-mx-8 md:px-8">
+        <div className="relative w-[120px] sm:w-[150px] lg:w-[160px]">
+          <CourtPositionDiagram
+            position={wedgie.position}
+            dotClassName="size-3"
+          />
+        </div>
       </div>
     </div>
   );

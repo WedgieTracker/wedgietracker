@@ -35,7 +35,7 @@ export function CourtPositionDiagram({
       <svg
         viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
         aria-hidden="true"
-        className="text-cream/55 absolute inset-0 size-full"
+        className="text-cream/55 group-hover:text-cream absolute inset-0 size-full transition-colors duration-200"
       >
         {COURT_PATHS.map((d) => (
           <path key={d.slice(0, 12)} d={d} fill="currentColor" />
@@ -44,7 +44,7 @@ export function CourtPositionDiagram({
       <span
         aria-hidden="true"
         className={cn(
-          "absolute -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#ff6fd8] shadow-[0_0_6px_#ff6fd8]",
+          "absolute -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#ff6fd8] shadow-[0_0_6px_#ff6fd8] transition-shadow duration-200 group-hover:shadow-[0_0_14px_3px_#ff6fd8]",
           dotClassName,
         )}
         style={{ left: `${position.x}%`, top: `${position.y}%` }}

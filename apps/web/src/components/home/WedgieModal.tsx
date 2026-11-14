@@ -10,7 +10,6 @@ import type { Wedgie, VideoUrls } from "@wedgietracker/core/types/wedgie";
 import { useState } from "react";
 import { ShareButtons } from "~/components/shared/ShareButtons";
 import { WedgieVideoTabs } from "./WedgieVideoTabs";
-import { CourtPositionDiagram } from "./CourtPositionDiagram";
 import { WedgieInfoPanel } from "./WedgieInfoPanel";
 import { WedgieModalNav } from "./WedgieModalNav";
 import { NoDunksTweetLink } from "./NoDunksTweetLink";
@@ -122,14 +121,6 @@ export function WedgieModal({
           <div className="relative w-full lg:w-[35%]">
             <div className="lg:absolute lg:inset-0 lg:overflow-y-auto">
               <WedgieInfoPanel wedgie={wedgie} />
-            </div>
-            {/* Pinned to the bottom of the labels column, so it never covers
-                the details beside it. */}
-            <div className="pointer-events-none absolute bottom-6 left-5 hidden w-[160px] lg:block">
-              <CourtPositionDiagram
-                position={wedgie.position}
-                dotClassName="size-3"
-              />
             </div>
           </div>
         </div>
