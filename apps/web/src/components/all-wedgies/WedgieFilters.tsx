@@ -140,20 +140,19 @@ export function WedgieFilters({
                   playerOrTeam: "",
                 })
               }
-              aria-label="Clear filters"
-              title="Clear filters"
-              className="bg-cream text-night hover:bg-violet hover:text-cream focus-visible:outline-cream absolute -top-2.5 -right-2.5 grid size-6 place-items-center rounded-full shadow-[0_2px_6px_rgb(5_2_20/0.5)] transition-colors focus-visible:outline-2"
+              className="text-cream/70 hover:text-cream focus-visible:outline-cream absolute top-full left-1/2 mt-2 inline-flex -translate-x-1/2 items-center gap-1 rounded-full text-xs font-extrabold whitespace-nowrap not-italic transition-colors [text-shadow:none] focus-visible:outline-2"
             >
               <svg
                 viewBox="0 0 12 12"
                 aria-hidden="true"
-                className="size-2.5"
+                className="size-2"
                 stroke="currentColor"
-                strokeWidth="2.2"
+                strokeWidth="2.4"
                 strokeLinecap="round"
               >
                 <path d="M2 2l8 8M10 2l-8 8" />
               </svg>
+              Clear filters
             </button>
           )
         }
