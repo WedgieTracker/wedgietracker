@@ -545,33 +545,44 @@
   }
 }
 
-/* The pink circle drawn round NEW WEDGIE on the calendar: draws on, holds, fades, repeats. */
-.wt-circle-date {
-  stroke-dasharray: 101 101;
-  stroke-dashoffset: 0;
+/* The NEW WEDGIE! stamp on the calendar: thumps down once, then the ball's seams spin. */
+.wt-stamp-spin {
+  transform-box: fill-box;
+  transform-origin: center;
+  will-change: transform;
 }
 @media (prefers-reduced-motion: no-preference) {
-  .wt-circle-date {
-    animation: wt-circle-date 3.2s cubic-bezier(0.6, 0.1, 0.3, 1) infinite;
+  .wt-stamp-in {
+    animation: wt-stamp-in 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.3) 0.2s both;
+  }
+  .wt-stamp-patch {
+    animation: wt-fade-in 0.45s ease 0.2s both;
+  }
+  .wt-stamp-spin {
+    animation: wt-stamp-spin 6s linear 0.8s infinite;
   }
 }
-@keyframes wt-circle-date {
+@keyframes wt-stamp-in {
   0% {
-    stroke-dashoffset: 101;
     opacity: 0;
+    transform: rotate(-10deg) scale(2.2);
   }
-  3% {
+  60% {
     opacity: 1;
-  }
-  35% {
-    stroke-dashoffset: 0;
-  }
-  80% {
-    stroke-dashoffset: 0;
-    opacity: 1;
+    transform: rotate(-10deg) scale(0.92);
   }
   100% {
-    stroke-dashoffset: 0;
+    opacity: 1;
+    transform: rotate(-10deg) scale(1);
+  }
+}
+@keyframes wt-stamp-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes wt-fade-in {
+  from {
     opacity: 0;
   }
 }
