@@ -1,17 +1,11 @@
 import { useState } from "react";
-import {
-  StyleSheet,
-  Text,
-  View,
-  useWindowDimensions,
-  type ViewStyle,
-} from "react-native";
+import { StyleSheet, Text, View, type ViewStyle } from "react-native";
 
 import { Confetti } from "@/components/Confetti";
 import { useCountUp } from "@/components/Counter";
 import { GradientFill, Grain } from "@/components/Gradient";
 import { Wave } from "@/components/Wave";
-import { clampRem, useFluidType } from "@/lib/fluid";
+import { clampRem, useFluidType, useFluidWidth } from "@/lib/fluid";
 import { badgeTextShadow, colors, fonts, space } from "@/lib/theme";
 
 /**
@@ -33,7 +27,7 @@ export function WaveCounterPanel({
   minHeight?: number;
   style?: ViewStyle;
 }) {
-  const { width } = useWindowDimensions();
+  const width = useFluidWidth();
   const t = useFluidType();
   const [box, setBox] = useState({ width: 0, height: 0 });
 

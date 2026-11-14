@@ -32,11 +32,17 @@ export function PaceGauge({
   record,
   recordSeason,
   hidden = false,
+  bare = false,
+  onExplain,
 }: {
   pace: number;
   record: number;
   recordSeason: string | null;
   hidden?: boolean;
+  /** Leave out the gauge's own card, when it already sits inside one. */
+  bare?: boolean;
+  /** Tapping the dial opens How the pace works. */
+  onExplain?: () => void;
 }) {
   const id = `pace${useId().replace(/:/g, "")}`;
   const [open, setOpen] = useState(false);
@@ -49,17 +55,20 @@ export function PaceGauge({
   const s = width / VIEW_W;
 
   return (
-    <View style={styles.card}>
-      <View
-        style={styles.dial}
+    <View style={!bare && styles.card}>
+      <Pressable
+        style={({ pressed }) => [styles.dial, pressed && styles.dialPressed]}
         onLayout={(e) => setWidth(e.nativeEvent.layout.width)}
+        onPress={onExplain}
+        disabled={!onExplain || hidden}
         accessible
-        accessibilityRole="image"
+        accessibilityRole={onExplain ? "button" : "image"}
         accessibilityLabel={
           hidden
             ? undefined
             : `On pace for ${pace} wedgies this season. The record is ${record}.`
         }
+        accessibilityHint={onExplain ? "Shows how the pace works" : undefined}
       >
         <Svg width="100%" height="100%" viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}>
           <Defs>
@@ -118,7 +127,7 @@ export function PaceGauge({
             </Text>
           </>
         ) : null}
-      </View>
+      </Pressable>
 
       <View style={styles.ends}>
         <Text
@@ -201,6 +210,7 @@ const styles = StyleSheet.create({
     fontFamily: fonts.blackItalic,
     color: colors.cream,
   },
+  dialPressed: { opacity: 0.8 },
   hidden: { opacity: 0 },
 
   ends: {
