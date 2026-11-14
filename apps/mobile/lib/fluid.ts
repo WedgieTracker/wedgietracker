@@ -1,5 +1,6 @@
 import { createContext, useContext } from "react";
 import { useWindowDimensions } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const ROOT_FONT_SIZE = 16;
 
@@ -34,7 +35,8 @@ export const FluidWidth = createContext<number | null>(null);
 
 export function useFluidWidth(): number {
   const { width } = useWindowDimensions();
-  return useContext(FluidWidth) ?? width;
+  const { left, right } = useSafeAreaInsets();
+  return useContext(FluidWidth) ?? width - left - right;
 }
 
 /**

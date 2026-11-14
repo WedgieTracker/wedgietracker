@@ -1,4 +1,4 @@
-import { useId } from "react";
+import { useId, useState } from "react";
 import { Image, StyleSheet, View, type ViewStyle } from "react-native";
 import Svg, { Defs, LinearGradient, Rect, Stop } from "react-native-svg";
 
@@ -33,30 +33,41 @@ export function GradientFill({
   const id = `g${useId().replace(/:/g, "")}`;
   const { angle, stops } = gradients[name];
   const line = cssAngle(angle);
+  // Drawn at the measured size: an Svg sized "100%" keeps its first size when
+  // the box later grows (unfolding an iPhone Duo), leaving half of it bare.
+  const [size, setSize] = useState({ width: 0, height: 0 });
 
   return (
     <View
       pointerEvents="none"
       style={[StyleSheet.absoluteFill, { borderRadius: radius }, style]}
+      onLayout={(e) => {
+        const { width, height } = e.nativeEvent.layout;
+        setSize((s) =>
+          s.width === width && s.height === height ? s : { width, height },
+        );
+      }}
     >
-      <Svg width="100%" height="100%">
-        <Defs>
-          <LinearGradient id={id} {...line}>
-            {stops.map(([offset, color]) => (
-              <Stop key={offset} offset={offset} stopColor={color} />
-            ))}
-          </LinearGradient>
-        </Defs>
-        <Rect
-          x={0}
-          y={0}
-          width="100%"
-          height="100%"
-          rx={radius}
-          ry={radius}
-          fill={`url(#${id})`}
-        />
-      </Svg>
+      {size.width > 0 ? (
+        <Svg width={size.width} height={size.height}>
+          <Defs>
+            <LinearGradient id={id} {...line}>
+              {stops.map(([offset, color]) => (
+                <Stop key={offset} offset={offset} stopColor={color} />
+              ))}
+            </LinearGradient>
+          </Defs>
+          <Rect
+            x={0}
+            y={0}
+            width="100%"
+            height="100%"
+            rx={radius}
+            ry={radius}
+            fill={`url(#${id})`}
+          />
+        </Svg>
+      ) : null}
     </View>
   );
 }
