@@ -8,48 +8,58 @@ export function Newsletter() {
     useNewsletterSubscription();
 
   return (
-    <div
+    <section
+      aria-labelledby="newsletter-title"
       className={cn(
-        "bg-yellow w-full max-w-2xl rounded-xl p-4 md:p-8",
-        loading &&
-          "animate-pulse-slow pointer-events-none animate-pulse opacity-50",
+        "bg-panel border-violet/20 w-full max-w-2xl rounded-[22px] border p-5 md:p-7",
+        loading && "pointer-events-none opacity-60",
       )}
     >
-      <div className="mb-3 text-center md:mb-4 md:text-left lg:text-left">
-        <h3 className="min-w-none text-darkpurple! mt-0! mb-0 text-2xl font-black uppercase">
-          Stay Updated
-        </h3>
-        <p className="text-darkpurple/80 mt-1 mb-0 leading-tight font-bold">
-          Subscribe to get the latest wedgies updates and more.
-        </p>
+      <div>
+        <div>
+          <h2
+            id="newsletter-title"
+            className="text-cream text-[21px] leading-tight font-extrabold tracking-[-0.01em]"
+          >
+            Never miss a wedgie
+          </h2>
+          <p className="text-cream/70 mt-1 text-sm leading-snug font-bold">
+            One short email when a new wedgie lands. Free, and you can
+            unsubscribe anytime.
+          </p>
+        </div>
       </div>
 
       <form
         onSubmit={handleSubmit}
-        className="flex flex-col gap-1 md:flex-row"
+        className="mt-5 flex flex-col gap-3 md:flex-row"
         autoComplete="on"
         spellCheck="false"
       >
+        <label htmlFor="newsletter-email" className="sr-only">
+          Email address
+        </label>
         <input
+          id="newsletter-email"
           type="email"
           value={email}
           autoComplete="email"
           autoCorrect="off"
           autoCapitalize="off"
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="Enter your email"
+          placeholder="you@example.com"
           disabled={loading}
-          className="focus:ring-none border-darkpurple bg-darkpurple text-yellow placeholder:text-yellow flex-1 rounded-t-xl border-2 px-4 py-2 text-center focus:outline-hidden md:rounded-t-none md:rounded-l-xl! md:text-left lg:text-left"
+          className="bg-night border-violet/40 text-cream placeholder:text-cream/40 focus:border-cream min-h-[54px] flex-1 rounded-2xl border-2 px-4 font-bold outline-none"
           required
         />
         <button
           type="submit"
           disabled={loading}
-          className="border-darkpurple bg-darkpurple text-yellow hover:bg-yellow hover:text-darkpurple rounded-b-xl border-2 px-4 py-2 text-xs font-black uppercase transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-50 md:rounded-r-xl! md:rounded-b-none md:px-6 md:py-2 md:text-base md:text-sm"
+          className="btn-sticker px-7 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          Subscribe
+          {loading ? "Subscribing…" : "Subscribe"}
         </button>
       </form>
-    </div>
+    </section>
   );
 }

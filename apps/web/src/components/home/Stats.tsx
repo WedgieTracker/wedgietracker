@@ -136,7 +136,7 @@ export function Stats({ stats, isLoading }: StatsProps) {
         <div className="absolute top-0 left-[50%] z-10 translate-x-[-50%] translate-y-[-50%]">
           <Link
             href="/stats-for-nerds"
-            className="bg-cream text-button-text text-night hover:bg-cream/90 block min-w-48 rounded-full px-8 py-1.5 text-center font-black shadow-[0_6px_18px_rgb(20_10_46/0.45)] transition-colors duration-300"
+            className="btn-sticker btn-sticker-flat text-button-text min-h-12 min-w-48 px-8"
           >
             MORE STATS
           </Link>

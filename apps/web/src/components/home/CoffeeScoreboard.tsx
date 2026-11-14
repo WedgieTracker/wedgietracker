@@ -134,7 +134,7 @@ export function CoffeeScoreboard({
       </p>
       <Link
         href="/support-us"
-        className="bg-cream text-night focus-visible:outline-cream mx-4 mt-3.5 mb-4 flex min-h-[52px] items-center justify-center rounded-full text-base font-black transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2"
+        className="btn-sticker btn-sticker-dark mx-4 mt-3.5 mb-5 text-base"
       >
         Support us with a coffee donation
       </Link>

@@ -487,6 +487,7 @@
 /*
   The main section button: a cream sticker with a dark ink border on a hard
   violet shadow. It lifts on hover and presses flat into the shadow on tap.
+  On the gradient, add btn-sticker-dark for a night shadow that still shows.
 */
 @utility btn-sticker {
   display: flex;
@@ -498,17 +499,17 @@
   background: hsl(var(--cream));
   color: #2a1660;
   font-weight: 900;
-  box-shadow: 6px 6px 0 hsl(var(--violet));
+  box-shadow: 6px 6px 0 var(--sticker-shadow, hsl(var(--violet)));
   transition:
     transform 0.15s ease,
     box-shadow 0.15s ease;
   &:hover {
     transform: translate(-2px, -2px);
-    box-shadow: 8px 8px 0 hsl(var(--violet));
+    box-shadow: 8px 8px 0 var(--sticker-shadow, hsl(var(--violet)));
   }
   &:active {
     transform: translate(6px, 6px);
-    box-shadow: 0 0 0 hsl(var(--violet));
+    box-shadow: 0 0 0 var(--sticker-shadow, hsl(var(--violet)));
   }
   &:focus-visible {
     outline: 2px solid hsl(var(--cream));
@@ -517,6 +518,15 @@
   @media (prefers-reduced-motion: reduce) {
     transition: none;
   }
+}
+
+@utility btn-sticker-dark {
+  --sticker-shadow: hsl(var(--night));
+}
+
+/* The sticker with no hard shadow, where one would fight the background. */
+@utility btn-sticker-flat {
+  --sticker-shadow: transparent;
 }
 
 /* Film grain over a gradient, like the badge. */
