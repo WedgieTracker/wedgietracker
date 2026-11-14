@@ -8,6 +8,11 @@ const db = createClient({
   url: process.env.TURSO_DATABASE_URL,
   authToken: process.env.TURSO_AUTH_TOKEN,
 });
+if (!process.env.STRIPE_SECRET_KEY?.startsWith("sk_live_")) {
+  throw new Error(
+    "Run the backfill with the live Stripe key; test payments never count.",
+  );
+}
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 const season = (
@@ -25,7 +30,12 @@ for await (const s of stripe.checkout.sessions.list({
   status: "complete",
   limit: 100,
 })) {
-  if (s.metadata?.coffee !== "true" || s.payment_status !== "paid") continue;
+  if (
+    !s.livemode ||
+    s.metadata?.coffee !== "true" ||
+    s.payment_status !== "paid"
+  )
+    continue;
   const coffees = Math.round((s.amount_subtotal ?? 0) / 100);
   if (coffees < 1) continue;
   const [inserted] = await db.batch(

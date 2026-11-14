@@ -34,4 +34,14 @@ describe("recordCoffeeCheckout", () => {
     });
     expect(await recordCoffeeCheckout("cs_test_456")).toBeNull();
   });
+
+  it("never counts a test-mode payment", async () => {
+    retrieve.mockResolvedValueOnce({
+      livemode: false,
+      metadata: { coffee: "true" },
+      payment_status: "paid",
+      amount_subtotal: 300,
+    });
+    expect(await recordCoffeeCheckout("cs_test_789")).toBeNull();
+  });
 });

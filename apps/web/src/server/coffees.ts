@@ -32,7 +32,7 @@ export async function getSeasonCoffees(): Promise<{
 
 /**
  * Adds a finished coffee checkout to the current season's total, once. The
- * session is read back from Stripe, so only a paid coffee counts, and the
+ * session is read back from Stripe, so only a paid, live-mode coffee counts, and the
  * session id is kept so a refreshed thanks page doesn't count it again.
  * Returns how many coffees the checkout was for, or null if it isn't one.
  */
@@ -42,7 +42,10 @@ export async function recordCoffeeCheckout(
   if (!/^cs_[A-Za-z0-9_]+$/.test(sessionId)) return null;
 
   const session = await stripe.checkout.sessions.retrieve(sessionId);
+  // Only real payments count: a test-mode checkout (a test key on a machine
+  // pointed at the real database) must never reach the scoreboard.
   if (
+    !session.livemode ||
     session.metadata?.coffee !== "true" ||
     session.payment_status !== "paid"
   ) {
