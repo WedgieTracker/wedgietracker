@@ -1,6 +1,7 @@
 import Link from "next/link";
 
-const LED = "font-mono tracking-[0.15em]";
+// Letter-spacing also trails the last character, so the same space on the left keeps it centred.
+const LED = "font-mono tracking-[0.15em] pl-[0.15em]";
 
 /** One side of the board: a label over glowing LED digits. */
 function Board({
