@@ -1,26 +1,27 @@
 import { PageLayout } from "~/components/layout/PageLayout";
-import { CoffeeBar } from "~/components/support/CoffeeBar";
+import { CoffeeStack } from "~/components/support/CoffeeStack";
 import { generateMetadata } from "~/config/metadata";
 
 export const metadata = generateMetadata({
   title: "Support Us",
   description:
-    "WedgieTracker is one person in London. Keep me awake with your coffees.",
+    "WedgieTracker is one person in London. Buy a coffee to keep the tracker running.",
 });
 
 export default function SupportUsPage() {
   return (
     <PageLayout>
-      <div className="flex w-full flex-col items-center gap-8 px-4 py-4 md:py-8 lg:px-8">
-        <h1 className="text-center text-4xl leading-none font-black uppercase md:text-6xl">
-          <span className="text-shadow-darkpurple text-yellow relative z-10 block leading-none">
-            Keep me
-          </span>
-          <span className="text-pink relative z-0 mt-[-.3em] block text-[1.2em] leading-none">
-            awake
-          </span>
-        </h1>
-        <CoffeeBar />
+      <div className="mx-auto flex w-full max-w-xl flex-col gap-5 px-[18px] py-8 md:py-12">
+        <div>
+          <h1 className="text-cream text-[32px] leading-none font-black tracking-[-0.03em] md:text-5xl">
+            Buy me a coffee
+          </h1>
+          <p className="text-cream/70 mt-3 text-[15px] leading-relaxed font-bold">
+            WedgieTracker is one person in London, logging every wedgie since
+            2014/15. Coffees keep the tracker running.
+          </p>
+        </div>
+        <CoffeeStack />
       </div>
     </PageLayout>
   );

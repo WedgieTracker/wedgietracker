@@ -658,3 +658,54 @@ html {
     translate: 0 -1px;
   }
 }
+
+/* Support page: each new cup drops onto the stack; cup steam curls up. */
+@media (prefers-reduced-motion: no-preference) {
+  .wt-cup-drop {
+    animation: wt-cup-drop 0.5s cubic-bezier(0.3, 0.6, 0.4, 1.3) both;
+  }
+  .wt-attr {
+    animation: wt-attr 0.35s ease both;
+  }
+  .wt-cup-steam {
+    animation: wt-cup-steam 2.6s ease-in-out infinite;
+  }
+  .wt-cup-steam:nth-child(2) {
+    animation-delay: 0.8s;
+  }
+  .wt-cup-steam:nth-child(3) {
+    animation-delay: 1.6s;
+  }
+}
+@keyframes wt-cup-drop {
+  0% {
+    opacity: 0;
+    transform: translateY(-160px) rotate(-12deg);
+  }
+  70% {
+    opacity: 1;
+    transform: translateY(4px) rotate(2deg);
+  }
+  100% {
+    transform: none;
+  }
+}
+@keyframes wt-cup-steam {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  40% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-14px);
+  }
+}
+@keyframes wt-attr {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}

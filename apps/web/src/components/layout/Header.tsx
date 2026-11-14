@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { LogoComponent } from "~/components/shared/Logo";
+import { CoffeeCup } from "~/components/support/CoffeeCup";
 import { useMenu } from "~/context/MenuContext";
 import { CircleMenu } from "./CircleMenu";
 
@@ -34,32 +35,7 @@ export function Header() {
                 isMenuOpen ? "opacity-0" : "opacity-100"
               }`}
             >
-              <svg
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-                className="size-4 overflow-visible"
-                fill="none"
-              >
-                <g stroke="#9a5cf5" strokeWidth="1.8" strokeLinecap="round">
-                  <path className="wt-steam" d="M9.5 6c-1-1 1-1.6 0-2.6" />
-                  <path className="wt-steam" d="M13.5 6c-1-1 1-1.6 0-2.6" />
-                </g>
-                <rect x="5" y="14" width="12" height="7" fill="#6b3a1f" />
-                <rect
-                  x="5"
-                  y="8"
-                  width="12"
-                  height="13"
-                  rx="1.5"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                />
-                <path
-                  d="M17 11h1.5a2.5 2.5 0 0 1 0 5H17"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                />
-              </svg>
+              <CoffeeCup className="h-[18px] w-[14px]" />
               Support
             </Link>
           </div>

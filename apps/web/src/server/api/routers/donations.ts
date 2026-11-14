@@ -6,7 +6,7 @@ export const donationsRouter = createTRPCRouter({
   createCheckoutSession: publicProcedure
     .input(
       z.object({
-        quantity: z.number().int().min(1).max(50),
+        quantity: z.number().int().min(1).max(99),
       }),
     )
     .mutation(async ({ input }) => {
