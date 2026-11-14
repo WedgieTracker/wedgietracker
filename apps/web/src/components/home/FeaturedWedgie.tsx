@@ -91,7 +91,7 @@ export function FeaturedWedgie({
                 className="text-cream/70 mt-1.5 block text-xs font-bold whitespace-nowrap"
               />
             </span>
-            <span className="relative block w-[150px] md:mx-auto md:mt-2 md:w-[150px]">
+            <span className="relative block w-[150px] md:mx-auto md:-mt-4 md:w-[132px]">
               <CourtPositionDiagram
                 position={wedgie.position}
                 dotClassName="size-2.5"
@@ -103,7 +103,7 @@ export function FeaturedWedgie({
           </span>
         </span>
 
-        <span className="relative block p-[18px] md:flex md:flex-col md:px-6 md:py-5">
+        <span className="relative block p-[18px] md:flex md:flex-col md:px-6 md:py-4">
           <span className="absolute top-[22px] right-[18px]">
             <PlayButton size="lg" />
           </span>
@@ -113,7 +113,7 @@ export function FeaturedWedgie({
           <span className="text-cream/80 mt-1 block text-[14.5px] font-bold">
             <Matchup wedgie={wedgie} teamClassName="text-violet font-black" />
           </span>
-          <span className="mt-3 flex flex-wrap gap-1.5">
+          <span className="mt-2.5 flex flex-wrap gap-1.5">
             {wedgie.types.map((type) => (
               <span
                 key={type.name}
@@ -123,7 +123,7 @@ export function FeaturedWedgie({
               </span>
             ))}
           </span>
-          <span className="mt-1 hidden md:block">
+          <span className="hidden md:block">
             <QuartersBar wedgie={wedgie} />
           </span>
           <span className="sr-only">Watch wedgie {wedgie.number}</span>

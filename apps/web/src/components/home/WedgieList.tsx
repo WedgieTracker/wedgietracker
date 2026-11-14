@@ -22,9 +22,7 @@ export function WedgieList({ wedgies }: WedgieListProps) {
 
   return (
     <section className="w-full max-w-2xl">
-      <h2 className="text-cream mb-4 text-[21px] font-extrabold tracking-[-0.01em]">
-        Latest wedgies
-      </h2>
+      <h2 className="sr-only">Latest wedgies</h2>
       {first && <FeaturedWedgie wedgie={first} onOpen={() => setSelected(0)} />}
       <div className="mt-3 flex flex-col gap-2.5">
         {rest.map((w, i) => (
