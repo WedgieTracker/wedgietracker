@@ -219,7 +219,14 @@ export default function HomeScreen() {
         ) : null}
 
         {wide ? (
-          <StickySplit scrollY={scrollY} left={hero} right={column} />
+          <StickySplit
+            scrollY={scrollY}
+            left={hero}
+            right={column}
+            // The right column's own padding is dropped on this side, so
+            // the gap is split evenly either side of the Duo's fold.
+            gap={36}
+          />
         ) : (
           <>
             {hero}
@@ -254,7 +261,7 @@ const styles = StyleSheet.create({
   },
   section: { width: "100%" },
   // Hero on the left, wedgies and leaders on the right, as on the desktop site.
-  columnWide: { paddingTop: 0 },
+  columnWide: { paddingTop: 0, paddingLeft: 0 },
   rows: { marginTop: 12, gap: 10 },
   sectionButton: { marginTop: 18 },
   loading: { minHeight: 240, alignItems: "center", justifyContent: "center" },
