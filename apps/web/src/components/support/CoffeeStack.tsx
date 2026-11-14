@@ -28,7 +28,6 @@ const ATTRIBUTES: { name: string; down?: boolean }[] = [
   { name: "Shot selection", down: true },
   { name: "Arc", down: true },
   { name: "Faith in physics", down: true },
-  { name: "Neck health", down: true },
   { name: "Social life", down: true },
 ];
 
