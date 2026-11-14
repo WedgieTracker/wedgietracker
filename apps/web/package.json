@@ -53,6 +53,7 @@
     "drizzle-orm": "^0.45.4",
     "googleapis": "^189.0.0",
     "lucide-react": "^1.65.0",
+    "mediabunny": "1.63.0",
     "next": "^16.4.3",
     "next-auth": "5.0.0-beta.32",
     "react": "^19.3.0",
