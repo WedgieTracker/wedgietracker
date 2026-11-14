@@ -81,7 +81,7 @@ export function StandingsFilters({
         role="switch"
         aria-checked={includeOpponents}
         onClick={() => setIncludeOpponents(!includeOpponents)}
-        title="Teams also count the other side's wedgies in their games"
+        aria-describedby="opponents-note"
         className="bg-panel border-violet/30 text-cream hover:border-cream/60 focus-visible:outline-cream inline-flex min-h-10 items-center gap-2.5 rounded-xl border pr-2 pl-3 text-[13.5px] font-extrabold transition-colors focus-visible:outline-2"
       >
         Including opponents
@@ -96,6 +96,15 @@ export function StandingsFilters({
           />
         </span>
       </button>
+
+      <p
+        id="opponents-note"
+        className="text-cream/50 w-full pl-0.5 text-[12.5px] font-bold"
+      >
+        {includeOpponents
+          ? "Teams also count the other side's wedgies in their games."
+          : "Teams only count their own players' wedgies."}
+      </p>
 
       {open && (
         <div role="group" aria-label="Season" className={POPOVER_CLASS}>
