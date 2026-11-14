@@ -19,9 +19,7 @@ export default function WelcomeEmail() {
         <Container style={{ textAlign: "center" }}>
           <Section>
             <Img
-              src={
-                "https://media.wedgietracker.com/assets/logo-wedgietracker_rlzejd.png"
-              }
+              src={"https://www.wedgietracker.com/logo-email.png"}
               alt={`Logo WedgieTracker`}
               width={120}
               style={image}
