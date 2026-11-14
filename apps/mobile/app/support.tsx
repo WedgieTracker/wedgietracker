@@ -236,12 +236,13 @@ export default function SupportScreen() {
               ? "That didn't go through. Nothing was charged. Try again in a moment."
               : available
                 ? "Paid through the App Store"
-                : "The scoreboard below keeps counting in the meantime."}
+                : "They will be paid through the App Store."}
           </Text>
 
-          <CoffeeScoreboard
-            data={scoreboard.error ? null : (scoreboard.data ?? null)}
-          />
+          {/* Not on every server yet, so a failure only hides the board. */}
+          {scoreboard.error ? null : (
+            <CoffeeScoreboard data={scoreboard.data ?? null} />
+          )}
         </View>
       </Screen>
     </>
