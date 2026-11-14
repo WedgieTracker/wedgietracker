@@ -169,7 +169,7 @@ async function getCachedStats() {
         .from(wedgie)
         .where(eq(wedgie.seasonName, globalSettings.currentSeason.name)),
       db
-        .select({ count: count() })
+        .select({ season: wedgie.seasonName, count: count() })
         .from(wedgie)
         .where(
           and(
@@ -180,10 +180,19 @@ async function getCachedStats() {
         .groupBy(wedgie.seasonName),
     ]);
   const currentSeasonWedgies = wedgieCountResult?.count ?? 0;
-  const previousRecord =
-    previousSeasonCounts.length > 0
-      ? Math.max(...previousSeasonCounts.map((s) => s.count))
-      : 0;
+  // The best season so far; on a tie the latest season holds the record.
+  const recordSeason = previousSeasonCounts.reduce<
+    (typeof previousSeasonCounts)[number] | null
+  >(
+    (best, s) =>
+      !best ||
+      s.count > best.count ||
+      (s.count === best.count && (s.season ?? "") > (best.season ?? ""))
+        ? s
+        : best,
+    null,
+  );
+  const previousRecord = recordSeason?.count ?? 0;
 
   let dateNow: Date | null = null;
   if (currentSeasonWedgies < globalSettings.currentTotalWedgies) {
@@ -200,6 +209,7 @@ async function getCachedStats() {
     liveGames: globalSettings.liveGames ?? false,
     currentSeasonWedgies: currentSeasonWedgies,
     previousRecord,
+    previousRecordSeason: recordSeason?.season ?? null,
   };
 }
 

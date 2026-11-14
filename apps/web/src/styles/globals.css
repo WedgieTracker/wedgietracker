@@ -499,3 +499,34 @@
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
 }
+
+/* The pink circle drawn round NEW WEDGIE on the calendar: draws on, holds, fades, repeats. */
+.wt-circle-date {
+  stroke-dasharray: 101 101;
+  stroke-dashoffset: 0;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .wt-circle-date {
+    animation: wt-circle-date 3.2s cubic-bezier(0.6, 0.1, 0.3, 1) infinite;
+  }
+}
+@keyframes wt-circle-date {
+  0% {
+    stroke-dashoffset: 101;
+    opacity: 0;
+  }
+  3% {
+    opacity: 1;
+  }
+  35% {
+    stroke-dashoffset: 0;
+  }
+  80% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+}
