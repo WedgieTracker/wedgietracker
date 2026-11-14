@@ -30,12 +30,37 @@ export function Header() {
           <div className="justify-self-start">
             <Link
               href="/support-us"
-              className={`store-CTA border-yellow text-yellow before:animate-gradient before:via-yellow/20 hover:bg-yellow hover:text-darkpurple relative mb-0.5 inline-block rounded-md border px-2 py-1.5 text-[10px] font-bold tracking-wider uppercase transition-all duration-300 before:absolute before:inset-0 before:-z-10 before:bg-linear-to-r before:from-transparent before:to-transparent before:bg-size-[200%_100%] md:px-3 md:text-xs ${
+              className={`btn-sticker btn-sticker-sm wt-nudge mb-0.5 gap-1.5 px-2.5 text-[11px] tracking-wider uppercase md:px-3 md:text-xs ${
                 isMenuOpen ? "opacity-0" : "opacity-100"
               }`}
             >
-              <span className="inline md:hidden">Support</span>
-              <span className="hidden md:inline">Support</span>
+              <svg
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+                className="size-4 overflow-visible"
+                fill="none"
+              >
+                <g stroke="#9a5cf5" strokeWidth="1.8" strokeLinecap="round">
+                  <path className="wt-steam" d="M9.5 6c-1-1 1-1.6 0-2.6" />
+                  <path className="wt-steam" d="M13.5 6c-1-1 1-1.6 0-2.6" />
+                </g>
+                <rect x="5" y="14" width="12" height="7" fill="#6b3a1f" />
+                <rect
+                  x="5"
+                  y="8"
+                  width="12"
+                  height="13"
+                  rx="1.5"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                />
+                <path
+                  d="M17 11h1.5a2.5 2.5 0 0 1 0 5H17"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                />
+              </svg>
+              Support
             </Link>
           </div>
 

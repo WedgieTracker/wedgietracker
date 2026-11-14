@@ -499,16 +499,19 @@
   background: hsl(var(--cream));
   color: #2a1660;
   font-weight: 900;
-  box-shadow: 6px 6px 0 var(--sticker-shadow, hsl(var(--violet)));
+  box-shadow: var(--sticker-off, 6px) var(--sticker-off, 6px) 0
+    var(--sticker-shadow, hsl(var(--violet)));
   transition:
     transform 0.15s ease,
     box-shadow 0.15s ease;
   &:hover {
     transform: translate(-2px, -2px);
-    box-shadow: 8px 8px 0 var(--sticker-shadow, hsl(var(--violet)));
+    box-shadow: calc(var(--sticker-off, 6px) + 2px)
+      calc(var(--sticker-off, 6px) + 2px) 0
+      var(--sticker-shadow, hsl(var(--violet)));
   }
   &:active {
-    transform: translate(6px, 6px);
+    transform: translate(var(--sticker-off, 6px), var(--sticker-off, 6px));
     box-shadow: 0 0 0 var(--sticker-shadow, hsl(var(--violet)));
   }
   &:focus-visible {
@@ -607,5 +610,51 @@ html {
   }
   &::-webkit-scrollbar-thumb:hover {
     background: rgb(154 92 245 / 0.8);
+  }
+}
+
+/* The header's small sticker: thinner, tighter shadow, a nudge every few seconds. */
+@utility btn-sticker-sm {
+  --sticker-off: 3px;
+  min-height: 34px;
+  border-width: 2px;
+  border-radius: 10px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .wt-nudge {
+    animation: wt-nudge 7s ease-in-out 2s infinite;
+  }
+  .wt-steam {
+    animation: wt-steam 2.2s ease-in-out infinite;
+  }
+  .wt-steam:nth-child(2) {
+    animation-delay: 0.6s;
+  }
+}
+@keyframes wt-nudge {
+  0%,
+  88%,
+  100% {
+    rotate: 0deg;
+  }
+  91% {
+    rotate: -5deg;
+  }
+  94% {
+    rotate: 4deg;
+  }
+  97% {
+    rotate: -2deg;
+  }
+}
+@keyframes wt-steam {
+  0%,
+  100% {
+    opacity: 0;
+    translate: 0 2px;
+  }
+  50% {
+    opacity: 1;
+    translate: 0 -1px;
   }
 }
