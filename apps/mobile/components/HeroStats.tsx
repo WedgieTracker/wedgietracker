@@ -5,6 +5,7 @@ import { DaysCalendar } from "@/components/DaysCalendar";
 import { PaceGauge } from "@/components/PaceGauge";
 import { StickerButton } from "@/components/StickerButton";
 import { WaveCounterPanel } from "@/components/WaveCounterPanel";
+import { useWide } from "@/lib/wide";
 import { SCREENSHOT_MODE } from "@/lib/screenshot";
 import { colors, fonts, space } from "@/lib/theme";
 
@@ -41,6 +42,7 @@ export function HeroStats({
   onExplainPace?: () => void;
 }) {
   const { height } = useWindowDimensions();
+  const { wide } = useWide();
 
   return (
     <View>
@@ -49,6 +51,9 @@ export function HeroStats({
         previousRecord={stats?.previousRecord ?? Number.POSITIVE_INFINITY}
         // `min-h-[25em] flex-2` of an `80svh` column on a phone.
         minHeight={Math.max(400, height * 0.5)}
+        // Edge to edge on a phone; on a wide screen it sits in a column, so
+        // it gets the cards' rounded corners.
+        style={wide ? styles.panelWide : undefined}
       />
 
       <View style={styles.night}>
@@ -171,6 +176,7 @@ function daysSince(value: Date | string | null): number | null {
 }
 
 const styles = StyleSheet.create({
+  panelWide: { borderRadius: 22 },
   // `bg-night px-[18px] pt-12 pb-8 min-h-[12em]`
   night: {
     minHeight: 192,

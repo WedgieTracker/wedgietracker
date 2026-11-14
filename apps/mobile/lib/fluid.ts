@@ -1,6 +1,5 @@
+import { useWide } from "@/lib/wide";
 import { createContext, useContext } from "react";
-import { useWindowDimensions } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const ROOT_FONT_SIZE = 16;
 
@@ -34,9 +33,8 @@ export function clampRem(
 export const FluidWidth = createContext<number | null>(null);
 
 export function useFluidWidth(): number {
-  const { width } = useWindowDimensions();
-  const { left, right } = useSafeAreaInsets();
-  return useContext(FluidWidth) ?? width - left - right;
+  const { width } = useWide();
+  return useContext(FluidWidth) ?? width;
 }
 
 /**

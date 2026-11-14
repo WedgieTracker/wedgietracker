@@ -1,6 +1,8 @@
 import { View, type StyleProp, type ViewStyle } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { useSideInsets } from "@/lib/wide";
+
 /**
  * Top safe-area padding for a tab screen, laid out on the very first frame.
  *
@@ -12,7 +14,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
  *
  * The sides are padded too. On the iPhone Duo the status bar and the tab bar
  * sit in a column down the right edge, and without this the content runs
- * under them. On other iPhones in portrait both side insets are 0.
+ * under them; see useSideInsets for why the left matches it. On other
+ * iPhones in portrait both side insets are 0.
  */
 export function TopSafeArea({
   style,
@@ -21,7 +24,8 @@ export function TopSafeArea({
   style?: StyleProp<ViewStyle>;
   children: React.ReactNode;
 }) {
-  const { top, left, right } = useSafeAreaInsets();
+  const { top } = useSafeAreaInsets();
+  const { left, right } = useSideInsets();
   return (
     <View
       style={[

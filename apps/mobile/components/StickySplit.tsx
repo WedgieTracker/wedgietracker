@@ -1,8 +1,8 @@
 import { useState, type ReactNode } from "react";
-import { Animated, StyleSheet, View, useWindowDimensions } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Animated, StyleSheet, View } from "react-native";
 
 import { FluidWidth } from "@/lib/fluid";
+import { useWide } from "@/lib/wide";
 
 /** Space kept above the pinned column while it follows the scroll. */
 const STICKY_TOP = 12;
@@ -13,11 +13,9 @@ const STICKY_TOP = 12;
  * layout. Pass the parent scroll view's `scrollY` (an Animated.Value driven by
  * its onScroll).
  *
- * The columns meet at the middle of the screen rather than the middle of the
- * content area, so on the iPhone Duo the fold runs down the gutter between
- * them instead of through the right-hand column. `inset` is how far the split
- * sits from the safe area's left edge (its parent's padding), and `gap` the
- * space between the columns.
+ * The columns are equal, and the content is centred on the screen, so on the
+ * iPhone Duo the fold runs down the gap between them. `inset` is its parent's
+ * padding on each side, and `gap` the space between the columns.
  */
 export function StickySplit({
   scrollY,
@@ -32,9 +30,10 @@ export function StickySplit({
   inset?: number;
   gap?: number;
 }) {
-  const { width: window } = useWindowDimensions();
-  const safe = useSafeAreaInsets();
-  const leftWidth = Math.max(0, window / 2 - safe.left - inset - gap / 2);
+  // Content is centred on the screen (see useSideInsets), so two equal
+  // columns meet in the middle of it, on the Duo's fold.
+  const { width } = useWide();
+  const leftWidth = Math.max(0, (width - 2 * inset - gap) / 2);
 
   const [top, setTop] = useState(0);
   const [leftHeight, setLeftHeight] = useState(0);
