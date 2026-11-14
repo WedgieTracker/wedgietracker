@@ -119,7 +119,10 @@ export function FilterSheet({
         />
         <Animated.View
           entering={SlideInDown.duration(240)}
-          style={[styles.sheet, { paddingBottom: bottom + 12 }]}
+          style={[
+            styles.sheet,
+            { paddingBottom: bottom + 8, maxHeight: height * 0.78 },
+          ]}
           accessibilityViewIsModal
         >
           <View style={styles.grabber} />
@@ -147,7 +150,7 @@ export function FilterSheet({
             </Pressable>
           </View>
           <ScrollView
-            style={{ maxHeight: height * 0.6 }}
+            style={styles.scroll}
             contentContainerStyle={styles.sheetBody}
             showsVerticalScrollIndicator={false}
           >
@@ -361,6 +364,7 @@ const styles = StyleSheet.create({
   },
   donePressed: { backgroundColor: colors.violet60 },
   doneText: { fontFamily: fonts.extraBold, fontSize: 14, color: colors.cream },
+  scroll: { flexGrow: 0, flexShrink: 1 },
   sheetBody: { paddingHorizontal: 10, paddingBottom: 8 },
 
   group: {
