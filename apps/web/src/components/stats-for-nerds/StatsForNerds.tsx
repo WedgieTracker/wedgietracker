@@ -218,14 +218,23 @@ function CourtHeat({ points }: { points: { x: number; y: number }[] }) {
 
 function Section({
   title,
+  hideTitle = false,
   children,
 }: {
   title: string;
+  /** Keep the heading for screen readers only. */
+  hideTitle?: boolean;
   children: React.ReactNode;
 }) {
   return (
     <section className="w-full max-w-2xl">
-      <h2 className="text-cream mb-3 text-[21px] font-extrabold tracking-[-0.01em]">
+      <h2
+        className={
+          hideTitle
+            ? "sr-only"
+            : "text-cream mb-3 text-[21px] font-extrabold tracking-[-0.01em]"
+        }
+      >
         {title}
       </h2>
       {children}
@@ -292,7 +301,7 @@ export function StatsForNerds({
       </div>
 
       <div className="flex w-full flex-col items-center gap-10 px-[18px] pt-2 pb-6 lg:w-1/2 lg:px-8 lg:pt-6">
-        <Section title="Pace">
+        <Section title="Pace" hideTitle>
           <Card className="items-center text-center">
             <div className="mx-auto w-full max-w-[245px]">
               <PaceGauge
@@ -315,7 +324,7 @@ export function StatsForNerds({
           </Card>
         </Section>
 
-        <Section title={`${stats.currentSeason} so far`}>
+        <Section title={`${stats.currentSeason} so far`} hideTitle>
           <Card>
             <div>
               <Line>
