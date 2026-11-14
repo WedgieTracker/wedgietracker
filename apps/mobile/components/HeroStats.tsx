@@ -31,11 +31,14 @@ export function HeroStats({
   stats,
   recordSeason,
   onMoreStats,
+  onExplainPace,
 }: {
   stats: HeroStatsData | null;
   /** Which season set the record, when the stats do not say. */
   recordSeason?: string | null;
   onMoreStats: () => void;
+  /** Opens How the pace works, from a tap on the gauge. */
+  onExplainPace?: () => void;
 }) {
   const { height } = useWindowDimensions();
 
@@ -62,6 +65,7 @@ export function HeroStats({
           <PaceRow
             stats={stats}
             recordSeason={stats.previousRecordSeason ?? recordSeason ?? null}
+            onExplainPace={onExplainPace}
           />
         ) : (
           <View style={styles.grid} pointerEvents="none">
@@ -90,9 +94,11 @@ export function HeroStats({
 function PaceRow({
   stats,
   recordSeason,
+  onExplainPace,
 }: {
   stats: HeroStatsData;
   recordSeason: string | null;
+  onExplainPace?: () => void;
 }) {
   // The web shows games played until the pace parts from the running total.
   const showPace = stats.currentPace !== stats.totalWedgies;
@@ -107,6 +113,7 @@ function PaceRow({
             pace={stats.currentPace}
             record={stats.previousRecord}
             recordSeason={recordSeason}
+            onExplain={onExplainPace}
           />
         ) : (
           <View style={styles.games}>

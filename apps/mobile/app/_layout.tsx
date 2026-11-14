@@ -75,6 +75,8 @@ function RootLayout() {
         */}
         {/* The page carries its own heading, so the bar only holds the back button. */}
         <Stack.Screen name="seasons" options={{ title: "" }} />
+        <Stack.Screen name="pace" options={{ title: "" }} />
+        <Stack.Screen name="support" options={{ title: "" }} />
         {/*
           A sheet sized to its content rather than a full-height modal, and no
           header: the title said nothing the screen does not already show.
