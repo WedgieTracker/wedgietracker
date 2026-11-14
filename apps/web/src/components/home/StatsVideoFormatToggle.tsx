@@ -13,18 +13,18 @@ const OPTIONS: {
   shape: string;
 }[] = [
   {
-    value: "portrait",
-    label: "Vertical",
-    size: "1080×1920",
-    hint: "Reels, Shorts, TikTok",
-    shape: "h-9 w-5",
-  },
-  {
     value: "landscape",
     label: "Landscape",
     size: "1920×1080",
     hint: "YouTube, X",
     shape: "h-5 w-9",
+  },
+  {
+    value: "portrait",
+    label: "Vertical",
+    size: "1080×1920",
+    hint: "Reels, Shorts, TikTok",
+    shape: "h-9 w-5",
   },
 ];
 

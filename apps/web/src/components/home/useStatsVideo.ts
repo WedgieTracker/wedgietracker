@@ -29,7 +29,7 @@ function isAbort(error: unknown) {
 }
 
 export function useStatsVideo(stats: ShareableStats) {
-  const [format, setFormat] = useState<VideoFormat>("portrait");
+  const [format, setFormat] = useState<VideoFormat>("landscape");
   const [status, setStatus] = useState<StatsVideoStatus>({ kind: "idle" });
   const controllerRef = useRef<AbortController | null>(null);
   const urlRef = useRef<string | null>(null);
