@@ -1,66 +1,108 @@
 import { StyleSheet, Text, View } from "react-native";
 
-import { colors, fonts, space } from "@/lib/theme";
+import { GradientFill } from "@/components/Gradient";
+import { badgeTextShadow, colors, fonts } from "@/lib/theme";
+
+const CHIP_TEXT = 22;
 
 /**
- * The site's page headings: two stacked lines, yellow over pink, the lower one
- * scaled and pulled up so it overlaps - the same device as the wordmark.
- *
- * Each page picks its own base size and scale, taken from the `<h1>` in its
- * matching page under apps/web/src/app, because the line lengths differ too
- * much for one ratio to serve them all.
+ * Port of apps/web/src/components/shared/PageHeading.tsx: a page title in
+ * sentence case, with an optional figure beside it in a small badge-gradient
+ * chip. `badgeAction` sits on the chip's corner, out of the flow, so showing
+ * it never moves the heading.
  */
 export function PageHeading({
-  top,
-  bottom,
-  base,
-  bottomScale,
-  liftEm,
+  title,
+  badge,
+  badgeAction,
 }: {
-  top: string;
-  bottom: string;
-  /** The `text-*` size on the web's h1, in px. */
-  base: number;
-  /** The lower line's `text-[Xem]`. */
-  bottomScale: number;
-  /** The lower line's `mt-[-Xem]`, relative to its own size. */
-  liftEm: number;
+  title: string;
+  badge?: React.ReactNode;
+  badgeAction?: React.ReactNode;
 }) {
-  const bottomSize = base * bottomScale;
-
   return (
     <View style={styles.heading}>
       <Text
-        style={[styles.line, { fontSize: base, lineHeight: base }]}
+        style={styles.title}
+        allowFontScaling={false}
+        accessibilityRole="header"
+      >
+        {title}
+      </Text>
+      {badge !== undefined && badge !== null ? (
+        <View style={styles.chip}>
+          <GradientFill name="button" radius={12} />
+          {badge}
+          {badgeAction}
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
+/**
+ * The chip's figure, set over an invisible copy of the widest value it can
+ * show, so the chip never changes width as the figure changes.
+ */
+export function ChipNumber({
+  value,
+  widest,
+}: {
+  value: string;
+  widest: string;
+}) {
+  return (
+    <View>
+      <Text
+        style={[styles.chipText, styles.invisible]}
         allowFontScaling={false}
       >
-        {top.toUpperCase()}
+        {widest}
       </Text>
       <Text
-        style={[
-          styles.line,
-          styles.bottom,
-          {
-            fontSize: bottomSize,
-            lineHeight: bottomSize,
-            marginTop: -liftEm * bottomSize,
-          },
-        ]}
+        style={[styles.chipText, styles.chipValue, badgeTextShadow(CHIP_TEXT)]}
         allowFontScaling={false}
       >
-        {bottom.toUpperCase()}
+        {value}
       </Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  heading: { alignItems: "center", marginBottom: space.xl },
-  line: {
+  heading: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 12,
+  },
+  // `text-[34px] leading-none font-black tracking-[-0.03em]`
+  title: {
     fontFamily: fonts.black,
-    color: colors.yellow,
+    fontSize: 34,
+    lineHeight: 38,
+    letterSpacing: -1,
+    color: colors.cream,
+  },
+  // `bg-button rounded-xl px-2.5 py-1`
+  chip: {
+    borderRadius: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  chipText: {
+    fontFamily: fonts.blackItalic,
+    fontSize: CHIP_TEXT,
+    lineHeight: CHIP_TEXT + 4,
+    color: colors.cream,
+    fontVariant: ["tabular-nums"],
+  },
+  invisible: { opacity: 0 },
+  chipValue: {
+    position: "absolute",
+    left: 0,
+    right: 0,
     textAlign: "center",
   },
-  // Sits behind the yellow line, as `z-0` does on the web.
-  bottom: { color: colors.pink, zIndex: -1 },
 });

@@ -49,8 +49,8 @@ export function SectionLabel({ children }: { children: string }) {
 }
 
 const styles = StyleSheet.create({
-  // The site's inner pages sit on the darker column colour.
-  safe: { flex: 1, backgroundColor: colors.darkpurpleDark },
+  // The site's pages sit on night.
+  safe: { flex: 1, backgroundColor: colors.night },
   content: { padding: space.lg },
   sectionLabel: {
     ...type.section,

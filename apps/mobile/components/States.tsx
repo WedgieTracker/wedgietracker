@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
 import { Loader } from "@/components/Loader";
-import { PillButton } from "@/components/PillButton";
+import { StickerButton } from "@/components/StickerButton";
 import { colors, radius, space, type } from "@/lib/theme";
 
 export function Loading({ label = "Loading" }: { label?: string }) {
@@ -55,7 +55,7 @@ export function ErrorState({
       <Text style={styles.muted}>{message}</Text>
       {onRetry ? (
         <View style={styles.retry}>
-          <PillButton label="RETRY" onPress={onRetry} />
+          <StickerButton label="Retry" compact onPress={onRetry} />
         </View>
       ) : null}
     </View>
@@ -73,7 +73,7 @@ export function Empty({ label }: { label: string }) {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: colors.darkpurpleDark,
+    backgroundColor: colors.night,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -89,9 +89,9 @@ const styles = StyleSheet.create({
   error: {
     padding: space.lg,
     borderRadius: radius.md,
-    backgroundColor: colors.darkpurpleLight,
+    backgroundColor: colors.panel,
     borderWidth: 1,
-    borderColor: colors.pink,
+    borderColor: colors.violet60,
     gap: space.xs,
   },
   errorTitle: { ...type.label, color: colors.pink },
