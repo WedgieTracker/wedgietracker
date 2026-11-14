@@ -1,143 +1,164 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
+  type EncodingMethod,
   type ShareableStats,
-  INITIAL_WAVE_LAYERS,
+  type VideoFormat,
   buildVideoFilename,
   pickFileExtension,
-  pickSupportedMimeType,
 } from "./stats-video-helpers";
-import {
-  type FrameContext,
-  createConfettiParticles,
-  drawFrame,
-  drawVerticalFrame,
-  loadImage,
-} from "./stats-video-canvas";
 
-const LOGO_URL =
-  "https://media.wedgietracker.com/assets/logo-wedgietracker_rlzejd.png";
+export interface StatsVideo {
+  blob: Blob;
+  url: string;
+  filename: string;
+  format: VideoFormat;
+  method: EncodingMethod;
+  renderMs: number;
+}
 
-const DESKTOP_DIMENSIONS = { width: 1920, height: 1080 } as const;
-const MOBILE_DIMENSIONS = { width: 1080, height: 1920 } as const;
-const VIDEO_DURATION_MS = 10000;
-const FRAMES_PER_SECOND = 30;
-const VIDEO_BITRATE = 8_000_000;
+export type StatsVideoStatus =
+  | { kind: "idle" }
+  | { kind: "rendering"; progress: number }
+  | { kind: "done"; video: StatsVideo }
+  | { kind: "error"; message: string };
 
-export type VideoType = "desktop" | "mobile";
+function isAbort(error: unknown) {
+  return error instanceof DOMException && error.name === "AbortError";
+}
 
 export function useStatsVideo(stats: ShareableStats) {
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [videoBlob, setVideoBlob] = useState<Blob | null>(null);
-  const [progress, setProgress] = useState(0);
-  const [videoType, setVideoType] = useState<VideoType>("desktop");
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [format, setFormat] = useState<VideoFormat>("portrait");
+  const [status, setStatus] = useState<StatsVideoStatus>({ kind: "idle" });
+  const controllerRef = useRef<AbortController | null>(null);
+  const urlRef = useRef<string | null>(null);
 
-  const generateVideo = async () => {
+  const releaseUrl = useCallback(() => {
+    if (urlRef.current) URL.revokeObjectURL(urlRef.current);
+    urlRef.current = null;
+  }, []);
+
+  const cancel = useCallback(() => {
+    controllerRef.current?.abort();
+    controllerRef.current = null;
+  }, []);
+
+  // Stop any render and free the file when the component goes away.
+  useEffect(
+    () => () => {
+      controllerRef.current?.abort();
+      if (urlRef.current) URL.revokeObjectURL(urlRef.current);
+    },
+    [],
+  );
+
+  const generate = useCallback(async () => {
+    cancel();
+    releaseUrl();
+    const controller = new AbortController();
+    controllerRef.current = controller;
+    setStatus({ kind: "rendering", progress: 0 });
+
+    // Only re-render when the shown percentage moves, not on every frame.
+    let shown = -1;
+    const onProgress = (fraction: number) => {
+      const percent = Math.floor(fraction * 100);
+      if (percent === shown || controller.signal.aborted) return;
+      shown = percent;
+      setStatus({ kind: "rendering", progress: percent / 100 });
+    };
+
     try {
-      setIsGenerating(true);
-      setProgress(0);
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-
-      const dimensions =
-        videoType === "desktop" ? DESKTOP_DIMENSIONS : MOBILE_DIMENSIONS;
-      canvas.width = dimensions.width;
-      canvas.height = dimensions.height;
-
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return;
-
-      const fillPercentage = Math.min((stats.totalWedgies / 50) * 100, 100);
-      const confettiParticles =
-        fillPercentage >= 100
-          ? createConfettiParticles(canvas.width, canvas.height)
-          : [];
-
-      const logoImage = await loadImage(LOGO_URL);
-
-      const supportedMimeType = pickSupportedMimeType((m) =>
-        MediaRecorder.isTypeSupported(m),
-      );
-      if (!supportedMimeType) {
-        throw new Error("No supported media type found");
-      }
-
-      const stream = canvas.captureStream(FRAMES_PER_SECOND);
-      const mediaRecorder = new MediaRecorder(stream, {
-        mimeType: supportedMimeType,
-        videoBitsPerSecond: VIDEO_BITRATE,
+      // Loaded on demand: the encoder is only needed once someone asks.
+      const { renderStatsVideo } = await import("./stats-video-render");
+      const result = await renderStatsVideo({
+        stats,
+        format,
+        signal: controller.signal,
+        onProgress,
       });
-
-      const chunks: Blob[] = [];
-      mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
-      mediaRecorder.onstop = () => {
-        setVideoBlob(new Blob(chunks, { type: supportedMimeType }));
-        setIsGenerating(false);
-      };
-
-      mediaRecorder.start();
-
-      const frame: FrameContext = {
-        ctx,
-        waveLayers: INITIAL_WAVE_LAYERS.map((l) => ({ ...l })),
-        confettiParticles,
-        logoImage,
-      };
-
-      const startTime = Date.now();
-      const animate = () => {
-        const currentProgress = (Date.now() - startTime) / VIDEO_DURATION_MS;
-        if (currentProgress < 1) {
-          setProgress(currentProgress);
-          if (videoType === "desktop") {
-            drawFrame(frame, currentProgress, stats);
-          } else {
-            drawVerticalFrame(frame, currentProgress, stats);
-          }
-          requestAnimationFrame(animate);
-        } else {
-          setProgress(1);
-          mediaRecorder.stop();
-        }
-      };
-
-      animate();
+      if (controller.signal.aborted) return;
+      const url = URL.createObjectURL(result.blob);
+      urlRef.current = url;
+      setStatus({
+        kind: "done",
+        video: {
+          blob: result.blob,
+          url,
+          filename: buildVideoFilename(
+            new Date(),
+            pickFileExtension(result.mimeType),
+            format,
+          ),
+          format,
+          method: result.method,
+          renderMs: result.renderMs,
+        },
+      });
     } catch (error) {
+      if (isAbort(error) || controller.signal.aborted) {
+        setStatus({ kind: "idle" });
+        return;
+      }
       console.error("Error generating video:", error);
-      setIsGenerating(false);
+      setStatus({
+        kind: "error",
+        message:
+          error instanceof Error && error.name === "VideoUnsupportedError"
+            ? "This browser can't make videos. Try the latest Chrome, Edge, Safari or Firefox."
+            : "Something went wrong making the video. Try again.",
+      });
+    } finally {
+      if (controllerRef.current === controller) controllerRef.current = null;
     }
-  };
+  }, [cancel, releaseUrl, stats, format]);
 
-  const handleDownload = () => {
-    if (!videoBlob) return;
-    const extension = pickFileExtension(videoBlob.type);
-    const filename = buildVideoFilename(new Date(), extension);
-    const url = window.URL.createObjectURL(videoBlob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
-  };
+  const stop = useCallback(() => {
+    cancel();
+    setStatus({ kind: "idle" });
+  }, [cancel]);
 
-  const reset = () => {
-    setVideoBlob(null);
-    setIsGenerating(false);
-  };
+  const reset = useCallback(() => {
+    cancel();
+    releaseUrl();
+    setStatus({ kind: "idle" });
+  }, [cancel, releaseUrl]);
 
-  return {
-    canvasRef,
-    isGenerating,
-    videoBlob,
-    progress,
-    videoType,
-    setVideoType,
-    generateVideo,
-    handleDownload,
-    reset,
-  };
+  return { format, setFormat, status, generate, cancel: stop, reset };
+}
+
+export function downloadVideo(video: StatsVideo) {
+  const a = document.createElement("a");
+  a.href = video.url;
+  a.download = video.filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
+export function canShareVideo(video: StatsVideo): boolean {
+  if (typeof navigator === "undefined" || !navigator.canShare) return false;
+  const file = new File([video.blob], video.filename, {
+    type: video.blob.type,
+  });
+  try {
+    return navigator.canShare({ files: [file] });
+  } catch {
+    return false;
+  }
+}
+
+export async function shareVideo(video: StatsVideo) {
+  const file = new File([video.blob], video.filename, {
+    type: video.blob.type,
+  });
+  try {
+    await navigator.share({ files: [file], title: "WedgieTracker" });
+  } catch (error) {
+    // Closing the share sheet is not an error worth showing.
+    if (!(error instanceof DOMException && error.name === "AbortError")) {
+      throw error;
+    }
+  }
 }

@@ -1,13 +1,13 @@
 "use client";
 
-import { Loader } from "../shared/Loader";
+import { MonitorDown, X } from "lucide-react";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
-  DialogTrigger,
   DialogTitle,
+  DialogTrigger,
 } from "~/components/ui/dialog";
-import { MonitorDown } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -23,95 +23,123 @@ interface ShareableStatsVideoProps {
   stats: ShareableStats;
 }
 
+const DESCRIPTION_ID = "stats-video-description";
+
 export function ShareableStatsVideo({ stats }: ShareableStatsVideoProps) {
-  const {
-    canvasRef,
-    isGenerating,
-    videoBlob,
-    progress,
-    videoType,
-    setVideoType,
-    generateVideo,
-    handleDownload,
-    reset,
-  } = useStatsVideo(stats);
+  const { format, setFormat, status, generate, cancel, reset } =
+    useStatsVideo(stats);
+  const rendering = status.kind === "rendering";
 
   return (
-    <Dialog>
-      <DialogTrigger>
-        <TooltipProvider>
-          <Tooltip delayDuration={0}>
-            <TooltipTrigger asChild>
-              <div className="border-cream/30 bg-night/35 text-cream hover:bg-cream hover:text-night absolute right-4 bottom-4 z-10 hidden size-10 place-items-center rounded-full border opacity-70 transition-all duration-300 hover:opacity-100 md:grid">
-                <MonitorDown className="size-5" />
-                <span className="sr-only">Share Stats Video</span>
-              </div>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Generate a video</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      </DialogTrigger>
-      <DialogContent className="border-darkpurple-lighter bg-darkpurple sm:max-w-[600px]">
-        <DialogTitle className="sr-only">Share Stats Video</DialogTitle>
-        <div className="flex flex-col items-center gap-4 p-6">
-          <canvas ref={canvasRef} className="hidden" />
-
-          {!videoBlob && (
-            <>
+    <Dialog
+      onOpenChange={(open) => {
+        // Closing the dialog stops a render; a finished video is kept.
+        if (!open && rendering) cancel();
+      }}
+    >
+      <TooltipProvider>
+        <Tooltip delayDuration={0}>
+          <TooltipTrigger asChild>
+            <DialogTrigger asChild>
               <button
-                onClick={generateVideo}
-                disabled={isGenerating}
-                className="group border-yellow bg-yellow text-darkpurple hover:bg-darkpurple hover:text-yellow flex w-full flex-row items-center justify-center gap-2 rounded-full border-2 px-8 py-2 text-center text-xl font-bold uppercase transition-all duration-300 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
+                type="button"
+                aria-label="Make a video of these stats"
+                className="border-cream/30 bg-night/35 text-cream hover:bg-cream hover:text-night focus-visible:outline-cream absolute right-4 bottom-4 z-10 hidden size-10 place-items-center rounded-full border opacity-70 transition-all duration-300 hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-2 md:grid"
               >
-                {isGenerating ? "Generating Video..." : "Generate Video"}
-                <span className="border-darkpurple bg-darkpurple text-yellow group-hover:bg-yellow group-hover:text-darkpurple rounded-full border-2 px-2 py-0.5 text-xs transition-all duration-300">
-                  Beta
-                </span>
+                <MonitorDown className="size-5" aria-hidden="true" />
               </button>
-              {!isGenerating && (
-                <StatsVideoFormatToggle
-                  value={videoType}
-                  onChange={setVideoType}
-                />
+            </DialogTrigger>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Make a video</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+
+      <DialogContent
+        aria-describedby={DESCRIPTION_ID}
+        className="border-violet/30 bg-night rounded-[24px] p-0 sm:max-w-[560px] sm:rounded-[24px]"
+        onInteractOutside={(e) => {
+          // A stray click outside should not throw away a render in progress.
+          if (rendering) e.preventDefault();
+        }}
+      >
+        <div className="flex flex-col gap-5 p-6 sm:p-8">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <DialogTitle className="text-cream text-2xl font-black tracking-tight italic">
+                Share the stats
+              </DialogTitle>
+              <p
+                id={DESCRIPTION_ID}
+                className="text-cream/70 mt-1.5 text-sm font-semibold"
+              >
+                A 10-second video of this season&apos;s numbers, made in your
+                browser.
+              </p>
+            </div>
+            <DialogClose
+              className="text-cream/70 hover:text-cream hover:bg-panel focus-visible:outline-cream -mt-1 -mr-2 grid size-10 shrink-0 place-items-center rounded-full transition-colors focus-visible:outline-2"
+              aria-label="Close"
+            >
+              <X className="size-5" aria-hidden="true" />
+            </DialogClose>
+          </div>
+
+          {(status.kind === "idle" || status.kind === "error") && (
+            <>
+              <StatsVideoFormatToggle value={format} onChange={setFormat} />
+              {status.kind === "error" && (
+                <p
+                  role="alert"
+                  className="rounded-[14px] border border-[#ff4fc8]/40 bg-[#ff4fc8]/10 px-4 py-3 text-sm font-bold text-[#ffb3e6]"
+                >
+                  {status.message}
+                </p>
               )}
+              <button
+                type="button"
+                onClick={generate}
+                className="btn-sticker text-button-text w-full px-8 uppercase"
+              >
+                {status.kind === "error" ? "Try again" : "Make the video"}
+              </button>
             </>
           )}
 
-          {isGenerating && (
-            <div className="w-full space-y-2">
-              <div className="flex items-center justify-center gap-2">
-                <div className="-mr-8 -mb-2 w-full max-w-24">
-                  <Loader />
-                </div>
-              </div>
-              <div className="bg-darkpurple-lighter relative h-2 w-full overflow-hidden rounded-full">
+          {status.kind === "rendering" && (
+            <div className="flex flex-col gap-4">
+              <div
+                role="progressbar"
+                aria-label="Making the video"
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={Math.round(status.progress * 100)}
+                className="bg-panel border-violet/20 h-4 w-full overflow-hidden rounded-full border"
+              >
                 <div
-                  className="bg-pink absolute top-0 left-0 h-full"
-                  style={{ width: `${progress * 100}%` }}
+                  className="bg-glow-x h-full rounded-full transition-[width] duration-150 ease-out"
+                  style={{ width: `${Math.max(status.progress * 100, 2)}%` }}
                 />
               </div>
-              <div className="text-center text-sm text-white/60">
-                {Math.round(progress * 100)}%
+              <div className="flex items-center justify-between gap-4">
+                <p className="text-cream text-sm font-bold" aria-live="polite">
+                  Making your video… {Math.round(status.progress * 100)}%
+                </p>
+                <button
+                  type="button"
+                  onClick={cancel}
+                  className="text-cream/80 hover:text-cream focus-visible:outline-cream rounded-full px-3 py-1.5 text-sm font-bold underline-offset-4 hover:underline focus-visible:outline-2"
+                >
+                  Cancel
+                </button>
               </div>
             </div>
           )}
 
-          {videoBlob && (
-            <StatsVideoResult
-              videoBlob={videoBlob}
-              videoType={videoType}
-              onReset={reset}
-              onDownload={handleDownload}
-            />
+          {status.kind === "done" && (
+            <StatsVideoResult video={status.video} onReset={reset} />
           )}
-
-          <div className="mt-2 text-center text-sm text-white/60">
-            Generate a video of the current stats to share on social media.{" "}
-            <br />
-            If the result doesn&apos;t look good, try generating a new video.
-          </div>
         </div>
       </DialogContent>
     </Dialog>

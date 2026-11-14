@@ -1,43 +1,91 @@
-import type { VideoType } from "./useStatsVideo";
+import { useEffect, useState } from "react";
+import { Download, Share2 } from "lucide-react";
+import { VIDEO_FORMATS, formatBytes } from "./stats-video-helpers";
+import {
+  type StatsVideo,
+  canShareVideo,
+  downloadVideo,
+  shareVideo,
+} from "./useStatsVideo";
 
 interface StatsVideoResultProps {
-  videoBlob: Blob;
-  videoType: VideoType;
+  video: StatsVideo;
   onReset: () => void;
-  onDownload: () => void;
 }
 
-export function StatsVideoResult({
-  videoBlob,
-  videoType,
-  onReset,
-  onDownload,
-}: StatsVideoResultProps) {
+export function StatsVideoResult({ video, onReset }: StatsVideoResultProps) {
+  const [canShare, setCanShare] = useState(false);
+  const [shareError, setShareError] = useState<string | null>(null);
+  const { width, height } = VIDEO_FORMATS[video.format];
+  const isWebm = video.blob.type.includes("webm");
+
+  // Only known in the browser, so it is checked after mount.
+  useEffect(() => setCanShare(canShareVideo(video)), [video]);
+
   return (
-    <div className="flex w-full flex-col items-center gap-4">
+    <div className="flex flex-col gap-4">
       <video
-        src={URL.createObjectURL(videoBlob)}
+        src={video.url}
+        autoPlay
+        muted
+        loop
+        playsInline
         controls
-        className={`w-full rounded-lg ${
-          videoType === "desktop" ? "aspect-video" : "max-h-[400px]"
+        aria-label="Preview of the stats video"
+        className={`border-violet/20 bg-panel mx-auto rounded-[16px] border ${
+          video.format === "landscape"
+            ? "aspect-video w-full"
+            : "aspect-[9/16] max-h-[52vh]"
         }`}
-      >
-        <track kind="captions" />
-      </video>
-      <div className="flex w-full flex-row gap-4">
+      />
+      <p className="text-cream/70 text-center text-xs font-bold" role="status">
+        Ready: {isWebm ? "WebM" : "MP4"} · {width}×{height} ·{" "}
+        {formatBytes(video.blob.size)} · made in{" "}
+        {(video.renderMs / 1000).toFixed(1)}s
+      </p>
+      {isWebm && (
+        <p className="text-cream/80 rounded-[14px] border border-[#ff4fc8]/40 bg-[#ff4fc8]/10 px-4 py-3 text-sm font-semibold">
+          This browser could only make a WebM, which Instagram and iPhones
+          won&apos;t take. For an MP4, use the latest Chrome, Edge or Safari.
+        </p>
+      )}
+      <div className="flex flex-col gap-3 sm:flex-row">
         <button
-          onClick={onReset}
-          className="border-pink text-pink hover:bg-pink hover:text-darkpurple flex-1 rounded-full border-2 bg-transparent px-8 py-2 text-center font-bold tracking-wide uppercase transition-all duration-300"
+          type="button"
+          onClick={() => downloadVideo(video)}
+          className="btn-sticker text-button-text flex-1 gap-2 px-6 uppercase"
         >
-          Generate New
-        </button>
-        <button
-          onClick={onDownload}
-          className="border-yellow bg-yellow text-darkpurple hover:bg-darkpurple hover:text-yellow flex-1 rounded-full border-2 px-8 py-2 text-center font-black tracking-wide uppercase transition-all duration-300"
-        >
+          <Download className="size-5" aria-hidden="true" />
           Download
         </button>
+        {canShare && (
+          <button
+            type="button"
+            onClick={() => {
+              setShareError(null);
+              shareVideo(video).catch(() =>
+                setShareError("Sharing didn't work here. Download it instead."),
+              );
+            }}
+            className="btn-sticker btn-sticker-flat text-button-text flex-1 gap-2 px-6 uppercase"
+          >
+            <Share2 className="size-5" aria-hidden="true" />
+            Share
+          </button>
+        )}
       </div>
+      {shareError && (
+        <p role="alert" className="text-sm font-bold text-[#ffb3e6]">
+          {shareError}
+        </p>
+      )}
+      <button
+        type="button"
+        onClick={onReset}
+        className="text-cream/80 hover:text-cream focus-visible:outline-cream self-center rounded-full px-3 py-1.5 text-sm font-bold underline-offset-4 hover:underline focus-visible:outline-2"
+      >
+        Make another
+      </button>
     </div>
   );
 }
