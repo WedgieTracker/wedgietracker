@@ -1,6 +1,15 @@
 "use client";
 
+import { useCallback, useRef, useState } from "react";
 import { api } from "~/trpc/react";
+import {
+  CountRow,
+  FilterPill,
+  GroupLabel,
+  PillLabel,
+  POPOVER_CLASS,
+  useCloseOnOutside,
+} from "~/components/shared/FilterPopover";
 
 interface StandingsFiltersProps {
   selectedSeason: string;
@@ -10,6 +19,10 @@ interface StandingsFiltersProps {
   isLoading: boolean;
 }
 
+/**
+ * A Season pill that opens the seasons with how many wedgies each had, as on
+ * All wedgies, and a switch for counting opponents' wedgies too.
+ */
 export function StandingsFilters({
   selectedSeason,
   setSelectedSeason,
@@ -18,107 +31,94 @@ export function StandingsFilters({
   isLoading,
 }: StandingsFiltersProps) {
   const { data: allWedgies } = api.wedgie.getAll.useQuery();
+  const [open, setOpen] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const close = useCallback(() => setOpen(false), []);
+  useCloseOnOutside(open, wrapRef, close);
 
-  const seasons = Array.from(
-    new Set(
-      allWedgies?.flatMap((w) => (w.seasonName ? [w.seasonName] : [])) ?? [],
-    ),
-  )
+  const counts = new Map<string, number>();
+  for (const w of allWedgies ?? []) {
+    if (w.seasonName)
+      counts.set(w.seasonName, (counts.get(w.seasonName) ?? 0) + 1);
+  }
+  // Newest season first, GEMS on their own at the end.
+  const seasons = [...counts.keys()]
+    .filter((s) => s !== "GEMS")
     .sort()
     .reverse();
+  const max = Math.max(0, ...counts.values());
+  const pick = (value: string) => {
+    setSelectedSeason(value);
+    setOpen(false);
+  };
+  const row = (value: string, label: string, count: number) => (
+    <CountRow
+      key={label}
+      value={value}
+      label={label}
+      count={count}
+      max={max}
+      on={selectedSeason === value}
+      onPick={() => pick(value)}
+    />
+  );
 
   return (
     <div
-      className={`bg-pink-darker/10 flex w-full items-start justify-between rounded-xl p-4 ${
-        isLoading ? "opacity-20" : ""
-      }`}
+      ref={wrapRef}
+      className={`relative flex flex-wrap gap-1.5 ${isLoading ? "opacity-40" : ""}`}
     >
-      <div className="flex w-full flex-col items-start gap-4 md:flex-row md:gap-8">
-        <span className="text-yellow mt-0 flex items-center gap-1 text-xs font-bold tracking-wide md:mt-2.5">
-          FILTER BY
-          <svg
-            className="size-3"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M9 6L15 12L9 18"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+      <FilterPill
+        set={!!selectedSeason}
+        open={open}
+        onClick={() => setOpen(!open)}
+      >
+        <PillLabel kind="season">{selectedSeason || "All time"}</PillLabel>
+      </FilterPill>
+
+      <button
+        type="button"
+        role="switch"
+        aria-checked={includeOpponents}
+        onClick={() => setIncludeOpponents(!includeOpponents)}
+        aria-describedby="opponents-note"
+        className="bg-panel border-violet/30 text-cream hover:border-cream/60 focus-visible:outline-cream inline-flex min-h-10 items-center gap-2.5 rounded-xl border pr-2 pl-3 text-[13.5px] font-extrabold transition-colors focus-visible:outline-2"
+      >
+        Including opponents
+        <span
+          aria-hidden="true"
+          className={`relative h-[22px] w-9 rounded-full transition-colors ${includeOpponents ? "bg-button" : "bg-cream/20"}`}
+        >
+          <span
+            className={`absolute top-[3px] left-[3px] size-4 rounded-full transition-transform ${
+              includeOpponents ? "bg-cream translate-x-3.5" : "bg-cream/70"
+            }`}
+          />
         </span>
+      </button>
 
-        <div className="flex gap-2">
-          {/* Season Filter */}
-          <div className="bg-yellow-darker/20 relative rounded-md p-2">
-            <button
-              className={`text-yellow flex items-center gap-2 rounded-md px-0 py-0 text-sm font-bold uppercase`}
-            >
-              <span>Season</span>
-              <span
-                className={`border-yellow relative flex size-5 items-center justify-center rounded-full border leading-none`}
-              >
-                <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                  +
-                </span>
-              </span>
-            </button>
-            <span className="bg-yellow text-darkpurple mt-2 inline-block rounded-md px-2 py-1 font-bold">
-              {selectedSeason || "All Seasons"}
-            </span>
-            <select
-              className="absolute inset-0 w-full cursor-pointer opacity-0"
-              value={selectedSeason}
-              onChange={(e) => setSelectedSeason(e.target.value)}
-            >
-              <option value="">All Seasons</option>
-              {seasons.map((season) => (
-                <option key={season} value={season}>
-                  {season}
-                </option>
-              ))}
-            </select>
-          </div>
+      <p
+        id="opponents-note"
+        className="text-cream/50 w-full pl-0.5 text-[12.5px] font-bold"
+      >
+        {includeOpponents
+          ? "Teams also count the other side's wedgies in their games."
+          : "Teams only count their own players' wedgies."}
+      </p>
 
-          {/* Team Count Switch */}
-          <div className="bg-yellow-darker/20 relative rounded-md p-2">
-            <div className="flex flex-col gap-2">
-              <span className="text-yellow text-sm font-bold uppercase">
-                Team Counting
-              </span>
-              <label
-                htmlFor="teamCountingToggle"
-                className="relative inline-flex cursor-pointer items-center"
-              >
-                <span className="sr-only">Toggle team counting</span>
-                <div className="flex items-center gap-2">
-                  <span className="relative">
-                    <input
-                      id="teamCountingToggle"
-                      type="checkbox"
-                      checked={includeOpponents}
-                      onChange={(e) => setIncludeOpponents(e.target.checked)}
-                      className="peer sr-only"
-                    />
-                    <div className="peer bg-darkpurple-lighter after:bg-pink peer-checked:bg-darkpurple-lighter peer-checked:after:bg-yellow h-6 w-11 rounded-full after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:transition-all after:content-[''] peer-checked:after:translate-x-full"></div>
-                  </span>
-                  <span>
-                    <span className="block w-16 text-[10px] font-medium text-white uppercase">
-                      {includeOpponents
-                        ? "Including Opponents"
-                        : "Player's Team Only"}
-                    </span>
-                  </span>
-                </div>
-              </label>
-            </div>
-          </div>
+      {open && (
+        <div role="group" aria-label="Season" className={POPOVER_CLASS}>
+          {row("", "All time", allWedgies?.length ?? 0)}
+          <GroupLabel>Seasons</GroupLabel>
+          {seasons.map((s) => row(s, s, counts.get(s) ?? 0))}
+          {counts.has("GEMS") && (
+            <>
+              <GroupLabel>Outside the seasons</GroupLabel>
+              {row("GEMS", "GEMS", counts.get("GEMS") ?? 0)}
+            </>
+          )}
         </div>
-      </div>
+      )}
     </div>
   );
 }

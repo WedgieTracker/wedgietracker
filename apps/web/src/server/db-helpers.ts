@@ -1,3 +1,4 @@
+import { isRealTeam } from "@wedgietracker/core/utils/teamAliases";
 import { eq, count } from "drizzle-orm";
 import type { db } from "./db";
 import {
@@ -20,8 +21,10 @@ export function buildTeamStandings(
   const teamCounts = new Map<string, number>();
 
   wedgies.forEach((w) => {
-    teamCounts.set(w.teamName, (teamCounts.get(w.teamName) ?? 0) + 1);
-    if (includeOpponents) {
+    if (isRealTeam(w.teamName)) {
+      teamCounts.set(w.teamName, (teamCounts.get(w.teamName) ?? 0) + 1);
+    }
+    if (includeOpponents && isRealTeam(w.teamAgainstName)) {
       teamCounts.set(
         w.teamAgainstName,
         (teamCounts.get(w.teamAgainstName) ?? 0) + 1,

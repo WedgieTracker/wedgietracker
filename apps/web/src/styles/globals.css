@@ -56,11 +56,29 @@
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
-    --yellow: 65 100% 50%;
-    --pink: 300 100% 50%;
-    --darkpurple: 264 100% 9%;
+    /*
+      Brand palette, from the No Dunks badge: cream lettering on a grainy
+      blue-to-purple gradient. The older token names stay so every page picks
+      the palette up: "yellow" is the cream, "pink" the violet accent and
+      "darkpurple" the night background with its panel shades.
+    */
+    --cream: 44 66% 82.7%; /* #F0E1B6 */
+    --violet: 264 88% 66.1%; /* #9A5CF5 */
+    --night: 257 64% 11%; /* #140A2E */
+    --panel: 254 57% 16.5%; /* #1D1242 */
+    --yellow: var(--cream);
+    --yellow-dark: 44 50% 70%;
+    --yellow-darker: 43 35% 56.9%;
+    --pink: var(--violet);
+    --pink-dark: 263 65% 54.3%;
+    --pink-darker: 263 59% 41.4%;
+    --darkpurple: var(--night);
+    --darkpurple-light: var(--panel);
+    --darkpurple-lighter: 255 56% 23.1%;
+    --darkpurple-dark: 257 64% 8.8%;
+    --darkpurple-darker: 256 65% 6.7%;
     /* rgb version */
-    --darkpurple-rgb: 23 0 45;
+    --darkpurple-rgb: 20 10 46;
   }
   .dark {
     --background: 0 0% 3.9%;
@@ -116,9 +134,18 @@
 /* selection color */
 ::selection {
   /* background color */
-  background-color: #e5ff00;
+  background-color: hsl(var(--yellow));
   /* text color */
-  color: #000;
+  color: hsl(var(--night));
+}
+
+/* On cream surfaces a cream highlight disappears, so it turns violet there. */
+.bg-cream::selection,
+.bg-cream ::selection,
+.btn-sticker::selection,
+.btn-sticker ::selection {
+  background-color: hsl(var(--violet));
+  color: hsl(var(--cream));
 }
 
 .waves {
@@ -379,10 +406,10 @@
 @keyframes wt-hof-glow {
   0%,
   100% {
-    box-shadow: 0 0 0 0 rgba(255, 0, 255, 0.5);
+    box-shadow: 0 0 0 0 hsl(var(--pink) / 0.5);
   }
   50% {
-    box-shadow: 0 0 12px 3px rgba(255, 0, 255, 0.55);
+    box-shadow: 0 0 12px 3px hsl(var(--pink) / 0.55);
   }
 }
 .wt-bump {
@@ -414,5 +441,304 @@
   .wt-shine,
   .wt-hof {
     animation: none;
+  }
+}
+
+/* The No Dunks badge: blue in the top-left to purple in the bottom-right. */
+@utility bg-badge {
+  background-image: linear-gradient(
+    150deg,
+    #4769c5 0%,
+    #3650a1 22%,
+    #36378d 45%,
+    #441c77 75%,
+    #502394 100%
+  );
+}
+
+/* Buttons with cream text: darker than the badge so the text stays at 4.5:1. */
+/* GEMS, the wedgies outside the seasons: an icy gem gradient. */
+@utility bg-gem {
+  background-image: linear-gradient(
+    135deg,
+    #9be7ff 0%,
+    #7fb2ff 35%,
+    #b58cff 70%,
+    #f0b8ff 100%
+  );
+}
+
+@utility bg-button {
+  background-image: linear-gradient(
+    135deg,
+    #3f5dc2 0%,
+    #5543c9 50%,
+    #7438cf 100%
+  );
+}
+
+/* The brighter blue-to-violet used for the wave and the gauges. */
+@utility bg-glow {
+  background-image: linear-gradient(
+    135deg,
+    #5f84e6 0%,
+    #7b6bf0 45%,
+    #a65ff5 100%
+  );
+}
+
+/* The same, left to right, for the wave fill so it meets the wave's own gradient. */
+@utility bg-glow-x {
+  background-image: linear-gradient(
+    90deg,
+    #5f84e6 0%,
+    #7b6bf0 50%,
+    #a65ff5 100%
+  );
+}
+
+/* Cream numbers on the badge get a dark drop, like the No Dunks lettering. */
+@utility text-shadow-badge {
+  text-shadow:
+    0 0.04em 0 #2a1a5c,
+    0 0.08em 0.14em rgb(10 5 30 / 0.45);
+}
+
+/*
+  The main section button: a cream sticker with a dark ink border on a hard
+  violet shadow. It lifts on hover and presses flat into the shadow on tap.
+  On the gradient, add btn-sticker-dark for a night shadow that still shows.
+*/
+@utility btn-sticker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 54px;
+  border: 3px solid #2a1660;
+  border-radius: 16px;
+  background: hsl(var(--cream));
+  color: #2a1660;
+  font-weight: 900;
+  box-shadow: var(--sticker-off, 6px) var(--sticker-off, 6px) 0
+    var(--sticker-shadow, hsl(var(--violet)));
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+  &:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: calc(var(--sticker-off, 6px) + 2px)
+      calc(var(--sticker-off, 6px) + 2px) 0
+      var(--sticker-shadow, hsl(var(--violet)));
+  }
+  &:active {
+    transform: translate(var(--sticker-off, 6px), var(--sticker-off, 6px));
+    box-shadow: 0 0 0 var(--sticker-shadow, hsl(var(--violet)));
+  }
+  &:focus-visible {
+    outline: 2px solid hsl(var(--cream));
+    outline-offset: 4px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+}
+
+@utility btn-sticker-dark {
+  --sticker-shadow: hsl(var(--night));
+}
+
+/* The sticker with no hard shadow, where one would fight the background. */
+@utility btn-sticker-flat {
+  --sticker-shadow: transparent;
+}
+
+/* Film grain over a gradient, like the badge. */
+@utility grain {
+  position: relative;
+  isolation: isolate;
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    border-radius: inherit;
+    opacity: 0.24;
+    mix-blend-mode: soft-light;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+}
+
+/* The NEW WEDGIE! stamp on the calendar: thumps down once, then the ball's seams spin. */
+.wt-stamp-spin {
+  transform-box: fill-box;
+  transform-origin: center;
+  will-change: transform;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .wt-stamp-in {
+    animation: wt-stamp-in 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.3) 0.2s both;
+  }
+  .wt-stamp-patch {
+    animation: wt-fade-in 0.45s ease 0.2s both;
+  }
+  .wt-stamp-spin {
+    animation: wt-stamp-spin 6s linear 0.8s infinite;
+  }
+}
+@keyframes wt-stamp-in {
+  0% {
+    opacity: 0;
+    transform: rotate(-10deg) scale(2.2);
+  }
+  60% {
+    opacity: 1;
+    transform: rotate(-10deg) scale(0.92);
+  }
+  100% {
+    opacity: 1;
+    transform: rotate(-10deg) scale(1);
+  }
+}
+@keyframes wt-stamp-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes wt-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* Scrollbars in the palette: thin violet on night, for the page and any scrolling panel. */
+html {
+  scrollbar-color: rgb(154 92 245 / 0.45) hsl(var(--night));
+}
+@utility scrollbar-wt {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(154 92 245 / 0.5) transparent;
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: rgb(154 92 245 / 0.5);
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background: rgb(154 92 245 / 0.8);
+  }
+}
+
+/* The header's small sticker: thinner, tighter shadow, a nudge every few seconds. */
+@utility btn-sticker-sm {
+  --sticker-off: 3px;
+  min-height: 34px;
+  border-width: 2px;
+  border-radius: 10px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .wt-nudge {
+    animation: wt-nudge 7s ease-in-out 2s infinite;
+  }
+  .wt-steam {
+    animation: wt-steam 2.2s ease-in-out infinite;
+  }
+  .wt-steam:nth-child(2) {
+    animation-delay: 0.6s;
+  }
+}
+@keyframes wt-nudge {
+  0%,
+  88%,
+  100% {
+    rotate: 0deg;
+  }
+  91% {
+    rotate: -5deg;
+  }
+  94% {
+    rotate: 4deg;
+  }
+  97% {
+    rotate: -2deg;
+  }
+}
+@keyframes wt-steam {
+  0%,
+  100% {
+    opacity: 0;
+    translate: 0 2px;
+  }
+  50% {
+    opacity: 1;
+    translate: 0 -1px;
+  }
+}
+
+/* Support page: each new cup drops onto the stack; cup steam curls up. */
+@media (prefers-reduced-motion: no-preference) {
+  .wt-cup-drop {
+    animation: wt-cup-drop 0.5s cubic-bezier(0.3, 0.6, 0.4, 1.3) both;
+  }
+  .wt-attr {
+    animation: wt-attr 0.35s ease both;
+  }
+  .wt-cup-steam {
+    animation: wt-cup-steam 2.6s ease-in-out infinite;
+  }
+  .wt-cup-steam:nth-child(2) {
+    animation-delay: 0.8s;
+  }
+  .wt-cup-steam:nth-child(3) {
+    animation-delay: 1.6s;
+  }
+}
+@keyframes wt-cup-drop {
+  0% {
+    opacity: 0;
+    transform: translateY(-160px) rotate(-12deg);
+  }
+  70% {
+    opacity: 1;
+    transform: translateY(4px) rotate(2deg);
+  }
+  100% {
+    transform: none;
+  }
+}
+@keyframes wt-cup-steam {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  40% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-14px);
+  }
+}
+@keyframes wt-attr {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+/* The All wedgies count chip pops when a filter changes the number. */
+@media (prefers-reduced-motion: no-preference) {
+  .wt-count-pop {
+    animation: wt-count-pop 0.28s cubic-bezier(0.2, 0.9, 0.3, 1.4);
+  }
+}
+@keyframes wt-count-pop {
+  from {
+    transform: scale(0.8);
+    opacity: 0.4;
   }
 }

@@ -32,5 +32,15 @@ export function Counter({
     return () => cancelAnimationFrame(animationFrame);
   }, [end, duration]);
 
-  return format ? format(count) : count;
+  // The final value sits invisibly underneath and sets the exact size, with
+  // the counting value laid over it, so counting up never moves anything.
+  const final = format ? format(end) : end;
+  return (
+    <span className="inline-grid justify-items-center tabular-nums [&>*]:[grid-area:1/1]">
+      <span aria-hidden="true" className="invisible">
+        {final}
+      </span>
+      <span>{format ? format(count) : count}</span>
+    </span>
+  );
 }

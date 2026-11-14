@@ -11,6 +11,7 @@ import { Loader } from "~/components/shared/Loader";
 import Link from "next/link";
 import { Newsletter } from "~/components/home/Newsletter";
 import { generateMetadata } from "~/config/metadata";
+import { CoffeeScoreboardLive } from "~/components/home/CoffeeScoreboardLive";
 
 export const metadata = generateMetadata({
   title: "NBA Wedgie Tracker | Count, pace and history",
@@ -25,9 +26,11 @@ export default async function Home() {
         <Suspense fallback={<StatsSkeleton />}>
           <StatsWrapper />
         </Suspense>
-        <div className="bg-darkpurple-dark flex w-full flex-col items-center justify-center gap-12 px-4 py-8 md:w-3/5 md:px-8 md:py-8 lg:w-1/2">
+        <div className="bg-night flex w-full flex-col items-center justify-start gap-12 px-[18px] pt-0 pb-12 md:w-3/5 md:px-8 md:pt-6 lg:w-1/2">
           <Suspense fallback={<LoaderWrapper />}>
             <WedgieListWrapper />
+
+            <CoffeeScoreboardLive />
 
             <StandingsWrapper />
 
@@ -87,9 +90,9 @@ async function TotalWedgiesWrapper() {
   return (
     <div className="flex w-full max-w-2xl flex-col items-center justify-between gap-4">
       <div className="sm:text-wedgies-text flex flex-row items-center gap-4 text-3xl leading-none">
-        <span className="text-yellow text-[1.5em] font-black">{total}</span>
+        <span className="text-violet text-[1.5em] font-black">{total}</span>
         <div className="gap-.5 flex flex-col">
-          <span className="text-pink text-[0.6em] leading-none font-black uppercase">
+          <span className="text-cream text-[0.6em] leading-none font-black uppercase">
             Total Wedgies
           </span>
           <span className="mt-[0.2em] text-[0.4em] leading-none font-bold text-white/50 uppercase">
@@ -99,9 +102,9 @@ async function TotalWedgiesWrapper() {
       </div>
       <Link
         href="/seasons-history"
-        className="border-yellow bg-yellow text-button-text text-darkpurple hover:bg-darkpurple hover:text-yellow block rounded-full border-2 px-6 py-1 font-black uppercase transition-all duration-300"
+        className="btn-sticker text-button-text w-full max-w-2xl"
       >
-        Seasons History
+        Seasons history
       </Link>
     </div>
   );

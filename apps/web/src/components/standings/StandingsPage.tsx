@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { api } from "~/trpc/react";
 import { StandingsFilters } from "./StandingsFilters";
 import { StandingsGrid } from "./StandingsGrid";
-import { Cta } from "../shared/Cta";
 import { useSeasonFallback } from "~/hooks/use-season-fallback";
 
 export function StandingsPage() {
@@ -38,7 +37,7 @@ export function StandingsPage() {
 
   if (isLoading || isLoadingSeasonData) {
     return (
-      <div className="container mx-auto max-w-3xl text-white">
+      <div className="container mx-auto max-w-5xl text-white">
         <StandingsFilters
           selectedSeason={selectedSeason}
           setSelectedSeason={setSelectedSeason}
@@ -63,7 +62,7 @@ export function StandingsPage() {
   }
 
   return (
-    <div className="container mx-auto max-w-3xl text-white">
+    <div className="container mx-auto max-w-5xl text-white">
       {shouldShowPreviousSeason && (
         <div className="border-pink/30 bg-pink/20 mb-4 rounded-lg border p-4 text-center">
           <p className="text-pink text-sm font-bold">
@@ -85,15 +84,6 @@ export function StandingsPage() {
           teams={standings?.teams ?? []}
           isLoading={isLoading}
           currentSeason={selectedSeason}
-        />
-      </div>
-      <div className="mt-8 md:mt-16">
-        <Cta
-          links={[
-            { title: "All wedgies", url: "/all-wedgies" },
-            { title: "Stats for nerds", url: "/stats-for-nerds" },
-            { title: "Seasons history", url: "/seasons-history" },
-          ]}
         />
       </div>
     </div>

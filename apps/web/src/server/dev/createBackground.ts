@@ -82,13 +82,13 @@ function drawPlayerBox(
   const boxY = y - boxHeight / 2;
 
   // Draw rounded rectangle
-  ctx.fillStyle = "#17002d";
+  ctx.fillStyle = "#140a2e";
   ctx.beginPath();
   ctx.roundRect(1080 - maxWidth / 2, boxY, maxWidth, boxHeight, borderRadius);
   ctx.fill();
 
   // Draw both lines of text
-  ctx.fillStyle = "#dfff00";
+  ctx.fillStyle = "#f0e1b6";
   ctx.textAlign = "center";
   ctx.font = `${fontSize}px InterBlack`;
 
@@ -134,7 +134,7 @@ export async function createBackground(
     // Existing thumbnail logic
     const seasonFontSize = getFittedFontSize(ctx, season, 1600, 300);
     ctx.font = `${seasonFontSize}px InterBlack`;
-    ctx.fillStyle = "#17002d";
+    ctx.fillStyle = "#140a2e";
     ctx.textAlign = "center";
     ctx.fillText(season, width / 2, 2600);
 
@@ -145,7 +145,7 @@ export async function createBackground(
       1000,
     );
     ctx.font = `${numberFontSize}px InterBlack`;
-    ctx.fillStyle = "#ff00ff";
+    ctx.fillStyle = "#9a5cf5";
     ctx.textAlign = "center";
     ctx.fillText(number.toString(), width / 2 - 20, 2400);
 
@@ -155,24 +155,24 @@ export async function createBackground(
   } else if (type === "reel") {
     // Add the season
     ctx.font = "120px InterBlack";
-    ctx.fillStyle = "#17002d";
+    ctx.fillStyle = "#140a2e";
     ctx.textAlign = "center";
     ctx.fillText(season, width / 2, 1780);
 
     // New reel layout with scaled dimensions
     ctx.font = "280px InterBlack";
-    ctx.fillStyle = "#ff00ff";
+    ctx.fillStyle = "#9a5cf5";
     ctx.textAlign = "center";
     ctx.fillText(number.toString(), width / 2, 1700);
   } else {
     // Existing shorts logic
     ctx.font = "240px InterBlack";
-    ctx.fillStyle = "#17002d";
+    ctx.fillStyle = "#140a2e";
     ctx.textAlign = "center";
     ctx.fillText(season, width / 2, 3600);
 
     ctx.font = "560px InterBlack";
-    ctx.fillStyle = "#ff00ff";
+    ctx.fillStyle = "#9a5cf5";
     ctx.textAlign = "center";
     ctx.fillText(number.toString(), width / 2, 3440);
   }

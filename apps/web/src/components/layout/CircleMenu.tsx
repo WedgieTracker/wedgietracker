@@ -49,7 +49,7 @@ export function CircleMenu() {
       >
         {/* Yellow circle background */}
         <div
-          className="fixed top-0 right-0 size-[800px] rounded-full bg-[#e5ff00] transition-transform duration-500 ease-in-out md:top-5"
+          className="bg-yellow fixed top-0 right-0 size-[800px] rounded-full transition-transform duration-500 ease-in-out md:top-5"
           style={{
             transform: isMenuOpen
               ? "translate(35%, -50%) scale(1)"

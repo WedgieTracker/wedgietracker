@@ -6,7 +6,41 @@ on:
       - main
 
 jobs:
+  # Applies new SQL files in apps/web/migrations to Turso before the code that
+  # needs them is deployed. Each file runs once (tracked in _migrations).
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up pnpm
+        # Reads the version from packageManager in package.json.
+        uses: pnpm/action-setup@v6
+
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --filter @wedgietracker/web...
+
+      - name: Apply migrations
+        env:
+          TURSO_DATABASE_URL: ${{ secrets.TURSO_DATABASE_URL }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
+        working-directory: apps/web
+        run: |
+          if [ -z "$TURSO_DATABASE_URL" ] || [ -z "$TURSO_AUTH_TOKEN" ]; then
+            echo "::warning::TURSO_DATABASE_URL or TURSO_AUTH_TOKEN is not set, so migrations were skipped."
+            exit 0
+          fi
+          node scripts/migrate.mjs
+
   sync:
+    needs: migrate
     runs-on: ubuntu-latest
     steps:
       - name: Checkout public repository

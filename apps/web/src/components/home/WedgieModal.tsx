@@ -10,7 +10,6 @@ import type { Wedgie, VideoUrls } from "@wedgietracker/core/types/wedgie";
 import { useState } from "react";
 import { ShareButtons } from "~/components/shared/ShareButtons";
 import { WedgieVideoTabs } from "./WedgieVideoTabs";
-import { CourtPositionDiagram } from "./CourtPositionDiagram";
 import { WedgieInfoPanel } from "./WedgieInfoPanel";
 import { WedgieModalNav } from "./WedgieModalNav";
 import { NoDunksTweetLink } from "./NoDunksTweetLink";
@@ -120,13 +119,8 @@ export function WedgieModal({
           {/* On desktop the row takes the video's height and the details scroll
               inside it, so the modal keeps one size from wedgie to wedgie. */}
           <div className="relative w-full lg:w-[35%]">
-            <div className="lg:absolute lg:inset-0 lg:overflow-y-auto">
+            <div className="scrollbar-wt lg:absolute lg:inset-0 lg:overflow-y-auto">
               <WedgieInfoPanel wedgie={wedgie} />
-            </div>
-            {/* Pinned to the bottom of the labels column, so it never covers
-                the details beside it. */}
-            <div className="pointer-events-none absolute bottom-6 left-8 hidden w-[70px] lg:block">
-              <CourtPositionDiagram position={wedgie.position} />
             </div>
           </div>
         </div>

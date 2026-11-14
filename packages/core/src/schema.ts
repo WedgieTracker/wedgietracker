@@ -94,9 +94,24 @@ export const season = sqliteTable(
       .notNull()
       .$onUpdate(() => new Date().toISOString()),
     totalGames: integer("total_games").default(0).notNull(),
+    /** Coffees bought this season, kept up to date by coffee_checkout. */
+    coffees: integer("coffees").default(0).notNull(),
   },
   (table) => [index("season_name_idx").on(table.name)],
 );
+
+/**
+ * Each Stripe Checkout already added to a season's coffees, so a refreshed
+ * thanks page can't count the same coffees twice.
+ */
+export const coffeeCheckout = sqliteTable("coffee_checkout", {
+  sessionId: text("session_id").primaryKey(),
+  seasonName: text("season_name").notNull(),
+  coffees: integer("coffees").notNull(),
+  createdAt: text("created_at")
+    .default(sql`(CURRENT_TIMESTAMP)`)
+    .notNull(),
+});
 
 export const game = sqliteTable(
   "game",
