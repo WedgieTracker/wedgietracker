@@ -1,0 +1,2 @@
+# Throwaway test certificates and key for the App Store verifier tests, not secrets.
+!src/server/__fixtures__/app-store/*.pem

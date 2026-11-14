@@ -145,7 +145,7 @@ async function getCachedLatestWedgies() {
   return wedgies.map((w) => ({ ...w, types: typesMap.get(w.id) ?? [] }));
 }
 
-async function getCachedStats() {
+export async function getCachedStats() {
   "use cache";
   cacheTag(CACHE_TAGS.WEDGIE_DATA);
   cacheLife({ revalidate: 3600 });

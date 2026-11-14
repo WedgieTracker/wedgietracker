@@ -54,17 +54,30 @@ export async function recordCoffeeCheckout(
   const coffees = Math.round((session.amount_subtotal ?? 0) / COFFEE_CENTS);
   if (coffees < 1) return null;
 
+  const added = await addSeasonCoffees(sessionId, coffees);
+  return added === "no-season" ? null : coffees;
+}
+
+/**
+ * Adds coffees to the current season's total, once per key. The key is kept
+ * in coffee_checkout, so the same purchase sent again adds nothing. Returns
+ * "added", "duplicate" when the key was already counted, or "no-season".
+ */
+export async function addSeasonCoffees(
+  key: string,
+  coffees: number,
+): Promise<"added" | "duplicate" | "no-season"> {
   const settings = await db.query.global.findFirst({
     where: eq(global.id, 1),
     with: { currentSeason: true },
   });
-  if (!settings) return null;
+  if (!settings) return "no-season";
   const seasonName = settings.currentSeason.name;
 
   const added = await db.transaction(async (tx) => {
     const inserted = await tx
       .insert(coffeeCheckout)
-      .values({ sessionId, seasonName, coffees })
+      .values({ sessionId: key, seasonName, coffees })
       .onConflictDoNothing()
       .returning({ sessionId: coffeeCheckout.sessionId });
     if (inserted.length === 0) return false;
@@ -75,6 +88,7 @@ export async function recordCoffeeCheckout(
     return true;
   });
 
-  if (added) revalidateTag(CACHE_TAGS.COFFEES, { expire: 0 });
-  return coffees;
+  if (!added) return "duplicate";
+  revalidateTag(CACHE_TAGS.COFFEES, { expire: 0 });
+  return "added";
 }
