@@ -19,6 +19,17 @@ export function pickInitialVideo(
   return null;
 }
 
+/**
+ * The start time in a YouTube link, in seconds: `t=754`, `t=754s`,
+ * `t=12m34s`, `t=1h2m3s` or `start=754`, after `?`, `&` or `#`.
+ */
+export function startSeconds(url: string): number {
+  const m =
+    /[?&#](?:t|start)=(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s?)?(?=$|[&#])/.exec(url);
+  if (!m) return 0;
+  return Number(m[1] ?? 0) * 3600 + Number(m[2] ?? 0) * 60 + Number(m[3] ?? 0);
+}
+
 /** Undefined when no video id can be read, rather than an embed of "undefined". */
 function toYoutubeEmbed(url: string): string | undefined {
   const videoIdMatch =
@@ -28,8 +39,8 @@ function toYoutubeEmbed(url: string): string | undefined {
   const videoId = videoIdMatch?.[1];
   if (!videoId) return undefined;
 
-  const timeMatch = /[?&](?:t|start)=(\d+)/.exec(url);
-  const startTime = timeMatch?.[1] ?? "";
+  const seconds = startSeconds(url);
+  const startTime = seconds ? String(seconds) : "";
 
   const embedUrl = `https://www.youtube.com/embed/${videoId}`;
   return startTime ? `${embedUrl}?start=${startTime}` : embedUrl;
