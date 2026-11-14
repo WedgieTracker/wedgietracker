@@ -61,11 +61,13 @@ export function WaveCounterPanel({
             {
               fontSize: t.bigNumber,
               lineHeight: t.bigNumber * 0.88,
+              // The padding keeps the tops of the digits from being clipped.
               paddingTop: t.bigNumber * 0.12,
-              // The digits' ink sits high in the line box, close under the
-              // headline and far above WEDGIES. Nudging it down by the
-              // difference evens the two gaps without moving anything else.
-              transform: [{ translateY: t.bigNumber * 0.165 }],
+              // Their ink sits high in the line box, close under the headline
+              // and far above WEDGIES: nudge it down to even the two gaps,
+              // then pull the whole number up so both stay tight.
+              transform: [{ translateY: t.bigNumber * 0.145 }],
+              marginTop: -t.bigNumber * 0.11,
             },
             badgeTextShadow(t.bigNumber),
             value === null && styles.hidden,
