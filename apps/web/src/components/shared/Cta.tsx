@@ -17,7 +17,7 @@ export function Cta({ links }: CtaProps) {
 
   return (
     <div className="bg-cream text-night @container flex h-full w-full flex-col rounded-[22px] p-5 shadow-[0_12px_28px_rgb(5_2_20/0.45)] md:p-6">
-      <h2 className="text-[22px] leading-none font-black tracking-[-0.03em]">
+      <h2 className="text-center text-[22px] leading-none font-black tracking-[-0.03em]">
         Find out more
       </h2>
       <div className="mt-4 mb-6 flex flex-col gap-2.5 @lg:flex-row">

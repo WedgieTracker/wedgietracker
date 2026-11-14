@@ -1,5 +1,5 @@
 import { PageHeading } from "~/components/shared/PageHeading";
-import { PillLabel } from "./WedgieFilters";
+import { PillLabel } from "~/components/shared/FilterPopover";
 
 /**
  * What All wedgies shows while it loads: the same heading, search, pills and

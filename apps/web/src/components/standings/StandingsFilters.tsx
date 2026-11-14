@@ -1,6 +1,15 @@
 "use client";
 
+import { useCallback, useRef, useState } from "react";
 import { api } from "~/trpc/react";
+import {
+  CountRow,
+  FilterPill,
+  GroupLabel,
+  PillLabel,
+  POPOVER_CLASS,
+  useCloseOnOutside,
+} from "~/components/shared/FilterPopover";
 
 interface StandingsFiltersProps {
   selectedSeason: string;
@@ -10,6 +19,10 @@ interface StandingsFiltersProps {
   isLoading: boolean;
 }
 
+/**
+ * A Season pill that opens the seasons with how many wedgies each had, as on
+ * All wedgies, and a switch for counting opponents' wedgies too.
+ */
 export function StandingsFilters({
   selectedSeason,
   setSelectedSeason,
@@ -18,69 +31,85 @@ export function StandingsFilters({
   isLoading,
 }: StandingsFiltersProps) {
   const { data: allWedgies } = api.wedgie.getAll.useQuery();
+  const [open, setOpen] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const close = useCallback(() => setOpen(false), []);
+  useCloseOnOutside(open, wrapRef, close);
 
-  const named = Array.from(
-    new Set(
-      allWedgies?.flatMap((w) => (w.seasonName ? [w.seasonName] : [])) ?? [],
-    ),
+  const counts = new Map<string, number>();
+  for (const w of allWedgies ?? []) {
+    if (w.seasonName)
+      counts.set(w.seasonName, (counts.get(w.seasonName) ?? 0) + 1);
+  }
+  // Newest season first, GEMS on their own at the end.
+  const seasons = [...counts.keys()]
+    .filter((s) => s !== "GEMS")
+    .sort()
+    .reverse();
+  const max = Math.max(0, ...counts.values());
+  const pick = (value: string) => {
+    setSelectedSeason(value);
+    setOpen(false);
+  };
+  const row = (value: string, label: string, count: number) => (
+    <CountRow
+      key={label}
+      value={value}
+      label={label}
+      count={count}
+      max={max}
+      on={selectedSeason === value}
+      onPick={() => pick(value)}
+    />
   );
-  // Newest season first, GEMS last.
-  const seasons = [
-    ...named
-      .filter((s) => s !== "GEMS")
-      .sort()
-      .reverse(),
-    ...(named.includes("GEMS") ? ["GEMS"] : []),
-  ];
-  const chips: [string, string][] = [
-    ["", "All time"],
-    ...seasons.map((s): [string, string] => [s, s]),
-  ];
 
   return (
-    <div className={isLoading ? "opacity-40" : undefined}>
-      <div
-        role="group"
-        aria-label="Season"
-        className="-mx-[18px] flex [scrollbar-width:none] gap-2 overflow-x-auto px-[18px] pt-0.5 pb-1.5 md:mx-0 md:flex-wrap md:px-0"
+    <div
+      ref={wrapRef}
+      className={`relative flex flex-wrap gap-1.5 ${isLoading ? "opacity-40" : ""}`}
+    >
+      <FilterPill
+        set={!!selectedSeason}
+        open={open}
+        onClick={() => setOpen(!open)}
       >
-        {chips.map(([value, label]) => (
-          <button
-            key={label}
-            type="button"
-            aria-pressed={selectedSeason === value}
-            onClick={() => setSelectedSeason(value)}
-            className="bg-panel border-violet/20 text-cream/70 aria-pressed:bg-cream aria-pressed:border-cream aria-pressed:text-night focus-visible:outline-cream min-h-10 shrink-0 rounded-full border px-[15px] text-sm font-extrabold focus-visible:outline-2"
-          >
-            {label}
-          </button>
-        ))}
-      </div>
+        <PillLabel kind="season">{selectedSeason || "All time"}</PillLabel>
+      </FilterPill>
 
-      <div className="bg-panel border-violet/20 mt-4 flex items-center justify-between gap-3 rounded-2xl border px-4 py-3 md:max-w-[520px]">
-        <div>
-          <div className="text-cream text-[14.5px] font-extrabold">
-            Including opponents
-          </div>
-          <div className="text-cream/50 mt-0.5 text-[12.5px] font-bold">
-            Teams also count the other side&apos;s wedgies in their games
-          </div>
-        </div>
-        <button
-          type="button"
-          role="switch"
-          aria-checked={includeOpponents}
-          aria-label="Including opponents"
-          onClick={() => setIncludeOpponents(!includeOpponents)}
-          className="aria-checked:bg-button bg-cream/20 focus-visible:outline-cream relative h-[30px] w-[50px] shrink-0 rounded-full focus-visible:outline-2"
+      <button
+        type="button"
+        role="switch"
+        aria-checked={includeOpponents}
+        onClick={() => setIncludeOpponents(!includeOpponents)}
+        title="Teams also count the other side's wedgies in their games"
+        className="bg-panel border-violet/30 text-cream hover:border-cream/60 focus-visible:outline-cream inline-flex min-h-10 items-center gap-2.5 rounded-xl border pr-2 pl-3 text-[13.5px] font-extrabold transition-colors focus-visible:outline-2"
+      >
+        Including opponents
+        <span
+          aria-hidden="true"
+          className={`relative h-[22px] w-9 rounded-full transition-colors ${includeOpponents ? "bg-button" : "bg-cream/20"}`}
         >
           <span
-            className={`bg-cream absolute top-[3px] left-[3px] size-6 rounded-full transition-transform ${
-              includeOpponents ? "translate-x-5" : "bg-cream/70"
+            className={`absolute top-[3px] left-[3px] size-4 rounded-full transition-transform ${
+              includeOpponents ? "bg-cream translate-x-3.5" : "bg-cream/70"
             }`}
           />
-        </button>
-      </div>
+        </span>
+      </button>
+
+      {open && (
+        <div role="group" aria-label="Season" className={POPOVER_CLASS}>
+          {row("", "All time", allWedgies?.length ?? 0)}
+          <GroupLabel>Seasons</GroupLabel>
+          {seasons.map((s) => row(s, s, counts.get(s) ?? 0))}
+          {counts.has("GEMS") && (
+            <>
+              <GroupLabel>Outside the seasons</GroupLabel>
+              {row("GEMS", "GEMS", counts.get("GEMS") ?? 0)}
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 }

@@ -7,7 +7,15 @@ import {
 import { api } from "~/trpc/react";
 import { PageHeading } from "~/components/shared/PageHeading";
 import {
-  useEffect,
+  CountRow,
+  FilterPill,
+  GroupLabel,
+  PillLabel,
+  POPOVER_CLASS,
+  useCloseOnOutside,
+} from "~/components/shared/FilterPopover";
+import {
+  useCallback,
   useRef,
   useState,
   type Dispatch,
@@ -35,21 +43,6 @@ const LABELS: Record<Kind, { label: string; any: string }> = {
   moment: { label: "When", any: "Anytime" },
 };
 
-/** A small cut gem, marking GEMS (wedgies that sit outside the seasons). */
-function GemIcon() {
-  return (
-    <svg viewBox="0 0 12 12" aria-hidden="true" className="size-3">
-      <path d="M3 1.5h6L11 4.5 6 10.5 1 4.5z" fill="#9be7ff" />
-      <path
-        d="M1 4.5h10M4.2 1.5 6 4.5l1.8-3M6 4.5v6"
-        stroke="rgb(20 10 46 / 0.35)"
-        strokeWidth=".7"
-        fill="none"
-      />
-    </svg>
-  );
-}
-
 /**
  * A player or team search, then Season, Type and When pills that each open a
  * popover of choices. A pill turns cream once it's set.
@@ -61,6 +54,7 @@ export function WedgieFilters({
 }: FiltersProps) {
   const { data: allWedgies, isLoading } = api.wedgie.getAll.useQuery();
   const [open, setOpen] = useState<Kind | null>(null);
+  const closePopover = useCallback(() => setOpen(null), []);
   const wrapRef = useRef<HTMLDivElement>(null);
 
   const named = Array.from(
@@ -102,24 +96,7 @@ export function WedgieFilters({
     moment: counted("moment", [...MOMENT_FILTERS]),
   };
 
-  useEffect(() => {
-    if (!open) return;
-    const close = (e: Event) => {
-      if (e instanceof KeyboardEvent && e.key !== "Escape") return;
-      if (
-        e instanceof PointerEvent &&
-        wrapRef.current?.contains(e.target as Node)
-      )
-        return;
-      setOpen(null);
-    };
-    document.addEventListener("pointerdown", close);
-    document.addEventListener("keydown", close);
-    return () => {
-      document.removeEventListener("pointerdown", close);
-      document.removeEventListener("keydown", close);
-    };
-  }, [open]);
+  useCloseOnOutside(open !== null, wrapRef, closePopover);
 
   const set = (kind: Kind, value: string) => {
     setFilters((prev) => ({ ...prev, [kind]: value }));
@@ -134,50 +111,16 @@ export function WedgieFilters({
     label: string,
     count: number,
     max: number,
-  ) => {
-    const on = filters[kind] === value;
-    return (
-      <button
-        key={label}
-        type="button"
-        aria-pressed={on}
-        onClick={() => set(kind, value)}
-        className={`focus-visible:outline-cream grid min-h-10 w-full grid-cols-[7.5rem_1fr_30px_14px] items-center gap-2.5 rounded-[10px] px-2.5 text-left text-sm font-extrabold transition-colors focus-visible:outline-2 ${
-          on
-            ? "bg-cream text-night"
-            : `text-cream/85 hover:bg-violet/15 ${count ? "" : "opacity-40"}`
-        }`}
-      >
-        <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
-          {value === "GEMS" && <GemIcon />}
-          {label}
-        </span>
-        <span
-          aria-hidden="true"
-          className={`h-1.5 ${value ? "" : "invisible"} overflow-hidden rounded-full ${on ? "bg-night/15" : "bg-violet/20"}`}
-        >
-          <span
-            className={`block h-full rounded-full ${on ? "bg-night" : "bg-button"}`}
-            style={{
-              width: `${max ? Math.max(count ? 4 : 0, (count / max) * 100) : 0}%`,
-            }}
-          />
-        </span>
-        <span
-          className={`text-right text-[12.5px] tabular-nums ${on ? "text-night/60" : "text-cream/55"}`}
-        >
-          {count}
-        </span>
-        <span aria-hidden="true" className="text-[13px]">
-          {on ? "✓" : ""}
-        </span>
-      </button>
-    );
-  };
-  const groupLabel = (text: string) => (
-    <div className="text-cream/45 px-2.5 pt-2 pb-1 text-[11px] font-black tracking-[0.08em] uppercase">
-      {text}
-    </div>
+  ) => (
+    <CountRow
+      key={label}
+      value={value}
+      label={label}
+      count={count}
+      max={max}
+      on={filters[kind] === value}
+      onPick={() => set(kind, value)}
+    />
   );
   const popover = (kind: Kind) => {
     const list = choices[kind];
@@ -193,11 +136,11 @@ export function WedgieFilters({
           countFor(kind, ""),
           countFor(kind, ""),
         )}
-        {kind === "season" && groupLabel("Seasons")}
+        {kind === "season" && <GroupLabel>Seasons</GroupLabel>}
         {regular.map((c) => row(kind, c.value, c.value, c.count, max))}
         {gems && (
           <>
-            {groupLabel("Outside the seasons")}
+            <GroupLabel>Outside the seasons</GroupLabel>
             {row(kind, gems.value, gems.value, gems.count, max)}
           </>
         )}
@@ -283,29 +226,21 @@ export function WedgieFilters({
           {(Object.keys(LABELS) as Kind[]).map((kind) => {
             const value = filters[kind];
             return (
-              <button
+              <FilterPill
                 key={kind}
-                type="button"
-                aria-expanded={open === kind}
+                set={!!value}
+                open={open === kind}
                 onClick={() => setOpen(open === kind ? null : kind)}
-                className={`focus-visible:outline-cream inline-flex min-h-10 items-center gap-1.5 rounded-xl border px-3 text-[13.5px] font-extrabold transition-colors focus-visible:outline-2 ${
-                  value
-                    ? "bg-cream border-cream text-night"
-                    : "bg-panel border-violet/30 text-cream hover:border-cream/60"
-                }`}
               >
                 <PillLabel kind={kind}>{value || LABELS[kind].label}</PillLabel>
-                <span aria-hidden="true" className="text-[11px] opacity-60">
-                  ▾
-                </span>
-              </button>
+              </FilterPill>
             );
           })}
           {open && (
             <div
               role="group"
               aria-label={LABELS[open].label}
-              className="bg-panel border-violet/35 scrollbar-wt absolute top-12 left-0 z-20 max-h-[min(340px,60svh)] w-full overflow-y-auto rounded-2xl border p-2 shadow-[0_14px_30px_rgb(5_2_20/0.6)] sm:w-[380px]"
+              className={POPOVER_CLASS}
             >
               {popover(open)}
             </div>
@@ -313,28 +248,5 @@ export function WedgieFilters({
         </div>
       </div>
     </div>
-  );
-}
-
-/**
- * A pill's label. The Season pill is sized for its widest value (a season
- * like 2026/27) so it doesn't grow, and push Type and When along, when the
- * default season fills in after loading.
- */
-export function PillLabel({
-  kind,
-  children,
-}: {
-  kind: string;
-  children: React.ReactNode;
-}) {
-  if (kind !== "season") return <>{children}</>;
-  return (
-    <span className="inline-grid">
-      <span aria-hidden="true" className="invisible [grid-area:1/1]">
-        0000/00
-      </span>
-      <span className="[grid-area:1/1]">{children}</span>
-    </span>
   );
 }
