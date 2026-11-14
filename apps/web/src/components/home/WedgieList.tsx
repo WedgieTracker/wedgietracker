@@ -37,7 +37,7 @@ export function WedgieList({ wedgies }: WedgieListProps) {
       </div>
       <Link
         href="/all-wedgies"
-        className="bg-button text-cream text-button-text focus-visible:outline-cream mt-[18px] flex min-h-[54px] items-center justify-center rounded-full font-black transition-opacity duration-300 hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2"
+        className="btn-sticker text-button-text mt-[18px]"
       >
         See all wedgies
       </Link>

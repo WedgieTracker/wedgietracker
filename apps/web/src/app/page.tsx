@@ -117,7 +117,7 @@ async function TotalWedgiesWrapper() {
       </div>
       <Link
         href="/seasons-history"
-        className="bg-button text-cream text-button-text focus-visible:outline-cream flex min-h-[54px] w-full max-w-2xl items-center justify-center rounded-full font-black transition-opacity duration-300 hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2"
+        className="btn-sticker text-button-text w-full max-w-2xl"
       >
         Seasons history
       </Link>

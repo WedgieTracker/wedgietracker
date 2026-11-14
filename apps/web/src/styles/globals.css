@@ -484,6 +484,41 @@
     0 0.08em 0.14em rgb(10 5 30 / 0.45);
 }
 
+/*
+  The main section button: a cream sticker with a dark ink border on a hard
+  violet shadow. It lifts on hover and presses flat into the shadow on tap.
+*/
+@utility btn-sticker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 54px;
+  border: 3px solid #2a1660;
+  border-radius: 16px;
+  background: hsl(var(--cream));
+  color: #2a1660;
+  font-weight: 900;
+  box-shadow: 6px 6px 0 hsl(var(--violet));
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+  &:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 8px 8px 0 hsl(var(--violet));
+  }
+  &:active {
+    transform: translate(6px, 6px);
+    box-shadow: 0 0 0 hsl(var(--violet));
+  }
+  &:focus-visible {
+    outline: 2px solid hsl(var(--cream));
+    outline-offset: 4px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+}
+
 /* Film grain over a gradient, like the badge. */
 @utility grain {
   position: relative;
