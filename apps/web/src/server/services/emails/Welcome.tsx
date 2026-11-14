@@ -77,6 +77,6 @@ const image = {
 };
 
 const link = {
-  color: "#ebff00",
+  color: "#f0e1b6",
   textDecoration: "none",
 };

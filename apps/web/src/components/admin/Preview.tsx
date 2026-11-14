@@ -65,13 +65,13 @@ function drawPlayerBox(
   const boxY = y - boxHeight / 2;
 
   // Draw rounded rectangle
-  ctx.fillStyle = "#17002d";
+  ctx.fillStyle = "#140a2e";
   ctx.beginPath();
   ctx.roundRect(540 - maxWidth / 2, boxY, maxWidth, boxHeight, borderRadius);
   ctx.fill();
 
   // Draw both lines of text
-  ctx.fillStyle = "#dfff00";
+  ctx.fillStyle = "#f0e1b6";
   ctx.textAlign = "center";
   ctx.font = `${fontSize}px InterBlack`;
 
@@ -126,23 +126,23 @@ export function Preview({
 
             // Add the season
             ctx.font = "120px InterBlack";
-            ctx.fillStyle = "#17002d";
+            ctx.fillStyle = "#140a2e";
             ctx.textAlign = "center";
             ctx.fillText(season, 540, 1800);
 
             // Add the number
             ctx.font = "280px InterBlack";
-            ctx.fillStyle = "#ff00ff";
+            ctx.fillStyle = "#9a5cf5";
             ctx.textAlign = "center";
             ctx.fillText(number.toString(), 540, 1720);
           } else {
             ctx.font = "150px InterBlack";
-            ctx.fillStyle = "#17002d";
+            ctx.fillStyle = "#140a2e";
             ctx.textAlign = "center";
             ctx.fillText(season, 540, 1300);
 
             ctx.font = "500px InterBlack";
-            ctx.fillStyle = "#ff00ff";
+            ctx.fillStyle = "#9a5cf5";
             ctx.textAlign = "center";
             ctx.fillText(number.toString(), 530, 1200);
 
