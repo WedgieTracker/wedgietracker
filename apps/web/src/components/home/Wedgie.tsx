@@ -36,7 +36,7 @@ export function Wedgie({
     <>
       <button
         type="button"
-        className={`group bg-panel border-violet/20 hover:border-violet/60 focus-visible:outline-cream grid w-full grid-cols-[64px_minmax(0,1fr)_76px_30px] items-center gap-3 rounded-[20px] border py-3.5 pr-3.5 pl-[18px] text-left transition-[background-color,border-color,box-shadow] duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 ${
+        className={`group bg-panel border-violet/20 hover:border-violet/60 focus-visible:outline-cream grid w-full grid-cols-[62px_minmax(0,1fr)_76px_30px] items-center gap-3 rounded-[20px] border py-3.5 pr-3.5 pl-[18px] text-left transition-[background-color,border-color,box-shadow] duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 ${
           variant === "small" ? "min-h-20" : "min-h-[84px]"
         }`}
         onClick={() => {
