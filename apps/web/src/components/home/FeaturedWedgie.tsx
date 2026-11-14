@@ -55,9 +55,6 @@ function QuartersBar({ wedgie }: { wedgie: WedgieWithTypes }) {
           );
         })}
       </span>
-      <span className="text-cream mt-2 block text-[13px] font-black">
-        {timeline.label}
-      </span>
     </span>
   );
 }
