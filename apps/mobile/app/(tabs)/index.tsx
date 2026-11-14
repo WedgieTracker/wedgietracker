@@ -8,16 +8,20 @@ import {
   View,
 } from "react-native";
 
+import { CoffeeScoreboard } from "@/components/CoffeeScoreboard";
 import { FeaturedWedgie } from "@/components/FeaturedWedgie";
 import { HeroStats } from "@/components/HeroStats";
 import { Loader } from "@/components/Loader";
 import { Logo } from "@/components/Logo";
+import { HiddenHeading } from "@/components/PageHeading";
 import { PlayersTeams } from "@/components/PlayersTeams";
 import { ErrorState } from "@/components/States";
 import { StickerButton } from "@/components/StickerButton";
 import { TopSafeArea } from "@/components/TopSafeArea";
 import { WedgieRow } from "@/components/WedgieRow";
 import { api } from "@/lib/api";
+import { FluidWidth } from "@/lib/fluid";
+import { useWide } from "@/lib/wide";
 import { useTabBarClearance } from "@/lib/layout";
 import { colors, fonts, space } from "@/lib/theme";
 import { heroForScreenshot, latestForScreenshot } from "@/lib/screenshot";
@@ -39,6 +43,11 @@ export default function HomeScreen() {
   const standings = api.wedgie.getTopStandings.useQuery();
   const total = api.wedgie.getTotalWedgies.useQuery();
   const seasons = api.season.getAllWithStats.useQuery();
+  // Not on every server yet, so a failure only hides the board.
+  const coffees = api.donations.getSeasonCoffees.useQuery(undefined, {
+    retry: 1,
+  });
+  const { wide, width } = useWide();
 
   // Which season set the record, for the gauge's note, worked out from the
   // seasons list where the stats do not carry it.
@@ -59,6 +68,7 @@ export default function HomeScreen() {
     void latest.refetch();
     void standings.refetch();
     void total.refetch();
+    void coffees.refetch();
   };
 
   const loadError =
@@ -92,97 +102,117 @@ export default function HomeScreen() {
           </View>
         ) : null}
 
-        <HeroStats
-          stats={stats.data ? heroForScreenshot(stats.data) : null}
-          recordSeason={recordSeason}
-          onMoreStats={() => router.push("/stats")}
-        />
-
-        {columnReady ? (
-          <View style={styles.column}>
-            {first ? (
-              <View style={styles.section}>
-                <Text style={styles.heading} allowFontScaling={false}>
-                  Latest wedgies
-                </Text>
-                <FeaturedWedgie
-                  wedgie={first}
-                  onPress={() => router.push(`/wedgie/${first.id}`)}
-                />
-                <View style={styles.rows}>
-                  {rest.map((wedgie) => (
-                    <WedgieRow
-                      key={wedgie.id}
-                      wedgie={wedgie}
-                      onPress={() => router.push(`/wedgie/${wedgie.id}`)}
-                    />
-                  ))}
-                </View>
-                <StickerButton
-                  label="See all wedgies"
-                  onPress={() => router.push("/all-wedgies")}
-                  style={styles.sectionButton}
-                />
-              </View>
-            ) : null}
-
-            {/* The web hides the leaders until the season has a wedgie. */}
-            {standings.data?.hasWedgiesThisSeason ? (
-              <View style={styles.section}>
-                <Text style={styles.heading} allowFontScaling={false}>
-                  Leaders
-                </Text>
-                <PlayersTeams
-                  players={standings.data.players}
-                  teams={standings.data.teams}
-                  showCount={false}
-                  onPressItem={(name, kind) =>
-                    router.push({
-                      pathname: "/all-wedgies",
-                      params: kind === "teams" ? { wt: name } : { wp: name },
-                    })
-                  }
-                />
-                <StickerButton
-                  label="Full standings"
-                  onPress={() => router.push("/standings")}
-                  style={styles.sectionButton}
-                />
-              </View>
-            ) : (
-              <StickerButton
-                label="Full standings"
-                onPress={() => router.push("/standings")}
+        <View style={wide && styles.split}>
+          <View style={wide && styles.half}>
+            {/* Sized as on a phone as wide as this column. */}
+            <FluidWidth.Provider value={wide ? width / 2 : null}>
+              <HeroStats
+                stats={stats.data ? heroForScreenshot(stats.data) : null}
+                recordSeason={recordSeason}
+                onMoreStats={() => router.push("/stats")}
+                onExplainPace={() => router.push("/pace")}
               />
-            )}
+            </FluidWidth.Provider>
+          </View>
 
-            {typeof total.data === "number" ? (
-              <View style={styles.total}>
-                <View style={styles.totalRow}>
-                  <Text style={styles.totalNumber} allowFontScaling={false}>
-                    {total.data}
-                  </Text>
-                  <View>
-                    <Text style={styles.totalLabel} allowFontScaling={false}>
-                      TOTAL WEDGIES
-                    </Text>
-                    <Text style={styles.totalSince} allowFontScaling={false}>
-                      FROM THE 2014/15 SEASON
-                    </Text>
+          <View style={wide && styles.half}>
+            {columnReady ? (
+              <View style={[styles.column, wide && styles.columnWide]}>
+                {first ? (
+                  <View style={styles.section}>
+                    <HiddenHeading>Latest wedgies</HiddenHeading>
+                    <FeaturedWedgie
+                      wedgie={first}
+                      onPress={() => router.push(`/wedgie/${first.id}`)}
+                    />
+                    <View style={styles.rows}>
+                      {rest.map((wedgie) => (
+                        <WedgieRow
+                          key={wedgie.id}
+                          wedgie={wedgie}
+                          onPress={() => router.push(`/wedgie/${wedgie.id}`)}
+                        />
+                      ))}
+                    </View>
+                    <StickerButton
+                      label="See all wedgies"
+                      onPress={() => router.push("/all-wedgies")}
+                      style={styles.sectionButton}
+                    />
                   </View>
-                </View>
-                <StickerButton
-                  label="Seasons history"
-                  onPress={() => router.push("/seasons?from=Home")}
-                />
+                ) : null}
+
+                {coffees.error ? null : (
+                  <CoffeeScoreboard
+                    data={coffees.data ?? null}
+                    onSupport={() => router.push("/support")}
+                  />
+                )}
+
+                {/* The web hides the leaders until the season has a wedgie. */}
+                {standings.data?.hasWedgiesThisSeason ? (
+                  <View style={styles.section}>
+                    <HiddenHeading>Leaders</HiddenHeading>
+                    <PlayersTeams
+                      players={standings.data.players}
+                      teams={standings.data.teams}
+                      showCount={false}
+                      onPressItem={(name, kind) =>
+                        router.push({
+                          pathname: "/all-wedgies",
+                          params:
+                            kind === "teams" ? { wt: name } : { wp: name },
+                        })
+                      }
+                    />
+                    <StickerButton
+                      label="Full standings"
+                      onPress={() => router.push("/standings")}
+                      style={styles.sectionButton}
+                    />
+                  </View>
+                ) : (
+                  <StickerButton
+                    label="Full standings"
+                    onPress={() => router.push("/standings")}
+                  />
+                )}
+
+                {typeof total.data === "number" ? (
+                  <View style={styles.total}>
+                    <View style={styles.totalRow}>
+                      <Text style={styles.totalNumber} allowFontScaling={false}>
+                        {total.data}
+                      </Text>
+                      <View>
+                        <Text
+                          style={styles.totalLabel}
+                          allowFontScaling={false}
+                        >
+                          TOTAL WEDGIES
+                        </Text>
+                        <Text
+                          style={styles.totalSince}
+                          allowFontScaling={false}
+                        >
+                          FROM THE 2014/15 SEASON
+                        </Text>
+                      </View>
+                    </View>
+                    <StickerButton
+                      label="Seasons history"
+                      onPress={() => router.push("/seasons?from=Home")}
+                    />
+                  </View>
+                ) : null}
               </View>
-            ) : null}
+            ) : loadError ? null : (
+              <View style={styles.loading}>
+                <Loader size={112} />
+              </View>
+            )}
           </View>
-        ) : loadError ? null : (
-          <View style={styles.loading}>
-            <Loader size={112} />
-          </View>
-        )}
+        </View>
       </ScrollView>
     </TopSafeArea>
   );
@@ -210,13 +240,10 @@ const styles = StyleSheet.create({
     gap: 48,
   },
   section: { width: "100%" },
-  heading: {
-    marginBottom: 16,
-    fontFamily: fonts.extraBold,
-    fontSize: 21,
-    letterSpacing: -0.2,
-    color: colors.cream,
-  },
+  // Hero on the left, wedgies and leaders on the right, as on the desktop site.
+  split: { flexDirection: "row", alignItems: "flex-start" },
+  half: { flex: 1 },
+  columnWide: { paddingTop: 0 },
   rows: { marginTop: 12, gap: 10 },
   sectionButton: { marginTop: 18 },
   loading: { minHeight: 240, alignItems: "center", justifyContent: "center" },

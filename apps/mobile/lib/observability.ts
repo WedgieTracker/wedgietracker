@@ -153,7 +153,8 @@ export type TrackedEvent =
   | "wt_wedgie_opened"
   | "wt_video_source_switched"
   | "wt_filter_applied"
-  | "wt_standings_tapped";
+  | "wt_standings_tapped"
+  | "wt_coffee_bought";
 
 /** Analytics values are JSON on the wire, so the type says so. */
 type TrackProperties = Record<string, string | number | boolean | null>;
