@@ -10,6 +10,11 @@ export const donationsRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input }) => {
+      // A preview deployment sends buyers back to itself, not to the live site.
+      const siteUrl =
+        process.env.VERCEL_ENV === "preview" && process.env.VERCEL_URL
+          ? `https://${process.env.VERCEL_URL}`
+          : process.env.NEXTAUTH_URL;
       const session = await stripe.checkout.sessions.create({
         line_items: [
           {
@@ -29,8 +34,8 @@ export const donationsRouter = createTRPCRouter({
         },
         mode: "payment",
         // Stripe fills in the session id, so the thanks page can count the coffees.
-        success_url: `${process.env.NEXTAUTH_URL}/support-us/thanks?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${process.env.NEXTAUTH_URL}/support-us`,
+        success_url: `${siteUrl}/support-us/thanks?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${siteUrl}/support-us`,
       });
 
       return session.url;
