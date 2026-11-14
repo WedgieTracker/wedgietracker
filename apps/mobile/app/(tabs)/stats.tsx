@@ -1,4 +1,5 @@
 import { useRouter } from "expo-router";
+import { useRef } from "react";
 import {
   RefreshControl,
   ScrollView,
@@ -21,6 +22,7 @@ import { WaveCounterPanel } from "@/components/WaveCounterPanel";
 import { api, type RouterOutputs } from "@/lib/api";
 import { FluidWidth } from "@/lib/fluid";
 import { useTabBarClearance } from "@/lib/layout";
+import { useShotScroll } from "@/lib/screenshot";
 import { badgeTextShadow, colors, fonts } from "@/lib/theme";
 import { useWide } from "@/lib/wide";
 import { TEAMS } from "@wedgietracker/core/utils/teamAliases";
@@ -60,6 +62,8 @@ export default function StatsScreen() {
   const nerd = api.wedgie.getNerdStats.useQuery();
   const extras = api.wedgie.getNerdExtras.useQuery(undefined, { retry: 1 });
   const tabBar = useTabBarClearance();
+  const shotRef = useRef<React.ComponentRef<typeof ScrollView>>(null);
+  useShotScroll(shotRef);
   const { wide, width } = useWide();
   const router = useRouter();
 
@@ -82,6 +86,7 @@ export default function StatsScreen() {
   return (
     <TopSafeArea style={styles.safe}>
       <ScrollView
+        ref={shotRef}
         contentContainerStyle={[styles.content, { paddingBottom: tabBar }]}
         showsVerticalScrollIndicator={false}
         refreshControl={

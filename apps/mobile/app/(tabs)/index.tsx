@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
 import {
   RefreshControl,
   ScrollView,
@@ -24,7 +24,11 @@ import { FluidWidth } from "@/lib/fluid";
 import { useWide } from "@/lib/wide";
 import { useTabBarClearance } from "@/lib/layout";
 import { colors, fonts, space } from "@/lib/theme";
-import { heroForScreenshot, latestForScreenshot } from "@/lib/screenshot";
+import {
+  heroForScreenshot,
+  latestForScreenshot,
+  useShotScroll,
+} from "@/lib/screenshot";
 
 /**
  * Mirrors apps/web/src/app/page.tsx: the badge hero, the latest wedgies, the
@@ -37,6 +41,8 @@ import { heroForScreenshot, latestForScreenshot } from "@/lib/screenshot";
 export default function HomeScreen() {
   const router = useRouter();
   const tabBar = useTabBarClearance();
+  const shotRef = useRef<React.ComponentRef<typeof ScrollView>>(null);
+  useShotScroll(shotRef);
 
   const stats = api.wedgie.getStats.useQuery();
   const latest = api.wedgie.getLatestWedgies.useQuery();
@@ -81,6 +87,7 @@ export default function HomeScreen() {
   return (
     <TopSafeArea style={styles.safe}>
       <ScrollView
+        ref={shotRef}
         style={styles.scroll}
         contentContainerStyle={{ paddingBottom: tabBar }}
         showsVerticalScrollIndicator={false}

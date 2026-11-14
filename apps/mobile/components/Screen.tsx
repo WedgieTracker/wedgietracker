@@ -1,5 +1,7 @@
+import type { ComponentRef, RefObject } from "react";
 import { StyleSheet, Text, View, type RefreshControlProps } from "react-native";
 import Animated, {
+  useAnimatedRef,
   useAnimatedScrollHandler,
   useSharedValue,
   type SharedValue,
@@ -7,6 +9,7 @@ import Animated, {
 
 import { TopSafeArea } from "@/components/TopSafeArea";
 import { useTabBarClearance } from "@/lib/layout";
+import { useShotScroll } from "@/lib/screenshot";
 import { colors, space, type } from "@/lib/theme";
 
 interface ScreenProps {
@@ -17,6 +20,8 @@ interface ScreenProps {
   underHeader?: boolean;
   /** Follows the scroll position, for anything pinned while scrolling. */
   scrollY?: SharedValue<number>;
+  /** The view holding the content, for measuring places within it. */
+  contentRef?: RefObject<ComponentRef<typeof View> | null>;
 }
 
 export function Screen({
@@ -25,8 +30,11 @@ export function Screen({
   refreshControl,
   underHeader = false,
   scrollY,
+  contentRef,
 }: ScreenProps) {
   const tabBar = useTabBarClearance();
+  const shotRef = useAnimatedRef<Animated.ScrollView>();
+  useShotScroll(shotRef);
   const fallback = useSharedValue(0);
   const offset = scrollY ?? fallback;
   const onScroll = useAnimatedScrollHandler((e) => {
@@ -35,14 +43,17 @@ export function Screen({
 
   const scroll = (
     <Animated.ScrollView
+      ref={shotRef}
       contentContainerStyle={[styles.content, { paddingBottom: tabBar }]}
       refreshControl={refreshControl}
       showsVerticalScrollIndicator={false}
       onScroll={onScroll}
       scrollEventThrottle={16}
     >
-      {heading}
-      {children}
+      <View ref={contentRef}>
+        {heading}
+        {children}
+      </View>
     </Animated.ScrollView>
   );
 

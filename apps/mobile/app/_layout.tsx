@@ -16,6 +16,7 @@ import "react-native-reanimated";
 
 import { initSentry, report, useScreenTracking } from "@/lib/observability";
 import { ApiProvider } from "@/lib/provider";
+import { useShotDriver } from "@/lib/screenshot";
 import { colors, fonts } from "@/lib/theme";
 
 export { ErrorBoundary } from "expo-router";
@@ -45,6 +46,7 @@ function RootLayout() {
   });
 
   useScreenTracking();
+  useShotDriver();
 
   useEffect(() => {
     // A font that fails to load leaves the app legible but off-brand, which is

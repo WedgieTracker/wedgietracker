@@ -1,6 +1,6 @@
 import { keepPreviousData } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   FlatList,
   RefreshControl,
@@ -24,6 +24,7 @@ import {
 } from "@/components/WedgieRow";
 import { api } from "@/lib/api";
 import { useTabBarClearance } from "@/lib/layout";
+import { useShotScroll } from "@/lib/screenshot";
 import { useSeasonFallback } from "@/lib/use-season-fallback";
 import { useWide } from "@/lib/wide";
 import { colors, fonts } from "@/lib/theme";
@@ -38,6 +39,8 @@ const GAP = 12;
 export default function AllWedgiesScreen() {
   const router = useRouter();
   const tabBar = useTabBarClearance();
+  const shotRef = useRef<FlatList>(null);
+  useShotScroll(shotRef);
   const { wide, width } = useWide();
   // Two rows side by side, each half the content less half the gap.
   const cellWidth = (Math.min(width, 1000) - 32 - GAP) / 2;
@@ -154,6 +157,7 @@ export default function AllWedgiesScreen() {
   return (
     <TopSafeArea style={styles.safe}>
       <FlatList
+        ref={shotRef}
         style={styles.screen}
         contentContainerStyle={[styles.content, { paddingBottom: tabBar }]}
         data={wedgies}
