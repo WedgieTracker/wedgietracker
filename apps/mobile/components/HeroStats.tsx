@@ -1,159 +1,131 @@
-import { useEffect } from "react";
-import { StyleSheet, Text, View } from "react-native";
-import Animated, {
-  Easing,
-  cancelAnimation,
-  interpolateColor,
-  useAnimatedStyle,
-  useReducedMotion,
-  useSharedValue,
-  withRepeat,
-  withTiming,
-} from "react-native-reanimated";
+import { StyleSheet, Text, View, useWindowDimensions } from "react-native";
 
 import { useCountUp } from "@/components/Counter";
-import { PillButton } from "@/components/PillButton";
+import { DaysCalendar } from "@/components/DaysCalendar";
+import { PaceGauge } from "@/components/PaceGauge";
+import { StickerButton } from "@/components/StickerButton";
 import { WaveCounterPanel } from "@/components/WaveCounterPanel";
-import { useFluidType } from "@/lib/fluid";
 import { SCREENSHOT_MODE } from "@/lib/screenshot";
-import { colors, fonts, radius, space } from "@/lib/theme";
+import { colors, fonts, space } from "@/lib/theme";
 
 export interface HeroStatsData {
   totalWedgies: number;
   currentPace: number;
   gamesPlayed: number;
   previousRecord: number;
+  /** Not served by every API version yet, so it may be missing. */
+  previousRecordSeason?: string | null;
   lastWedgie: Date | string | null;
   liveGames: boolean;
 }
 
 /**
- * Port of apps/web/src/components/home/Stats.tsx - the wave-filled hero with
- * the running total, and the pace/drought block beneath it.
+ * Port of apps/web/src/components/home/Stats.tsx and StatsSkeleton.tsx: the
+ * badge hero with the running total, then the pace gauge and the tear-off
+ * calendar on night.
+ *
+ * With `stats` null it is the skeleton: the same pieces at the same sizes
+ * with their figures left out, so the page does not jump when they arrive.
  */
 export function HeroStats({
   stats,
+  recordSeason,
   onMoreStats,
 }: {
-  stats: HeroStatsData;
+  stats: HeroStatsData | null;
+  /** Which season set the record, when the stats do not say. */
+  recordSeason?: string | null;
   onMoreStats: () => void;
 }) {
+  const { height } = useWindowDimensions();
+
   return (
     <View>
       <WaveCounterPanel
-        value={stats.totalWedgies}
-        previousRecord={stats.previousRecord}
+        value={stats?.totalWedgies ?? null}
+        previousRecord={stats?.previousRecord ?? Number.POSITIVE_INFINITY}
+        // `min-h-[25em] flex-2` of an `80svh` column on a phone.
+        minHeight={Math.max(400, height * 0.5)}
       />
 
-      <PaceBlock stats={stats} onMoreStats={onMoreStats} />
+      <View style={styles.night}>
+        <View style={styles.moreStats}>
+          <StickerButton
+            label="MORE STATS"
+            variant="flat"
+            compact
+            onPress={onMoreStats}
+          />
+        </View>
+
+        {stats ? (
+          <PaceRow
+            stats={stats}
+            recordSeason={stats.previousRecordSeason ?? recordSeason ?? null}
+          />
+        ) : (
+          <View style={styles.grid} pointerEvents="none">
+            <View style={styles.gaugeCol}>
+              <PaceGauge pace={0} record={1} recordSeason={null} hidden />
+            </View>
+            <View style={styles.calendarCol}>
+              <DaysCalendar days={1} hidden />
+            </View>
+          </View>
+        )}
+
+        {stats?.liveGames ? (
+          <View style={styles.liveBadge}>
+            <View style={styles.liveDot} />
+            <Text style={styles.liveText} allowFontScaling={false}>
+              LIVE GAMES
+            </Text>
+          </View>
+        ) : null}
+      </View>
     </View>
   );
 }
 
-function PaceBlock({
+function PaceRow({
   stats,
-  onMoreStats,
+  recordSeason,
 }: {
   stats: HeroStatsData;
-  onMoreStats: () => void;
+  recordSeason: string | null;
 }) {
-  const t = useFluidType();
-
-  // The web app hides pace until it diverges from the running total.
+  // The web shows games played until the pace parts from the running total.
   const showPace = stats.currentPace !== stats.totalWedgies;
-  const paceValue = useCountUp(
-    showPace ? stats.currentPace : stats.gamesPlayed,
-  );
+  const games = useCountUp(stats.gamesPlayed);
   const daysAgo = daysSince(stats.lastWedgie);
 
-  const labelSize = showPace ? t.paceText : 20;
-  const numberSize = showPace ? t.paceNumber : 48;
-
   return (
-    <View style={styles.pacePanel}>
-      <View style={styles.moreStatsWrap}>
-        <PillButton label="MORE STATS" onPress={onMoreStats} />
-      </View>
-
-      <View style={[styles.paceRow, !showPace && styles.paceRowStacked]}>
-        <View style={[styles.paceColumn, !showPace && styles.paceColumnWide]}>
-          <Text
-            style={[styles.paceLabel, tight(labelSize)]}
-            allowFontScaling={false}
-          >
-            {showPace ? "PACE" : "GAMES"}
-          </Text>
-          <Text
-            style={[
-              styles.paceNumber,
-              tight(numberSize),
-              // The web uses `mt-[-.2em]`; a touch less overlap here, which
-              // reads better at the sizes the label actually renders at.
-              { marginTop: -0.12 * numberSize },
-            ]}
-            allowFontScaling={false}
-          >
-            {paceValue}
-          </Text>
-        </View>
-
-        {daysAgo !== null && daysAgo > 0 ? (
-          <View style={styles.droughtRow}>
-            <View style={styles.droughtCount}>
-              <Text
-                style={[styles.droughtNumber, tight(DROUGHT_NUMBER)]}
-                allowFontScaling={false}
-              >
-                {daysAgo}
-              </Text>
-              <Text
-                style={[
-                  styles.droughtUnit,
-                  tight(DROUGHT_UNIT),
-                  // `mt-[-.6em]` on the web
-                  { marginTop: -0.6 * DROUGHT_UNIT },
-                ]}
-                allowFontScaling={false}
-              >
-                {daysAgo === 1 ? "DAY" : "DAYS"}
-              </Text>
-            </View>
-            <Text
-              style={[styles.droughtLabel, tight(14)]}
-              allowFontScaling={false}
-            >
-              WITHOUT{"\n"}WEDGIES
+    <View style={styles.grid}>
+      <View style={styles.gaugeCol}>
+        {showPace ? (
+          <PaceGauge
+            pace={stats.currentPace}
+            record={stats.previousRecord}
+            recordSeason={recordSeason}
+          />
+        ) : (
+          <View style={styles.games}>
+            <Text style={styles.gamesNumber} allowFontScaling={false}>
+              {games}
+            </Text>
+            <Text style={styles.gamesLabel} allowFontScaling={false}>
+              games played
             </Text>
           </View>
-        ) : (
-          <FreshWedgie />
         )}
       </View>
-
-      {stats.liveGames ? (
-        <View style={styles.liveBadge}>
-          <View style={styles.liveDot} />
-          <Text style={styles.liveText} allowFontScaling={false}>
-            LIVE GAMES
-          </Text>
+      {daysAgo !== null ? (
+        <View style={styles.calendarCol}>
+          <DaysCalendar days={Math.max(0, daysAgo)} />
         </View>
       ) : null}
     </View>
   );
-}
-
-const DROUGHT_NUMBER = 48;
-const DROUGHT_UNIT = 14;
-const FRESH_NEW = 36;
-const FRESH_WEDGIE = 29;
-
-/**
- * `leading-none` - a line box exactly as tall as the type. Without it React
- * Native's default leading pads each line and the labels cannot overlap the
- * numbers the way they do on the site.
- */
-function tight(fontSize: number) {
-  return { fontSize, lineHeight: fontSize };
 }
 
 const NY_DATE = new Intl.DateTimeFormat("en-US", {
@@ -183,162 +155,78 @@ function daysSince(value: Date | string | null): number | null {
   const last = new Date(value);
   if (Number.isNaN(last.getTime())) return null;
 
-  // Store screenshots only, see lib/screenshot.ts. Captured in the offseason
-  // the panel reads "96 days without wedgies", true that day and an odd first
-  // impression of an app that spends the season announcing new ones.
+  // Store screenshots only, see lib/screenshot.ts: the stamp on a fresh
+  // wedgie is a better first impression than an offseason drought.
   if (SCREENSHOT_MODE) return 0;
 
   const diff = easternDay(new Date()) - easternDay(last);
   return Math.round(diff / (1000 * 60 * 60 * 24));
 }
 
-/**
- * Half of `animation: colorShift 1s infinite` in apps/web/tailwind.config.ts:
- * yellow to pink takes half a second, pink back to yellow the other half.
- */
-const COLOR_SHIFT_HALF_MS = 500;
-
-/**
- * Blend the way a browser animates CSS colour. Reanimated gamma-corrects by
- * default (2.2), which lifts the halfway point between yellow and pink to a
- * pale, almost white wash, so the words flashed white on every swap.
- */
-const PLAIN_SRGB = { gamma: 1 } as const;
-
-/**
- * Port of the web's `animate-color-shift` / `animate-color-shift-delayed` pair:
- * NEW and WEDGIE swap between yellow and pink, always opposite each other.
- *
- * One value yoyos 0 to 1 and back, and the two words read it in opposite
- * directions, so they cannot drift out of phase.
- */
-function FreshWedgie() {
-  const reduceMotion = useReducedMotion();
-  const shift = useSharedValue(0);
-
-  useEffect(() => {
-    if (reduceMotion) return;
-    shift.value = withRepeat(
-      withTiming(1, {
-        duration: COLOR_SHIFT_HALF_MS,
-        // CSS's default `ease` timing function.
-        easing: Easing.bezier(0.25, 0.1, 0.25, 1),
-      }),
-      -1,
-      true,
-    );
-    return () => cancelAnimation(shift);
-  }, [reduceMotion, shift]);
-
-  const newStyle = useAnimatedStyle(() => ({
-    color: interpolateColor(
-      shift.value,
-      [0, 1],
-      [colors.yellow, colors.pink],
-      "RGB",
-      PLAIN_SRGB,
-    ),
-  }));
-  const wedgieStyle = useAnimatedStyle(() => ({
-    color: interpolateColor(
-      shift.value,
-      [0, 1],
-      [colors.pink, colors.yellow],
-      "RGB",
-      PLAIN_SRGB,
-    ),
-  }));
-
-  return (
-    <View style={styles.freshRow}>
-      <Animated.Text
-        style={[styles.freshNew, tight(FRESH_NEW), !reduceMotion && newStyle]}
-        allowFontScaling={false}
-      >
-        NEW
-      </Animated.Text>
-      <Animated.Text
-        style={[
-          styles.freshWedgie,
-          tight(FRESH_WEDGIE),
-          { marginTop: -0.3 * FRESH_WEDGIE },
-          !reduceMotion && wedgieStyle,
-        ]}
-        allowFontScaling={false}
-      >
-        WEDGIE
-      </Animated.Text>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
-  pacePanel: {
+  // `bg-night px-[18px] pt-12 pb-8 min-h-[12em]`
+  night: {
     minHeight: 192,
-    backgroundColor: colors.darkpurple,
+    backgroundColor: colors.night,
     justifyContent: "center",
-    paddingHorizontal: space.xl,
+    paddingHorizontal: 18,
     paddingTop: 48,
-    paddingBottom: space.lg,
+    // Room for the live badge under the grid, kept whether or not it shows,
+    // so a live night does not push the page down when the stats land.
+    paddingBottom: 46,
   },
-  moreStatsWrap: {
+  // Straddles the seam between the badge and the night.
+  moreStats: {
     position: "absolute",
-    top: -19,
+    top: -24,
     left: 0,
     right: 0,
     alignItems: "center",
     zIndex: 10,
   },
-  paceRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 20,
-  },
-  // `flex-col gap-2` on the web when pace is hidden
-  paceRowStacked: { flexDirection: "column", gap: space.sm },
-  paceColumn: { width: 130, alignItems: "center" },
-  paceColumnWide: { width: 140 },
-  paceLabel: {
-    fontFamily: fonts.black,
-    color: colors.pink,
-    letterSpacing: 1.5,
-    textAlign: "center",
-  },
-  paceNumber: {
-    fontFamily: fonts.black,
-    color: colors.yellow,
-    textAlign: "center",
-  },
-
-  droughtRow: {
-    width: 150,
+  // `grid-cols-[1.35fr_1fr] items-center gap-3`
+  grid: {
     flexDirection: "row",
     alignItems: "center",
     gap: space.md,
-  },
-  droughtCount: { alignItems: "center" },
-  droughtNumber: { fontFamily: fonts.black, color: colors.yellow },
-  droughtUnit: { fontFamily: fonts.black, color: colors.pink },
-  droughtLabel: {
-    fontFamily: fonts.bold,
-    color: colors.white,
-    letterSpacing: 0.8,
-  },
-
-  freshRow: { width: 140, alignItems: "center" },
-  freshNew: { fontFamily: fonts.black, color: colors.pink },
-  freshWedgie: { fontFamily: fonts.black, color: colors.yellow },
-
-  // Centred under the pace with a gap, as the site does on phones
-  // (components/home/Stats.tsx `order-last mx-auto mt-4`)
-  liveBadge: {
+    width: "100%",
+    maxWidth: 560,
     alignSelf: "center",
-    marginTop: space.lg,
+  },
+  gaugeCol: { flex: 1.35 },
+  calendarCol: { flex: 1, alignItems: "center" },
+
+  games: {
+    backgroundColor: colors.panel,
+    borderColor: colors.violet20,
+    borderWidth: 1,
+    borderRadius: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 20,
+    alignItems: "center",
+  },
+  gamesNumber: {
+    fontFamily: fonts.blackItalic,
+    fontSize: 48,
+    lineHeight: 50,
+    color: colors.cream,
+  },
+  gamesLabel: {
+    marginTop: 8,
+    fontFamily: fonts.bold,
+    fontSize: 13,
+    color: colors.cream70,
+  },
+
+  // Centred under the pace and calendar, as the site does on phones.
+  liveBadge: {
+    position: "absolute",
+    bottom: 10,
+    alignSelf: "center",
     flexDirection: "row",
     alignItems: "center",
     gap: space.sm,
-    borderRadius: radius.pill,
+    borderRadius: 999,
     borderWidth: 1,
     borderColor: colors.live,
     backgroundColor: "rgba(239, 68, 68, 0.9)",

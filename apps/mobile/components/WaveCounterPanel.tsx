@@ -9,14 +9,18 @@ import {
 
 import { Confetti } from "@/components/Confetti";
 import { useCountUp } from "@/components/Counter";
+import { GradientFill, Grain } from "@/components/Gradient";
 import { Wave } from "@/components/Wave";
 import { clampRem, useFluidType } from "@/lib/fluid";
-import { colors, fonts, radius, space } from "@/lib/theme";
+import { badgeTextShadow, colors, fonts, space } from "@/lib/theme";
 
 /**
- * The wave-filled counter shared by the home hero and the stats page
- * (apps/web/src/components/home/Stats.tsx and
- * .../stats-for-nerds/StatsForNerds.tsx render the same block).
+ * The badge hero shared by the home screen and the stats page
+ * (apps/web/src/components/home/Stats.tsx and StatsSkeleton.tsx): the grainy
+ * badge gradient, the wave rising toward 50, and the running total.
+ *
+ * `value` is null while the stats load: the panel keeps its size and only the
+ * number is left out, so nothing moves when it arrives.
  */
 export function WaveCounterPanel({
   value,
@@ -24,7 +28,7 @@ export function WaveCounterPanel({
   minHeight = 400,
   style,
 }: {
-  value: number;
+  value: number | null;
   previousRecord: number;
   minHeight?: number;
   style?: ViewStyle;
@@ -34,21 +38,23 @@ export function WaveCounterPanel({
   const [box, setBox] = useState({ width: 0, height: 0 });
 
   // Both pages fill toward the same 50-wedgie target.
-  const fillPercentage = Math.min((value / 50) * 100, 100);
-  const shown = useCountUp(value);
+  const fillPercentage = value === null ? 0 : Math.min((value / 50) * 100, 100);
+  const shown = useCountUp(value ?? 0);
 
   const headline =
-    value > previousRecord
-      ? "NEW ALL-TIME RECORD"
-      : value === previousRecord
-        ? "ALL-TIME RECORD TIED"
-        : "WE'RE AT";
+    value === null || value < previousRecord
+      ? "WE'RE AT"
+      : value > previousRecord
+        ? "NEW ALL-TIME RECORD"
+        : "ALL-TIME RECORD TIED";
 
   return (
     <View
       style={[styles.panel, { minHeight }, style]}
       onLayout={(e) => setBox(e.nativeEvent.layout)}
     >
+      <GradientFill name="badge" />
+      <Grain />
       <Wave fillPercentage={fillPercentage} containerHeight={box.height} />
 
       <View style={[styles.card, { width: clampRem(16, 13, 16, 28, width) }]}>
@@ -56,14 +62,31 @@ export function WaveCounterPanel({
           {headline}
         </Text>
         <Text
-          style={[styles.bigNumber, { fontSize: t.bigNumber }]}
+          style={[
+            styles.bigNumber,
+            {
+              fontSize: t.bigNumber,
+              lineHeight: t.bigNumber * 0.88,
+              paddingTop: t.bigNumber * 0.12,
+            },
+            badgeTextShadow(t.bigNumber),
+            value === null && styles.hidden,
+          ]}
           numberOfLines={1}
           allowFontScaling={false}
         >
-          {shown.toLocaleString()}
+          {value === null ? "0" : shown.toLocaleString()}
         </Text>
         <Text
-          style={[styles.label, { fontSize: t.wedgiesText }]}
+          style={[
+            styles.label,
+            {
+              fontSize: t.wedgiesText,
+              lineHeight: t.wedgiesText,
+              marginTop: t.wedgiesText * 0.08,
+            },
+            badgeTextShadow(t.wedgiesText),
+          ]}
           allowFontScaling={false}
         >
           WEDGIES
@@ -71,10 +94,9 @@ export function WaveCounterPanel({
       </View>
 
       {/*
-        The web celebrates once the wave tops out. It renders the confetti
-        behind the translucent counter card; here it sits in front, because at
-        50% opacity the pieces showing through the card read as smudges on the
-        numeral rather than as confetti.
+        The web celebrates once the wave tops out. Here the confetti sits in
+        front of the card, because pieces showing through the translucent card
+        read as smudges on the number rather than as confetti.
       */}
       {fillPercentage >= 100 ? (
         <Confetti width={box.width} height={box.height} />
@@ -85,23 +107,30 @@ export function WaveCounterPanel({
 
 const styles = StyleSheet.create({
   panel: {
-    backgroundColor: colors.darkpurpleLight,
     overflow: "hidden",
     alignItems: "center",
     justifyContent: "center",
-    padding: space.xl,
+    padding: 32,
   },
+  // `bg-panel/50 rounded-lg p-4`
   card: {
-    backgroundColor: "rgba(31, 0, 77, 0.5)",
-    borderRadius: radius.md,
+    backgroundColor: "rgba(29, 18, 66, 0.5)",
+    borderRadius: 8,
     padding: space.lg,
     alignItems: "center",
   },
-  headline: { fontFamily: fonts.bold, color: colors.yellow, fontSize: 14 },
+  headline: {
+    fontFamily: fonts.bold,
+    color: colors.cream,
+    fontSize: 14,
+    lineHeight: 14,
+    marginBottom: 2,
+  },
   bigNumber: {
     fontFamily: fonts.black,
-    color: colors.yellow,
+    color: colors.cream,
     includeFontPadding: false,
   },
-  label: { fontFamily: fonts.black, color: colors.yellow },
+  hidden: { opacity: 0 },
+  label: { fontFamily: fonts.black, color: colors.cream },
 });
