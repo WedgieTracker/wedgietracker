@@ -12,13 +12,11 @@ const ATTRIBUTES: { name: string; down?: boolean }[] = [
   { name: "Steal" },
   { name: "Speed" },
   { name: "Vertical" },
-  { name: "Stamina" },
   { name: "Hustle" },
   { name: "Clutch", down: true },
   // Wedgie watching has its costs.
   { name: "Basketball IQ", down: true },
   { name: "Shooting", down: true },
-  { name: "Rim respect", down: true },
   { name: "Sleep", down: true },
   { name: "Shot selection", down: true },
 ];
