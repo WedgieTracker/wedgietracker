@@ -129,19 +129,50 @@ describe("WedgieModal", () => {
       fireEvent.click(
         screen.getByRole("button", { name: /report wrong info/i }),
       );
-      const submit = screen.getByRole("button", { name: /send challenge/i });
-      expect(submit).toBeDisabled();
+      // Step 1 is just the list: nothing to send yet.
+      expect(
+        screen.queryByRole("button", { name: /send challenge/i }),
+      ).not.toBeInTheDocument();
+      expect(screen.getByText("We have LeBron")).toBeInTheDocument();
 
-      fireEvent.click(screen.getByLabelText("Player"));
-      fireEvent.change(screen.getByLabelText(/details/i), {
+      fireEvent.click(screen.getByRole("button", { name: /^Player/ }));
+      const question = screen.getByRole("heading", { name: "Who was it?" });
+      expect(question).toHaveFocus();
+      fireEvent.change(screen.getByLabelText("Who was it?"), {
         target: { value: "  it was Bronny  " },
       });
-      fireEvent.click(submit);
+      fireEvent.click(screen.getByRole("button", { name: /send challenge/i }));
 
       expect(reportMutate).toHaveBeenCalledWith({
         wedgieId: 1,
         field: "player",
         note: "it was Bronny",
+        website: undefined,
+      });
+    });
+
+    it("goes back to the list on Change and asks the new question", () => {
+      render(<WedgieModal wedgie={baseWedgie} isOpen onClose={noop} />);
+      fireEvent.click(
+        screen.getByRole("button", { name: /report wrong info/i }),
+      );
+
+      fireEvent.click(screen.getByRole("button", { name: /^Player/ }));
+      fireEvent.click(screen.getByRole("button", { name: /change/i }));
+      const playerRow = screen.getByRole("button", { name: /^Player/ });
+      expect(playerRow).toHaveFocus();
+      expect(playerRow).toHaveAttribute("aria-current", "true");
+
+      fireEvent.click(screen.getByRole("button", { name: /^Type/ }));
+      expect(
+        screen.getByRole("heading", { name: "What kind was it?" }),
+      ).toHaveFocus();
+      fireEvent.click(screen.getByRole("button", { name: /send challenge/i }));
+
+      expect(reportMutate).toHaveBeenLastCalledWith({
+        wedgieId: 1,
+        field: "type",
+        note: undefined,
         website: undefined,
       });
     });
