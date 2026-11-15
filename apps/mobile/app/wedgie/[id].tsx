@@ -1,6 +1,7 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
+  Animated,
   Image,
   Linking,
   Pressable,
@@ -25,6 +26,7 @@ import { api, type RouterOutputs } from "@/lib/api";
 import { track } from "@/lib/observability";
 import { GemTag } from "@/components/GemTag";
 import { Matchup } from "@/components/Matchup";
+import { StickySplit } from "@/components/StickySplit";
 import { SupportFooter } from "@/components/SupportFooter";
 import { isGem, nightDate } from "@/lib/dates";
 import { badgeTextShadow, colors, fonts, radius, space } from "@/lib/theme";
@@ -133,6 +135,15 @@ function WedgieDetail({
   const sides = useSideInsets();
   const insets = useSafeAreaInsets();
   const [shoutoutNote, setShoutoutNote] = useState(false);
+  // Drives the pinned video column on a wide screen.
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const onScroll = useMemo(
+    () =>
+      Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], {
+        useNativeDriver: true,
+      }),
+    [scrollY],
+  );
   const [active, setActive] = useState<ActiveVideo | null>(() =>
     pickVideoForApp(wedgie.videoUrl),
   );
@@ -141,7 +152,7 @@ function WedgieDetail({
   // piece that gives way - everything above it carries information the court
   // only illustrates.
   const courtWidth = wideScreen
-    ? 190
+    ? 260
     : height >= 820
       ? 130
       : height >= 720
@@ -189,6 +200,15 @@ function WedgieDetail({
 
       <WedgiePlayer videoUrl={wedgie.videoUrl} active={active} />
     </>
+  );
+  const court = (
+    <View style={styles.courtWrap}>
+      <CourtPositionDiagram
+        position={wedgie.position}
+        width={courtWidth}
+        dotSize={Math.max(9, Math.round(courtWidth * 0.09))}
+      />
+    </View>
   );
   const details = (
     <View style={styles.body}>
@@ -334,23 +354,21 @@ function WedgieDetail({
         </View>
       ) : null}
 
-      <View style={styles.courtWrap}>
-        <CourtPositionDiagram
-          position={wedgie.position}
-          width={courtWidth}
-          dotSize={Math.max(9, Math.round(courtWidth * 0.09))}
-        />
-      </View>
+      {/* On a wide screen the court sits under the video instead. */}
+      {wide ? null : court}
     </View>
   );
 
   if (wide) {
-    // Full screen on a wide screen: the video on the left and the details on
-    // the right, meeting in the middle of the screen (on the Duo's fold).
+    // Full screen on a wide screen: the video pinned at the top of the left
+    // half while the details scroll past on the right, the two halves meeting
+    // on the Duo's fold, as Home pins its hero.
     return (
-      <ScrollView
+      <Animated.ScrollView
         style={styles.sheet}
         onLayout={onPageLayout}
+        onScroll={onScroll}
+        scrollEventThrottle={16}
         contentContainerStyle={[
           styles.wideContent,
           {
@@ -361,12 +379,24 @@ function WedgieDetail({
         ]}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.wideColumn}>{media}</View>
-        <View style={styles.wideColumn}>
-          {details}
-          <SupportFooter />
-        </View>
-      </ScrollView>
+        <StickySplit
+          scrollY={scrollY}
+          inset={16}
+          gap={36}
+          left={
+            <>
+              {media}
+              <View style={styles.wideCourt}>{court}</View>
+            </>
+          }
+          right={
+            <>
+              {details}
+              <SupportFooter />
+            </>
+          }
+        />
+      </Animated.ScrollView>
     );
   }
 
@@ -578,14 +608,8 @@ const styles = StyleSheet.create({
   closePressed: { opacity: 0.7 },
   // Everything under the full-bleed video keeps the page gutter.
   body: { padding: space.lg, gap: space.md },
-  wideContent: {
-    flexGrow: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 36,
-    paddingBottom: 32,
-  },
-  wideColumn: { flex: 1 },
+  wideContent: { flexGrow: 1, paddingBottom: 32 },
+  wideCourt: { marginTop: 28, alignItems: "center" },
   padded: { flex: 1, padding: space.lg, backgroundColor: colors.night },
 
   headerRow: { flexDirection: "row", alignItems: "center", gap: space.lg },
