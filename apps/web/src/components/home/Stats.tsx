@@ -97,16 +97,13 @@ export function Stats({ stats, isLoading }: StatsProps) {
       <div className="bg-night relative flex min-h-[12em] flex-1 flex-col justify-center px-[18px] pt-12 pb-8 md:min-h-[17em] md:px-16 md:pt-14 md:pb-10">
         {stats.liveGames && (
           <div
-            className="z-50 order-last mx-auto mt-4 flex w-fit flex-row items-center justify-center gap-2 rounded-full border border-red-500 bg-red-500/90 px-2 py-1 md:absolute md:bottom-4 md:left-4 md:order-none md:mx-0 md:mt-0 md:px-2 md:py-2"
+            className="wt-live-badge z-50 order-last mx-auto mt-4 w-fit uppercase md:absolute md:bottom-4 md:left-4 md:order-none md:mx-0 md:mt-0"
             title="Updated every 15 minutes"
           >
-            <div className="relative z-5">
-              <div className="absolute top-0 left-0 size-4 animate-ping rounded-full bg-white/50"></div>
-              <div className="size-4 animate-pulse rounded-full bg-white"></div>
-            </div>
-            <div className="relative z-5 text-[10px] font-bold tracking-wider text-white uppercase md:text-xs">
-              Live games
-            </div>
+            <span className="wt-live-hoop" aria-hidden="true">
+              <span className="wt-live-ball" />
+            </span>
+            Live games
           </div>
         )}
         <div className="mx-auto grid w-full max-w-[560px] grid-cols-[1.35fr_1fr] items-center gap-3 md:grid-cols-[300px_auto] md:justify-center md:gap-12">
