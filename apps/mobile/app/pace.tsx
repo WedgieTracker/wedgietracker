@@ -111,7 +111,7 @@ function Explainer({ data }: { data: PaceData }) {
         finish with.
       </Text>
 
-      <Section step="1" title="A normal season">
+      <Section step="1" title="The usual rate">
         <P>
           Over the last <Hi>{seasons.length} completed seasons</Hi>, with recent
           ones counting a bit more, a normal season works out at one wedgie
@@ -166,7 +166,7 @@ function Explainer({ data }: { data: PaceData }) {
         </Note>
       </Section>
 
-      <Section step="2" title="The season so far">
+      <Section step="2" title="This season so far">
         <P>
           <Hi>{data.wedgiesThisSeason}</Hi>{" "}
           {data.wedgiesThisSeason === 1 ? "wedgie" : "wedgies"} in{" "}
@@ -182,7 +182,7 @@ function Explainer({ data }: { data: PaceData }) {
         </Note>
       </Section>
 
-      <Section step="3" title="Mix in this season">
+      <Section step="3" title="Combine the two rates">
         <P>
           {fmt(games)} {games === 1 ? "game is" : "games is"} too small a sample
           to trust on its own, so past seasons get a say worth{" "}
@@ -221,7 +221,7 @@ function Explainer({ data }: { data: PaceData }) {
         </Note>
       </Section>
 
-      <Section step="4" title="Put together">
+      <Section step="4" title="Work out the pace">
         <P>
           The games still to play go at that mixed rate, on top of this
           season&apos;s wedgies so far. Move the numbers below to try it.
@@ -309,7 +309,7 @@ function Explainer({ data }: { data: PaceData }) {
         </Pressable>
       </Section>
 
-      <Section title="Why it works this way">
+      <Section title="Why we do it this way">
         {[
           "We tested it on the 12 seasons from 2014/15 to 2025/26. At many points in each season, from the first weeks to the playoffs, we worked out what this pace would have said back then and compared it with how many wedgies that season actually finished with. On average it was about 4 wedgies off.",
           "Going by this season alone jumps around too much early on. In the first part of a season it misses by around 15 wedgies.",
