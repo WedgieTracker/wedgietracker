@@ -84,8 +84,8 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: radius.md,
     borderTopRightRadius: radius.md,
   },
-  tabActive: { backgroundColor: colors.yellow },
-  tabIdle: { backgroundColor: colors.darkpurpleLighter },
+  tabActive: { backgroundColor: colors.cream },
+  tabIdle: { backgroundColor: colors.panelLight },
   tabText: { fontFamily: fonts.black, color: colors.white, fontSize: 12 },
-  tabTextActive: { color: colors.darkpurple },
+  tabTextActive: { color: colors.night },
 });

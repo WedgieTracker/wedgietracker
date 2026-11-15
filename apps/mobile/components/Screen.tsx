@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
   },
   sectionLabel: {
     ...type.section,
-    color: colors.yellow,
+    color: colors.cream,
     marginTop: space.xl,
     marginBottom: space.md,
   },

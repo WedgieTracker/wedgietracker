@@ -501,7 +501,7 @@ function Chevron({ direction }: { direction: "previous" | "next" }) {
     <Svg width={17} height={17} viewBox="0 0 24 24" fill="none">
       <Path
         d={direction === "previous" ? PREVIOUS_PATH : NEXT_PATH}
-        stroke={colors.yellow}
+        stroke={colors.cream}
         strokeWidth={3}
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -520,7 +520,7 @@ function CloseButton({ onPress }: { onPress: () => void }) {
       <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
         <Path
           d="M6 6L18 18M18 6L6 18"
-          stroke={colors.darkpurple}
+          stroke={colors.night}
           strokeWidth={3.5}
           strokeLinecap="round"
         />
@@ -555,7 +555,7 @@ const styles = StyleSheet.create({
     alignItems: "stretch",
     height: 30,
     borderRadius: radius.pill,
-    backgroundColor: colors.darkpurpleLighter,
+    backgroundColor: colors.panelLight,
     overflow: "hidden",
   },
   navDivider: { width: 1, backgroundColor: colors.hairline },
@@ -563,7 +563,7 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     borderRadius: 15,
-    backgroundColor: colors.yellow,
+    backgroundColor: colors.cream,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -578,7 +578,7 @@ const styles = StyleSheet.create({
     paddingBottom: 32,
   },
   wideColumn: { flex: 1 },
-  padded: { flex: 1, padding: space.lg, backgroundColor: colors.darkpurple },
+  padded: { flex: 1, padding: space.lg, backgroundColor: colors.night },
 
   headerRow: { flexDirection: "row", alignItems: "center", gap: space.lg },
   badge: {
@@ -621,9 +621,9 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
   },
   factValue: { flex: 1 },
-  player: { fontFamily: fonts.bold, color: colors.yellow, fontSize: 22 },
+  player: { fontFamily: fonts.bold, color: colors.cream, fontSize: 22 },
   teams: { fontFamily: fonts.bold, color: colors.white, fontSize: 22 },
-  teamName: { color: colors.pink },
+  teamName: { color: colors.violet },
   types: { fontFamily: fonts.bold, color: colors.white, fontSize: 16 },
   // The site's pills: white/20 border on a white/5 fill, yellow when pressed.
   shoutouts: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
@@ -670,7 +670,7 @@ const styles = StyleSheet.create({
   },
   noteLink: { textDecorationLine: "underline" },
   shoutoutText: { fontFamily: fonts.bold, color: colors.white, fontSize: 13 },
-  shoutoutTextPressed: { color: colors.darkpurple },
+  shoutoutTextPressed: { color: colors.night },
   // The facts' label column plus the gap between label and value.
   valueColumn: { paddingLeft: LABEL_WIDTH + space.md, gap: space.md },
   noDunks: { alignSelf: "flex-start" },

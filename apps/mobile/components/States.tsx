@@ -94,6 +94,6 @@ const styles = StyleSheet.create({
     borderColor: colors.violet60,
     gap: space.xs,
   },
-  errorTitle: { ...type.label, color: colors.pink },
+  errorTitle: { ...type.label, color: colors.violet },
   retry: { marginTop: space.sm, alignItems: "flex-start" },
 });

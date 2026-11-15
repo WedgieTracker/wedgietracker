@@ -3,9 +3,6 @@
  * (apps/web/src/styles/globals.css): cream lettering on a grainy
  * blue-to-purple badge, a violet accent and a night background.
  *
- * The older names stay, as they do on the web, so every screen picks the
- * palette up: "yellow" is the cream, "pink" the violet accent and
- * "darkpurple" the night background with its panel shades.
  */
 const cream = "#F0E1B6";
 const violet = "#9A5CF5";
@@ -22,13 +19,10 @@ export const colors = {
   // The shot marker on the court.
   shot: "#FF6FD8",
 
-  yellow: cream,
-  pink: violet,
-  darkpurple: night,
-  darkpurpleLight: panel,
-  darkpurpleLighter: "#2A1A5C",
-  darkpurpleDark: "#100825",
-  darkpurpleDarker: "#0C061C",
+  // A lighter panel, and two shades darker than night.
+  panelLight: "#2A1A5C",
+  nightDark: "#100825",
+  nightDarker: "#0C061C",
 
   white: "#FFFFFF",
   white60: "rgba(255, 255, 255, 0.6)",

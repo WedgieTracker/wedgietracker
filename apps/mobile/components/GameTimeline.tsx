@@ -13,15 +13,15 @@ import { colors, fonts } from "@/lib/theme";
 
 const TONE = {
   normal: {
-    dot: colors.yellow,
+    dot: colors.cream,
     fill: "rgba(255,255,255,0.35)",
-    text: colors.yellow,
+    text: colors.cream,
   },
   // The web uses `bg-pink/50`, and pink there is now violet.
   clutch: {
-    dot: colors.pink,
+    dot: colors.violet,
     fill: "rgba(154, 92, 245, 0.5)",
-    text: colors.pink,
+    text: colors.violet,
   },
   garbage: {
     dot: "rgba(255,255,255,0.7)",
@@ -301,7 +301,7 @@ const styles = StyleSheet.create({
     left: 0,
     borderRadius: 6,
     borderWidth: 2,
-    borderColor: colors.darkpurpleDark,
+    borderColor: colors.nightDark,
   },
   ring: {
     position: "absolute",
@@ -310,7 +310,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     borderRadius: 6,
-    backgroundColor: colors.pink,
+    backgroundColor: colors.violet,
   },
   snooze: {
     position: "absolute",

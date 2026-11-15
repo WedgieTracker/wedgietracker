@@ -5,14 +5,14 @@ import { colors, radius, space, type } from "@/lib/theme";
 interface StatTileProps {
   label: string;
   value: string | number;
-  accent?: "yellow" | "pink" | "white";
+  accent?: "cream" | "violet" | "white";
   wide?: boolean;
 }
 
 export function StatTile({
   label,
   value,
-  accent = "yellow",
+  accent = "cream",
   wide = false,
 }: StatTileProps) {
   return (
