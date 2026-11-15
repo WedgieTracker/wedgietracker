@@ -735,50 +735,43 @@ html {
 
 /* The split-flap board on Stats for nerds: fixed flaps, digits in amber. */
 .wt-board {
-  --flap-h: 19px;
-  display: inline-flex;
-  gap: 2px;
+  /* Two rows of --cols flaps that share the card's width. */
+  container-type: inline-size;
+  display: grid;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  gap: 3px;
+  width: 100%;
   padding: 8px;
-  border-radius: 12px;
+  border-radius: 14px;
   background: #0b0518;
   box-shadow: inset 0 2px 8px rgb(0 0 0 / 0.6);
 }
-@media (min-width: 400px) {
-  .wt-board {
-    --flap-h: 22px;
-  }
-}
 @media (min-width: 768px) {
   .wt-board {
-    --flap-h: 30px;
-    gap: 3px;
+    gap: 4px;
     padding: 10px;
   }
 }
-.wt-board-gap {
-  width: 8px;
-}
 .wt-flap {
   position: relative;
-  display: inline-block;
-  width: calc(var(--flap-h) * 0.68);
-  height: var(--flap-h);
+  display: grid;
+  place-items: center;
+  aspect-ratio: 0.72;
   border-radius: 4px;
-  background: linear-gradient(#1c1236 0 49%, #120a26 51% 100%);
+  background: linear-gradient(#251847 0 49%, #1b1036 51% 100%);
   color: hsl(var(--cream));
-  font-family: ui-monospace, "SF Mono", Menlo, monospace;
-  font-size: calc(var(--flap-h) * 0.62);
-  font-weight: 800;
-  line-height: var(--flap-h);
-  text-align: center;
-  white-space: pre;
+  font-family: var(--font-inter), system-ui, sans-serif;
+  font-size: calc(100cqw / var(--cols) * 0.78);
+  font-weight: 900;
+  line-height: 1;
+  overflow: hidden;
 }
 .wt-flap::after {
   content: "";
   position: absolute;
   inset: 50% 0 auto;
   height: 1px;
-  background: #05020c;
+  background: rgb(5 2 12 / 0.55);
 }
 .wt-flap-amber {
   color: #ffcf6b;

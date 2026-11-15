@@ -289,7 +289,7 @@ export function StatsForNerds({
               </p>
             </div>
           </div>
-          <div className="bg-panel px-6 py-5">
+          <div className="bg-panel p-3 md:p-4">
             <TypingStats stats={stats.statsPerWedgie} />
           </div>
         </div>
