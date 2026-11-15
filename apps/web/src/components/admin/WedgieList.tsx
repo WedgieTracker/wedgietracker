@@ -1,5 +1,6 @@
 "use client";
 
+import { isGemsDate } from "@wedgietracker/core/utils/formatDate";
 import { useState } from "react";
 import { api } from "~/trpc/react";
 
@@ -60,7 +61,9 @@ export function WedgieList({ seasons, currentSeason }: WedgieListProps) {
             </h3>
             <p suppressHydrationWarning className="mt-1 text-sm text-gray-300">
               {wedgie.teamName} - {wedgie.teamAgainstName} |{" "}
-              {new Date(wedgie.wedgieDate).toLocaleDateString()}
+              {isGemsDate(new Date(wedgie.wedgieDate))
+                ? "GEM, no date"
+                : new Date(wedgie.wedgieDate).toLocaleDateString()}
             </p>
             <div className="mt-3 flex space-x-4">
               <Link

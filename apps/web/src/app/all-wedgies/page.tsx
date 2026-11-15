@@ -1,3 +1,4 @@
+import { isGemsDate } from "@wedgietracker/core/utils/formatDate";
 import { ExploreFooter } from "~/components/shared/ExploreFooter";
 import type { Metadata } from "next";
 import { connection } from "next/server";
@@ -58,7 +59,9 @@ export async function generateMetadata({
   const w = await getWedgieForMeta(seasonFromParam(season), number);
   if (!w) return ALL_WEDGIES;
 
-  // the date is the tip-off in US Eastern time written as if UTC
+  // the date is the tip-off in US Eastern time written as if UTC; GEMS
+  // wedgies have no real date (stored as a zero timestamp), so none is said
+  const gems = isGemsDate(new Date(w.wedgieDate));
   const night = new Date(w.wedgieDate).toLocaleDateString("en-GB", {
     day: "numeric",
     month: "long",
@@ -69,7 +72,7 @@ export async function generateMetadata({
   const shot = types.length ? `${types.join(", ")} ` : "";
   return pageMetadata({
     title: `${w.playerName}, Wedgie No. ${w.number} of ${w.seasonName}`,
-    description: `${w.playerName}'s ${shot}wedgie for the ${teamName(w.teamName)} against the ${teamName(w.teamAgainstName)} on ${night}, the ${ordinal(w.number)} of the ${w.seasonName} season. Watch the clip on WedgieTracker.`,
+    description: `${w.playerName}'s ${shot}wedgie for the ${teamName(w.teamName)} against the ${teamName(w.teamAgainstName)}${gems ? "" : ` on ${night}`}, the ${ordinal(w.number)} of the ${w.seasonName} season. Watch the clip on WedgieTracker.`,
     image: youtubeThumbnail(w.videoUrl?.youtube),
     canonical: `${APP_URL}/all-wedgies?${buildAllWedgiesQuery({
       season: w.seasonName,
