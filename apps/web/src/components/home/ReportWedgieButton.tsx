@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
-import { ChevronRightIcon, Cross2Icon } from "@radix-ui/react-icons";
+import { Cross2Icon } from "@radix-ui/react-icons";
 import {
   Dialog,
   DialogClose,
@@ -189,6 +189,31 @@ function StepMeta({ step }: { step: 1 | 2 }) {
   );
 }
 
+/** A ticked or empty box for a step-one row; drawn, not an icon. */
+function TickBox({ checked }: { checked: boolean }) {
+  return (
+    <span
+      aria-hidden="true"
+      className={`ml-auto grid size-6 shrink-0 place-items-center rounded-[7px] border-2 transition-colors duration-150 ${
+        checked ? "border-[#2a1660] bg-[#2a1660]" : "border-violet/70"
+      }`}
+    >
+      {checked && (
+        <svg viewBox="0 0 16 16" className="size-3.5" fill="none">
+          <path
+            d="M3 8.5 6.5 12 13 4.5"
+            stroke="currentColor"
+            strokeWidth={2.6}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="text-cream"
+          />
+        </svg>
+      )}
+    </span>
+  );
+}
+
 // Kept separate so the mutation hook only mounts while the dialog is open.
 function ReportForm({
   wedgie,
@@ -198,18 +223,23 @@ function ReportForm({
   onDone: () => void;
 }) {
   const { toast } = useToast();
-  const [field, setField] = useState<WedgieReportField | null>(null);
+  const [ticked, setTicked] = useState<Set<WedgieReportField>>(() => new Set());
   const [step, setStep] = useState<1 | 2>(1);
-  const [note, setNote] = useState("");
+  // Kept per field, so a note survives going back to the list and unticking it for a moment.
+  const [notes, setNotes] = useState<
+    Partial<Record<WedgieReportField, string>>
+  >({});
   const [website, setWebsite] = useState("");
   const ids = useId();
-  const questionRef = useRef<HTMLHeadingElement>(null);
-  const listHeadingRef = useRef<HTMLHeadingElement>(null);
-  const rowRefs = useRef<
-    Partial<Record<WedgieReportField, HTMLButtonElement | null>>
+  const firstQuestionRef = useRef<HTMLHeadingElement>(null);
+  const boxRefs = useRef<
+    Partial<Record<WedgieReportField, HTMLInputElement | null>>
   >({});
   // Move focus only after someone steps, not when the dialog first opens.
   const [stepped, setStepped] = useState(false);
+
+  // Always in the list's order, whatever order they were ticked in.
+  const picked = WEDGIE_REPORT_FIELDS.filter((f) => ticked.has(f));
 
   const report = api.report.create.useMutation({
     onSuccess: () => {
@@ -224,104 +254,133 @@ function ReportForm({
   useEffect(() => {
     if (!stepped) return;
     if (step === 2) {
-      questionRef.current?.focus();
+      firstQuestionRef.current?.focus();
       return;
     }
-    const row = field ? rowRefs.current[field] : null;
-    if (row) row.focus();
-    else listHeadingRef.current?.focus();
-  }, [step, field, stepped]);
+    const first = WEDGIE_REPORT_FIELDS.find((f) => ticked.has(f));
+    if (first) boxRefs.current[first]?.focus();
+    // Focus follows the step, not every tick.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step, stepped]);
 
-  const choose = (f: WedgieReportField) => {
+  const toggle = (f: WedgieReportField) =>
+    setTicked((prev) => {
+      const next = new Set(prev);
+      if (next.has(f)) next.delete(f);
+      else next.add(f);
+      return next;
+    });
+
+  const goTo = (to: 1 | 2) => {
     setStepped(true);
-    setField(f);
-    setStep(2);
+    setStep(to);
   };
-
-  const change = () => {
-    setStepped(true);
-    setStep(1);
-  };
-
-  const chosen = step === 2 ? field : null;
 
   return (
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        if (!field) return;
+        if (step === 1) {
+          if (picked.length) goTo(2);
+          return;
+        }
+        if (!picked.length) return;
         report.mutate({
           wedgieId: wedgie.id,
-          field,
-          note: note.trim() || undefined,
+          items: picked.map((field) => {
+            const note = notes[field]?.trim();
+            return { field, note: note === "" ? undefined : note };
+          }),
           website: website || undefined,
         });
       }}
     >
-      {chosen ? (
+      {step === 2 && picked.length ? (
         <div
           key="step-2"
           className="motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-right-4 motion-safe:duration-200"
         >
           <StepMeta step={2} />
-          <div
-            className="bg-cream flex items-center gap-3 rounded-[14px] px-3.5 py-2.5"
-            style={{ color: INK }}
-          >
-            <p className="flex min-w-0 flex-col">
-              <span className="text-[15.5px] font-black">
-                <span className="sr-only">You&apos;re challenging: </span>
-                {FIELDS[chosen].label}
-              </span>
-              <span className="truncate text-[12.5px] font-bold opacity-75">
-                {hintFor(chosen, wedgie)}
-              </span>
-            </p>
+          <div className="mb-2 flex items-center gap-3">
+            <h3
+              id={`${ids}-picked`}
+              className="text-cream text-[15px] font-black"
+            >
+              You&apos;re challenging
+            </h3>
             <button
               type="button"
-              onClick={change}
-              aria-label={`Change what's wrong, now ${FIELDS[chosen].label}`}
-              className="hover:text-cream ml-auto min-h-9 shrink-0 rounded-[10px] border-2 border-current px-3 text-[12.5px] font-black transition-colors duration-200 hover:bg-[#2a1660] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2a1660]"
+              onClick={() => goTo(1)}
+              aria-label="Change what's wrong"
+              className="border-cream/60 text-cream hover:bg-cream hover:text-night focus-visible:outline-cream ml-auto min-h-9 shrink-0 rounded-[10px] border-2 px-3 text-[12.5px] font-black transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2"
             >
               Change
             </button>
           </div>
-
-          <h3
-            id={`${ids}-q`}
-            ref={questionRef}
-            tabIndex={-1}
-            className="text-cream mt-[18px] mb-2.5 text-lg font-black outline-none"
+          <ul
+            aria-labelledby={`${ids}-picked`}
+            className="flex flex-col gap-1.5"
           >
-            {FIELDS[chosen].question}
-          </h3>
-          <textarea
-            aria-labelledby={`${ids}-q`}
-            aria-describedby={`${ids}-opt`}
-            value={note}
-            maxLength={NOTE_MAX}
-            rows={3}
-            placeholder={FIELDS[chosen].placeholder}
-            onChange={(e) => setNote(e.target.value)}
-            className="bg-night focus-visible:outline-violet w-full rounded-xl px-4 py-3 text-[15px] font-bold text-white outline-none placeholder:text-white/40 focus-visible:outline-2"
-          />
-          <p className="mt-1 mb-[18px] flex justify-between text-xs font-bold text-white/50">
-            <span id={`${ids}-opt`}>Optional</span>
-            <span>
-              {note.length}/{NOTE_MAX}
-            </span>
-          </p>
+            {picked.map((f) => (
+              <li
+                key={f}
+                className="bg-cream flex min-w-0 items-baseline gap-2 rounded-[12px] px-3 py-2"
+                style={{ color: INK }}
+              >
+                <span className="shrink-0 text-[14.5px] font-black">
+                  {FIELDS[f].label}
+                </span>
+                <span className="truncate text-[12.5px] font-bold opacity-75">
+                  {hintFor(f, wedgie)}
+                </span>
+              </li>
+            ))}
+          </ul>
+
+          {picked.map((f, i) => {
+            const note = notes[f] ?? "";
+            return (
+              <div key={f}>
+                <h3
+                  id={`${ids}-q-${f}`}
+                  ref={i === 0 ? firstQuestionRef : undefined}
+                  tabIndex={i === 0 ? -1 : undefined}
+                  className="text-cream mt-[18px] mb-2.5 text-lg font-black outline-none"
+                >
+                  {FIELDS[f].question}
+                </h3>
+                <textarea
+                  aria-labelledby={`${ids}-q-${f}`}
+                  aria-describedby={`${ids}-opt-${f}`}
+                  value={note}
+                  maxLength={NOTE_MAX}
+                  rows={picked.length > 1 ? 2 : 3}
+                  placeholder={FIELDS[f].placeholder}
+                  onChange={(e) =>
+                    setNotes((prev) => ({ ...prev, [f]: e.target.value }))
+                  }
+                  className="bg-night focus-visible:outline-violet w-full rounded-xl px-4 py-3 text-[15px] font-bold text-white outline-none placeholder:text-white/40 focus-visible:outline-2"
+                />
+                <p className="mt-1 flex justify-between text-xs font-bold text-white/50">
+                  <span id={`${ids}-opt-${f}`}>Optional</span>
+                  <span>
+                    {note.length}/{NOTE_MAX}
+                  </span>
+                </p>
+              </div>
+            );
+          })}
 
           {report.isError && (
-            <p role="alert" className="text-violet mb-3 text-sm font-bold">
+            <p role="alert" className="text-violet mt-3 text-sm font-bold">
               Something went wrong, please try again.
             </p>
           )}
 
           <button
             type="submit"
-            disabled={!field || report.isPending}
-            className="btn-sticker min-h-12 w-full px-5 text-[15px] [--sticker-off:4px] disabled:pointer-events-none disabled:opacity-50"
+            disabled={report.isPending}
+            className="btn-sticker mt-[18px] min-h-12 w-full px-5 text-[15px] [--sticker-off:4px] disabled:pointer-events-none disabled:opacity-50"
           >
             {report.isPending ? "Sending..." : "Send challenge"}
           </button>
@@ -336,54 +395,67 @@ function ReportForm({
           }
         >
           <StepMeta step={1} />
-          <h3
-            id={`${ids}-list`}
-            ref={listHeadingRef}
-            tabIndex={-1}
-            className="text-cream mb-2.5 text-lg font-black outline-none"
-          >
+          <h3 id={`${ids}-list`} className="text-cream mb-1 text-lg font-black">
             What did we get wrong?
           </h3>
-          <ul aria-labelledby={`${ids}-list`} className="flex flex-col gap-1.5">
+          <p className="mb-2.5 text-[13px] font-semibold text-white">
+            Tick everything that looks off.
+          </p>
+          <div
+            role="group"
+            aria-labelledby={`${ids}-list`}
+            className="flex flex-col gap-1.5"
+          >
             {WEDGIE_REPORT_FIELDS.map((f) => {
-              const isChosen = field === f;
+              const checked = ticked.has(f);
               return (
-                <li key={f}>
-                  <button
-                    type="button"
+                <label
+                  key={f}
+                  className={`group flex min-h-[54px] w-full cursor-pointer items-center gap-3 rounded-[14px] border px-3.5 py-2 text-left transition-colors duration-150 has-[input:focus-visible]:outline-2 has-[input:focus-visible]:outline-offset-2 has-[input:focus-visible]:outline-[hsl(var(--cream))] ${
+                    checked
+                      ? "bg-cream border-cream"
+                      : "bg-night/45 border-violet/30 hover:border-cream hover:bg-cream/5 text-white"
+                  }`}
+                  style={checked ? { color: INK } : undefined}
+                >
+                  <input
+                    type="checkbox"
                     ref={(el) => {
-                      rowRefs.current[f] = el;
+                      boxRefs.current[f] = el;
                     }}
-                    onClick={() => choose(f)}
-                    aria-current={isChosen ? "true" : undefined}
+                    checked={checked}
+                    onChange={() => toggle(f)}
+                    aria-labelledby={`${ids}-${f}-label`}
                     aria-describedby={`${ids}-${f}`}
-                    className={`group focus-visible:outline-cream flex min-h-[54px] w-full items-center gap-3 rounded-[14px] border px-3.5 py-2 text-left transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 ${
-                      isChosen
-                        ? "bg-cream border-cream"
-                        : "bg-night/45 border-violet/30 hover:border-cream hover:bg-cream/5 text-white"
-                    }`}
-                    style={isChosen ? { color: INK } : undefined}
-                  >
-                    <span className="flex min-w-0 flex-col">
-                      <span className="text-[15.5px] font-black">
-                        {FIELDS[f].label}
-                      </span>
-                      <span
-                        id={`${ids}-${f}`}
-                        className={`truncate text-[12.5px] font-semibold ${isChosen ? "opacity-75" : "text-white/65"}`}
-                      >
-                        {hintFor(f, wedgie)}
-                      </span>
+                    className="sr-only"
+                  />
+                  <span className="flex min-w-0 flex-col">
+                    <span
+                      id={`${ids}-${f}-label`}
+                      className="text-[15.5px] font-black"
+                    >
+                      {FIELDS[f].label}
                     </span>
-                    <ChevronRightIcon
-                      aria-hidden="true"
-                      className={`ml-auto size-5 shrink-0 transition-transform duration-150 motion-safe:group-hover:translate-x-0.5 ${isChosen ? "" : "text-violet"}`}
-                    />
-                  </button>
-                </li>
+                    <span
+                      id={`${ids}-${f}`}
+                      className={`truncate text-[12.5px] font-semibold ${checked ? "opacity-75" : "text-white"}`}
+                    >
+                      {hintFor(f, wedgie)}
+                    </span>
+                  </span>
+                  <TickBox checked={checked} />
+                </label>
               );
             })}
-          </ul>
+          </div>
+          <button
+            type="button"
+            onClick={() => goTo(2)}
+            disabled={!picked.length}
+            className="btn-sticker mt-[18px] min-h-12 w-full px-5 text-[15px] [--sticker-off:4px] disabled:pointer-events-none disabled:opacity-50"
+          >
+            {picked.length ? `Next, ${picked.length} picked` : "Next"}
+          </button>
         </div>
       )}
 

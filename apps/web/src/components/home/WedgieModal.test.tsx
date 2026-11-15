@@ -123,21 +123,40 @@ describe("WedgieModal", () => {
   });
 
   describe("report wrong info", () => {
-    it("sends the picked field and note", () => {
+    const openChallenge = () => {
       render(<WedgieModal wedgie={baseWedgie} isOpen onClose={noop} />);
-
       fireEvent.click(
         screen.getByRole("button", { name: /report wrong info/i }),
       );
-      // Step 1 is just the list: nothing to send yet.
+    };
+
+    it("sends the ticked fields with a note each", () => {
+      openChallenge();
+      // Step 1 is just the list: nothing to send yet, and Next waits for a tick.
       expect(
         screen.queryByRole("button", { name: /send challenge/i }),
       ).not.toBeInTheDocument();
+      expect(
+        screen.getByRole("group", { name: "What did we get wrong?" }),
+      ).toBeInTheDocument();
       expect(screen.getByText("We have LeBron")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Next" })).toBeDisabled();
 
-      fireEvent.click(screen.getByRole("button", { name: /^Player/ }));
-      const question = screen.getByRole("heading", { name: "Who was it?" });
-      expect(question).toHaveFocus();
+      fireEvent.click(screen.getByRole("checkbox", { name: "Type" }));
+      fireEvent.click(screen.getByRole("checkbox", { name: "Player" }));
+      expect(screen.getByRole("checkbox", { name: "Player" })).toBeChecked();
+      fireEvent.click(screen.getByRole("button", { name: "Next, 2 picked" }));
+
+      // Questions follow the list's order, not the tick order.
+      const questions = screen.getAllByRole("heading", { level: 3 });
+      expect(questions.map((q) => q.textContent)).toEqual([
+        "You're challenging",
+        "Who was it?",
+        "What kind was it?",
+      ]);
+      expect(
+        screen.getByRole("heading", { name: "Who was it?" }),
+      ).toHaveFocus();
       fireEvent.change(screen.getByLabelText("Who was it?"), {
         target: { value: "  it was Bronny  " },
       });
@@ -145,34 +164,43 @@ describe("WedgieModal", () => {
 
       expect(reportMutate).toHaveBeenCalledWith({
         wedgieId: 1,
-        field: "player",
-        note: "it was Bronny",
+        items: [
+          { field: "player", note: "it was Bronny" },
+          { field: "type", note: undefined },
+        ],
         website: undefined,
       });
     });
 
-    it("goes back to the list on Change and asks the new question", () => {
-      render(<WedgieModal wedgie={baseWedgie} isOpen onClose={noop} />);
-      fireEvent.click(
-        screen.getByRole("button", { name: /report wrong info/i }),
-      );
+    it("keeps ticks and notes across Change", () => {
+      openChallenge();
+      fireEvent.click(screen.getByRole("checkbox", { name: "Player" }));
+      fireEvent.click(screen.getByRole("checkbox", { name: "Date" }));
+      fireEvent.click(screen.getByRole("button", { name: "Next, 2 picked" }));
+      fireEvent.change(screen.getByLabelText("When was it?"), {
+        target: { value: "the 14th" },
+      });
 
-      fireEvent.click(screen.getByRole("button", { name: /^Player/ }));
       fireEvent.click(screen.getByRole("button", { name: /change/i }));
-      const playerRow = screen.getByRole("button", { name: /^Player/ });
-      expect(playerRow).toHaveFocus();
-      expect(playerRow).toHaveAttribute("aria-current", "true");
+      const player = screen.getByRole("checkbox", { name: "Player" });
+      expect(player).toHaveFocus();
+      expect(player).toBeChecked();
+      expect(screen.getByRole("checkbox", { name: "Date" })).toBeChecked();
 
-      fireEvent.click(screen.getByRole("button", { name: /^Type/ }));
+      fireEvent.click(player);
+      fireEvent.click(screen.getByRole("button", { name: "Next, 1 picked" }));
       expect(
-        screen.getByRole("heading", { name: "What kind was it?" }),
+        screen.queryByRole("heading", { name: "Who was it?" }),
+      ).not.toBeInTheDocument();
+      expect(screen.getByLabelText("When was it?")).toHaveValue("the 14th");
+      expect(
+        screen.getByRole("heading", { name: "When was it?" }),
       ).toHaveFocus();
       fireEvent.click(screen.getByRole("button", { name: /send challenge/i }));
 
       expect(reportMutate).toHaveBeenLastCalledWith({
         wedgieId: 1,
-        field: "type",
-        note: undefined,
+        items: [{ field: "date", note: "the 14th" }],
         website: undefined,
       });
     });
