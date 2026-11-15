@@ -1,4 +1,16 @@
+import { useEffect } from "react";
 import { StyleSheet, Text, View, useWindowDimensions } from "react-native";
+import Animated, {
+  Easing,
+  cancelAnimation,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withRepeat,
+  withSequence,
+  withTiming,
+} from "react-native-reanimated";
+import Svg, { Defs, Pattern, Rect } from "react-native-svg";
 
 import { useCountUp } from "@/components/Counter";
 import { DaysCalendar } from "@/components/DaysCalendar";
@@ -83,14 +95,7 @@ export function HeroStats({
           </View>
         )}
 
-        {stats?.liveGames ? (
-          <View style={styles.liveBadge}>
-            <View style={styles.liveDot} />
-            <Text style={styles.liveText} allowFontScaling={false}>
-              LIVE GAMES
-            </Text>
-          </View>
-        ) : null}
+        {stats?.liveGames ? <LiveBadge /> : null}
       </View>
     </View>
   );
@@ -136,6 +141,93 @@ function PaceRow({
           <DaysCalendar days={Math.max(0, daysAgo)} />
         </View>
       ) : null}
+    </View>
+  );
+}
+
+/** The live badge's own colours: the coffee scoreboard's glass, a pink rim. */
+const GLASS = "#0D0620";
+const RIM = "#F25CB5";
+
+/**
+ * One bounce, 0.9s, as the web's `lb-bounce` keyframes: the ball drops 7pt
+ * onto the rim, squashes, kicks up 1pt and rises again. Each leg eases on its
+ * own, as a CSS timing function does between keyframes.
+ */
+const BOUNCE_EASE = Easing.bezier(0.3, 0, 0.7, 1);
+const leg = (to: number, duration: number) =>
+  withTiming(to, { duration, easing: BOUNCE_EASE });
+
+/**
+ * "Night glass": a dark glass pill with cream LIVE GAMES and a little cream
+ * ball bouncing on a glowing pink rim. With reduced motion the ball rests on
+ * the rim.
+ */
+function LiveBadge() {
+  const still = useReducedMotion();
+  // Height above the rim, and how squashed the ball is (0 round, 1 flat).
+  const lift = useSharedValue(still ? 0 : -7);
+  const squash = useSharedValue(0);
+
+  useEffect(() => {
+    if (still) {
+      lift.value = 0;
+      squash.value = 0;
+      return;
+    }
+    // 0% to 45% falling, 45% to 52% squashing, 52% to 60% kicking up, then
+    // rising to the top. The two loops add up to 900ms each so they stay in
+    // step.
+    lift.value = withRepeat(
+      withSequence(leg(0, 405), leg(0, 63), leg(-1, 72), leg(-7, 360)),
+      -1,
+    );
+    squash.value = withRepeat(
+      withSequence(leg(0, 405), leg(1, 63), leg(0, 72), leg(0, 360)),
+      -1,
+    );
+    return () => {
+      cancelAnimation(lift);
+      cancelAnimation(squash);
+    };
+  }, [still, lift, squash]);
+
+  const ballStyle = useAnimatedStyle(() => ({
+    transform: [
+      { translateY: lift.value },
+      { scaleX: 1 + 0.2 * squash.value },
+      { scaleY: 1 - 0.22 * squash.value },
+    ],
+  }));
+
+  return (
+    <View
+      style={styles.liveBadge}
+      accessible
+      accessibilityRole="text"
+      accessibilityLabel="Live games"
+    >
+      {/* The glass's faint scanlines, one pale line every 3pt. */}
+      <Svg style={StyleSheet.absoluteFill} pointerEvents="none">
+        <Defs>
+          <Pattern
+            id="live-scanlines"
+            width={3}
+            height={3}
+            patternUnits="userSpaceOnUse"
+          >
+            <Rect width={3} height={1} fill="#FFFFFF" fillOpacity={0.03} />
+          </Pattern>
+        </Defs>
+        <Rect width="100%" height="100%" fill="url(#live-scanlines)" />
+      </Svg>
+      <View style={styles.liveHoop}>
+        <View style={styles.liveRim} />
+        <Animated.View style={[styles.liveBall, ballStyle]} />
+      </View>
+      <Text style={styles.liveText} allowFontScaling={false}>
+        LIVE GAMES
+      </Text>
     </View>
   );
 }
@@ -238,24 +330,45 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     flexDirection: "row",
     alignItems: "center",
-    gap: space.sm,
+    gap: 8,
+    overflow: "hidden",
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: colors.live,
-    backgroundColor: "rgba(239, 68, 68, 0.9)",
-    paddingHorizontal: space.sm,
-    paddingVertical: space.xs,
+    borderColor: "rgba(154, 92, 245, 0.4)",
+    backgroundColor: GLASS,
+    boxShadow: "inset 0 1px 6px rgba(0, 0, 0, 0.6)",
+    paddingLeft: 9,
+    paddingRight: 13,
+    paddingVertical: 6,
   },
-  liveDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: colors.white,
+  liveHoop: { width: 12, height: 16 },
+  liveRim: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 1,
+    height: 2,
+    borderRadius: 2,
+    backgroundColor: RIM,
+    boxShadow: "0 0 6px rgba(242, 92, 181, 0.9)",
+  },
+  liveBall: {
+    position: "absolute",
+    left: 2,
+    bottom: 3,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: colors.cream,
+    boxShadow: "inset -1px -1px 0 rgba(42, 22, 96, 0.35)",
+    // Squash from where it meets the rim.
+    transformOrigin: "50% 100%",
   },
   liveText: {
-    fontFamily: fonts.bold,
-    color: colors.white,
-    fontSize: 10,
-    letterSpacing: 1,
+    fontFamily: fonts.black,
+    color: colors.cream,
+    fontSize: 11,
+    lineHeight: 13,
+    letterSpacing: 0.9,
   },
 });

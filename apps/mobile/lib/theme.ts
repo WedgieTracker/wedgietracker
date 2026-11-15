@@ -44,8 +44,6 @@ export const colors = {
   faint: "rgba(240, 225, 182, 0.38)",
   // The faint violet edge on panels.
   hairline: "rgba(154, 92, 245, 0.2)",
-
-  live: "#EF4444",
 } as const;
 
 /**
