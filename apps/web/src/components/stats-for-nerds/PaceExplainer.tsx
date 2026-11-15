@@ -68,7 +68,7 @@ export function PaceExplainer({ data }: PaceExplainerProps) {
         finish with.
       </p>
 
-      <Section step="1" title="A normal season">
+      <Section step="1" title="The usual rate">
         <p className="mb-4">
           Over the last{" "}
           <span className="text-violet">
@@ -118,7 +118,7 @@ export function PaceExplainer({ data }: PaceExplainerProps) {
         </p>
       </Section>
 
-      <Section step="2" title="The season so far">
+      <Section step="2" title="This season so far">
         <p>
           <span className="text-cream">{data.wedgiesThisSeason}</span>{" "}
           {data.wedgiesThisSeason === 1 ? "wedgie" : "wedgies"} in{" "}
@@ -137,7 +137,7 @@ export function PaceExplainer({ data }: PaceExplainerProps) {
         </p>
       </Section>
 
-      <Section step="3" title="Mix in this season">
+      <Section step="3" title="Blend the two rates">
         <p className="mb-4">
           {fmt(games)} {games === 1 ? "game is" : "games is"} too small a sample
           to trust on its own, so past seasons get a say worth{" "}
@@ -176,7 +176,7 @@ export function PaceExplainer({ data }: PaceExplainerProps) {
         </p>
       </Section>
 
-      <Section step="4" title="Put together">
+      <Section step="4" title="Work out the pace">
         <p className="mb-4">
           The games still to play go at that mixed rate, on top of this
           season&apos;s wedgies so far. Move the numbers below to try it.
@@ -239,7 +239,7 @@ export function PaceExplainer({ data }: PaceExplainerProps) {
         </div>
       </Section>
 
-      <Section title="Why it works this way">
+      <Section title="Why we do it this way">
         <ul className="marker:text-violet flex list-disc flex-col gap-2 pl-5">
           <li>
             We tested it on the 12 seasons from 2014/15 to 2025/26. At many
