@@ -77,9 +77,7 @@ export default function StatsScreen() {
   );
   const router = useRouter();
 
-  const season = (
-    <SeasonCard stats={nerd.data ?? null} flapHeight={wide ? 18 : 22} />
-  );
+  const season = <SeasonCard stats={nerd.data ?? null} />;
   const rest = nerd.data ? (
     <NerdColumn
       stats={nerd.data}
@@ -148,13 +146,7 @@ export default function StatsScreen() {
  * "In the 2026/27 season", the wave counter and the split-flap board. With
  * no stats yet it keeps its shape, empty.
  */
-function SeasonCard({
-  stats,
-  flapHeight,
-}: {
-  stats: NerdStats | null;
-  flapHeight: number;
-}) {
+function SeasonCard({ stats }: { stats: NerdStats | null }) {
   return (
     <View>
       <View style={styles.seasonHeader}>
@@ -177,13 +169,11 @@ function SeasonCard({
           previousRecord={stats?.previousRecord ?? Number.POSITIVE_INFINITY}
           minHeight={300}
         />
-        <View style={styles.board}>
-          {stats ? (
-            <TypingStats stats={stats.statsPerWedgie} flapHeight={flapHeight} />
-          ) : (
-            <View style={{ height: flapHeight + 16 + 33 }} />
-          )}
-        </View>
+        {stats ? (
+          <TypingStats stats={stats.statsPerWedgie} />
+        ) : (
+          <View style={styles.boardPlaceholder} />
+        )}
       </View>
     </View>
   );
@@ -656,11 +646,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.violet20,
   },
-  board: {
-    backgroundColor: colors.panel,
-    paddingHorizontal: 12,
-    paddingVertical: 20,
-  },
+  // Holds the board's height while the stats load.
+  boardPlaceholder: { height: 96, backgroundColor: "#0B0518" },
 
   // `bg-panel border-violet/20 rounded-[22px] border p-[18px]`
   card: {
