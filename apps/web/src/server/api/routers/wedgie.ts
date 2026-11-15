@@ -608,6 +608,18 @@ export const wedgieRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const w = await ctx.db.query.wedgie.findFirst({
         where: eq(wedgie.id, Number(input.id)),
+        // the game through game_id, so the form shows it by its teams and day
+        with: {
+          game: {
+            columns: {
+              id: true,
+              name: true,
+              homeTeam: true,
+              awayTeam: true,
+              gameDate: true,
+            },
+          },
+        },
       });
       if (!w) return null;
 

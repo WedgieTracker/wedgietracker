@@ -8,6 +8,17 @@ import type {
   VideoUrls,
 } from "@wedgietracker/core/types/wedgie";
 import { hostedVideo } from "@wedgietracker/core/utils/wedgieVideo";
+import { gameLabelWithDate } from "@wedgietracker/core/utils/game";
+
+/** A wedgie as the edit page loads it, with its game when it has one. */
+export type EditableWedgie = WedgieWithTypes & {
+  game?: {
+    name: string;
+    homeTeam: string | null;
+    awayTeam: string | null;
+    gameDate: string | null;
+  } | null;
+};
 
 interface WedgieFormData {
   playerName: string;
@@ -20,11 +31,13 @@ interface WedgieFormData {
   videoUrl: VideoUrls;
   types: string[];
   gameName: string;
+  /** What the game input shows; only the game picked from it is saved. */
+  gameText: string;
   shoutouts: string[];
 }
 
 function initialFormData(
-  wedgie?: WedgieWithTypes,
+  wedgie?: EditableWedgie,
   currentSeason?: string,
 ): WedgieFormData {
   const video = (wedgie?.videoUrl as VideoUrls | undefined) ?? {};
@@ -44,11 +57,16 @@ function initialFormData(
     },
     types: wedgie?.types?.map((t) => t.name) ?? [],
     gameName: wedgie?.gameName ?? "",
+    gameText: wedgie?.game
+      ? gameLabelWithDate(wedgie.game)
+      : wedgie?.gameName
+        ? gameLabelWithDate({ name: wedgie.gameName })
+        : "",
     shoutouts: wedgie?.shoutouts ?? [],
   };
 }
 
-function normalizePosition(formData: WedgieFormData) {
+function toPayload({ gameText: _shown, ...formData }: WedgieFormData) {
   return {
     ...formData,
     position: formData.position
@@ -57,10 +75,7 @@ function normalizePosition(formData: WedgieFormData) {
   };
 }
 
-export function useWedgieForm(
-  wedgie?: WedgieWithTypes,
-  currentSeason?: string,
-) {
+export function useWedgieForm(wedgie?: EditableWedgie, currentSeason?: string) {
   const router = useRouter();
   const [formData, setFormData] = useState<WedgieFormData>(() =>
     initialFormData(wedgie, currentSeason),
@@ -72,7 +87,7 @@ export function useWedgieForm(
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const payload = normalizePosition(formData);
+      const payload = toPayload(formData);
       if (wedgie?.id) {
         await updateMutation.mutateAsync({ id: wedgie.id, data: payload });
       } else {

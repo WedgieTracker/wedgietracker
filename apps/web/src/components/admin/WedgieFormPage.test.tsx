@@ -189,6 +189,27 @@ describe("WedgieFormPage", () => {
       expect(screen.getByTestId("social-share")).toBeInTheDocument();
     });
 
+    it("shows the wedgie's game in NBA notation, away team first", () => {
+      render(
+        <WedgieFormPage
+          wedgie={
+            {
+              ...(existingWedgie as object),
+              game: {
+                name: "BOS @ LAL - 2026-01-15T19:30:00Z",
+                homeTeam: "BOS",
+                awayTeam: "LAL",
+                gameDate: "2026-01-15",
+              },
+            } as never
+          }
+        />,
+      );
+      expect(screen.getByTestId("game-input")).toHaveValue(
+        "LAL @ BOS, 2026-01-15",
+      );
+    });
+
     it("submits via updateMutation with the wedgie id", async () => {
       render(<WedgieFormPage wedgie={existingWedgie} />);
 

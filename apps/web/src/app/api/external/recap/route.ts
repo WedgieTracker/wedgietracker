@@ -1,4 +1,5 @@
 import { buildAllWedgiesQuery } from "@wedgietracker/core/utils/allWedgiesUrl";
+import { gameLabel, gameMatchup } from "@wedgietracker/core/utils/game";
 import { gameTimeline } from "@wedgietracker/core/utils/gameMoment";
 import { timingSafeEqual } from "crypto";
 import { NextResponse } from "next/server";
@@ -48,7 +49,17 @@ export async function GET(request: Request) {
     db.query.wedgie.findMany({
       where: like(wedgie.wedgieDate, `${date}%`),
       orderBy: [asc(wedgie.wedgieDate), asc(wedgie.number)],
-      with: { wedgieToTypes: { with: { type: true } } },
+      with: {
+        wedgieToTypes: { with: { type: true } },
+        game: {
+          columns: {
+            name: true,
+            homeTeam: true,
+            awayTeam: true,
+            gameDate: true,
+          },
+        },
+      },
     }),
     db.query.global.findFirst({
       where: eq(global.id, 1),
@@ -127,7 +138,18 @@ export async function GET(request: Request) {
       playerName: w.playerName,
       teamName: w.teamName,
       teamAgainstName: w.teamAgainstName,
+      // the old text key, home team first; read the teams from `game` instead
       gameName: w.gameName,
+      // the game by its own columns: NBA notation (away @ home) and who was at home
+      game: w.game
+        ? {
+            label: gameLabel(w.game),
+            matchup: gameMatchup(w.game, w.teamName),
+            homeTeam: w.game.homeTeam,
+            awayTeam: w.game.awayTeam,
+            date: w.game.gameDate,
+          }
+        : null,
       period: w.period,
       gameClock: w.gameClock,
       teamScore: w.teamScore,
