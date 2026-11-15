@@ -24,6 +24,7 @@ export async function createReel(
   number: number,
   season: string,
   player: string,
+  date: string | null = null,
 ): Promise<boolean> {
   try {
     const backgroundPath = await createBackground(
@@ -31,6 +32,7 @@ export async function createReel(
       season,
       player,
       "reel",
+      date,
     );
 
     return new Promise((resolve, reject) => {
@@ -99,12 +101,14 @@ async function createCoverImage(
   number: number,
   season: string,
   player: string,
+  date: string | null,
 ) {
   const backgroundPath = await createBackground(
     number,
     season,
     player,
     "thumbnail",
+    date,
   );
   return backgroundPath;
 }
@@ -118,10 +122,11 @@ export async function uploadToInstagram(
   season: string,
   player: string,
   instagramToken: string,
+  date: string | null = null,
 ) {
   try {
     // Create cover image
-    const coverImagePath = await createCoverImage(number, season, player);
+    const coverImagePath = await createCoverImage(number, season, player, date);
 
     // Download the original video
     const tempInputPath = `/tmp/input_${Date.now()}.mp4`;
@@ -133,7 +138,14 @@ export async function uploadToInstagram(
     await fs.promises.writeFile(tempInputPath, Buffer.from(buffer));
 
     // Create the reel with background
-    await createReel(tempInputPath, tempOutputPath, number, season, player);
+    await createReel(
+      tempInputPath,
+      tempOutputPath,
+      number,
+      season,
+      player,
+      date,
+    );
 
     // Upload so Instagram can fetch the reel from a public URL
     const reelUrl = await uploadFile(

@@ -59,7 +59,8 @@ export function YouTubeUploadForm({ wedgie }: YouTubeUploadFormProps) {
     formData.append("title", title);
     formData.append("description", description);
     formData.append("number", wedgie.number?.toString() ?? "");
-    formData.append("season", wedgie.seasonName?.slice(-5) ?? "");
+    formData.append("season", wedgie.seasonName ?? "");
+    formData.append("date", wedgie.wedgieDate);
     formData.append("player", wedgie.playerName ?? "");
 
     try {
@@ -91,13 +92,15 @@ export function YouTubeUploadForm({ wedgie }: YouTubeUploadFormProps) {
           <div className="grid grid-cols-2 gap-4">
             <Preview
               number={wedgie.number ?? 0}
-              season={wedgie.seasonName?.slice(-5) ?? ""}
+              season={wedgie.seasonName ?? ""}
+              date={wedgie.wedgieDate}
               type="short"
               className="mb-4"
             />
             <Preview
               number={wedgie.number ?? 0}
-              season={wedgie.seasonName?.slice(-5) ?? ""}
+              season={wedgie.seasonName ?? ""}
+              date={wedgie.wedgieDate}
               player={wedgie.playerName ?? ""}
               type="thumbnail"
               className="mb-4"

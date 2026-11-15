@@ -15,6 +15,7 @@ export async function POST(req: Request) {
     const number = parseInt(formData.get("number") as string);
     const season = formData.get("season") as string;
     const player = formData.get("player") as string;
+    const date = (formData.get("date") as string | null) ?? null;
     const instagramToken = req.headers.get("Authorization")?.split(" ")[1];
 
     if (!instagramToken) {
@@ -33,6 +34,7 @@ export async function POST(req: Request) {
       season,
       player,
       instagramToken,
+      date,
     );
 
     if (!result.success) {

@@ -18,9 +18,16 @@ async function createShort(
   number: number,
   season: string,
   player: string,
+  date: string | null,
 ): Promise<boolean> {
   try {
-    const backgroundPath = await createBackground(number, season, player);
+    const backgroundPath = await createBackground(
+      number,
+      season,
+      player,
+      "short",
+      date,
+    );
 
     return new Promise((resolve, reject) => {
       const ffmpeg = spawn("ffmpeg", [
@@ -134,6 +141,7 @@ export async function uploadToYoutube(
   number: number,
   season: string,
   player: string,
+  date: string | null = null,
 ): Promise<{
   success: boolean;
   short?: { videoId: string; videoUrl: string };
@@ -170,7 +178,7 @@ export async function uploadToYoutube(
     const shortPath = `/tmp/short_${path.basename(videoPath)}`;
 
     // Convert the video to Short format
-    await createShort(videoPath, shortPath, number, season, player);
+    await createShort(videoPath, shortPath, number, season, player, date);
 
     console.log("user session", session?.user);
 
@@ -240,6 +248,7 @@ export async function uploadToYoutube(
             number,
             season,
             player,
+            date,
           );
         }
       } catch (refreshError) {
