@@ -30,6 +30,7 @@ interface WedgieFormData {
   position: { x: number; y: number } | null;
   videoUrl: VideoUrls;
   types: string[];
+  gameId: number | null;
   gameName: string;
   /** What the game input shows; only the game picked from it is saved. */
   gameText: string;
@@ -56,6 +57,7 @@ function initialFormData(
       instagram: video.instagram ?? "",
     },
     types: wedgie?.types?.map((t) => t.name) ?? [],
+    gameId: wedgie?.gameId ?? null,
     gameName: wedgie?.gameName ?? "",
     gameText: wedgie?.game
       ? gameLabelWithDate(wedgie.game)

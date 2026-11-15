@@ -1,11 +1,10 @@
 import { SHOUTOUT_PATTERN } from "@wedgietracker/core/utils/shoutout";
 import { timingSafeEqual } from "crypto";
 import { NextResponse } from "next/server";
-import { and, eq, inArray, like } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "~/server/db";
 import {
-  game,
   player,
   team,
   type as typeTable,
@@ -13,6 +12,7 @@ import {
 } from "@wedgietracker/core/schema";
 import { env } from "~/env";
 import { invalidateWedgieData } from "~/server/cache";
+import { pickGame } from "~/server/games";
 import {
   maybeUpdateGlobalWedgieCount,
   syncWedgieTypes,
@@ -78,28 +78,6 @@ function findWedgie(seasonName: string, number: number) {
   });
 }
 
-// The game list names games "HOME @ AWAY - <tip time>", with the tip in US Eastern time written
-// as if UTC; a caller holding the real UTC tip-off finds the same game by teams and the nearest
-// tip within 12 hours.
-async function pickGame(name: string) {
-  const exact = await db.query.game.findFirst({ where: eq(game.name, name) });
-  if (exact) return exact;
-  const [teams, tip] = name.split(" - ");
-  const wanted = Date.parse(tip ?? "");
-  if (!teams || Number.isNaN(wanted)) return undefined;
-  const candidates = await db.query.game.findMany({
-    where: like(game.name, `${teams} - %`),
-  });
-  const near = candidates
-    .map((g) => ({
-      g,
-      gap: Math.abs(Date.parse(g.name.split(" - ")[1] ?? "") - wanted),
-    }))
-    .filter((c) => c.gap <= 12 * 3600 * 1000)
-    .sort((a, b) => a.gap - b.gap);
-  return near[0]?.g;
-}
-
 async function readBody(request: Request) {
   return (await request.json().catch(() => null)) as unknown;
 }
@@ -124,7 +102,7 @@ export async function POST(request: Request) {
 
   // The game comes from the site's own game list, as when it is picked in the admin; its
   // date is the wedgie's date.
-  const picked = await pickGame(data.gameName);
+  const picked = await pickGame(db, data.gameName);
   if (!picked) {
     return NextResponse.json(
       { error: `Unknown game ${data.gameName}` },
@@ -134,6 +112,7 @@ export async function POST(request: Request) {
 
   const record = {
     ...data,
+    gameId: picked.id,
     gameName: picked.name,
     position: data.position ?? { x: 0, y: 0 },
     wedgieDate: new Date(picked.createdAt).toISOString(),

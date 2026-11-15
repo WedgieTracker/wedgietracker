@@ -3,6 +3,7 @@ import {
   SEASON_GAMES,
   normalRate,
 } from "@wedgietracker/core/utils/paceCalculator";
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { eq, desc, ne, and, count, sql, asc, gt, inArray } from "drizzle-orm";
 import { cacheTag, cacheLife } from "next/cache";
@@ -23,6 +24,7 @@ import {
   game,
 } from "@wedgietracker/core/schema";
 import { CACHE_TAGS, invalidateWedgieData } from "~/server/cache";
+import { findLinkedGame } from "~/server/games";
 import { getNerdExtras } from "~/server/nerd-extras";
 import {
   buildTeamStandings,
@@ -50,9 +52,27 @@ const wedgieInput = z.object({
     instagram: z.string().optional(),
   }),
   types: z.array(z.string()),
+  // the game picked in the form; gameName alone is still taken for older callers
+  gameId: z.number().int().nullable().optional(),
   gameName: z.string().optional(),
   shoutouts: z.array(z.string().regex(SHOUTOUT_PATTERN)).default([]),
 });
+
+// The game_id and game_name a wedgie saved from the admin gets: the picked game's id and its name,
+// both from the game row, or neither for a wedgie without a game (GEMS).
+async function linkGame(
+  database: typeof db,
+  pick: { gameId?: number | null; gameName?: string | null },
+) {
+  const found = await findLinkedGame(database, pick);
+  if ("error" in found) {
+    throw new TRPCError({ code: "BAD_REQUEST", message: found.error });
+  }
+  return {
+    gameId: found.game?.id ?? null,
+    gameName: found.game?.name ?? null,
+  };
+}
 
 // Helper: get wedgies with their types via the join table
 async function getWedgiesWithTypes(wedgieRows: { id: number }[]) {
@@ -557,12 +577,14 @@ export const wedgieRouter = createTRPCRouter({
   create: protectedProcedure
     .input(wedgieInput)
     .mutation(async ({ ctx, input }) => {
-      const { types: typeNames, ...data } = input;
+      const { types: typeNames, gameId, gameName, ...data } = input;
+      const linked = await linkGame(ctx.db, { gameId, gameName });
 
       const [created] = await ctx.db
         .insert(wedgie)
         .values({
           ...data,
+          ...linked,
           position: data.position ?? { x: 0, y: 0 },
           wedgieDate: data.wedgieDate.toISOString(),
         })
@@ -635,12 +657,14 @@ export const wedgieRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const { types: typeNames, ...data } = input.data;
+      const { types: typeNames, gameId, gameName, ...data } = input.data;
+      const linked = await linkGame(ctx.db, { gameId, gameName });
 
       const [updated] = await ctx.db
         .update(wedgie)
         .set({
           ...data,
+          ...linked,
           position: data.position ?? { x: 0, y: 0 },
           wedgieDate: data.wedgieDate.toISOString(),
         })

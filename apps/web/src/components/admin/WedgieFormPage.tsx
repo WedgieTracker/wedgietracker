@@ -161,12 +161,13 @@ export function WedgieFormPage({ wedgie, currentSeason }: WedgieFormPageProps) {
                   ...prev,
                   gameText: value,
                   // emptying the box takes the wedgie off its game (GEMS have none)
-                  ...(value.trim() === "" && { gameName: "" }),
+                  ...(value.trim() === "" && { gameId: null, gameName: "" }),
                 }))
               }
               onGameSelect={(game) => {
                 setFormData((prev) => ({
                   ...prev,
+                  gameId: game.id,
                   gameName: game.name,
                   gameText: game.label,
                   wedgieDate: game.date,
