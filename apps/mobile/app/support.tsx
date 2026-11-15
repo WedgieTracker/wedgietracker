@@ -1,4 +1,4 @@
-import { Stack } from "expo-router";
+import { Stack, useLocalSearchParams } from "expo-router";
 import {
   isUserCancelledError,
   useIAP,
@@ -64,7 +64,11 @@ type Status =
  * can't sell right now (no connection), pressing it says so instead.
  */
 export default function SupportScreen() {
-  const [count, setCount] = useState<1 | 3 | 5>(3);
+  // Dev builds only: `?cups=5` opens on another pick, for screenshots.
+  const { cups } = useLocalSearchParams<{ cups?: string }>();
+  const [count, setCount] = useState<1 | 3 | 5>(() =>
+    __DEV__ && (cups === "1" || cups === "5") ? (Number(cups) as 1 | 5) : 3,
+  );
   const [status, setStatus] = useState<Status>({ kind: "idle" });
   const [checked, setChecked] = useState(false);
   const scoreboard = api.donations.getSeasonCoffees.useQuery(undefined, {
@@ -278,7 +282,7 @@ function useRotatingAttribute() {
 
 /**
  * Port of apps/web/src/components/support/CoffeeStack.tsx: the cups on the
- * badge, four high, each new one dropping onto the stack, with a rotating
+ * badge in a pyramid, each new one dropping onto the stack, with a rotating
  * attribute boost in the corner.
  */
 function CoffeeStack({ count }: { count: number }) {
@@ -287,11 +291,15 @@ function CoffeeStack({ count }: { count: number }) {
   const prev = shown.current;
   shown.current = count;
 
-  const size = 40;
-  const high = 4;
-  const columns: number[][] = [];
-  for (let i = 0; i < count; i++)
-    (columns[Math.floor(i / high)] ??= []).push(i);
+  // Only 1, 3 or 5 can be bought, so each gets a stack built to fill the
+  // badge: one big cup, then pyramids of two under one and three under two.
+  const size = count <= 1 ? 104 : count <= 3 ? 84 : 74;
+  const rows: number[][] = [];
+  for (let i = 0, width = Math.ceil(count / 2); i < count; width--) {
+    const row: number[] = [];
+    for (let j = 0; j < Math.max(1, width) && i < count; j++) row.push(i++);
+    rows.push(row);
+  }
 
   return (
     <View
@@ -313,10 +321,18 @@ function CoffeeStack({ count }: { count: number }) {
           </Text>
         </View>
       </View>
-      <View style={[styles.cups, { gap: Math.round(size / 6) }]}>
-        {columns.map((col, c) => (
-          <View key={c} style={styles.column}>
-            {col.map((i) => (
+      <View style={styles.cups}>
+        {rows.map((row, r) => (
+          <View
+            key={r}
+            style={[
+              styles.row,
+              { gap: Math.round(size / 8) },
+              // Each row sits down onto the lids of the one below.
+              r > 0 && { marginBottom: -Math.round(size * 0.3) },
+            ]}
+          >
+            {row.map((i) => (
               <Animated.View
                 key={i}
                 entering={
@@ -326,7 +342,6 @@ function CoffeeStack({ count }: { count: number }) {
                         .delay(Math.max(0, i - prev) * 90)
                     : undefined
                 }
-                style={{ marginTop: -Math.round(size * 0.225) }}
               >
                 <CoffeeCup width={size} full steam={i === count - 1} />
               </Animated.View>
@@ -383,11 +398,10 @@ const styles = StyleSheet.create({
     bottom: 14,
     left: 0,
     right: 0,
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "flex-end",
+    flexDirection: "column-reverse",
+    alignItems: "center",
   },
-  column: { flexDirection: "column-reverse", alignItems: "center" },
+  row: { flexDirection: "row", justifyContent: "center" },
 
   picks: { flexDirection: "row", justifyContent: "center", gap: 8 },
   pick: {

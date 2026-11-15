@@ -1,5 +1,6 @@
 import { router, useLocalSearchParams, type Href } from "expo-router";
 import { useEffect, type RefObject } from "react";
+import { LogBox } from "react-native";
 
 import type { HeroStatsData } from "@/components/HeroStats";
 
@@ -79,6 +80,8 @@ const SHOT_DRIVER = __DEV__ ? process.env.EXPO_PUBLIC_SHOT_DRIVER : undefined;
 export function useShotDriver() {
   useEffect(() => {
     if (!SHOT_DRIVER) return;
+    // The dev warning toast would land in the captures.
+    LogBox.ignoreAllLogs(true);
     let last = -1;
     const timer = setInterval(() => {
       fetch(SHOT_DRIVER)
