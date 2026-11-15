@@ -1,15 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 62.87" width="200" height="62.87">
   <!--
-    WedgieTracker wordmark, the single vector source of truth for every app icon.
-    Traced from apps/web/public/logo.svg; the two brand colours below are the
-    tokens from apps/web/src/styles/globals.css (--yellow, --pink).
-    scripts/generate-icons.mjs recolours the mark by substituting the two hex
-    literals, so keep them spelled exactly as #FF00FF and #EAFF00.
+    WedgieTracker wordmark, the single vector source of truth for every app icon
+    and the splash. Traced from apps/web/public/logo.svg and coloured like
+    components/Logo.tsx: violet WEDGIE fading out at its foot over cream TRACKER.
+    scripts/generate-icons.mjs reads the paths inside #wedgie and #tracker and
+    sets each composition's own fills, so the colours here are only the default.
   -->
   <defs>
     <linearGradient id="wedgie-fade" x1="0" y1="23.72" x2="0" y2="37.65" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#FF00FF" />
-      <stop offset="1" stop-color="#FF00FF" stop-opacity="0" />
+      <stop offset="0" stop-color="#9A5CF5" />
+      <stop offset="1" stop-color="#9A5CF5" stop-opacity="0" />
     </linearGradient>
   </defs>
   <g id="wedgie" fill="url(#wedgie-fade)">
@@ -20,7 +20,7 @@
     <path d="M168.77.49v35.59h-9.66V.49h9.66Z" />
     <path d="M173.35,36.08V.49h25.65v7.79h-15.99v6.12h14.67v7.79h-14.67v6.12h15.92v7.79h-25.58Z" />
   </g>
-  <g id="tracker" fill="#EAFF00">
+  <g id="tracker" fill="#F0E1B6">
     <polygon points="0 39.02 9.02 39.02 9.02 62.46 17.05 62.46 17.05 39.02 26.08 39.02 26.08 32.46 0 32.46 0 39.02" />
     <path d="M51.78,48.09c.95-1.47,1.43-3.29,1.43-5.43s-.46-3.96-1.39-5.48c-.93-1.52-2.23-2.69-3.9-3.5-1.67-.81-3.62-1.22-5.85-1.22h-12.95v30h8.15v-9.9h2.82l5.27,9.9h8.85l-6.09-11.19c1.55-.75,2.78-1.81,3.67-3.18ZM37.27,38.96h2.87c.96,0,1.77.13,2.45.39.68.26,1.2.66,1.57,1.2.37.54.55,1.24.55,2.1s-.18,1.54-.55,2.07c-.37.53-.89.91-1.57,1.15-.68.24-1.5.36-2.45.36h-2.87v-7.27Z" />
     <path d="M65.57,32.46l-9.9,30h8.79l1.73-5.74h9.89l1.73,5.74h8.79l-9.9-30h-11.13ZM68.03,50.63l2.99-9.9h.23l2.99,9.9h-6.21Z" />
