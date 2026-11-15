@@ -45,7 +45,9 @@ export const defaultMetadata: Metadata = {
     images: [DEFAULT_SOCIAL_IMAGE],
   },
   icons: [
-    { rel: "icon", url: "/favicon.ico" },
+    // The ICO carries 16, 32 and 48 px for older browsers; the SVG is crisp everywhere else.
+    { rel: "icon", url: "/favicon.ico", sizes: "48x48" },
+    { rel: "icon", url: "/favicon.svg", type: "image/svg+xml" },
     { rel: "apple-touch-icon", url: "/apple-touch-icon.png" },
   ],
 };
