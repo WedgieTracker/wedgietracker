@@ -40,7 +40,7 @@ export function ReportWedgieButton({ wedgie }: ReportWedgieButtonProps) {
       <DialogTrigger
         aria-label="Challenge: report wrong info"
         title="Challenge"
-        className="border-yellow/60 text-yellow hover:bg-yellow hover:text-darkpurple flex size-7 items-center justify-center rounded-md border transition-all duration-300 sm:size-8"
+        className="border-cream/60 text-cream hover:bg-cream hover:text-night focus-visible:outline-cream flex size-7 items-center justify-center rounded-md border transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 sm:size-8"
       >
         <svg
           className="size-4"
@@ -58,12 +58,12 @@ export function ReportWedgieButton({ wedgie }: ReportWedgieButtonProps) {
           <circle cx="9" cy="15" r="1.5" fill="currentColor" stroke="none" />
         </svg>
       </DialogTrigger>
-      <DialogContent className="bg-darkpurple border-yellow max-w-[90vw] rounded-xl border-2 text-white sm:max-w-md">
-        <DialogClose className="border-yellow bg-yellow text-darkpurple hover:bg-darkpurple hover:text-yellow absolute top-3 right-3 rounded-full border transition-all duration-300">
-          <Cross2Icon className="size-6 p-1" />
+      <DialogContent className="bg-panel border-violet/30 text-cream max-w-[90vw] rounded-[22px] border p-5 shadow-[0_14px_30px_rgb(5_2_20/0.6)] sm:max-w-md sm:rounded-[22px] md:p-6">
+        <DialogClose className="border-cream/30 bg-night/35 text-cream hover:bg-cream hover:text-night focus-visible:outline-cream absolute top-4 right-4 grid size-9 place-items-center rounded-full border transition-colors duration-200 focus-visible:outline-2 md:top-5 md:right-5">
+          <Cross2Icon className="size-5" />
           <span className="sr-only">Close</span>
         </DialogClose>
-        <DialogTitle className="text-yellow pr-8 font-black uppercase">
+        <DialogTitle className="text-cream pr-11 text-[22px] leading-tight font-black tracking-[-0.03em]">
           Coach&apos;s challenge on #{wedgie.number}
         </DialogTitle>
         <ReportForm wedgieId={wedgie.id} onDone={() => setOpen(false)} />
@@ -97,7 +97,7 @@ function ReportForm({
 
   return (
     <form
-      className="space-y-4"
+      className="space-y-5"
       onSubmit={(e) => {
         e.preventDefault();
         if (!field) return;
@@ -110,17 +110,17 @@ function ReportForm({
       }}
     >
       <fieldset>
-        <legend className="mb-2 text-xs font-bold tracking-wider text-white/60 uppercase">
+        <legend className="text-cream/60 mb-2.5 text-[11.5px] font-black tracking-[0.12em] uppercase">
           What did we get wrong?
         </legend>
         <div className="flex flex-wrap gap-2">
           {WEDGIE_REPORT_FIELDS.map((f) => (
             <label
               key={f}
-              className={`cursor-pointer rounded-md border px-3 py-1 text-sm font-bold transition-colors ${
+              className={`has-focus-visible:outline-cream flex min-h-9 cursor-pointer items-center rounded-full border px-3.5 text-[13.5px] font-extrabold transition-colors has-focus-visible:outline-2 has-focus-visible:outline-offset-2 ${
                 field === f
-                  ? "border-yellow bg-yellow text-darkpurple"
-                  : "hover:border-yellow border-white/30 text-white"
+                  ? "bg-cream border-cream text-night"
+                  : "bg-night/40 border-violet/30 text-cream hover:border-cream/60"
               }`}
             >
               <input
@@ -140,7 +140,7 @@ function ReportForm({
       <div>
         <label
           htmlFor="report-note"
-          className="mb-2 block text-xs font-bold tracking-wider text-white/60 uppercase"
+          className="text-cream/60 mb-2.5 block text-[11.5px] font-black tracking-[0.12em] uppercase"
         >
           Details (optional)
         </label>
@@ -151,9 +151,9 @@ function ReportForm({
           rows={3}
           placeholder="e.g. it was Jokic, not Murray"
           onChange={(e) => setNote(e.target.value)}
-          className="focus:border-yellow w-full rounded-md border border-white/30 bg-white/5 p-2 text-sm text-white outline-none"
+          className="bg-night text-cream placeholder:text-cream/40 focus-visible:outline-violet w-full rounded-xl px-4 py-3 text-[15px] font-bold outline-none focus-visible:outline-2"
         />
-        <p className="text-right text-xs text-white/40">
+        <p className="text-cream/45 mt-1 text-right text-xs font-bold">
           {note.length}/{NOTE_MAX}
         </p>
       </div>
@@ -171,7 +171,7 @@ function ReportForm({
       />
 
       {report.isError && (
-        <p className="text-pink text-sm">
+        <p className="text-violet text-sm font-bold">
           Something went wrong, please try again.
         </p>
       )}
@@ -179,7 +179,7 @@ function ReportForm({
       <button
         type="submit"
         disabled={!field || report.isPending}
-        className="bg-yellow text-darkpurple hover:bg-yellow/80 w-full rounded-md px-3 py-2 text-sm font-bold uppercase transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-50"
+        className="btn-sticker min-h-12 w-full px-5 text-[15px] [--sticker-off:4px] disabled:pointer-events-none disabled:opacity-50"
       >
         {report.isPending ? "Sending..." : "Send challenge"}
       </button>
