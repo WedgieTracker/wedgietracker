@@ -25,6 +25,8 @@ export const colors = {
   nightDarker: "#0C061C",
 
   white: "#FFFFFF",
+  // Body copy on night and panels, set apart from cream headings.
+  white85: "rgba(255, 255, 255, 0.85)",
   white60: "rgba(255, 255, 255, 0.6)",
   white50: "rgba(255, 255, 255, 0.5)",
 

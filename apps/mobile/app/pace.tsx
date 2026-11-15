@@ -536,7 +536,7 @@ const styles = StyleSheet.create({
     fontFamily: fonts.extraBold,
     fontSize: 17,
     lineHeight: 24,
-    color: colors.cream80,
+    color: colors.white85,
   },
   strong: { fontFamily: fonts.black, color: colors.cream },
 
@@ -578,7 +578,7 @@ const styles = StyleSheet.create({
     fontFamily: fonts.bold,
     fontSize: 15,
     lineHeight: 22,
-    color: colors.cream80,
+    color: colors.white85,
   },
   note: {
     marginTop: 12,
