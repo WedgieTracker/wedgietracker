@@ -1,6 +1,9 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import { stripe } from "~/server/services/stripe";
+import { recordAppStoreCoffee } from "~/server/app-store";
+import { getSeasonCoffees } from "~/server/coffees";
+import { getCachedStats } from "./wedgie";
 
 export const donationsRouter = createTRPCRouter({
   createCheckoutSession: publicProcedure
@@ -40,4 +43,18 @@ export const donationsRouter = createTRPCRouter({
 
       return session.url;
     }),
+
+  /** Counts a coffee bought in the iOS app, sent as its signed transaction. */
+  recordAppStoreCoffee: publicProcedure
+    .input(z.object({ signedTransaction: z.string().max(20000) }))
+    .mutation(({ input }) => recordAppStoreCoffee(input.signedTransaction)),
+
+  /** This season's coffees against its wedgies, for the app's scoreboard. */
+  getSeasonCoffees: publicProcedure.query(async () => {
+    const [{ season, coffees }, stats] = await Promise.all([
+      getSeasonCoffees(),
+      getCachedStats(),
+    ]);
+    return { season, coffees, wedgies: stats.currentSeasonWedgies };
+  }),
 });

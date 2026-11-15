@@ -11,7 +11,12 @@ vi.mock("~/server/db-helpers", () => ({
   maybeUpdateGlobalWedgieCount,
 }));
 vi.mock("@wedgietracker/core/schema", () => ({
-  game: { name: "name" },
+  game: {
+    id: "id",
+    name: "name",
+    homeTeam: "homeTeam",
+    awayTeam: "awayTeam",
+  },
   player: {},
   team: {},
   type: { name: "name" },
@@ -73,7 +78,11 @@ const draft = {
   noDunksTweet: { id: "1", text: "wedgie", postedAt: "2026-11-09T02:00:00Z" },
 };
 const siteGame = {
+  id: 22600123,
   name: "NYK @ SAS - 2026-11-08T20:30:00Z",
+  homeTeam: "NYK",
+  awayTeam: "SAS",
+  gameDate: "2026-11-08",
   createdAt: "2026-11-08T20:30:00.000Z",
 };
 
@@ -100,6 +109,7 @@ describe("/api/external/wedgie", () => {
       (v) => (v as { number?: number }).number === 3,
     );
     expect(record).toMatchObject({
+      gameId: 22600123,
       gameName: siteGame.name,
       wedgieDate: "2026-11-08T20:30:00.000Z",
       gameClock: "0:09.6",
@@ -115,6 +125,59 @@ describe("/api/external/wedgie", () => {
       expect.anything(),
       "2026/27",
     );
+  });
+
+  it("finds the same game when the teams come in NBA order, away team first", async () => {
+    const res = await POST(
+      call("POST", { ...draft, gameName: "SAS @ NYK - 2026-11-09T01:30:00Z" }),
+    );
+    expect(res.status).toBe(200);
+    expect(
+      inserted.find((v) => (v as { number?: number }).number === 3),
+    ).toMatchObject({ gameId: 22600123, gameName: siteGame.name });
+  });
+
+  it("does not take a game more than 12 hours from the tip", async () => {
+    const res = await POST(
+      call("POST", { ...draft, gameName: "NYK @ SAS - 2026-11-10T00:30:00Z" }),
+    );
+    expect(res.status).toBe(400);
+  });
+
+  it("refuses a team that did not play in the game, dry run or not", async () => {
+    for (const dryRun of [false, true]) {
+      const res = await POST(
+        call("POST", { ...draft, teamAgainstName: "BOS", dryRun }),
+      );
+      expect(res.status).toBe(400);
+      expect(await res.json()).toMatchObject({
+        error: "NYK v BOS is not the game SAS @ NYK on 2026-11-08 (SAS at NYK)",
+        game: { id: 22600123, label: "SAS @ NYK", homeTeam: "NYK" },
+      });
+    }
+    expect(inserted).toHaveLength(0);
+  });
+
+  it("takes the team and opponent in either order", async () => {
+    const res = await POST(
+      call("POST", { ...draft, teamName: "SAS", teamAgainstName: "NYK" }),
+    );
+    expect(res.status).toBe(200);
+  });
+
+  it("keeps a date the caller sends on the game's day and refuses one off it", async () => {
+    const sent = await POST(
+      call("POST", { ...draft, wedgieDate: "2026-11-09T02:10:00Z" }),
+    );
+    expect(sent.status).toBe(200);
+    expect(
+      inserted.find((v) => (v as { number?: number }).number === 3),
+    ).toMatchObject({ wedgieDate: "2026-11-09T02:10:00.000Z" });
+
+    const off = await POST(
+      call("POST", { ...draft, wedgieDate: "2026-11-07T20:30:00Z" }),
+    );
+    expect(off.status).toBe(400);
   });
 
   it("writes nothing on a dry run", async () => {
