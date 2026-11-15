@@ -21,7 +21,7 @@ const BALL_INK = "#ff4fc8";
 const BANNER_INK = "#ad3792";
 
 const WIDTH = 132;
-const PAGE_MIN_HEIGHT = 118;
+const PAGE_MIN_HEIGHT = 104;
 const BINDING = 26;
 
 /**
@@ -297,8 +297,8 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     alignItems: "center",
     justifyContent: "center",
-    paddingTop: 6,
-    paddingBottom: 14,
+    paddingTop: 10,
+    paddingBottom: 8,
   },
   count: {
     fontFamily: fonts.blackItalic,

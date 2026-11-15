@@ -92,7 +92,7 @@ export function FeaturedWedgie({
       <View style={styles.card}>
         <View style={styles.badge}>
           <GradientFill name="badge" />
-          <Grain />
+          <Grain opacity={0.1} />
           <View style={styles.badgeTop}>
             <View>
               <Text

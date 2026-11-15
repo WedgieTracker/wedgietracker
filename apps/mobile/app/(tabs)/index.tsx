@@ -261,7 +261,8 @@ const styles = StyleSheet.create({
   },
   support: {
     position: "absolute",
-    left: 16,
+    // Clear of the screen's rounded corner.
+    left: 24,
     flexDirection: "row",
     gap: 6,
     paddingHorizontal: 10,

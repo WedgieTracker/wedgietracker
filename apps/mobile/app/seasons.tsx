@@ -14,6 +14,7 @@ import { PageHeading } from "@/components/PageHeading";
 import { Screen } from "@/components/Screen";
 import { ErrorState } from "@/components/States";
 import { StickerButton } from "@/components/StickerButton";
+import { SupportFooter } from "@/components/SupportFooter";
 import { api, type RouterOutputs } from "@/lib/api";
 import { colors, fonts } from "@/lib/theme";
 import { useWide } from "@/lib/wide";
@@ -155,6 +156,7 @@ export default function SeasonsScreen() {
                 />
               ))}
         </View>
+        <SupportFooter />
       </Screen>
     </>
   );

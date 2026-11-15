@@ -77,11 +77,23 @@ export function GradientFill({
  * draws it with an SVG turbulence filter, which react-native-svg cannot, so
  * it is a tiled noise image blended the same way.
  */
-export function Grain({ radius = 0 }: { radius?: number }) {
+export function Grain({
+  radius = 0,
+  opacity,
+}: {
+  radius?: number;
+  /** Fainter where the grain sits on a large flat area. */
+  opacity?: number;
+}) {
   return (
     <View
       pointerEvents="none"
-      style={[StyleSheet.absoluteFill, styles.grain, { borderRadius: radius }]}
+      style={[
+        StyleSheet.absoluteFill,
+        styles.grain,
+        { borderRadius: radius },
+        opacity !== undefined && { opacity },
+      ]}
     >
       <Image
         source={require("../assets/images/grain.png")}

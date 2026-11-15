@@ -17,6 +17,7 @@ import { HiddenHeading, PageHeading } from "@/components/PageHeading";
 import { PaceGauge } from "@/components/PaceGauge";
 import { ErrorState } from "@/components/States";
 import { StickerButton } from "@/components/StickerButton";
+import { SupportFooter } from "@/components/SupportFooter";
 import { StickySplit } from "@/components/StickySplit";
 import { TopSafeArea } from "@/components/TopSafeArea";
 import { TypingStats } from "@/components/TypingStats";
@@ -132,6 +133,8 @@ export default function StatsScreen() {
             {rest}
           </View>
         )}
+
+        <SupportFooter style={styles.supportFooter} />
 
         <Text style={styles.disclaimer} allowFontScaling={false}>
           WedgieTracker is an independent fan project, not affiliated with or
@@ -273,16 +276,18 @@ function NerdColumn({
       <HiddenHeading>All time</HiddenHeading>
       <View style={styles.allTime}>
         <Card>
-          <Kicker>All time</Kicker>
-          <Text style={styles.big} allowFontScaling={false}>
-            {nf(stats.totalWedgiesOverall)}
-          </Text>
-          <Text
-            style={[styles.kicker, styles.bigLabel]}
-            allowFontScaling={false}
-          >
-            WEDGIES
-          </Text>
+          <View style={styles.bigBlock}>
+            <Kicker>All time</Kicker>
+            <Text style={styles.big} allowFontScaling={false}>
+              {nf(stats.totalWedgiesOverall)}
+            </Text>
+            <Text
+              style={[styles.kicker, styles.bigLabel]}
+              allowFontScaling={false}
+            >
+              WEDGIES
+            </Text>
+          </View>
           <View style={styles.list}>
             {(
               [
@@ -415,7 +420,7 @@ function B({ children }: { children: React.ReactNode }) {
 function More({ label, onPress }: { label: string; onPress: () => void }) {
   return (
     <View style={styles.more}>
-      <StickerButton label={label} small onPress={onPress} />
+      <StickerButton label={label} onPress={onPress} />
     </View>
   );
 }
@@ -610,6 +615,7 @@ const styles = StyleSheet.create({
   error: { paddingTop: 24 },
   splitWrap: { marginTop: 8 },
   column: { gap: 14, marginTop: 8 },
+  supportFooter: { marginBottom: 24 },
   flex: { flex: 1 },
   centred: { alignItems: "center" },
   disclaimer: {
@@ -685,7 +691,8 @@ const styles = StyleSheet.create({
   },
   lineCentred: { textAlign: "center" },
   strong: { color: colors.cream },
-  more: { marginTop: 16, alignSelf: "flex-start" },
+  // Full width, as the buttons on Home.
+  more: { marginTop: 16, alignSelf: "stretch" },
 
   since: { flexDirection: "row", alignItems: "center", gap: 16 },
   // `size-20 rounded-2xl pr-[0.12em] text-[44px] italic`: no negative
@@ -697,7 +704,10 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     alignItems: "center",
     justifyContent: "center",
-    paddingRight: 44 * 0.12,
+    // Measured on a device: a single slanted digit needs less right room
+    // than a wide number, and Inter's figures sit high in the line box.
+    paddingRight: 1,
+    paddingTop: 5,
   },
   tileNumber: {
     fontFamily: fonts.blackItalic,
@@ -746,6 +756,7 @@ const styles = StyleSheet.create({
     color: colors.cream,
   },
   bigLabel: { marginTop: 6, letterSpacing: 1.6 },
+  bigBlock: { alignItems: "center" },
   list: { marginTop: 16, gap: 10 },
   listRow: {
     flexDirection: "row",

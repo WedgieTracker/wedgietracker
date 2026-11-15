@@ -25,6 +25,7 @@ import { api, type RouterOutputs } from "@/lib/api";
 import { track } from "@/lib/observability";
 import { GemTag } from "@/components/GemTag";
 import { Matchup } from "@/components/Matchup";
+import { SupportFooter } from "@/components/SupportFooter";
 import { isGem, nightDate } from "@/lib/dates";
 import { badgeTextShadow, colors, fonts, radius, space } from "@/lib/theme";
 import { gameTimeline } from "@wedgietracker/core/utils/gameMoment";
@@ -361,7 +362,10 @@ function WedgieDetail({
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.wideColumn}>{media}</View>
-        <View style={styles.wideColumn}>{details}</View>
+        <View style={styles.wideColumn}>
+          {details}
+          <SupportFooter />
+        </View>
       </ScrollView>
     );
   }
@@ -379,6 +383,9 @@ function WedgieDetail({
     >
       {media}
       {details}
+      <View style={styles.footer}>
+        <SupportFooter />
+      </View>
     </ScrollView>
   );
 }
@@ -541,6 +548,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: SHEET_RADIUS,
   },
   sheetContent: { paddingBottom: space.xl },
+  footer: { paddingHorizontal: space.lg },
   topBar: {
     flexDirection: "row",
     alignItems: "center",

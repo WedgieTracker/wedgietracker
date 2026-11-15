@@ -19,6 +19,7 @@ import { PageHeading } from "@/components/PageHeading";
 import { PlayersTeams } from "@/components/PlayersTeams";
 import { Screen } from "@/components/Screen";
 import { ErrorState } from "@/components/States";
+import { SupportFooter } from "@/components/SupportFooter";
 import { api } from "@/lib/api";
 import { track } from "@/lib/observability";
 import { useSeasonFallback } from "@/lib/use-season-fallback";
@@ -204,6 +205,7 @@ export default function StandingsScreen() {
           />
         </View>
       )}
+      <SupportFooter />
     </Screen>
   );
 }

@@ -12,6 +12,7 @@ import {
 
 import { Empty, ErrorState } from "@/components/States";
 import { TopSafeArea } from "@/components/TopSafeArea";
+import { SupportFooter } from "@/components/SupportFooter";
 import {
   NO_FILTERS,
   WedgieFilters,
@@ -220,6 +221,7 @@ export default function AllWedgiesScreen() {
             ) : null}
           </View>
         }
+        ListFooterComponent={wedgies.length ? <SupportFooter /> : undefined}
         renderItem={({ item }) => (
           <View style={cell}>
             <WedgieRow
