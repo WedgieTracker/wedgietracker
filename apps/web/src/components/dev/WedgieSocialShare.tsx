@@ -18,25 +18,25 @@ export function WedgieSocialShare({ wedgie }: WedgieSocialShareProps) {
         <TabsList className="mb-2 grid w-full grid-cols-4 bg-white/10">
           <TabsTrigger
             value="youtube"
-            className="data-[state=active]:bg-yellow text-white"
+            className="data-[state=active]:bg-cream text-white"
           >
             YouTube
           </TabsTrigger>
           <TabsTrigger
             value="instagram"
-            className="data-[state=active]:bg-yellow text-white"
+            className="data-[state=active]:bg-cream text-white"
           >
             Instagram
           </TabsTrigger>
           <TabsTrigger
             value="twitter"
-            className="data-[state=active]:bg-yellow text-white"
+            className="data-[state=active]:bg-cream text-white"
           >
             Twitter
           </TabsTrigger>
           <TabsTrigger
             value="bluesky"
-            className="data-[state=active]:bg-yellow text-white"
+            className="data-[state=active]:bg-cream text-white"
           >
             Bluesky
           </TabsTrigger>

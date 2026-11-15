@@ -18,6 +18,7 @@
     "db:push": "pnpm --filter @wedgietracker/web db:push",
     "db:studio": "pnpm --filter @wedgietracker/web db:studio",
     "db:dump": "pnpm --filter @wedgietracker/web db:dump",
+    "db:check-games": "pnpm --filter @wedgietracker/web db:check-games",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,cjs,mjs,json,md,mdx,yml,yaml,css}\" --cache",
     "format:write": "prettier --write \"**/*.{ts,tsx,js,jsx,cjs,mjs,json,md,mdx,yml,yaml,css}\" --cache",
     "prepare": "lefthook install"

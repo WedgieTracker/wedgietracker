@@ -20,7 +20,7 @@ export function AddNewEntityDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <div className="fixed inset-0 z-50 bg-black/50" />
-      <div className="bg-darkpurple fixed top-1/2 left-1/2 z-50 -translate-x-1/2 -translate-y-1/2 rounded-lg p-6">
+      <div className="bg-night fixed top-1/2 left-1/2 z-50 -translate-x-1/2 -translate-y-1/2 rounded-lg p-6">
         <h2 className="mb-4 text-lg font-bold text-white">
           Add New {entityLabel}
         </h2>

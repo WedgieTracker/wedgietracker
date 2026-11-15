@@ -1,6 +1,7 @@
 export * from "./schema";
 export * from "./types/wedgie";
 export * from "./utils/formatDate";
+export * from "./utils/game";
 export * from "./utils/paceCalculator";
 export * from "./utils/teamAliases";
 export * from "./utils/wedgieFilter";

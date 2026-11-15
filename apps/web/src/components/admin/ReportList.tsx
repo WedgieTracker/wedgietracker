@@ -53,7 +53,7 @@ export function ReportList() {
               ).toLocaleString()}
             </p>
             <p className="mt-3">
-              <span className="bg-pink rounded px-2 py-0.5 text-xs font-bold uppercase">
+              <span className="bg-violet rounded px-2 py-0.5 text-xs font-bold uppercase">
                 {report.field}
               </span>
             </p>
@@ -63,7 +63,7 @@ export function ReportList() {
             <div className="mt-3 flex space-x-4">
               <Link
                 href={`/admin/wedgies/${report.wedgie.id}`}
-                className="bg-yellow hover:bg-yellow/80 rounded-md px-4 py-1 font-bold text-black uppercase"
+                className="bg-cream hover:bg-cream/80 rounded-md px-4 py-1 font-bold text-black uppercase"
               >
                 Edit wedgie
               </Link>

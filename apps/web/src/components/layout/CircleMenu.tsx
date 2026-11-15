@@ -34,7 +34,7 @@ export function CircleMenu() {
         onClick={() => setIsMenuOpen(false)}
         style={{
           backgroundImage:
-            "radial-gradient(transparent 1px, rgb(var(--darkpurple-rgb)) 1px)",
+            "radial-gradient(transparent 1px, rgb(var(--night-rgb)) 1px)",
           backgroundSize: "2px 2px",
         }}
       /> */}
@@ -49,7 +49,7 @@ export function CircleMenu() {
       >
         {/* Yellow circle background */}
         <div
-          className="bg-yellow fixed top-0 right-0 size-[800px] rounded-full transition-transform duration-500 ease-in-out md:top-5"
+          className="bg-cream fixed top-0 right-0 size-[800px] rounded-full transition-transform duration-500 ease-in-out md:top-5"
           style={{
             transform: isMenuOpen
               ? "translate(35%, -50%) scale(1)"
@@ -68,7 +68,7 @@ export function CircleMenu() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="text-md hover:text-pink font-bold text-black transition-colors md:text-lg"
+                className="text-md hover:text-violet font-bold text-black transition-colors md:text-lg"
                 onClick={() => setIsMenuOpen(false)}
               >
                 {item.label}
@@ -89,7 +89,7 @@ export function CircleMenu() {
                     href={social.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="hover:bg-darkpurple rounded-full p-2 text-lg text-black transition-colors"
+                    className="hover:bg-night rounded-full p-2 text-lg text-black transition-colors"
                     onClick={() => setIsMenuOpen(false)}
                     onMouseEnter={() => setHoveredSocial(social.href)}
                     onMouseLeave={() => setHoveredSocial(null)}

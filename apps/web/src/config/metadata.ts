@@ -5,8 +5,8 @@ const APP_DESCRIPTION =
   "The original NBA wedgie tracker. We count how many times a basketball gets stuck between the rim and the backboard. NoDunks Inspired.";
 export const APP_URL =
   process.env.NEXT_PUBLIC_APP_URL ?? "https://www.wedgietracker.com";
-const DEFAULT_SOCIAL_IMAGE =
-  "https://media.wedgietracker.com/assets/social-wedgietracker_bibnbu.jpg";
+// The site's own share image, so it changes with the artwork in this repo.
+const DEFAULT_SOCIAL_IMAGE = `${APP_URL}/opengraph-image.png`;
 
 export const defaultMetadata: Metadata = {
   applicationName: APP_NAME,
@@ -45,7 +45,9 @@ export const defaultMetadata: Metadata = {
     images: [DEFAULT_SOCIAL_IMAGE],
   },
   icons: [
-    { rel: "icon", url: "/favicon.ico" },
+    // The ICO carries 16, 32 and 48 px for older browsers; the SVG is crisp everywhere else.
+    { rel: "icon", url: "/favicon.ico", sizes: "48x48" },
+    { rel: "icon", url: "/favicon.svg", type: "image/svg+xml" },
     { rel: "apple-touch-icon", url: "/apple-touch-icon.png" },
   ],
 };

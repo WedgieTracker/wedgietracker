@@ -32,7 +32,7 @@ export function TeamList() {
         </div>
         <Link
           href="/admin/teams/new"
-          className="border-yellow bg-darkpurple text-yellow hover:bg-yellow rounded-md border-2 px-4 py-2 font-bold uppercase transition-colors duration-300 hover:text-black"
+          className="border-cream bg-night text-cream hover:bg-cream rounded-md border-2 px-4 py-2 font-bold uppercase transition-colors duration-300 hover:text-black"
         >
           Add New Team
         </Link>
@@ -54,7 +54,7 @@ export function TeamList() {
             <div className="mt-4 flex space-x-4">
               <Link
                 href={`/admin/teams/${team.id}`}
-                className="border-yellow bg-yellow hover:bg-yellow/80 rounded-md border-2 px-4 py-1 font-bold text-black uppercase transition-colors duration-300"
+                className="border-cream bg-cream hover:bg-cream/80 rounded-md border-2 px-4 py-1 font-bold text-black uppercase transition-colors duration-300"
               >
                 Edit
               </Link>

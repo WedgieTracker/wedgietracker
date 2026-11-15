@@ -9,28 +9,36 @@ interface StatsPerWedgie {
   minutes: number;
 }
 
-const STATS: { key: keyof StatsPerWedgie; word: string }[] = [
-  { key: "possessions", word: "POSSESSIONS" },
-  { key: "fga", word: "SHOTS" },
-  { key: "games", word: "GAMES" },
-  { key: "minutes", word: "MINUTES" },
+/** `word` is shown on the flaps; `spoken` is read to screen readers. */
+const STATS: { key: keyof StatsPerWedgie; word: string; spoken: string }[] = [
+  { key: "possessions", word: "POSS.", spoken: "possessions" },
+  { key: "fga", word: "SHOTS", spoken: "shots" },
+  { key: "games", word: "GAMES", spoken: "games" },
+  { key: "minutes", word: "MINUTES", spoken: "minutes" },
 ];
-const NUM_FLAPS = 5;
-const WORD_FLAPS = 11;
+/** Digit flaps: up to 9999, written without a thousands comma. */
+const NUM_FLAPS = 4;
+/** Letter flaps: the longest word, MINUTES. */
+const WORD_FLAPS = 7;
+/** Column widths: the digits, a half-width gap, then the letters. */
+const TEMPLATE = `repeat(${NUM_FLAPS}, 1fr) 0.5fr repeat(${WORD_FLAPS}, 1fr)`;
+/** The same total in flap widths, for sizing the letters. */
+const UNITS = NUM_FLAPS + 0.5 + WORD_FLAPS;
+
 /** The figure's flaps only carry digits, the word's only letters. */
-const DIGITS = " 0123456789,";
-const LETTERS = " ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const DIGITS = " 0123456789";
+const LETTERS = " ABCDEFGHIJKLMNOPQRSTUVWXYZ.";
 const STEP_MS = 45;
 const HOLD_MS = 4200;
 
 /** The board's text for one stat: the figure right-aligned, the word left. */
 function boardText(stats: StatsPerWedgie, i: number) {
   const s = STATS[i % STATS.length]!;
-  const num = stats[s.key]
-    .toLocaleString("en-US")
-    .padStart(NUM_FLAPS, " ")
-    .slice(-NUM_FLAPS);
-  return [...num, ...s.word.padEnd(WORD_FLAPS, " ").slice(0, WORD_FLAPS)];
+  const value = Math.min(stats[s.key], 9999);
+  return {
+    digits: [...String(value).padStart(NUM_FLAPS, " ")],
+    word: [...s.word.padEnd(WORD_FLAPS, " ").slice(0, WORD_FLAPS)],
+  };
 }
 
 /** One flap. It steps through its characters in order until it reaches `target`. */
@@ -82,9 +90,10 @@ function Flap({
 }
 
 /**
- * "That's a wedgie every 2,837 possessions" on a split-flap board that cycles
- * through possessions, shots, games and minutes. The board has a fixed number
- * of flaps, so it never changes width.
+ * "A wedgie every 2,837 possessions" on a board across the bottom of the
+ * season card: a fixed label, then a row of split flaps cycling through
+ * possessions, shots, games and minutes. The flaps scale with the card's
+ * width, so the board fills it and never changes size.
  */
 export function TypingStats({ stats }: { stats: StatsPerWedgie }) {
   const [index, setIndex] = useState(0);
@@ -98,20 +107,34 @@ export function TypingStats({ stats }: { stats: StatsPerWedgie }) {
   const current = STATS[index % STATS.length]!;
 
   return (
-    <div className="text-cream flex flex-col items-center gap-3 text-center">
-      <p className="text-[15px] font-extrabold">That&apos;s a wedgie every</p>
+    <div
+      className="wt-board"
+      style={
+        {
+          "--cols": UNITS,
+          gridTemplateColumns: TEMPLATE,
+        } as React.CSSProperties
+      }
+    >
       <p className="sr-only" aria-live="polite">
-        {stats[current.key].toLocaleString("en-US")}{" "}
-        {current.word.toLowerCase()}
+        That&apos;s a wedgie every {stats[current.key].toLocaleString("en-US")}{" "}
+        {current.spoken}
       </p>
-      <div className="wt-board">
-        {text.map((ch, i) => (
-          <span key={i} className="contents">
-            {i === NUM_FLAPS && <span className="wt-board-gap" />}
-            <Flap target={ch} delay={i * 25} amber={i < NUM_FLAPS} />
-          </span>
-        ))}
-      </div>
+      <span className="wt-board-label" aria-hidden="true">
+        A wedgie every
+      </span>
+      {text.digits.map((ch, i) => (
+        <Flap key={`d${i}`} target={ch} delay={i * 25} amber />
+      ))}
+      <span aria-hidden="true" />
+      {text.word.map((ch, i) => (
+        <Flap
+          key={`w${i}`}
+          target={ch}
+          delay={(NUM_FLAPS + i) * 25}
+          amber={false}
+        />
+      ))}
     </div>
   );
 }

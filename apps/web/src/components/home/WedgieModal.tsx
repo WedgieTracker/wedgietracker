@@ -52,7 +52,7 @@ export function WedgieModal({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-[90vw] gap-0 overflow-hidden overflow-y-auto rounded-xl border-none bg-transparent p-0 max-lg:mt-[4vh] max-lg:mb-auto sm:max-w-lg lg:max-w-7xl lg:p-2">
-        <DialogClose className="focus:ring-none border-yellow bg-yellow text-darkpurple hover:bg-darkpurple hover:text-yellow absolute top-2 right-1 z-10 rounded-full border shadow-lg transition-all duration-300 hover:opacity-100 focus:ring-offset-0 focus:outline-hidden disabled:pointer-events-none sm:top-0 lg:top-1 lg:right-4">
+        <DialogClose className="focus:ring-none border-cream bg-cream text-night hover:bg-night hover:text-cream absolute top-2 right-1 z-10 rounded-full border shadow-lg transition-all duration-300 hover:opacity-100 focus:ring-offset-0 focus:outline-hidden disabled:pointer-events-none sm:top-0 lg:top-1 lg:right-4">
           <Cross2Icon className="size-6 p-1 sm:h-8 sm:w-8" />
         </DialogClose>
 
@@ -74,11 +74,11 @@ export function WedgieModal({
 
         {/* Below lg the dialog scrolls: the panel keeps its full height instead of shrinking to fit
             and clipping a long shoutout list (16 fans on No. 1 of 2026/27). */}
-        <div className="border-darkpurple-lighter bg-darkpurple flex flex-col overflow-hidden rounded-xl max-lg:shrink-0 lg:flex-row">
+        <div className="border-panel-light bg-night flex flex-col overflow-hidden rounded-xl max-lg:shrink-0 lg:flex-row">
           <div
             className={`w-full lg:w-[65%] ${
               activeVideo === "instagram"
-                ? "bg-darkpurple-darker aspect-video max-h-[80vh]"
+                ? "bg-night-darker aspect-video max-h-[80vh]"
                 : "aspect-video"
             }`}
           >
@@ -90,7 +90,7 @@ export function WedgieModal({
               }
             >
               {(!wedgie.videoUrl || activeVideo === "hosted") && (
-                <div className="bg-darkpurple-darker flex h-full w-full items-center justify-center p-6 text-center text-sm font-bold tracking-wider text-white/60 uppercase">
+                <div className="bg-night-darker flex h-full w-full items-center justify-center p-6 text-center text-sm font-bold tracking-wider text-white/60 uppercase">
                   Video not available at the moment
                 </div>
               )}
@@ -134,7 +134,7 @@ export function WedgieModal({
               onClick={handleCopyLink}
               aria-label="Copy link"
               title="Copy link"
-              className="bg-yellow text-darkpurple hover:bg-yellow/80 flex size-7 items-center justify-center rounded-md transition-all duration-300 sm:size-8"
+              className="bg-cream text-night hover:bg-cream/80 flex size-7 items-center justify-center rounded-md transition-all duration-300 sm:size-8"
             >
               <svg
                 className="size-4"

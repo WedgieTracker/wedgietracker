@@ -54,7 +54,7 @@ export function EntitySearchInput({
       />
 
       {showDropdown && (
-        <div className="bg-darkpurple absolute z-10 mt-1 w-full rounded-md border border-gray-700 shadow-lg">
+        <div className="bg-night absolute z-10 mt-1 w-full rounded-md border border-gray-700 shadow-lg">
           {filteredItems.map((item) => (
             <button
               key={item.id}

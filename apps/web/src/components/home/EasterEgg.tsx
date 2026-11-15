@@ -25,16 +25,16 @@ export function EasterEgg() {
             <div className="relative z-1 w-28 max-[360px]:w-24 sm:w-32 md:w-48">
               <div className="md:mr-none relative z-1 -mr-4">
                 <Loader hover={hover} />
-                <div className="to-darkpurple-dark absolute top-0 -right-1 z-10 h-full w-[50px] bg-linear-to-r from-transparent" />
+                <div className="to-night-dark absolute top-0 -right-1 z-10 h-full w-[50px] bg-linear-to-r from-transparent" />
               </div>
-              {/* add a gradient from transparent to darkpurple on the last 50px of the div */}
+              {/* add a gradient from transparent to night on the last 50px of the div */}
             </div>
             <div className="sm:text-wedgies-text relative z-10 mt-[-.5em] text-3xl leading-none text-white">
               <div className="flex flex-row items-baseline gap-2">
-                <span className="text-yellow text-[.6em] font-black">
+                <span className="text-cream text-[.6em] font-black">
                   Wedgie
                 </span>
-                <span className="text-pink text-[.5em]">/ˈwɛdʒi/</span>
+                <span className="text-violet text-[.5em]">/ˈwɛdʒi/</span>
                 <span className="text-[.4em] text-white/50">NOUN</span>
               </div>
               <div className="mt-[.3em] pb-8 text-[.5em] leading-tight text-white/90">

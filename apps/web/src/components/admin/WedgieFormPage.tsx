@@ -8,17 +8,17 @@ import { TypeSearchInput } from "./TypeSearchInput";
 import { VideoUrlInput } from "./VideoUrlInput";
 import { useWedgieForm } from "./useWedgieForm";
 import { ShoutoutsInput } from "./ShoutoutsInput";
-import type { WedgieWithTypes } from "@wedgietracker/core/types/wedgie";
+import type { EditableWedgie } from "./useWedgieForm";
 import { WedgieSocialShareWrapper } from "~/components/admin/WedgieSocialShareWrapper";
 import { VideoUpload } from "~/components/admin/VideoUpload";
 
 interface WedgieFormPageProps {
-  wedgie?: WedgieWithTypes;
+  wedgie?: EditableWedgie;
   currentSeason?: string;
 }
 
 export function WedgieFormPage({ wedgie, currentSeason }: WedgieFormPageProps) {
-  const { formData, setFormData, handleSubmit, router } = useWedgieForm(
+  const { formData, setFormData, handleSubmit, router, error } = useWedgieForm(
     wedgie,
     currentSeason,
   );
@@ -155,14 +155,21 @@ export function WedgieFormPage({ wedgie, currentSeason }: WedgieFormPageProps) {
               Game
             </label>
             <GameSearchInput
-              value={formData.gameName ?? ""}
+              value={formData.gameText}
               onChange={(value) =>
-                setFormData((prev) => ({ ...prev, gameName: value }))
+                setFormData((prev) => ({
+                  ...prev,
+                  gameText: value,
+                  // emptying the box takes the wedgie off its game (GEMS have none)
+                  ...(value.trim() === "" && { gameId: null, gameName: "" }),
+                }))
               }
               onGameSelect={(game) => {
                 setFormData((prev) => ({
                   ...prev,
+                  gameId: game.id,
                   gameName: game.name,
+                  gameText: game.label,
                   wedgieDate: game.date,
                   seasonName: game.seasonName,
                 }));
@@ -269,6 +276,12 @@ export function WedgieFormPage({ wedgie, currentSeason }: WedgieFormPageProps) {
             </div>
           </div>
         </div>
+
+        {error && (
+          <p role="alert" className="rounded-md bg-red-900/50 p-3 text-white">
+            {error}
+          </p>
+        )}
 
         <div className="flex justify-end space-x-4">
           <button

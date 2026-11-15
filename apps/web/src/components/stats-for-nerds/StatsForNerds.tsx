@@ -259,7 +259,6 @@ export function StatsForNerds({
     stats.totalGamesOverall / Math.max(1, stats.totalWedgiesOverall),
   );
   const { records } = extras;
-  const gameDate = (name: string) => /\d{4}-\d{2}-\d{2}/.exec(name)?.[0] ?? "";
 
   const fillPercentage = Math.min((stats.wedgiesThisSeason / 50) * 100, 100);
   const diff = stats.pace - stats.averageLastTenSeasons;
@@ -289,9 +288,7 @@ export function StatsForNerds({
               </p>
             </div>
           </div>
-          <div className="bg-panel px-6 py-5">
-            <TypingStats stats={stats.statsPerWedgie} />
-          </div>
+          <TypingStats stats={stats.statsPerWedgie} />
         </div>
       </div>
 
@@ -404,7 +401,7 @@ export function StatsForNerds({
                 ],
                 records.mostInGame && [
                   records.mostInGame.count,
-                  `in one game: ${records.mostInGame.game.replace(/ - .*/, "").replace(" @ ", " vs ")}, ${niceDate(gameDate(records.mostInGame.game))}`,
+                  `in one game: ${records.mostInGame.game}, ${niceDate(records.mostInGame.date)}`,
                 ],
                 [
                   records.mostInNight.count,

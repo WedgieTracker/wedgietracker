@@ -111,7 +111,7 @@ export function PaceGauge({
         )}
         <text
           x="70"
-          y="36"
+          y="40"
           textAnchor="middle"
           fontSize="8.5"
           className="fill-cream/70 font-bold"
@@ -120,7 +120,7 @@ export function PaceGauge({
         </text>
         <text
           x="69"
-          y="70"
+          y="74"
           textAnchor="middle"
           fontSize="36"
           className="fill-cream font-black italic"

@@ -29,6 +29,7 @@ export async function POST(req: Request) {
     const number = parseInt(formData.get("number") as string);
     const season = formData.get("season") as string;
     const player = formData.get("player") as string;
+    const date = (formData.get("date") as string | null) ?? null;
 
     // Download the video to temp directory
     const tempPath = `/tmp/${Date.now()}_${path.basename(videoUrl)}`;
@@ -43,6 +44,7 @@ export async function POST(req: Request) {
       number,
       season,
       player,
+      date,
     );
 
     // Clean up temp file

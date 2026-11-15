@@ -29,30 +29,16 @@ export default {
       colors: {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
-        yellow: {
-          DEFAULT: "hsl(var(--yellow))",
-          light: "hsl(var(--yellow) / 0.8)",
-          lighter: "hsl(var(--yellow) / 0.6)",
-          dark: "hsl(var(--yellow-dark))",
-          darker: "hsl(var(--yellow-darker))",
-        },
-        pink: {
-          DEFAULT: "hsl(var(--pink))",
-          light: "hsl(var(--pink) / 0.8)",
-          lighter: "hsl(var(--pink) / 0.6)",
-          dark: "hsl(var(--pink-dark))",
-          darker: "hsl(var(--pink-darker))",
-        },
         cream: "hsl(var(--cream))",
         violet: "hsl(var(--violet))",
-        night: "hsl(var(--night))",
-        panel: "hsl(var(--panel))",
-        darkpurple: {
-          DEFAULT: "hsl(var(--darkpurple))",
-          light: "hsl(var(--darkpurple-light))",
-          lighter: "hsl(var(--darkpurple-lighter))",
-          dark: "hsl(var(--darkpurple-dark))",
-          darker: "hsl(var(--darkpurple-darker))",
+        night: {
+          DEFAULT: "hsl(var(--night))",
+          dark: "hsl(var(--night-dark))",
+          darker: "hsl(var(--night-darker))",
+        },
+        panel: {
+          DEFAULT: "hsl(var(--panel))",
+          light: "hsl(var(--panel-light))",
         },
         card: {
           DEFAULT: "hsl(var(--card))",
@@ -112,10 +98,10 @@ export default {
       keyframes: {
         colorShift: {
           "0%, 100%": {
-            color: "hsl(var(--yellow))",
+            color: "hsl(var(--cream))",
           },
           "50%": {
-            color: "hsl(var(--pink))",
+            color: "hsl(var(--violet))",
           },
         },
         blink: {
@@ -136,33 +122,33 @@ export default {
           css: {
             color: "white",
             a: {
-              color: "hsl(var(--pink))",
+              color: "hsl(var(--violet))",
               "&:hover": {
-                color: "hsl(var(--pink))",
+                color: "hsl(var(--violet))",
                 opacity: 0.8,
               },
             },
             h1: {
-              color: "hsl(var(--yellow))",
+              color: "hsl(var(--cream))",
             },
             h2: {
-              color: "hsl(var(--yellow))",
+              color: "hsl(var(--cream))",
             },
             h3: {
-              color: "hsl(var(--yellow))",
+              color: "hsl(var(--cream))",
             },
             h4: {
-              color: "hsl(var(--yellow))",
+              color: "hsl(var(--cream))",
             },
             strong: {
               color: "white",
             },
             blockquote: {
-              color: "hsl(var(--yellow))",
-              borderLeftColor: "hsl(var(--yellow))",
+              color: "hsl(var(--cream))",
+              borderLeftColor: "hsl(var(--cream))",
             },
             code: {
-              color: "hsl(var(--pink))",
+              color: "hsl(var(--violet))",
             },
             "code::before": {
               content: '""',

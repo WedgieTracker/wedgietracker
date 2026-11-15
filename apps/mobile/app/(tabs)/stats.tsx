@@ -466,7 +466,6 @@ function Leaders({
 }
 
 function Records({ records }: { records: NerdExtras["records"] }) {
-  const gameDate = (name: string) => /\d{4}-\d{2}-\d{2}/.exec(name)?.[0] ?? "";
   const rows = [
     records.drought.games > 0 && [
       nf(records.drought.games),
@@ -474,7 +473,7 @@ function Records({ records }: { records: NerdExtras["records"] }) {
     ],
     records.mostInGame && [
       String(records.mostInGame.count),
-      `in one game: ${records.mostInGame.game.replace(/ - .*/, "").replace(" @ ", " vs ")}, ${niceDate(gameDate(records.mostInGame.game))}`,
+      `in one game: ${records.mostInGame.game}, ${niceDate(records.mostInGame.date)}`,
     ],
     [
       String(records.mostInNight.count),

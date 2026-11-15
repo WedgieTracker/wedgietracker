@@ -15,7 +15,7 @@ export function Header() {
         className={`fixed top-0 z-70 h-auto w-full backdrop-blur-xs transition-all duration-300`}
         style={{
           backgroundImage:
-            "radial-gradient(transparent 0.5px, rgb(var(--darkpurple-rgb)) 0.5px) ",
+            "radial-gradient(transparent 0.5px, rgb(var(--night-rgb)) 0.5px) ",
           backgroundSize: "4px 4px",
           WebkitMaskImage: !isMenuOpen
             ? "linear-gradient(rgb(0, 0, 0) 80%, rgba(0, 0, 0, 0) 100%)"
@@ -59,13 +59,13 @@ export function Header() {
               aria-label="Toggle menu"
             >
               <span
-                className={`h-0.5 w-5 transition-transform md:w-6 ${isMenuOpen ? "bg-darkpurple translate-y-[300%] rotate-45 md:translate-y-[400%]" : "bg-white"}`}
+                className={`h-0.5 w-5 transition-transform md:w-6 ${isMenuOpen ? "bg-night translate-y-[300%] rotate-45 md:translate-y-[400%]" : "bg-white"}`}
               />
               <span
-                className={`h-0.5 w-5 transition-opacity md:w-6 ${isMenuOpen ? "bg-darkpurple opacity-0" : "bg-white"}`}
+                className={`h-0.5 w-5 transition-opacity md:w-6 ${isMenuOpen ? "bg-night opacity-0" : "bg-white"}`}
               />
               <span
-                className={`h-0.5 w-5 transition-transform md:w-6 ${isMenuOpen ? "bg-darkpurple -translate-y-[300%] -rotate-45 md:-translate-y-[400%]" : "bg-white"}`}
+                className={`h-0.5 w-5 transition-transform md:w-6 ${isMenuOpen ? "bg-night -translate-y-[300%] -rotate-45 md:-translate-y-[400%]" : "bg-white"}`}
               />
             </button>
           </div>

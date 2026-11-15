@@ -14,6 +14,7 @@ export async function POST(req: Request) {
     const number = parseInt(formData.get("number") as string);
     const season = formData.get("season") as string;
     const player = formData.get("player") as string;
+    const date = (formData.get("date") as string | null) ?? null;
 
     // Download the original video
     const tempInputPath = `/tmp/input_${Date.now()}.mp4`;
@@ -25,7 +26,14 @@ export async function POST(req: Request) {
     await fs.promises.writeFile(tempInputPath, Buffer.from(buffer));
 
     // Create the preview reel
-    await createReel(tempInputPath, tempOutputPath, number, season, player);
+    await createReel(
+      tempInputPath,
+      tempOutputPath,
+      number,
+      season,
+      player,
+      date,
+    );
 
     // Upload the preview so Instagram can fetch it from a public URL
     const previewUrl = await uploadFile(

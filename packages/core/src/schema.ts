@@ -38,6 +38,11 @@ export const wedgie = sqliteTable(
     teamAgainstName: text("team_against_name").notNull(),
     playerName: text("player_name").notNull(),
     seasonName: text("season_name").notNull(),
+    // The game, by id; null for GEMS. game_name is the older text link to
+    // game.name, still written alongside it until every reader uses game_id.
+    gameId: integer("game_id").references(() => game.id, {
+      onDelete: "set null",
+    }),
     gameName: text("game_name"),
     // When in the game it happened: 1-4 for quarters, 5+ for overtimes, and
     // the game clock as shown on the broadcast ("2:51", "0:43.7").
@@ -62,6 +67,7 @@ export const wedgie = sqliteTable(
     index("wedgie_player_name_idx").on(table.playerName),
     index("wedgie_season_name_idx").on(table.seasonName),
     index("wedgie_game_name_idx").on(table.gameName),
+    index("wedgie_game_id_idx").on(table.gameId),
   ],
 );
 
@@ -101,8 +107,9 @@ export const season = sqliteTable(
 );
 
 /**
- * Each Stripe Checkout already added to a season's coffees, so a refreshed
- * thanks page can't count the same coffees twice.
+ * Each coffee already added to a season's coffees, keyed by Stripe Checkout
+ * session id or "appstore:<transactionId>", so the same purchase sent again
+ * can't count twice. A refunded coffee keeps its row with refunded_at set.
  */
 export const coffeeCheckout = sqliteTable("coffee_checkout", {
   sessionId: text("session_id").primaryKey(),
@@ -111,13 +118,25 @@ export const coffeeCheckout = sqliteTable("coffee_checkout", {
   createdAt: text("created_at")
     .default(sql`(CURRENT_TIMESTAMP)`)
     .notNull(),
+  /** When the purchase was refunded or revoked, or null while it counts. */
+  refundedAt: text("refunded_at"),
 });
 
+/**
+ * One NBA game. `id` is the NBA game id for most games. `name` is the old text
+ * key, "HOME @ AWAY - <tip>" with the home team first (the reverse of NBA
+ * notation); read the teams and day from the columns instead, and build labels
+ * with utils/game.ts.
+ */
 export const game = sqliteTable(
   "game",
   {
     id: integer("id").primaryKey({ autoIncrement: true }),
     name: text("name").unique().notNull(),
+    homeTeam: text("home_team"),
+    awayTeam: text("away_team"),
+    /** The US Eastern calendar day the game was played, YYYY-MM-DD. */
+    gameDate: text("game_date"),
     createdAt: text("created_at")
       .default(sql`(CURRENT_TIMESTAMP)`)
       .notNull(),
@@ -131,6 +150,8 @@ export const game = sqliteTable(
   (table) => [
     index("game_season_name_idx").on(table.seasonName),
     index("game_name_idx").on(table.name),
+    index("game_home_team_away_team_idx").on(table.homeTeam, table.awayTeam),
+    index("game_game_date_idx").on(table.gameDate),
   ],
 );
 
@@ -312,8 +333,8 @@ export const tshirtOrder = sqliteTable("tshirt_order", {
 
 export const wedgieRelations = relations(wedgie, ({ one, many }) => ({
   game: one(game, {
-    fields: [wedgie.gameName],
-    references: [game.name],
+    fields: [wedgie.gameId],
+    references: [game.id],
   }),
   player: one(player, {
     fields: [wedgie.playerName],
