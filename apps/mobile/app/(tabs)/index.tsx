@@ -261,8 +261,8 @@ const styles = StyleSheet.create({
   },
   support: {
     position: "absolute",
-    // Well clear of the screen's rounded corner.
-    left: 32,
+    // In line with the cards below, clear of the screen's rounded corner.
+    left: 20,
     flexDirection: "row",
     gap: 6,
     // Tighter than a standard small sticker: it sits in a 52pt header.

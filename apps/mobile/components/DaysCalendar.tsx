@@ -297,22 +297,22 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     alignItems: "center",
     justifyContent: "center",
-    paddingTop: 8,
-    paddingBottom: 6,
+    paddingTop: 4,
+    paddingBottom: 4,
   },
   count: {
     fontFamily: fonts.blackItalic,
-    fontSize: 48,
+    fontSize: 60,
     // Taller than the type, so the figure sits lower in its line, where the
     // eye expects it, rather than riding up to the binding.
-    lineHeight: 54,
+    lineHeight: 62,
     // No negative tracking, and a little room on the right, so the slanted
     // digit looks centred rather than leaning off to the right.
-    paddingRight: 6,
+    paddingRight: 7,
     color: "#502394",
   },
   caption: {
-    marginTop: 2,
+    marginTop: 0,
     fontFamily: fonts.black,
     fontSize: 12,
     lineHeight: 15,
