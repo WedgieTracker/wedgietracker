@@ -261,11 +261,14 @@ const styles = StyleSheet.create({
   },
   support: {
     position: "absolute",
-    // Clear of the screen's rounded corner.
-    left: 24,
+    // Well clear of the screen's rounded corner.
+    left: 32,
     flexDirection: "row",
     gap: 6,
-    paddingHorizontal: 10,
+    // Tighter than a standard small sticker: it sits in a 52pt header.
+    minHeight: 34,
+    paddingHorizontal: 9,
+    paddingVertical: 0,
   },
   supportLabel: { fontSize: 11, letterSpacing: 1 },
   errorWrap: { padding: space.lg },

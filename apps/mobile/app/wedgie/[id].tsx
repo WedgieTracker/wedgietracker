@@ -152,7 +152,7 @@ function WedgieDetail({
   // piece that gives way - everything above it carries information the court
   // only illustrates.
   const courtWidth = wideScreen
-    ? 260
+    ? 150
     : height >= 820
       ? 130
       : height >= 720
@@ -175,6 +175,19 @@ function WedgieDetail({
     });
   }, [wedgie.id, wedgie.number, wedgie.seasonName, wedgie.videoUrl]);
 
+  const player = (
+    <>
+      {wedgie.videoUrl ? (
+        <WedgieVideoTabs
+          videoUrl={wedgie.videoUrl}
+          activeVideo={active}
+          onChange={setActive}
+        />
+      ) : null}
+
+      <WedgiePlayer videoUrl={wedgie.videoUrl} active={active} />
+    </>
+  );
   const media = (
     <>
       <View style={styles.topBar}>
@@ -190,15 +203,7 @@ function WedgieDetail({
         <CloseButton onPress={onClose} />
       </View>
 
-      {wedgie.videoUrl ? (
-        <WedgieVideoTabs
-          videoUrl={wedgie.videoUrl}
-          activeVideo={active}
-          onChange={setActive}
-        />
-      ) : null}
-
-      <WedgiePlayer videoUrl={wedgie.videoUrl} active={active} />
+      {player}
     </>
   );
   const court = (
@@ -360,43 +365,62 @@ function WedgieDetail({
   );
 
   if (wide) {
-    // Full screen on a wide screen: the video pinned at the top of the left
-    // half while the details scroll past on the right, the two halves meeting
-    // on the Duo's fold, as Home pins its hero.
+    // Full screen on a wide screen (the opened Duo). The close button and the
+    // arrows stand in the empty gutter on the left, as a rail mirroring the
+    // tab bar on the right. The left half holds a small court above the video,
+    // centred in the screen and pinned while the details scroll on the right.
+    const top = insets.top + 8;
+    const gutter = sides.left + 16;
     return (
-      <Animated.ScrollView
-        style={styles.sheet}
-        onLayout={onPageLayout}
-        onScroll={onScroll}
-        scrollEventThrottle={16}
-        contentContainerStyle={[
-          styles.wideContent,
-          {
-            paddingTop: insets.top + 8,
-            paddingLeft: sides.left + 16,
-            paddingRight: sides.right + 16,
-          },
-        ]}
-        showsVerticalScrollIndicator={false}
-      >
-        <StickySplit
-          scrollY={scrollY}
-          inset={16}
-          gap={36}
-          left={
-            <>
-              {media}
-              <View style={styles.wideCourt}>{court}</View>
-            </>
-          }
-          right={
-            <>
-              {details}
-              <SupportFooter />
-            </>
-          }
-        />
-      </Animated.ScrollView>
+      <View style={[styles.sheet, styles.flex]}>
+        <Animated.ScrollView
+          style={styles.flex}
+          onLayout={onPageLayout}
+          onScroll={onScroll}
+          scrollEventThrottle={16}
+          contentContainerStyle={[
+            styles.wideContent,
+            { paddingTop: top, paddingLeft: gutter, paddingRight: gutter },
+          ]}
+          showsVerticalScrollIndicator={false}
+        >
+          <StickySplit
+            scrollY={scrollY}
+            inset={16}
+            gap={36}
+            left={
+              <View style={[styles.wideMedia, { height: height - top - 32 }]}>
+                {court}
+                <View style={styles.wideVideo}>{player}</View>
+              </View>
+            }
+            right={
+              <>
+                {details}
+                <SupportFooter />
+              </>
+            }
+          />
+        </Animated.ScrollView>
+        <View style={[styles.rail, { top, left: 0, width: gutter }]}>
+          <CloseButton onPress={onClose} />
+          <View style={styles.navRail}>
+            <NavButton
+              direction="previous"
+              enabled={hasPrevious}
+              onPress={onPrevious}
+              vertical
+            />
+            <View style={styles.navRailDivider} />
+            <NavButton
+              direction="next"
+              enabled={hasNext}
+              onPress={onNext}
+              vertical
+            />
+          </View>
+        </View>
+      </View>
     );
   }
 
@@ -505,10 +529,13 @@ function NavButton({
   direction,
   enabled,
   onPress,
+  vertical = false,
 }: {
   direction: "previous" | "next";
   enabled: boolean;
   onPress: () => void;
+  /** Stacked in the wide screen's rail rather than side by side. */
+  vertical?: boolean;
 }) {
   return (
     <Pressable
@@ -521,6 +548,7 @@ function NavButton({
       accessibilityState={{ disabled: !enabled }}
       style={({ pressed }) => [
         styles.navButton,
+        vertical && styles.navButtonVertical,
         !enabled && styles.navButtonDisabled,
         pressed && enabled && styles.navButtonPressed,
       ]}
@@ -609,7 +637,17 @@ const styles = StyleSheet.create({
   // Everything under the full-bleed video keeps the page gutter.
   body: { padding: space.lg, gap: space.md },
   wideContent: { flexGrow: 1, paddingBottom: 32 },
-  wideCourt: { marginTop: 28, alignItems: "center" },
+  flex: { flex: 1 },
+  wideMedia: { alignItems: "center" },
+  wideVideo: { flex: 1, width: "100%", justifyContent: "center" },
+  rail: { position: "absolute", alignItems: "center", gap: 12 },
+  navRail: {
+    width: 36,
+    borderRadius: radius.pill,
+    backgroundColor: colors.panelLight,
+    overflow: "hidden",
+  },
+  navRailDivider: { height: 1, backgroundColor: colors.hairline },
   padded: { flex: 1, padding: space.lg, backgroundColor: colors.night },
 
   headerRow: { flexDirection: "row", alignItems: "center", gap: space.lg },
@@ -718,6 +756,7 @@ const styles = StyleSheet.create({
   },
   // Only the chevron dims: the container keeps its shape at either end of the
   // list, so the control never looks half-missing.
+  navButtonVertical: { width: 36, height: 40 },
   navButtonDisabled: { opacity: 0.28 },
   navButtonPressed: { backgroundColor: colors.night },
 });

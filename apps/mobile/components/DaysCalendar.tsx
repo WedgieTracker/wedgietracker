@@ -20,8 +20,8 @@ import { colors, fonts } from "@/lib/theme";
 const BALL_INK = "#ff4fc8";
 const BANNER_INK = "#ad3792";
 
-const WIDTH = 132;
-const PAGE_MIN_HEIGHT = 104;
+const WIDTH = 118;
+const PAGE_MIN_HEIGHT = 92;
 const BINDING = 26;
 
 /**
@@ -297,16 +297,18 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     alignItems: "center",
     justifyContent: "center",
-    paddingTop: 10,
+    paddingTop: 12,
     paddingBottom: 8,
   },
   count: {
     fontFamily: fonts.blackItalic,
-    fontSize: 64,
-    lineHeight: 64,
+    fontSize: 54,
+    // Taller than the type, so the figure sits lower in its line, where the
+    // eye expects it, rather than riding up to the binding.
+    lineHeight: 62,
     // No negative tracking, and a little room on the right, so the slanted
     // digit looks centred rather than leaning off to the right.
-    paddingRight: 7,
+    paddingRight: 6,
     color: "#502394",
   },
   caption: {
