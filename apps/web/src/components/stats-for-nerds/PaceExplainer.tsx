@@ -137,7 +137,7 @@ export function PaceExplainer({ data }: PaceExplainerProps) {
         </p>
       </Section>
 
-      <Section step="3" title="Blend the two rates">
+      <Section step="3" title="Combine the two rates">
         <p className="mb-4">
           {fmt(games)} {games === 1 ? "game is" : "games is"} too small a sample
           to trust on its own, so past seasons get a say worth{" "}
