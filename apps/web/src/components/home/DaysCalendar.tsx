@@ -122,7 +122,7 @@ export function DaysCalendar({ days }: { days: number }) {
       <div className="bg-glow before:bg-cream after:bg-cream relative h-[26px] rounded-t-[14px] before:absolute before:-top-1.5 before:left-[26px] before:h-[18px] before:w-2 before:rounded-sm before:shadow-[0_2px_0_rgb(0_0_0/0.25)] before:content-[''] after:absolute after:-top-1.5 after:right-[26px] after:h-[18px] after:w-2 after:rounded-sm after:shadow-[0_2px_0_rgb(0_0_0/0.25)] after:content-['']" />
       <div className="bg-cream relative flex min-h-[118px] flex-col items-center justify-center overflow-hidden rounded-b-[14px] pt-1.5 pb-3.5 text-center shadow-[0_1px_0_rgb(42_22_96/0.18)] md:min-h-[134px]">
         <span
-          className={`text-[64px] leading-none font-black tracking-[-0.04em] text-[#502394] italic md:text-[70px] ${isNew ? "opacity-30" : ""}`}
+          className={`pr-[0.12em] text-[64px] leading-none font-black text-[#502394] italic md:text-[70px] ${isNew ? "opacity-30" : ""}`}
         >
           {days}
         </span>
