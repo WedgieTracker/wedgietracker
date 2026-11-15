@@ -10,9 +10,7 @@ interface StandingsProps {
 export function Standings({ players, teams }: StandingsProps) {
   return (
     <section className="w-full max-w-2xl">
-      <h2 className="text-cream mb-4 text-[21px] font-extrabold tracking-[-0.01em]">
-        Leaders
-      </h2>
+      <h2 className="sr-only">Leaders</h2>
       <PlayersTeams players={players} teams={teams} showCount={false} />
       <Link
         href="/standings"

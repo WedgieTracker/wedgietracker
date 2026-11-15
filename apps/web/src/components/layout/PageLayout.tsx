@@ -12,7 +12,7 @@ export function PageLayout({
 }) {
   return (
     <MenuProvider>
-      <div className="bg-darkpurple flex min-h-screen flex-col">
+      <div className="bg-night flex min-h-screen flex-col">
         <Header />
         {showCircleMenu && <CircleMenu />}
         {/* At least a screen tall, so the footer never starts in view and jumps as content loads. */}

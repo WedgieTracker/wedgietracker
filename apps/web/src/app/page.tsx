@@ -11,8 +11,7 @@ import { Loader } from "~/components/shared/Loader";
 import Link from "next/link";
 import { Newsletter } from "~/components/home/Newsletter";
 import { generateMetadata } from "~/config/metadata";
-import { CoffeeScoreboard } from "~/components/home/CoffeeScoreboard";
-import { getSeasonCoffees } from "~/server/coffees";
+import { CoffeeScoreboardLive } from "~/components/home/CoffeeScoreboardLive";
 
 export const metadata = generateMetadata({
   title: "NBA Wedgie Tracker | Count, pace and history",
@@ -27,11 +26,11 @@ export default async function Home() {
         <Suspense fallback={<StatsSkeleton />}>
           <StatsWrapper />
         </Suspense>
-        <div className="bg-night flex w-full flex-col items-center justify-start gap-12 px-[18px] pt-8 pb-12 md:w-3/5 md:px-8 md:pt-8 lg:w-1/2">
+        <div className="bg-night flex w-full flex-col items-center justify-start gap-12 px-[18px] pt-0 pb-12 md:w-3/5 md:px-8 md:pt-6 lg:w-1/2">
           <Suspense fallback={<LoaderWrapper />}>
             <WedgieListWrapper />
 
-            <CoffeeScoreboardWrapper />
+            <CoffeeScoreboardLive />
 
             <StandingsWrapper />
 
@@ -66,20 +65,6 @@ async function WedgieListWrapper() {
   return <WedgieList wedgies={wedgies} />;
 }
 
-async function CoffeeScoreboardWrapper() {
-  const [{ season, coffees }, stats] = await Promise.all([
-    getSeasonCoffees(),
-    api.wedgie.getStats(),
-  ]);
-  return (
-    <CoffeeScoreboard
-      season={season}
-      coffees={coffees}
-      wedgies={stats.currentSeasonWedgies}
-    />
-  );
-}
-
 async function StandingsWrapper() {
   const standings = await api.wedgie.getTopStandings();
 
@@ -89,7 +74,7 @@ async function StandingsWrapper() {
       <div className="flex w-full max-w-2xl flex-col items-center justify-center">
         <Link
           href="/standings"
-          className="border-yellow bg-yellow text-button-text text-darkpurple hover:border-yellow hover:text-yellow w-full rounded-3xl border-2 py-2 text-center font-black transition-all duration-300 hover:bg-transparent"
+          className="border-cream bg-cream text-button-text text-night hover:border-cream hover:text-cream w-full rounded-3xl border-2 py-2 text-center font-black transition-all duration-300 hover:bg-transparent"
         >
           SEE STANDINGS
         </Link>

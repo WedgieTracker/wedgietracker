@@ -123,7 +123,7 @@ export function VideoUpload({
         />
         <label
           htmlFor="video-upload"
-          className={`hover:border-yellow flex cursor-pointer items-center justify-center rounded-md border border-dashed border-gray-300 bg-white/5 p-6 text-white transition-all ${
+          className={`hover:border-cream flex cursor-pointer items-center justify-center rounded-md border border-dashed border-gray-300 bg-white/5 p-6 text-white transition-all ${
             uploading ? "opacity-50" : ""
           }`}
         >
@@ -184,7 +184,7 @@ export function VideoUpload({
               href={uploadedUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-yellow hover:underline"
+              className="text-cream hover:underline"
             >
               {uploadedUrl}
             </a>

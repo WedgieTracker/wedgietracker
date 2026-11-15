@@ -1,5 +1,6 @@
 "use client";
 
+import { isGemsDate } from "@wedgietracker/core/utils/formatDate";
 import { useState } from "react";
 import { api } from "~/trpc/react";
 
@@ -43,7 +44,7 @@ export function WedgieList({ seasons, currentSeason }: WedgieListProps) {
         </div>
         <Link
           href="/admin/wedgies/new"
-          className="border-yellow bg-darkpurple text-yellow hover:bg-yellow rounded-md border-2 px-4 py-2 font-bold uppercase transition-colors duration-300 hover:text-black"
+          className="border-cream bg-night text-cream hover:bg-cream rounded-md border-2 px-4 py-2 font-bold uppercase transition-colors duration-300 hover:text-black"
         >
           Add New Wedgie
         </Link>
@@ -60,12 +61,14 @@ export function WedgieList({ seasons, currentSeason }: WedgieListProps) {
             </h3>
             <p suppressHydrationWarning className="mt-1 text-sm text-gray-300">
               {wedgie.teamName} - {wedgie.teamAgainstName} |{" "}
-              {new Date(wedgie.wedgieDate).toLocaleDateString()}
+              {isGemsDate(new Date(wedgie.wedgieDate))
+                ? "GEM, no date"
+                : new Date(wedgie.wedgieDate).toLocaleDateString()}
             </p>
             <div className="mt-3 flex space-x-4">
               <Link
                 href={`/admin/wedgies/${wedgie.id}`}
-                className="bg-yellow hover:bg-yellow/80 rounded-md px-4 py-1 font-bold text-black uppercase"
+                className="bg-cream hover:bg-cream/80 rounded-md px-4 py-1 font-bold text-black uppercase"
               >
                 Edit
               </Link>

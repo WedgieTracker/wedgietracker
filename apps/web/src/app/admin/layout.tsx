@@ -37,7 +37,7 @@ async function AuthenticatedAdmin({ children }: { children: React.ReactNode }) {
     <HydrateClient>
       <SidebarProvider defaultOpen={false}>
         <AppSidebar />
-        <main className="bg-darkpurple min-h-screen w-full">
+        <main className="bg-night min-h-screen w-full">
           <AdminHeader />
           <div className="container mx-auto p-6">{children}</div>
         </main>
@@ -54,7 +54,7 @@ export default function AdminLayout({
   return (
     <Suspense
       fallback={
-        <main className="bg-darkpurple flex min-h-screen items-center justify-center">
+        <main className="bg-night flex min-h-screen items-center justify-center">
           <div className="text-white">Loading...</div>
         </main>
       }

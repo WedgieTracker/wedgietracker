@@ -24,19 +24,48 @@ function escapeHtml(text: string) {
     .replace(/>/g, "&gt;");
 }
 
+const reportField = z.enum(WEDGIE_REPORT_FIELDS);
+const reportNote = z.string().trim().max(500).optional();
+// Honeypot: hidden from people, filled in by bots.
+const honeypot = z.string().optional();
+
+const createInput = z.union([
+  // One challenge covering several fields, each with its own note.
+  z.object({
+    wedgieId: z.number().int().positive(),
+    items: z
+      .array(z.object({ field: reportField, note: reportNote }))
+      .min(1)
+      .max(WEDGIE_REPORT_FIELDS.length)
+      .refine(
+        (items) => new Set(items.map((i) => i.field)).size === items.length,
+        { message: "Each field can only be picked once" },
+      ),
+    website: honeypot,
+  }),
+  // The original single-field shape, still accepted from older clients.
+  z.object({
+    wedgieId: z.number().int().positive(),
+    field: reportField,
+    note: reportNote,
+    website: honeypot,
+  }),
+]);
+
 export const reportRouter = createTRPCRouter({
   create: publicProcedure
-    .input(
-      z.object({
-        wedgieId: z.number().int().positive(),
-        field: z.enum(WEDGIE_REPORT_FIELDS),
-        note: z.string().trim().max(500).optional(),
-        // Honeypot: hidden from people, filled in by bots.
-        website: z.string().optional(),
-      }),
-    )
+    .input(createInput)
     .mutation(async ({ ctx, input }) => {
       if (input.website) return { ok: true };
+
+      const items = (
+        "items" in input
+          ? input.items
+          : [{ field: input.field, note: input.note }]
+      ).map((item) => ({
+        field: item.field,
+        note: item.note?.length ? item.note : null,
+      }));
 
       const target = await ctx.db.query.wedgie.findFirst({
         where: eq(wedgie.id, input.wedgieId),
@@ -64,10 +93,10 @@ export const reportRouter = createTRPCRouter({
         return { ok: true };
       }
 
-      const note = input.note?.length ? input.note : null;
-      await ctx.db
-        .insert(wedgieReport)
-        .values({ wedgieId: target.id, field: input.field, note });
+      // One row per field, written in a single insert so a challenge lands whole or not at all.
+      const rows = items.map((item) => ({ wedgieId: target.id, ...item }));
+      const insert = ctx.db.insert(wedgieReport);
+      await (rows.length === 1 ? insert.values(rows[0]!) : insert.values(rows));
 
       const shareQuery = buildAllWedgiesQuery({
         season: target.seasonName,
@@ -79,8 +108,18 @@ export const reportRouter = createTRPCRouter({
           [
             `🚩 <b>Wrong info reported</b> on wedgie #${target.number} (${escapeHtml(target.seasonName)})`,
             `${escapeHtml(target.playerName)}, ${escapeHtml(target.teamName)} vs ${escapeHtml(target.teamAgainstName)}`,
-            `Field: <b>${input.field}</b>`,
-            note ? `Note: ${escapeHtml(note)}` : null,
+            ...(items.length === 1
+              ? [
+                  `Field: <b>${items[0]!.field}</b>`,
+                  items[0]!.note ? `Note: ${escapeHtml(items[0]!.note)}` : null,
+                ]
+              : [
+                  `Fields (${items.length}):`,
+                  ...items.map(
+                    (item) =>
+                      `• <b>${item.field}</b>${item.note ? `: ${escapeHtml(item.note)}` : ""}`,
+                  ),
+                ]),
             "",
             `<a href="${APP_URL}/all-wedgies?${shareQuery}">View</a> · <a href="${APP_URL}/admin/wedgies/${target.id}">Edit</a> · <a href="${APP_URL}/admin/reports">Reports</a>`,
           ]

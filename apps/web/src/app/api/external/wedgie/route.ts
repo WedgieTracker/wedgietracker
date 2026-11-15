@@ -1,11 +1,15 @@
+import {
+  gameLabel,
+  wedgieDateForGame,
+  wedgieGameProblem,
+} from "@wedgietracker/core/utils/game";
 import { SHOUTOUT_PATTERN } from "@wedgietracker/core/utils/shoutout";
 import { timingSafeEqual } from "crypto";
 import { NextResponse } from "next/server";
-import { and, eq, inArray, like } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "~/server/db";
 import {
-  game,
   player,
   team,
   type as typeTable,
@@ -13,6 +17,7 @@ import {
 } from "@wedgietracker/core/schema";
 import { env } from "~/env";
 import { invalidateWedgieData } from "~/server/cache";
+import { pickGame } from "~/server/games";
 import {
   maybeUpdateGlobalWedgieCount,
   syncWedgieTypes,
@@ -23,7 +28,9 @@ import {
 // season + number: a second POST returns the wedgie already there. PATCH fills in video links
 // once the clip is posted, and replaces the shoutouts when more fans turn up after the wedgie was
 // added, and corrects a record that went on wrong (player, court position, types, period, clock,
-// score); DELETE undoes a wedgie added by mistake.
+// score), and attaches NoDunks' tweet to a wedgie added before he tweeted it; DELETE undoes a
+// wedgie added by mistake. A POST whose team and opponent are not the two teams of the game it
+// names (All-Star games aside), or whose date is not that game's day, gets a 400 naming the game.
 
 function authorised(request: Request) {
   const given = Buffer.from(request.headers.get("x-api-key") ?? "");
@@ -58,6 +65,8 @@ const createInput = key.extend({
   teamName: z.string().min(2),
   teamAgainstName: z.string().min(2),
   gameName: z.string().min(5),
+  // left out (as usual), the wedgie takes its game's date; sent, it must fall on the game's day
+  wedgieDate: z.string().datetime({ offset: true }).optional(),
   position: z.object({ x: z.number(), y: z.number() }).nullable(),
   types: z.array(z.string()).min(1),
   videoUrl: videoUrl.default({}),
@@ -75,28 +84,6 @@ function findWedgie(seasonName: string, number: number) {
   return db.query.wedgie.findFirst({
     where: and(eq(wedgie.seasonName, seasonName), eq(wedgie.number, number)),
   });
-}
-
-// The game list names games "HOME @ AWAY - <tip time>", with the tip in US Eastern time written
-// as if UTC; a caller holding the real UTC tip-off finds the same game by teams and the nearest
-// tip within 12 hours.
-async function pickGame(name: string) {
-  const exact = await db.query.game.findFirst({ where: eq(game.name, name) });
-  if (exact) return exact;
-  const [teams, tip] = name.split(" - ");
-  const wanted = Date.parse(tip ?? "");
-  if (!teams || Number.isNaN(wanted)) return undefined;
-  const candidates = await db.query.game.findMany({
-    where: like(game.name, `${teams} - %`),
-  });
-  const near = candidates
-    .map((g) => ({
-      g,
-      gap: Math.abs(Date.parse(g.name.split(" - ")[1] ?? "") - wanted),
-    }))
-    .filter((c) => c.gap <= 12 * 3600 * 1000)
-    .sort((a, b) => a.gap - b.gap);
-  return near[0]?.g;
 }
 
 async function readBody(request: Request) {
@@ -122,8 +109,8 @@ export async function POST(request: Request) {
   }
 
   // The game comes from the site's own game list, as when it is picked in the admin; its
-  // date is the wedgie's date.
-  const picked = await pickGame(data.gameName);
+  // date is the wedgie's date unless the caller sends one.
+  const picked = await pickGame(db, data.gameName);
   if (!picked) {
     return NextResponse.json(
       { error: `Unknown game ${data.gameName}` },
@@ -131,11 +118,33 @@ export async function POST(request: Request) {
     );
   }
 
+  // The team and opponent must be the two teams that played it, in either order
+  const problem = wedgieGameProblem(data, picked);
+  if (problem) {
+    return NextResponse.json(
+      {
+        error: problem,
+        game: {
+          id: picked.id,
+          name: picked.name,
+          label: gameLabel(picked),
+          homeTeam: picked.homeTeam,
+          awayTeam: picked.awayTeam,
+          date: picked.gameDate,
+        },
+      },
+      { status: 400 },
+    );
+  }
+
   const record = {
     ...data,
+    gameId: picked.id,
     gameName: picked.name,
     position: data.position ?? { x: 0, y: 0 },
-    wedgieDate: new Date(picked.createdAt).toISOString(),
+    wedgieDate: data.wedgieDate
+      ? new Date(data.wedgieDate).toISOString()
+      : (wedgieDateForGame(picked) ?? new Date(picked.createdAt).toISOString()),
   };
   if (dryRun) {
     return NextResponse.json({
@@ -179,6 +188,8 @@ const updateInput = key
     gameClock: gameClock.optional(),
     teamScore: z.number().int().nullable().optional(),
     opponentScore: z.number().int().nullable().optional(),
+    // a wedgie added from the live feed before NoDunks tweeted it gets his tweet once it comes
+    noDunksTweet: z.object({ id: z.string() }).nullable().optional(),
   })
   .refine(
     (u) => Object.keys(u).some((k) => k !== "seasonName" && k !== "number"),

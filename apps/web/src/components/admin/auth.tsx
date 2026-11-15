@@ -15,7 +15,7 @@ export function SignIn() {
 export function SignOut() {
   return (
     <Button
-      className="border-yellow bg-yellow text-darkpurple hover:bg-darkpurple hover:text-yellow rounded-lg border-2 border-solid px-4 py-2 font-semibold transition-colors"
+      className="border-cream bg-cream text-night hover:bg-night hover:text-cream rounded-lg border-2 border-solid px-4 py-2 font-semibold transition-colors"
       onClick={() => signOut()}
     >
       Sign out

@@ -122,4 +122,93 @@ describe("reportRouter.create", () => {
       }),
     ).rejects.toBeInstanceOf(TRPCError);
   });
+
+  describe("with several fields", () => {
+    it("stores one row per field with its own note in one insert", async () => {
+      await anonCaller().create({
+        wedgieId: 7,
+        items: [
+          { field: "player", note: " it was Murray " },
+          { field: "date" },
+          { field: "video", note: "   " },
+        ],
+      });
+
+      expect(insertValues).toHaveBeenCalledTimes(1);
+      expect(insertValues).toHaveBeenCalledWith([
+        { wedgieId: 7, field: "player", note: "it was Murray" },
+        { wedgieId: 7, field: "date", note: null },
+        { wedgieId: 7, field: "video", note: null },
+      ]);
+    });
+
+    it("sends one combined Telegram message listing every field", async () => {
+      await anonCaller().create({
+        wedgieId: 7,
+        items: [{ field: "player", note: "Murray & co" }, { field: "type" }],
+      });
+
+      expect(sendTelegramMessage).toHaveBeenCalledTimes(1);
+      const message = sendTelegramMessage.mock.calls[0]![0] as string;
+      expect(message).toContain("Fields (2):");
+      expect(message).toContain("<b>player</b>: Murray &amp; co");
+      expect(message).toContain("<b>type</b>");
+    });
+
+    it("stores a single item the same way as the old shape", async () => {
+      await anonCaller().create({
+        wedgieId: 7,
+        items: [{ field: "position", note: "left block" }],
+      });
+      expect(insertValues).toHaveBeenCalledWith({
+        wedgieId: 7,
+        field: "position",
+        note: "left block",
+      });
+      const message = sendTelegramMessage.mock.calls[0]![0] as string;
+      expect(message).toContain("Field: <b>position</b>");
+      expect(message).toContain("Note: left block");
+    });
+
+    it("rejects an empty list", async () => {
+      await expect(
+        anonCaller().create({ wedgieId: 7, items: [] }),
+      ).rejects.toBeInstanceOf(TRPCError);
+      expect(insertValues).not.toHaveBeenCalled();
+    });
+
+    it("rejects the same field picked twice", async () => {
+      await expect(
+        anonCaller().create({
+          wedgieId: 7,
+          items: [{ field: "player" }, { field: "player" }],
+        }),
+      ).rejects.toBeInstanceOf(TRPCError);
+      expect(insertValues).not.toHaveBeenCalled();
+    });
+
+    it("rejects an item note over 500 characters", async () => {
+      await expect(
+        anonCaller().create({
+          wedgieId: 7,
+          items: [{ field: "other", note: "x".repeat(501) }],
+        }),
+      ).rejects.toBeInstanceOf(TRPCError);
+    });
+
+    it("still honours the honeypot and the open report cap", async () => {
+      await anonCaller().create({
+        wedgieId: 7,
+        items: [{ field: "player" }, { field: "date" }],
+        website: "spam.example",
+      });
+      selectWhere.mockResolvedValue([{ count: 10 }]);
+      await anonCaller().create({
+        wedgieId: 7,
+        items: [{ field: "player" }, { field: "date" }],
+      });
+      expect(insertValues).not.toHaveBeenCalled();
+      expect(sendTelegramMessage).not.toHaveBeenCalled();
+    });
+  });
 });

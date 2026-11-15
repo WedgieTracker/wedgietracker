@@ -9,7 +9,7 @@ export function Footer() {
   const [hoveredSocial, setHoveredSocial] = useState<string | null>(null);
 
   return (
-    <div className="bg-darkpurple-darker w-full px-4 py-4 md:px-8 lg:px-8">
+    <div className="bg-night-darker w-full px-4 py-4 md:px-8 lg:px-8">
       <div className="flex flex-col-reverse items-center justify-between gap-2 sm:flex-row md:flex-row">
         <div className="block items-center gap-8 text-center sm:text-left lg:flex lg:flex-row">
           {/* social networks */}

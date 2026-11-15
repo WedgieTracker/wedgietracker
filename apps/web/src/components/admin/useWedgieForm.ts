@@ -8,6 +8,17 @@ import type {
   VideoUrls,
 } from "@wedgietracker/core/types/wedgie";
 import { hostedVideo } from "@wedgietracker/core/utils/wedgieVideo";
+import { gameLabelWithDate } from "@wedgietracker/core/utils/game";
+
+/** A wedgie as the edit page loads it, with its game when it has one. */
+export type EditableWedgie = WedgieWithTypes & {
+  game?: {
+    name: string;
+    homeTeam: string | null;
+    awayTeam: string | null;
+    gameDate: string | null;
+  } | null;
+};
 
 interface WedgieFormData {
   playerName: string;
@@ -19,12 +30,15 @@ interface WedgieFormData {
   position: { x: number; y: number } | null;
   videoUrl: VideoUrls;
   types: string[];
+  gameId: number | null;
   gameName: string;
+  /** What the game input shows; only the game picked from it is saved. */
+  gameText: string;
   shoutouts: string[];
 }
 
 function initialFormData(
-  wedgie?: WedgieWithTypes,
+  wedgie?: EditableWedgie,
   currentSeason?: string,
 ): WedgieFormData {
   const video = (wedgie?.videoUrl as VideoUrls | undefined) ?? {};
@@ -43,12 +57,18 @@ function initialFormData(
       instagram: video.instagram ?? "",
     },
     types: wedgie?.types?.map((t) => t.name) ?? [],
+    gameId: wedgie?.gameId ?? null,
     gameName: wedgie?.gameName ?? "",
+    gameText: wedgie?.game
+      ? gameLabelWithDate(wedgie.game)
+      : wedgie?.gameName
+        ? gameLabelWithDate({ name: wedgie.gameName })
+        : "",
     shoutouts: wedgie?.shoutouts ?? [],
   };
 }
 
-function normalizePosition(formData: WedgieFormData) {
+function toPayload({ gameText: _shown, ...formData }: WedgieFormData) {
   return {
     ...formData,
     position: formData.position
@@ -57,22 +77,22 @@ function normalizePosition(formData: WedgieFormData) {
   };
 }
 
-export function useWedgieForm(
-  wedgie?: WedgieWithTypes,
-  currentSeason?: string,
-) {
+export function useWedgieForm(wedgie?: EditableWedgie, currentSeason?: string) {
   const router = useRouter();
   const [formData, setFormData] = useState<WedgieFormData>(() =>
     initialFormData(wedgie, currentSeason),
   );
 
+  // why the last save was refused, e.g. a team that did not play in the picked game
+  const [error, setError] = useState<string | null>(null);
   const createMutation = api.wedgie.create.useMutation();
   const updateMutation = api.wedgie.update.useMutation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
     try {
-      const payload = normalizePosition(formData);
+      const payload = toPayload(formData);
       if (wedgie?.id) {
         await updateMutation.mutateAsync({ id: wedgie.id, data: payload });
       } else {
@@ -80,10 +100,13 @@ export function useWedgieForm(
       }
       router.push("/admin/wedgies");
       router.refresh();
-    } catch (error) {
-      console.error("Error submitting wedgie:", error);
+    } catch (err) {
+      console.error("Error submitting wedgie:", err);
+      setError(
+        err instanceof Error ? err.message : "Could not save the wedgie",
+      );
     }
   };
 
-  return { formData, setFormData, handleSubmit, router };
+  return { formData, setFormData, handleSubmit, router, error };
 }

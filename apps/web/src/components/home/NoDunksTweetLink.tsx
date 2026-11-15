@@ -12,7 +12,7 @@ export function NoDunksTweetLink({ tweetId }: { tweetId: string }) {
       rel="noopener noreferrer"
       title="No Dunks tweet"
       aria-label="No Dunks tweet"
-      className="hover:ring-yellow flex size-7 shrink-0 items-center justify-center overflow-hidden rounded-md transition-all duration-300 hover:ring-2 sm:size-8"
+      className="hover:ring-cream flex size-7 shrink-0 items-center justify-center overflow-hidden rounded-md transition-all duration-300 hover:ring-2 sm:size-8"
     >
       <img
         src={noDunksLogo.src}

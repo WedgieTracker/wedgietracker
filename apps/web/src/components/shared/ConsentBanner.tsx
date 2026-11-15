@@ -50,27 +50,29 @@ export default function ConsentBanner({ requiresConsent }: ConsentBannerProps) {
   if (!isVisible) return null;
 
   return (
-    <div className="inverted border-darkpurple-lighter bg-darkpurple-lighter/70 text-foreground fixed right-0 bottom-2 left-0 z-50 mx-auto max-w-[340px] rounded-lg border-2 px-4 py-4 shadow-lg backdrop-blur-xs sm:max-w-[550px] sm:px-8">
-      <div className="container mx-auto flex flex-col items-center justify-between gap-4 sm:flex-row">
-        <p className={`text-center text-xs font-bold text-white sm:text-left`}>
+    <div className="bg-night/90 border-violet/45 fixed right-0 bottom-3 left-0 z-50 mx-auto w-[calc(100%-24px)] max-w-[340px] rounded-[22px] border px-5 py-4 shadow-[0_14px_30px_rgb(5_2_20/0.6)] backdrop-blur-xs sm:max-w-[560px] sm:px-6">
+      <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
+        <p className="text-cream text-center text-[13.5px] leading-snug font-bold sm:text-left">
           We like 🍪🍪, would you like to share yours?
           <Link
             href="/privacy"
-            className="text-accent mt-0.5 block text-xs text-white hover:opacity-80"
+            className="text-cream/70 decoration-cream/40 hover:text-cream mt-1 block text-xs underline underline-offset-4"
           >
-            Privacy Policy
+            Privacy policy
           </Link>
         </p>
-        <div className="flex gap-3">
+        <div className="flex shrink-0 gap-3">
           <button
+            type="button"
             onClick={handleDecline}
-            className="hover:text-darkpurple rounded-md border border-white px-4 py-2 text-sm font-semibold whitespace-nowrap text-white transition-all duration-300 hover:bg-white"
+            className="border-cream/35 text-cream hover:border-cream hover:bg-cream/10 focus-visible:outline-cream min-h-10 rounded-xl border-2 px-4 text-[13.5px] font-black whitespace-nowrap transition-colors duration-150 focus-visible:outline-2"
           >
             No thanks
           </button>
           <button
+            type="button"
             onClick={handleAccept}
-            className="border-yellow bg-yellow text-darkpurple hover:text-yellow rounded-md border px-4 py-2 text-sm font-bold whitespace-nowrap uppercase transition-all duration-300 hover:bg-transparent"
+            className="btn-sticker btn-sticker-sm min-h-10 px-4 text-[13.5px] whitespace-nowrap"
           >
             I&apos;m in!
           </button>

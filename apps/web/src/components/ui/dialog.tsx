@@ -19,12 +19,12 @@ const DialogOverlay = React.forwardRef<
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-      "bg-darkpurple-darker/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-90",
+      "bg-night-darker/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-90",
       className,
     )}
     style={{
       backgroundImage:
-        "radial-gradient(transparent 1px, rgb(var(--darkpurple-rgb)) 1px)",
+        "radial-gradient(transparent 1px, rgb(var(--night-rgb)) 1px)",
       backgroundSize: "2px 2px",
       backdropFilter: "blur(4px)",
     }}
@@ -50,7 +50,7 @@ const DialogContent = React.forwardRef<
       {...props}
     >
       {children}
-      {/* <DialogPrimitive.Close className="ring-offset-none bg-red data-[state=open]:bg-red absolute right-4 top-4 rounded-sm transition-opacity hover:opacity-100 focus:outline-hidden focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:text-yellow">
+      {/* <DialogPrimitive.Close className="ring-offset-none bg-red data-[state=open]:bg-red absolute right-4 top-4 rounded-sm transition-opacity hover:opacity-100 focus:outline-hidden focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:text-cream">
         <Cross2Icon className="h-4 w-4" />
         <span className="sr-only">Close</span>
       </DialogPrimitive.Close> */}

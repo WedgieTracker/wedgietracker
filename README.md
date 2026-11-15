@@ -65,9 +65,26 @@ packages/
 └── core/                   # Shared, client-agnostic code
     ├── src/schema.ts       # Drizzle schema (single source of truth)
     ├── src/types/          # Domain types derived from the schema
-    └── src/utils/          # Pure helpers (pace, game moment, filters, URLs,
-                            # team aliases, shoutouts, video)
+    └── src/utils/          # Pure helpers (pace, game moment, games, filters,
+                            # URLs, team aliases, shoutouts, video)
 ```
+
+### Games
+
+A `game` row keeps its teams and day in `home_team`, `away_team` and
+`game_date` (the US Eastern calendar day, `YYYY-MM-DD`); `id` is the NBA game
+id for most games. A wedgie points at its game with `game_id`. Its old text
+link, `wedgie.game_name` to `game.name`, is still written for now.
+
+`game.name` is `"HOME @ AWAY - <tip>"`, home team first, which is the reverse
+of NBA notation (`AWAY @ HOME`). Don't show it or parse it: build labels with
+`packages/core/src/utils/game.ts`, which gives the NBA label (`POR @ HOU`) and
+a plain one (`HOU v POR, at HOU`).
+
+A wedgie's team and opponent must be its game's two teams (All-Star games and
+GEMS aside), and its date must fall on the game's day; the admin and
+`/api/external/wedgie` refuse anything else. `pnpm db:check-games` lists any
+row that disagrees, without changing anything.
 
 ### How the iOS app talks to the API
 
@@ -85,6 +102,28 @@ Auth.js) reach the app bundle - only the shape of the API does.
 
 Point the app at a different backend with `EXPO_PUBLIC_API_URL`; it otherwise
 uses the production site.
+
+### App Store refunds
+
+The app's coffee purchases are counted by `donations.recordAppStoreCoffee`,
+keyed by transaction id. When Apple refunds or revokes one, it posts an App
+Store Server Notification (Version 2) to `/api/app-store/notifications`, which
+checks Apple's signature, takes the coffees back off the season they were
+added to and marks the purchase refunded. A reversed refund adds them back.
+Each change happens once however often Apple sends it, and Sandbox
+notifications change nothing.
+
+In App Store Connect, under the app's App Information, App Store Server
+Notifications, set the Production Server URL (Version 2) to:
+
+```
+https://www.wedgietracker.com/api/app-store/notifications
+```
+
+The Sandbox Server URL can point at a preview deployment's
+`/api/app-store/notifications` to try it out; it answers 200 and changes
+nothing. "Request a Test Notification" there sends a `TEST` notification,
+which should get a 200.
 
 ## Local Development Setup
 
@@ -147,24 +186,25 @@ IP rather than `localhost` if you are testing on a physical device.
 
 ## Available Scripts
 
-| Script              | Description                           |
-| ------------------- | ------------------------------------- |
-| `pnpm dev`          | Start dev server with Turbo and HTTPS |
-| `pnpm build`        | Production build                      |
-| `pnpm start`        | Start production server               |
-| `pnpm lint`         | Run oxlint                            |
-| `pnpm typecheck`    | Run type checking with tsc (native)   |
-| `pnpm format:check` | Check Prettier formatting             |
-| `pnpm format:write` | Fix Prettier formatting               |
-| `pnpm test`         | Run tests once                        |
-| `pnpm check`        | Run oxlint + tsc + tests              |
-| `pnpm db:push`      | Push schema changes to database       |
-| `pnpm db:generate`  | Generate database migrations          |
-| `pnpm db:migrate`   | Apply database migrations             |
-| `pnpm db:studio`    | Open Drizzle Studio                   |
-| `pnpm db:dump`      | Refresh `database-backups/seed.sql`   |
-| `pnpm mobile`       | Start the Expo dev server             |
-| `pnpm mobile:ios`   | Open the iOS app in the Simulator     |
+| Script                | Description                                      |
+| --------------------- | ------------------------------------------------ |
+| `pnpm dev`            | Start dev server with Turbo and HTTPS            |
+| `pnpm build`          | Production build                                 |
+| `pnpm start`          | Start production server                          |
+| `pnpm lint`           | Run oxlint                                       |
+| `pnpm typecheck`      | Run type checking with tsc (native)              |
+| `pnpm format:check`   | Check Prettier formatting                        |
+| `pnpm format:write`   | Fix Prettier formatting                          |
+| `pnpm test`           | Run tests once                                   |
+| `pnpm check`          | Run oxlint + tsc + tests                         |
+| `pnpm db:push`        | Push schema changes to database                  |
+| `pnpm db:generate`    | Generate database migrations                     |
+| `pnpm db:migrate`     | Apply database migrations                        |
+| `pnpm db:studio`      | Open Drizzle Studio                              |
+| `pnpm db:dump`        | Refresh `database-backups/seed.sql`              |
+| `pnpm db:check-games` | List wedgies and games that disagree (read-only) |
+| `pnpm mobile`         | Start the Expo dev server                        |
+| `pnpm mobile:ios`     | Open the iOS app in the Simulator                |
 
 Scripts at the root delegate to the workspace packages. To target one package
 directly, use `pnpm --filter @wedgietracker/web <script>` (or `.../core`,
