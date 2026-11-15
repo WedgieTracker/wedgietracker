@@ -9,15 +9,17 @@ interface StatsPerWedgie {
   minutes: number;
 }
 
-const STATS: { key: keyof StatsPerWedgie; word: string }[] = [
-  { key: "possessions", word: "POSSESSIONS" },
-  { key: "fga", word: "SHOTS" },
-  { key: "games", word: "GAMES" },
-  { key: "minutes", word: "MINUTES" },
+/** `word` is shown on the flaps; `spoken` is read to screen readers. */
+const STATS: { key: keyof StatsPerWedgie; word: string; spoken: string }[] = [
+  { key: "possessions", word: "POSS.", spoken: "possessions" },
+  { key: "fga", word: "SHOTS", spoken: "shots" },
+  { key: "games", word: "GAMES", spoken: "games" },
+  { key: "minutes", word: "MINUTES", spoken: "minutes" },
 ];
 /** Digit flaps: up to 9999, written without a thousands comma. */
 const NUM_FLAPS = 4;
-const WORD_FLAPS = 11;
+/** Letter flaps: the longest word, MINUTES. */
+const WORD_FLAPS = 7;
 /** Column widths: the digits, a half-width gap, then the letters. */
 const TEMPLATE = `repeat(${NUM_FLAPS}, 1fr) 0.5fr repeat(${WORD_FLAPS}, 1fr)`;
 /** The same total in flap widths, for sizing the letters. */
@@ -25,7 +27,7 @@ const UNITS = NUM_FLAPS + 0.5 + WORD_FLAPS;
 
 /** The figure's flaps only carry digits, the word's only letters. */
 const DIGITS = " 0123456789";
-const LETTERS = " ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const LETTERS = " ABCDEFGHIJKLMNOPQRSTUVWXYZ.";
 const STEP_MS = 45;
 const HOLD_MS = 4200;
 
@@ -116,7 +118,7 @@ export function TypingStats({ stats }: { stats: StatsPerWedgie }) {
     >
       <p className="sr-only" aria-live="polite">
         That&apos;s a wedgie every {stats[current.key].toLocaleString("en-US")}{" "}
-        {current.word.toLowerCase()}
+        {current.spoken}
       </p>
       <span className="wt-board-label" aria-hidden="true">
         A wedgie every
