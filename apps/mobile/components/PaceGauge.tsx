@@ -102,7 +102,7 @@ export function PaceGauge({
                 {
                   fontSize: 8.5 * s,
                   lineHeight: 8.5 * s,
-                  top: (36 - 8.5 * 0.78) * s,
+                  top: (40 - 8.5 * 0.78) * s,
                 },
                 hidden && styles.hidden,
               ]}
@@ -117,7 +117,7 @@ export function PaceGauge({
                   fontSize: 36 * s,
                   lineHeight: 36 * s,
                   letterSpacing: -1.4 * s,
-                  top: (70 - 36 * 0.76) * s,
+                  top: (74 - 36 * 0.76) * s,
                 },
                 hidden && styles.hidden,
               ]}
