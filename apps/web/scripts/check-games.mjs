@@ -1,6 +1,8 @@
 // Reports wedgies that disagree with their game, and games whose name and
 // columns disagree. Read-only: everything runs in a read transaction, nothing
 // is changed. Exits with 1 when it finds a problem, so it can gate a deploy.
+// Also counts games by id_source and lists the 'derived' and 'site' ones,
+// which are not problems.
 // Run with: pnpm db:check-games (add -- --all to list every row, not the first 20)
 //
 // A game's name is "HOME @ AWAY - <tip>", home team first; home_team,
@@ -38,9 +40,18 @@ const tx = await db.transaction("read");
 let games;
 let wedgies;
 try {
+  // id_source arrives with migration 0005; before it every game reads as nba
+  const hasIdSource =
+    (
+      await tx.execute(
+        "SELECT 1 FROM pragma_table_info('game') WHERE name = 'id_source'",
+      )
+    ).rows.length > 0;
   games = (
     await tx.execute(
-      "SELECT id, name, home_team, away_team, game_date FROM game ORDER BY id",
+      `SELECT id, name, home_team, away_team, game_date, season_name,
+              ${hasIdSource ? "id_source" : "'nba' AS id_source"}
+         FROM game ORDER BY id`,
     )
   ).rows;
   wedgies = (
@@ -137,6 +148,34 @@ function report(title, rows) {
 }
 
 console.log(`Checked ${games.length} games and ${wedgies.length} wedgies.`);
+
+const bySource = new Map();
+for (const g of games) {
+  const source = String(g.id_source);
+  if (!bySource.has(source)) bySource.set(source, []);
+  bySource.get(source).push(g);
+}
+console.log("\nGames by id_source:");
+for (const source of ["nba", "derived", "site"]) {
+  console.log(`  ${source}: ${bySource.get(source)?.length ?? 0}`);
+}
+for (const [source, rows] of bySource) {
+  if (!["nba", "derived", "site"].includes(source)) {
+    problems.games.push(`${rows.length} games have id_source "${source}"`);
+  }
+}
+report(
+  "Games with a derived id",
+  (bySource.get("derived") ?? []).map(
+    (g) => `game ${g.id} (${g.season_name}) "${g.name}"`,
+  ),
+);
+report(
+  "Games with a site number",
+  (bySource.get("site") ?? []).map(
+    (g) => `game ${g.id} (${g.season_name}) "${g.name}"`,
+  ),
+);
 report("Games whose name and columns disagree", problems.games);
 report("Wedgies that disagree with their game", problems.wedgies);
 
