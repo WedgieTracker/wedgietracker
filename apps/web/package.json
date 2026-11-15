@@ -24,7 +24,8 @@
     "typecheck": "tsc --noEmit",
     "types:build": "tsc -p tsconfig.types.json",
     "db:sql-migrate": "node --env-file=.env scripts/migrate.mjs",
-    "db:backfill-coffees": "node --env-file=.env scripts/backfill-coffees.mjs"
+    "db:backfill-coffees": "node --env-file=.env scripts/backfill-coffees.mjs",
+    "db:check-games": "node --env-file=.env scripts/check-games.mjs"
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.11.3",

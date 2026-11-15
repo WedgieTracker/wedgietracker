@@ -5,6 +5,7 @@ import { global, season, game } from "@wedgietracker/core/schema";
 import { env } from "~/env";
 import { calculatePace } from "~/server/pace";
 import { invalidateWedgieData } from "~/server/cache";
+import { gameColumnsFromName } from "~/server/games";
 
 const wedgieTrackerApiKey = env.WEDGIETRACKER_API_KEY;
 
@@ -48,6 +49,8 @@ async function syncIncomingGames(newGames: NewGameInput[]) {
     await db.insert(game).values(
       newGamesToCreate.map((g) => ({
         name: g.name,
+        // the teams and day as columns, so nothing has to read them from the name
+        ...gameColumnsFromName(g.name),
         createdAt: new Date(g.createdAt).toISOString(),
         seasonName: g.seasonName,
         live: g.live,
