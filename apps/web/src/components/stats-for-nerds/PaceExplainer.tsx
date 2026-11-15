@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
 import {
   PRIOR_GAMES,
@@ -62,31 +61,31 @@ export function PaceExplainer({ data }: PaceExplainerProps) {
     games === data.gamesPlayed && wedgies === data.wedgiesThisSeason;
 
   return (
-    <div className="flex w-full max-w-2xl flex-col gap-6 text-white">
-      <p className="text-center text-lg font-bold md:text-xl">
+    <div className="text-cream/75 flex w-full max-w-2xl flex-col gap-5 font-bold">
+      <p className="text-center text-[17px] leading-snug md:text-xl">
         The pace is our guess at how many wedgies the{" "}
-        <span className="text-yellow">{data.currentSeason}</span> season will
+        <span className="text-cream">{data.currentSeason}</span> season will
         finish with.
       </p>
 
       <Section step="1" title="A normal season">
-        <p className="mb-4 font-bold">
+        <p className="mb-4">
           Over the last{" "}
-          <span className="text-pink">{seasons.length} completed seasons</span>,
-          with recent ones counting a bit more, a normal season works out at one
-          wedgie every{" "}
-          <span className="text-yellow">{Math.round(1 / normal)} games</span>.
+          <span className="text-violet">
+            {seasons.length} completed seasons
+          </span>
+          , with recent ones counting a bit more, a normal season works out at
+          one wedgie every{" "}
+          <span className="text-cream">{Math.round(1 / normal)} games</span>.
         </p>
         <ul className="flex flex-col gap-1.5">
           {seasons.map((s, i) => (
             <li key={s.name} className="flex items-center gap-2 text-sm">
-              <span className="w-16 shrink-0 font-bold text-white/70">
-                {s.name}
-              </span>
+              <span className="text-cream/60 w-16 shrink-0">{s.name}</span>
               <span className="relative h-5 flex-1">
                 <span
                   className={`absolute inset-y-0 left-0 rounded-r-md ${
-                    (rates[i] ?? 0) >= normal ? "bg-yellow" : "bg-pink"
+                    (rates[i] ?? 0) >= normal ? "bg-cream" : "bg-violet"
                   }`}
                   style={{
                     width: `${(s.wedgies / most) * 100}%`,
@@ -99,39 +98,39 @@ export function PaceExplainer({ data }: PaceExplainerProps) {
                   style={{ left: `${(normalSeason / most) * 100}%` }}
                 />
               </span>
-              <span className="w-8 shrink-0 text-right font-black">
+              <span className="text-cream w-8 shrink-0 text-right font-black">
                 {s.wedgies}
               </span>
-              <span className="w-10 shrink-0 text-right text-xs font-bold text-white/60">
+              <span className="text-cream/50 w-10 shrink-0 text-right text-xs">
                 {pct(weightOf(i))}
               </span>
             </li>
           ))}
         </ul>
-        <p className="mt-4 text-sm text-white/60">
+        <p className="text-cream/55 mt-4 text-sm font-semibold">
           Each season&apos;s wedgies are divided by the games it actually
           played, so the shortened 2019/20 and 2020/21 seasons count by how
           often wedgies happened, not by their smaller totals. Last season
           counts in full, the one before at 80%, then 64%, and so on, as the
-          percentages on the right show. Yellow seasons had wedgies more often
-          than normal, pink ones less. The white line is a normal season, about{" "}
-          {Math.round(normalSeason)} wedgies.
+          percentages on the right show. Cream seasons had wedgies more often
+          than normal, violet ones less. The white line is a normal season,
+          about {Math.round(normalSeason)} wedgies.
         </p>
       </Section>
 
       <Section step="2" title="The season so far">
-        <p className="font-bold">
-          <span className="text-yellow">{data.wedgiesThisSeason}</span>{" "}
+        <p>
+          <span className="text-cream">{data.wedgiesThisSeason}</span>{" "}
           {data.wedgiesThisSeason === 1 ? "wedgie" : "wedgies"} in{" "}
-          <span className="text-yellow">{fmt(data.gamesPlayed)}</span> games,
-          out of an estimated {fmt(SEASON_GAMES)} for the whole season. That
-          leaves about{" "}
-          <span className="text-pink">
+          <span className="text-cream">{fmt(data.gamesPlayed)}</span> games, out
+          of an estimated {fmt(SEASON_GAMES)} for the whole season. That leaves
+          about{" "}
+          <span className="text-violet">
             {fmt(Math.max(0, SEASON_GAMES - data.gamesPlayed))} games
           </span>{" "}
           to play.
         </p>
-        <p className="mt-2 text-sm text-white/60">
+        <p className="text-cream/55 mt-2 text-sm font-semibold">
           The total is an estimate. The 1,230 regular-season games are fixed,
           but how many play-in and playoff games there will be isn&apos;t known
           until the season ends.
@@ -139,7 +138,7 @@ export function PaceExplainer({ data }: PaceExplainerProps) {
       </Section>
 
       <Section step="3" title="Mix in this season">
-        <p className="mb-4 font-bold">
+        <p className="mb-4">
           {fmt(games)} {games === 1 ? "game is" : "games is"} too small a sample
           to trust on its own, so past seasons get a say worth{" "}
           {fmt(PRIOR_GAMES)} games, about half a season. The season starts off
@@ -167,7 +166,7 @@ export function PaceExplainer({ data }: PaceExplainerProps) {
             />
           </Line>
         </div>
-        <p className="mt-4 text-sm text-white/60">
+        <p className="text-cream/55 mt-4 text-sm font-semibold">
           {Math.round(madeUp)} + {wedgies} = {Math.round(madeUp + wedgies)}{" "}
           wedgies in {fmt(PRIOR_GAMES)} + {fmt(games)} ={" "}
           {fmt(PRIOR_GAMES + games)} games. The made-up games always stay{" "}
@@ -178,7 +177,7 @@ export function PaceExplainer({ data }: PaceExplainerProps) {
       </Section>
 
       <Section step="4" title="Put together">
-        <p className="mb-4 font-bold">
+        <p className="mb-4">
           The games still to play go at that mixed rate, on top of this
           season&apos;s wedgies so far. Move the numbers below to try it.
         </p>
@@ -188,13 +187,13 @@ export function PaceExplainer({ data }: PaceExplainerProps) {
           every={Math.round(1 / rate)}
           pace={pace}
         />
-        <p className="mt-3 text-center text-xs text-white/50">
+        <p className="text-cream/45 mt-3 text-center text-xs font-semibold">
           Rounded to whole numbers here. The pace uses the exact ones.
         </p>
-        <div className="my-5 border-t border-white/10" />
-        <label className="mb-1 flex justify-between font-bold">
+        <div className="border-cream/15 my-5 border-t-2 border-dashed" />
+        <label className="text-cream mb-1 flex justify-between">
           <span>Games played</span>
-          <span className="text-yellow">{fmt(games)}</span>
+          <span className="font-black">{fmt(games)}</span>
         </label>
         <input
           type="range"
@@ -202,10 +201,10 @@ export function PaceExplainer({ data }: PaceExplainerProps) {
           max={SEASON_GAMES}
           value={games}
           onChange={(e) => setGames(Number(e.target.value))}
-          className="accent-yellow mb-5 w-full"
+          className="accent-violet mb-5 w-full"
           aria-label="Games played"
         />
-        <div className="mb-5 flex items-center justify-between font-bold">
+        <div className="text-cream mb-5 flex items-center justify-between">
           <span>Wedgies so far</span>
           <span className="flex items-center gap-3">
             <Stepper
@@ -214,7 +213,7 @@ export function PaceExplainer({ data }: PaceExplainerProps) {
             >
               −
             </Stepper>
-            <span className="text-yellow w-10 text-center text-2xl font-black">
+            <span className="w-12 pr-[0.1em] text-center text-2xl font-black italic">
               {wedgies}
             </span>
             <Stepper
@@ -233,15 +232,15 @@ export function PaceExplainer({ data }: PaceExplainerProps) {
               setGames(data.gamesPlayed);
               setWedgies(data.wedgiesThisSeason);
             }}
-            className="border-yellow text-yellow hover:bg-yellow hover:text-darkpurple disabled:hover:text-yellow rounded-full border-2 px-4 py-1 text-sm font-bold transition-colors disabled:opacity-40 disabled:hover:bg-transparent"
+            className="btn-sticker btn-sticker-sm px-4 text-[13px] disabled:pointer-events-none disabled:opacity-40"
           >
-            BACK TO TODAY
+            Back to today
           </button>
         </div>
       </Section>
 
       <Section title="Why it works this way">
-        <ul className="flex list-disc flex-col gap-2 pl-5 font-bold">
+        <ul className="marker:text-violet flex list-disc flex-col gap-2 pl-5">
           <li>
             We tested it on the 12 seasons from 2014/15 to 2025/26. At many
             points in each season, from the first weeks to the playoffs, we
@@ -268,13 +267,6 @@ export function PaceExplainer({ data }: PaceExplainerProps) {
           </li>
         </ul>
       </Section>
-
-      <Link
-        href="/stats-for-nerds"
-        className="border-yellow bg-yellow text-button-text text-darkpurple hover:bg-darkpurple hover:text-yellow w-full rounded-3xl border-2 py-1.5 text-center font-bold transition-all duration-300"
-      >
-        BACK TO STATS FOR NERDS
-      </Link>
     </div>
   );
 }
@@ -289,14 +281,14 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section className="bg-darkpurple-dark rounded-3xl p-5 md:p-8">
-      <h2 className="mb-3 flex items-center gap-3 text-2xl font-black uppercase md:text-3xl">
+    <section className="bg-panel border-violet/20 rounded-[22px] border p-[18px] md:p-7">
+      <h2 className="text-cream mb-3 flex items-center gap-3 text-[22px] leading-tight font-black tracking-[-0.03em] md:text-[26px]">
         {step && (
-          <span className="bg-pink text-darkpurple inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xl">
+          <span className="bg-button text-shadow-badge inline-flex size-9 shrink-0 items-center justify-center rounded-xl pr-[0.1em] text-xl tracking-normal italic">
             {step}
           </span>
         )}
-        <span className="text-yellow">{title}</span>
+        <span>{title}</span>
       </h2>
       {children}
     </section>
@@ -361,13 +353,13 @@ function Term({
   return (
     <div className="flex flex-col items-center">
       <span
-        className={`rounded-xl px-3 py-1 text-2xl font-black md:text-3xl ${
-          highlight ? "bg-yellow text-darkpurple" : "bg-darkpurple text-yellow"
+        className={`text-cream rounded-xl py-1 pr-[calc(0.75rem+0.1em)] pl-3 text-2xl font-black italic md:text-3xl ${
+          highlight ? "bg-button text-shadow-badge" : "bg-night"
         }`}
       >
         {value}
       </span>
-      <span className="mt-1 text-center text-xs font-bold text-white/60 uppercase md:whitespace-nowrap">
+      <span className="text-cream/55 mt-1.5 text-center text-[11px] font-black tracking-[0.08em] uppercase md:whitespace-nowrap">
         {label}
       </span>
     </div>
@@ -376,7 +368,7 @@ function Term({
 
 function Op({ children }: { children: React.ReactNode }) {
   return (
-    <span className="text-pink block pt-1 text-center text-2xl font-black md:text-3xl">
+    <span className="text-violet block pt-1 text-center text-2xl font-black md:text-3xl">
       {children}
     </span>
   );
@@ -396,7 +388,7 @@ function Stepper({
       type="button"
       aria-label={label}
       onClick={onClick}
-      className="border-yellow text-yellow hover:bg-yellow hover:text-darkpurple flex h-9 w-9 items-center justify-center rounded-full border-2 text-xl font-black transition-colors"
+      className="border-cream/35 text-cream hover:border-cream hover:bg-cream/10 focus-visible:outline-cream flex size-11 items-center justify-center rounded-xl border-2 text-xl font-black transition-colors duration-150 focus-visible:outline-2"
     >
       {children}
     </button>
