@@ -20,8 +20,9 @@ import {
 import { env } from "~/env";
 
 // The wedgies of one night, for the morning recap email. `date` is the US Eastern game date: a
-// wedgie's date is its game's tip-off in Eastern time written as if UTC (see pickGame in
-// ../wedgie/route.ts), so its first ten characters are the night it happened. Same key as
+// wedgie's date is its game's tip-off in Eastern time written as if UTC (see wedgieDateForGame in
+// packages/core/src/utils/game.ts), so its first ten characters are the night it happened. Each
+// wedgie's `game` gives its game by the game's own columns, the NBA label first. Same key as
 // /api/external ("x-api-key"). `facts` are worked out here from the whole history so the recap's
 // writer only says what is true; see ./facts.ts.
 
