@@ -21,8 +21,8 @@ const BALL_INK = "#ff4fc8";
 const BANNER_INK = "#ad3792";
 
 const WIDTH = 118;
-const PAGE_MIN_HEIGHT = 92;
-const BINDING = 26;
+const PAGE_MIN_HEIGHT = 78;
+const BINDING = 22;
 
 /**
  * Port of apps/web/src/components/home/DaysCalendar.tsx: a tear-off pad
@@ -249,14 +249,14 @@ const styles = StyleSheet.create({
   sheetBack: {
     left: 5,
     right: 5,
-    bottom: -10,
+    bottom: -8,
     backgroundColor: "#ddcc98",
     transform: [{ rotate: "1.6deg" }],
   },
   sheetMiddle: {
     left: 2,
     right: 2,
-    bottom: -5,
+    bottom: -4,
     backgroundColor: "#e8d9ab",
     transform: [{ rotate: "-1.4deg" }],
   },
@@ -279,9 +279,9 @@ const styles = StyleSheet.create({
   // The two rings that hold the pad, standing proud of the binding.
   ring: {
     position: "absolute",
-    top: -6,
-    width: 8,
-    height: 18,
+    top: -5,
+    width: 7,
+    height: 15,
     borderRadius: 2,
     backgroundColor: colors.cream,
     shadowColor: "#000",
@@ -297,15 +297,15 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     alignItems: "center",
     justifyContent: "center",
-    paddingTop: 12,
-    paddingBottom: 8,
+    paddingTop: 8,
+    paddingBottom: 6,
   },
   count: {
     fontFamily: fonts.blackItalic,
-    fontSize: 54,
+    fontSize: 48,
     // Taller than the type, so the figure sits lower in its line, where the
     // eye expects it, rather than riding up to the binding.
-    lineHeight: 62,
+    lineHeight: 54,
     // No negative tracking, and a little room on the right, so the slanted
     // digit looks centred rather than leaning off to the right.
     paddingRight: 6,

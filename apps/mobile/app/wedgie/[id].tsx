@@ -17,6 +17,7 @@ import Svg, { Path } from "react-native-svg";
 
 import { WIDE_MIN, useSideInsets, useWide } from "@/lib/wide";
 import { CourtPositionDiagram } from "@/components/CourtPositionDiagram";
+import { Glass } from "@/components/Glass";
 import { GradientFill } from "@/components/Gradient";
 import { GameTimeline } from "@/components/GameTimeline";
 import { ErrorState, Loading } from "@/components/States";
@@ -191,16 +192,14 @@ function WedgieDetail({
   const media = (
     <>
       <View style={styles.topBar}>
-        <View style={styles.navGroup}>
-          <NavButton
-            direction="previous"
-            enabled={hasPrevious}
-            onPress={onPrevious}
-          />
-          <View style={styles.navDivider} />
-          <NavButton direction="next" enabled={hasNext} onPress={onNext} />
-        </View>
-        <CloseButton onPress={onClose} />
+        <GlassNav
+          size={38}
+          hasPrevious={hasPrevious}
+          hasNext={hasNext}
+          onPrevious={onPrevious}
+          onNext={onNext}
+        />
+        <GlassClose size={38} onPress={onClose} />
       </View>
 
       {player}
@@ -215,75 +214,83 @@ function WedgieDetail({
       />
     </View>
   );
+  // Number badge beside the date and season, as the info panel has it.
+  const headerRow = (
+    <View style={styles.headerRow}>
+      <View style={styles.badge}>
+        <GradientFill name="button" radius={radius.md} />
+        <Text
+          style={[
+            styles.badgeHash,
+            {
+              fontSize: BADGE_HASH,
+              lineHeight: BADGE_HASH,
+              // `mt-[.75em]` on the web, dropping the hash to the numeral's foot
+              marginTop: BADGE_HASH * 0.75,
+            },
+          ]}
+          allowFontScaling={false}
+        >
+          #
+        </Text>
+        <Text
+          style={[
+            styles.badgeNumber,
+            { fontSize: BADGE_NUMBER, lineHeight: BADGE_NUMBER + 4 },
+            badgeTextShadow(BADGE_NUMBER),
+          ]}
+          allowFontScaling={false}
+        >
+          {wedgie.number ?? 1}
+        </Text>
+      </View>
+      <View style={styles.headerText}>
+        {isGem(wedgie.wedgieDate) ? (
+          // GEMS have no real date.
+          <View style={styles.gemRow}>
+            <GemTag />
+            <Text style={styles.date} allowFontScaling={false}>
+              Not part of a season
+            </Text>
+          </View>
+        ) : (
+          <Text style={styles.date} allowFontScaling={false}>
+            {nightDate(wedgie.wedgieDate)}
+          </Text>
+        )}
+        {wedgie.seasonName && wedgie.seasonName !== "GEMS" ? (
+          <Text style={styles.season} allowFontScaling={false}>
+            {wedgie.seasonName} SEASON
+          </Text>
+        ) : null}
+      </View>
+    </View>
+  );
+  const basicFacts = (
+    <>
+      <Fact label="Player">
+        <Text style={styles.player}>{wedgie.playerName}</Text>
+      </Fact>
+      <Fact label="Teams">
+        <Text style={styles.teams}>
+          <Matchup wedgie={wedgie} teamStyle={styles.teamName} />
+        </Text>
+      </Fact>
+      {wedgie.types.length > 0 ? (
+        <Fact label="Type">
+          <Text style={styles.types}>
+            {wedgie.types.map((t) => t.name).join(", ")}
+          </Text>
+        </Fact>
+      ) : null}
+    </>
+  );
   const details = (
     <View style={styles.body}>
-      {/* Number badge beside the date and season, as the info panel has it. */}
-      <View style={styles.headerRow}>
-        <View style={styles.badge}>
-          <GradientFill name="button" radius={radius.md} />
-          <Text
-            style={[
-              styles.badgeHash,
-              {
-                fontSize: BADGE_HASH,
-                lineHeight: BADGE_HASH,
-                // `mt-[.75em]` on the web, dropping the hash to the numeral's foot
-                marginTop: BADGE_HASH * 0.75,
-              },
-            ]}
-            allowFontScaling={false}
-          >
-            #
-          </Text>
-          <Text
-            style={[
-              styles.badgeNumber,
-              { fontSize: BADGE_NUMBER, lineHeight: BADGE_NUMBER + 4 },
-              badgeTextShadow(BADGE_NUMBER),
-            ]}
-            allowFontScaling={false}
-          >
-            {wedgie.number ?? 1}
-          </Text>
-        </View>
-        <View style={styles.headerText}>
-          {isGem(wedgie.wedgieDate) ? (
-            // GEMS have no real date.
-            <View style={styles.gemRow}>
-              <GemTag />
-              <Text style={styles.date} allowFontScaling={false}>
-                Not part of a season
-              </Text>
-            </View>
-          ) : (
-            <Text style={styles.date} allowFontScaling={false}>
-              {nightDate(wedgie.wedgieDate)}
-            </Text>
-          )}
-          {wedgie.seasonName && wedgie.seasonName !== "GEMS" ? (
-            <Text style={styles.season} allowFontScaling={false}>
-              {wedgie.seasonName} SEASON
-            </Text>
-          ) : null}
-        </View>
-      </View>
+      {wide ? null : headerRow}
 
       <View style={styles.facts}>
-        <Fact label="Player">
-          <Text style={styles.player}>{wedgie.playerName}</Text>
-        </Fact>
-        <Fact label="Teams">
-          <Text style={styles.teams}>
-            <Matchup wedgie={wedgie} teamStyle={styles.teamName} />
-          </Text>
-        </Fact>
-        {wedgie.types.length > 0 ? (
-          <Fact label="Type">
-            <Text style={styles.types}>
-              {wedgie.types.map((t) => t.name).join(", ")}
-            </Text>
-          </Fact>
-        ) : null}
+        {wide ? null : basicFacts}
         {wedgie.shoutouts.length > 0 ? (
           <Fact
             label="Shoutout"
@@ -390,8 +397,14 @@ function WedgieDetail({
             gap={36}
             left={
               <View style={[styles.wideMedia, { height: height - top - 32 }]}>
-                {court}
-                <View style={styles.wideVideo}>{player}</View>
+                <View style={styles.wideHeading}>
+                  {headerRow}
+                  <View style={styles.facts}>{basicFacts}</View>
+                </View>
+                <View style={styles.wideVideo}>
+                  {player}
+                  <View style={styles.wideCourt}>{court}</View>
+                </View>
               </View>
             }
             right={
@@ -402,23 +415,21 @@ function WedgieDetail({
             }
           />
         </Animated.ScrollView>
-        <View style={[styles.rail, { top, left: 0, width: gutter }]}>
-          <CloseButton onPress={onClose} />
-          <View style={styles.navRail}>
-            <NavButton
-              direction="previous"
-              enabled={hasPrevious}
-              onPress={onPrevious}
-              vertical
-            />
-            <View style={styles.navRailDivider} />
-            <NavButton
-              direction="next"
-              enabled={hasNext}
-              onPress={onNext}
-              vertical
-            />
-          </View>
+        {/* iOS-style controls in the empty bottom right of the modal. */}
+        <View
+          style={[
+            styles.glassBar,
+            { right: gutter, bottom: Math.max(insets.bottom, 16) + 8 },
+          ]}
+        >
+          <GlassNav
+            size={48}
+            hasPrevious={hasPrevious}
+            hasNext={hasNext}
+            onPrevious={onPrevious}
+            onNext={onNext}
+          />
+          <GlassClose size={48} onPress={onClose} />
         </View>
       </View>
     );
@@ -525,72 +536,107 @@ function ShoutoutNote({ onClose }: { onClose: () => void }) {
  * The number was already the largest thing on the screen in the pink badge,
  * and a pair of chevrons does not need the words spelling out, so both went.
  */
-function NavButton({
-  direction,
+const PREVIOUS_PATH = "M15 19l-7-7 7-7";
+const NEXT_PATH = "M9 5l7 7-7 7";
+
+/** A round, translucent control in the style of iOS's own floating buttons. */
+function GlassButton({
+  size,
+  label,
   enabled,
   onPress,
-  vertical = false,
+  path,
 }: {
-  direction: "previous" | "next";
+  size: number;
+  label: string;
   enabled: boolean;
   onPress: () => void;
-  /** Stacked in the wide screen's rail rather than side by side. */
-  vertical?: boolean;
+  path: string;
 }) {
   return (
     <Pressable
       onPress={enabled ? onPress : undefined}
       disabled={!enabled}
       accessibilityRole="button"
-      accessibilityLabel={
-        direction === "previous" ? "Newer wedgie" : "Older wedgie"
-      }
+      accessibilityLabel={label}
       accessibilityState={{ disabled: !enabled }}
+      hitSlop={4}
       style={({ pressed }) => [
-        styles.navButton,
-        vertical && styles.navButtonVertical,
+        { width: size, height: size },
+        styles.glassButton,
+        pressed && enabled && styles.glassPressed,
         !enabled && styles.navButtonDisabled,
-        pressed && enabled && styles.navButtonPressed,
       ]}
     >
-      <Chevron direction={direction} />
-    </Pressable>
-  );
-}
-
-const PREVIOUS_PATH = "M15 19l-7-7 7-7";
-const NEXT_PATH = "M9 5l7 7-7 7";
-
-function Chevron({ direction }: { direction: "previous" | "next" }) {
-  return (
-    <Svg width={17} height={17} viewBox="0 0 24 24" fill="none">
-      <Path
-        d={direction === "previous" ? PREVIOUS_PATH : NEXT_PATH}
-        stroke={colors.cream}
-        strokeWidth={3}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </Svg>
-  );
-}
-
-function CloseButton({ onPress }: { onPress: () => void }) {
-  return (
-    <Pressable
-      onPress={onPress}
-      hitSlop={10}
-      style={({ pressed }) => [styles.close, pressed && styles.closePressed]}
-    >
-      <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+      <Svg
+        width={Math.round(size * 0.42)}
+        height={Math.round(size * 0.42)}
+        viewBox="0 0 24 24"
+        fill="none"
+      >
         <Path
-          d="M6 6L18 18M18 6L6 18"
-          stroke={colors.night}
-          strokeWidth={3.5}
+          d={path}
+          stroke={colors.white}
+          strokeWidth={2.6}
           strokeLinecap="round"
+          strokeLinejoin="round"
         />
       </Svg>
     </Pressable>
+  );
+}
+
+/** Newer and older, in one glass capsule, as iOS groups paired controls. */
+function GlassNav({
+  size,
+  hasPrevious,
+  hasNext,
+  onPrevious,
+  onNext,
+}: {
+  size: number;
+  hasPrevious: boolean;
+  hasNext: boolean;
+  onPrevious: () => void;
+  onNext: () => void;
+}) {
+  return (
+    <Glass style={[styles.glassPill, { height: size, borderRadius: size / 2 }]}>
+      <GlassButton
+        size={size}
+        label="Newer wedgie"
+        enabled={hasPrevious}
+        onPress={onPrevious}
+        path={PREVIOUS_PATH}
+      />
+      <View style={[styles.glassDivider, { height: size / 2 }]} />
+      <GlassButton
+        size={size}
+        label="Older wedgie"
+        enabled={hasNext}
+        onPress={onNext}
+        path={NEXT_PATH}
+      />
+    </Glass>
+  );
+}
+
+function GlassClose({ size, onPress }: { size: number; onPress: () => void }) {
+  return (
+    <Glass
+      style={[
+        styles.glassCircle,
+        { width: size, height: size, borderRadius: size / 2 },
+      ]}
+    >
+      <GlassButton
+        size={size}
+        label="Close"
+        enabled
+        onPress={onPress}
+        path="M7 7L17 17M17 7L7 17"
+      />
+    </Glass>
   );
 }
 
@@ -616,38 +662,30 @@ const styles = StyleSheet.create({
     paddingBottom: space.md,
     gap: space.sm,
   },
-  navGroup: {
-    flexDirection: "row",
-    alignItems: "stretch",
-    height: 30,
-    borderRadius: radius.pill,
-    backgroundColor: colors.panelLight,
-    overflow: "hidden",
-  },
-  navDivider: { width: 1, backgroundColor: colors.hairline },
-  close: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: colors.cream,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  closePressed: { opacity: 0.7 },
   // Everything under the full-bleed video keeps the page gutter.
   body: { padding: space.lg, gap: space.md },
   wideContent: { flexGrow: 1, paddingBottom: 32 },
   flex: { flex: 1 },
-  wideMedia: { alignItems: "center" },
-  wideVideo: { flex: 1, width: "100%", justifyContent: "center" },
-  rail: { position: "absolute", alignItems: "center", gap: 12 },
-  navRail: {
-    width: 36,
-    borderRadius: radius.pill,
-    backgroundColor: colors.panelLight,
-    overflow: "hidden",
+  // Heading, video and court as one group with even gaps, centred in the
+  // screen's height rather than spread to its edges.
+  wideMedia: { justifyContent: "center", gap: 32 },
+  wideHeading: { gap: space.md },
+  wideCourt: { alignItems: "center" },
+  wideVideo: { width: "100%", gap: 32 },
+  glassBar: {
+    position: "absolute",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
   },
-  navRailDivider: { height: 1, backgroundColor: colors.hairline },
+  glassPill: { flexDirection: "row", alignItems: "center", overflow: "hidden" },
+  glassCircle: { overflow: "hidden" },
+  glassButton: { alignItems: "center", justifyContent: "center" },
+  glassPressed: { backgroundColor: "rgba(255, 255, 255, 0.16)" },
+  glassDivider: {
+    width: StyleSheet.hairlineWidth,
+    backgroundColor: "rgba(255, 255, 255, 0.3)",
+  },
   padded: { flex: 1, padding: space.lg, backgroundColor: colors.night },
 
   headerRow: { flexDirection: "row", alignItems: "center", gap: space.lg },
@@ -749,14 +787,7 @@ const styles = StyleSheet.create({
   // Bottom left under the details, as the web panel pins it.
   courtWrap: { alignItems: "flex-start", paddingTop: space.sm },
 
-  navButton: {
-    width: 42,
-    alignItems: "center",
-    justifyContent: "center",
-  },
   // Only the chevron dims: the container keeps its shape at either end of the
   // list, so the control never looks half-missing.
-  navButtonVertical: { width: 36, height: 40 },
   navButtonDisabled: { opacity: 0.28 },
-  navButtonPressed: { backgroundColor: colors.night },
 });
