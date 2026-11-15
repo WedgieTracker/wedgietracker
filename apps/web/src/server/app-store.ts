@@ -101,15 +101,16 @@ function isValidAt(cert: X509Certificate, at: Date): boolean {
 }
 
 /**
- * Checks a StoreKit 2 signed transaction (its jwsRepresentation) and returns
- * the transaction inside. Throws AppStoreVerificationError unless the JWS is
- * ES256, signed by a leaf that chains through an Apple intermediate to the
- * trusted root. The root is the Apple one unless a test passes its own.
+ * Checks a JWS that Apple signed for the App Store, a StoreKit 2 transaction
+ * or a server notification, and returns its decoded payload. Throws
+ * AppStoreVerificationError unless the JWS is ES256, signed by a leaf that
+ * chains through an Apple intermediate to the trusted root. The root is the
+ * Apple one unless a test passes its own.
  */
-export function verifyAppStoreTransaction(
+export function verifyAppleSignedPayload(
   jws: string,
   trustedRoot: string | Buffer = APPLE_ROOT_CA_G3_PEM,
-): AppStoreTransaction {
+): unknown {
   const parts = jws.split(".");
   if (parts.length !== 3) fail("not a compact JWS");
   const [headerPart = "", payloadPart = "", signaturePart = ""] = parts;
@@ -154,18 +155,48 @@ export function verifyAppStoreTransaction(
   );
   if (!signed) fail("bad signature");
 
-  const parsed = transactionSchema.safeParse(decodeJson(payloadPart));
-  if (!parsed.success) fail("payload isn't a transaction");
-  const transaction = parsed.data;
+  const payload = decodeJson(payloadPart);
+  if (typeof payload !== "object" || payload === null) {
+    fail("payload isn't an object");
+  }
 
-  // Apple checks the chain as of when the transaction was signed, so an old
+  // Apple checks the chain as of when the payload was signed, so an old
   // purchase still verifies after its certificate expires.
-  const at = new Date(transaction.signedDate ?? Date.now());
+  const { signedDate } = payload as { signedDate?: unknown };
+  const at = new Date(typeof signedDate === "number" ? signedDate : Date.now());
   for (const cert of [leaf, intermediate, root]) {
     if (!isValidAt(cert, at)) fail("certificate not valid at signedDate");
   }
 
-  return transaction;
+  return payload;
+}
+
+/**
+ * Checks a StoreKit 2 signed transaction (its jwsRepresentation) and returns
+ * the transaction inside. Throws AppStoreVerificationError as
+ * verifyAppleSignedPayload does, or if the payload isn't a transaction.
+ */
+export function verifyAppStoreTransaction(
+  jws: string,
+  trustedRoot: string | Buffer = APPLE_ROOT_CA_G3_PEM,
+): AppStoreTransaction {
+  const parsed = transactionSchema.safeParse(
+    verifyAppleSignedPayload(jws, trustedRoot),
+  );
+  if (!parsed.success) fail("payload isn't a transaction");
+  return parsed.data;
+}
+
+/** A coffee purchase's key in coffee_checkout. */
+export function appStoreCoffeeKey(transaction: AppStoreTransaction): string {
+  return `appstore:${transaction.transactionId}`;
+}
+
+/** How many coffees a product is worth, or undefined if it isn't a coffee. */
+export function coffeesPerProduct(productId: string): number | undefined {
+  return Object.hasOwn(COFFEE_PRODUCTS, productId)
+    ? COFFEE_PRODUCTS[productId]
+    : undefined;
 }
 
 export type AppStoreCoffeeResult =
@@ -199,9 +230,7 @@ export async function recordAppStoreCoffee(
   if (transaction.environment !== "Production") {
     return { status: "ignored", reason: "sandbox" };
   }
-  const perProduct = Object.hasOwn(COFFEE_PRODUCTS, transaction.productId)
-    ? COFFEE_PRODUCTS[transaction.productId]
-    : undefined;
+  const perProduct = coffeesPerProduct(transaction.productId);
   if (!perProduct || transaction.type !== "Consumable") {
     return { status: "rejected", reason: "unknown-product" };
   }
@@ -213,10 +242,7 @@ export async function recordAppStoreCoffee(
   }
 
   const coffees = perProduct * transaction.quantity;
-  const added = await addSeasonCoffees(
-    `appstore:${transaction.transactionId}`,
-    coffees,
-  );
+  const added = await addSeasonCoffees(appStoreCoffeeKey(transaction), coffees);
   if (added === "no-season") return { status: "ignored", reason: "no-season" };
   return { status: "counted", coffees };
 }
