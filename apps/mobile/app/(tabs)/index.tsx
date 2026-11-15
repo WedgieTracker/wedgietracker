@@ -9,6 +9,7 @@ import {
   View,
 } from "react-native";
 
+import { CoffeeCup } from "@/components/CoffeeCup";
 import { CoffeeScoreboard } from "@/components/CoffeeScoreboard";
 import { FeaturedWedgie } from "@/components/FeaturedWedgie";
 import { HeroStats } from "@/components/HeroStats";
@@ -209,6 +210,15 @@ export default function HomeScreen() {
         }
       >
         <View style={styles.header}>
+          {/* As on the website's header: the way into the coffees. */}
+          <StickerButton
+            small
+            label="SUPPORT"
+            icon={<CoffeeCup width={11} />}
+            labelStyle={styles.supportLabel}
+            style={styles.support}
+            onPress={() => router.push("/support")}
+          />
           <Logo width={84} />
         </View>
 
@@ -249,6 +259,14 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: colors.night,
   },
+  support: {
+    position: "absolute",
+    left: 16,
+    flexDirection: "row",
+    gap: 6,
+    paddingHorizontal: 10,
+  },
+  supportLabel: { fontSize: 11, letterSpacing: 1 },
   errorWrap: { padding: space.lg },
 
   // `bg-night gap-12 px-[18px] pb-12`

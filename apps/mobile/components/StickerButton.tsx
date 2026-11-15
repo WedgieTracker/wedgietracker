@@ -1,4 +1,10 @@
-import { Pressable, StyleSheet, Text, type ViewStyle } from "react-native";
+import {
+  Pressable,
+  StyleSheet,
+  Text,
+  type TextStyle,
+  type ViewStyle,
+} from "react-native";
 
 import { useFluidType } from "@/lib/fluid";
 import { colors, fonts } from "@/lib/theme";
@@ -19,9 +25,14 @@ export function StickerButton({
   compact = false,
   small = false,
   disabled = false,
+  icon,
+  labelStyle,
   style,
 }: {
   label: string;
+  /** Drawn before the label, as the web's Support button has its cup. */
+  icon?: React.ReactNode;
+  labelStyle?: TextStyle;
   onPress: () => void;
   variant?: "violet" | "dark" | "flat";
   /** The smaller one that straddles the hero (MORE STATS). */
@@ -55,8 +66,13 @@ export function StickerButton({
         style,
       ]}
     >
+      {icon}
       <Text
-        style={[styles.label, { fontSize: small ? 13 : t.buttonText }]}
+        style={[
+          styles.label,
+          { fontSize: small ? 13 : t.buttonText },
+          labelStyle,
+        ]}
         allowFontScaling={false}
       >
         {label}
