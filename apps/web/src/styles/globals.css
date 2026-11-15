@@ -740,17 +740,29 @@ html {
   display: grid;
   grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
   gap: 3px;
+  /* Edge to edge across the foot of the season card, which rounds it. */
   width: 100%;
-  padding: 8px;
-  border-radius: 14px;
+  padding: 12px;
   background: #0b0518;
   box-shadow: inset 0 2px 8px rgb(0 0 0 / 0.6);
 }
 @media (min-width: 768px) {
   .wt-board {
     gap: 4px;
-    padding: 10px;
+    padding: 16px;
   }
+}
+/* The fixed words above the flaps, lit like a scoreboard caption. */
+.wt-board-label {
+  grid-column: 1 / -1;
+  padding: 2px 0 6px;
+  text-align: center;
+  color: hsl(var(--cream));
+  font-size: clamp(13px, 4.2cqw, 20px);
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-shadow: 0 0 10px rgb(240 225 182 / 0.35);
 }
 .wt-flap {
   position: relative;

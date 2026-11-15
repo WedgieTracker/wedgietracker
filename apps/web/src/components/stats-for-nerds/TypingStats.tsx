@@ -19,11 +19,7 @@ const NUM_FLAPS = 5;
 const WORD_FLAPS = 11;
 /** Columns on the board: the figure, one blank, then the word. */
 const COLS = NUM_FLAPS + 1 + WORD_FLAPS;
-/** The top row, centred over the figure and word. */
-const LEAD = "A WEDGIE EVERY";
-const LEAD_ROW = [..." ".repeat(Math.floor((COLS - LEAD.length) / 2)), ...LEAD]
-  .concat([..." ".repeat(COLS)])
-  .slice(0, COLS);
+
 /** The figure's flaps only carry digits, the word's only letters. */
 const DIGITS = " 0123456789,";
 const LETTERS = " ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -89,9 +85,9 @@ function Flap({
 }
 
 /**
- * "A wedgie every / 2,837 possessions" on a split-flap board across the
- * bottom of the season card, cycling through possessions, shots, games and
- * minutes. Two rows of a fixed number of flaps that scale with the card's
+ * "A wedgie every 2,837 possessions" on a board across the bottom of the
+ * season card: a fixed label, then a row of split flaps cycling through
+ * possessions, shots, games and minutes. The flaps scale with the card's
  * width, so the board fills it and never changes size.
  */
 export function TypingStats({ stats }: { stats: StatsPerWedgie }) {
@@ -111,11 +107,11 @@ export function TypingStats({ stats }: { stats: StatsPerWedgie }) {
         That&apos;s a wedgie every {stats[current.key].toLocaleString("en-US")}{" "}
         {current.word.toLowerCase()}
       </p>
-      {LEAD_ROW.map((ch, i) => (
-        <Flap key={`lead-${i}`} target={ch} delay={i * 20} amber={false} />
-      ))}
+      <span className="wt-board-label" aria-hidden="true">
+        A wedgie every
+      </span>
       {text.map((ch, i) => (
-        <Flap key={i} target={ch} delay={300 + i * 25} amber={i < NUM_FLAPS} />
+        <Flap key={i} target={ch} delay={i * 25} amber={i < NUM_FLAPS} />
       ))}
     </div>
   );
