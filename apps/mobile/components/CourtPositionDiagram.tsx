@@ -22,7 +22,14 @@ export const COURT_PATHS = [
 ];
 
 /** The artwork's own proportions, 1023.9 by 751.1. */
-const COURT_ASPECT = 1023.9248 / 751.14307;
+const COURT_W = 1023.9248;
+const COURT_H = 751.14307;
+
+/**
+ * Where the lines are drawn inside the artwork: the top 27% and about a tenth
+ * at each side are empty, room for shots from deep. `trim` crops to this box.
+ */
+const INK = { x: 97, y: 201, w: 830, h: 550 };
 
 /**
  * Port of apps/web/src/components/home/CourtPositionDiagram.tsx: the court
@@ -34,22 +41,34 @@ export function CourtPositionDiagram({
   width,
   dotSize = 10,
   lineColor = colors.cream80,
+  trim = false,
 }: {
   position: { x: number; y: number };
   width: number;
   dotSize?: number;
   lineColor?: string;
+  /**
+   * Crop the empty margin around the lines, so the court fills its box. A
+   * shot recorded in that margin still shows, just outside the box.
+   */
+  trim?: boolean;
 }) {
-  const height = width / COURT_ASPECT;
-  const left = (position.x / 100) * width;
-  const top = (position.y / 100) * height;
+  const box = trim ? INK : { x: 0, y: 0, w: COURT_W, h: COURT_H };
+  const height = (width * box.h) / box.w;
+  // Positions are percentages of the whole artwork; map them into the box.
+  const left = (((position.x / 100) * COURT_W - box.x) / box.w) * width;
+  const top = (((position.y / 100) * COURT_H - box.y) / box.h) * height;
   // `-inset-[60%]` and `-inset-[130%]` on the web: rings 2.2x and 3.6x the dot.
   const inner = dotSize * 2.2;
   const outer = dotSize * 3.6;
 
   return (
     <View style={{ width, height }} pointerEvents="none">
-      <Svg width={width} height={height} viewBox={COURT_VIEWBOX}>
+      <Svg
+        width={width}
+        height={height}
+        viewBox={trim ? `${box.x} ${box.y} ${box.w} ${box.h}` : COURT_VIEWBOX}
+      >
         {COURT_PATHS.map((d) => (
           <Path key={d} d={d} fill={lineColor} />
         ))}

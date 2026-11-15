@@ -114,8 +114,9 @@ export function FeaturedWedgie({
             </View>
             <CourtPositionDiagram
               position={wedgie.position}
-              width={150}
+              width={122}
               dotSize={10}
+              trim
             />
           </View>
           <QuartersBar wedgie={wedgie} />
