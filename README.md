@@ -103,6 +103,28 @@ Auth.js) reach the app bundle - only the shape of the API does.
 Point the app at a different backend with `EXPO_PUBLIC_API_URL`; it otherwise
 uses the production site.
 
+### App Store refunds
+
+The app's coffee purchases are counted by `donations.recordAppStoreCoffee`,
+keyed by transaction id. When Apple refunds or revokes one, it posts an App
+Store Server Notification (Version 2) to `/api/app-store/notifications`, which
+checks Apple's signature, takes the coffees back off the season they were
+added to and marks the purchase refunded. A reversed refund adds them back.
+Each change happens once however often Apple sends it, and Sandbox
+notifications change nothing.
+
+In App Store Connect, under the app's App Information, App Store Server
+Notifications, set the Production Server URL (Version 2) to:
+
+```
+https://www.wedgietracker.com/api/app-store/notifications
+```
+
+The Sandbox Server URL can point at a preview deployment's
+`/api/app-store/notifications` to try it out; it answers 200 and changes
+nothing. "Request a Test Notification" there sends a `TEST` notification,
+which should get a 200.
+
 ## Local Development Setup
 
 1. Clone the repository:

@@ -107,8 +107,9 @@ export const season = sqliteTable(
 );
 
 /**
- * Each Stripe Checkout already added to a season's coffees, so a refreshed
- * thanks page can't count the same coffees twice.
+ * Each coffee already added to a season's coffees, keyed by Stripe Checkout
+ * session id or "appstore:<transactionId>", so the same purchase sent again
+ * can't count twice. A refunded coffee keeps its row with refunded_at set.
  */
 export const coffeeCheckout = sqliteTable("coffee_checkout", {
   sessionId: text("session_id").primaryKey(),
@@ -117,6 +118,8 @@ export const coffeeCheckout = sqliteTable("coffee_checkout", {
   createdAt: text("created_at")
     .default(sql`(CURRENT_TIMESTAMP)`)
     .notNull(),
+  /** When the purchase was refunded or revoked, or null while it counts. */
+  refundedAt: text("refunded_at"),
 });
 
 /**
