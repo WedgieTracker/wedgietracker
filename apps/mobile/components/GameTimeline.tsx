@@ -17,7 +17,12 @@ const TONE = {
     fill: "rgba(255,255,255,0.35)",
     text: colors.yellow,
   },
-  clutch: { dot: colors.pink, fill: "rgba(255,0,255,0.5)", text: colors.pink },
+  // The web uses `bg-pink/50`, and pink there is now violet.
+  clutch: {
+    dot: colors.pink,
+    fill: "rgba(154, 92, 245, 0.5)",
+    text: colors.pink,
+  },
   garbage: {
     dot: "rgba(255,255,255,0.7)",
     fill: "rgba(255,255,255,0.25)",
