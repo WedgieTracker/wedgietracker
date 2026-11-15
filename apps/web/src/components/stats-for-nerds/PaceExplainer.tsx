@@ -61,7 +61,7 @@ export function PaceExplainer({ data }: PaceExplainerProps) {
     games === data.gamesPlayed && wedgies === data.wedgiesThisSeason;
 
   return (
-    <div className="text-cream/75 flex w-full max-w-2xl flex-col gap-5 font-bold">
+    <div className="flex w-full max-w-2xl flex-col gap-5 font-bold text-white/85">
       <p className="text-center text-[17px] leading-snug md:text-xl">
         The pace is our guess at how many wedgies the{" "}
         <span className="text-cream">{data.currentSeason}</span> season will

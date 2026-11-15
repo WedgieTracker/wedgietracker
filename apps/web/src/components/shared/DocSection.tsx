@@ -21,7 +21,7 @@ export function DocSection({
       <h2 className="text-cream text-[22px] leading-tight font-black tracking-[-0.03em] md:text-2xl">
         {title}
       </h2>
-      <div className="text-cream/75 [&_strong]:text-cream mt-3 space-y-4 text-[15px] leading-relaxed font-bold">
+      <div className="mt-3 space-y-4 text-[15px] leading-relaxed font-bold text-white/85 [&_strong]:text-white">
         {children}
       </div>
     </section>
