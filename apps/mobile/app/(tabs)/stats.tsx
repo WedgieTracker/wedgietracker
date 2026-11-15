@@ -473,7 +473,10 @@ function Records({ records }: { records: NerdExtras["records"] }) {
     ],
     records.mostInGame && [
       String(records.mostInGame.count),
-      `in one game: ${records.mostInGame.game}, ${niceDate(records.mostInGame.date)}`,
+      // The date arrives with the redesigned server; until then, the game alone.
+      records.mostInGame.date
+        ? `in one game: ${records.mostInGame.game}, ${niceDate(records.mostInGame.date)}`
+        : `in one game: ${records.mostInGame.game}`,
     ],
     [
       String(records.mostInNight.count),
