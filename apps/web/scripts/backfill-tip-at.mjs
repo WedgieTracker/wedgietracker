@@ -3,6 +3,9 @@
 // written with a Z ("T19:30:00Z" is 7:30pm Eastern); it is turned into the real
 // UTC instant here, DST included. A midnight time means the tip-off isn't
 // known, so those games stay null, as do games that already have a tip_at.
+// Names before 2022/23 carry no real times: the few that aren't midnight are
+// all "T23:00:00.000Z" placeholders (midnight Italian time, some on games that
+// were postponed), so those seasons stay null too and are only counted.
 // 2026/27 games are checked against the NBA schedule CSV.
 //
 // Dry run by default; --apply writes, in one transaction. --apply refuses when
@@ -27,6 +30,7 @@ const csvPath =
         "Documents/Sandbox/tools/game-ids/2026-27-games.csv",
       );
 const CHECKED_SEASON = "2026/27";
+const FIRST_TIMED_SEASON = "2022/23";
 
 const url = process.env.TURSO_DATABASE_URL;
 if (!url) throw new Error("TURSO_DATABASE_URL is not set");
@@ -84,7 +88,7 @@ const { rows } = await db.execute(
   "SELECT id, name, season_name, game_date, tip_at FROM game ORDER BY season_name, id",
 );
 
-/** @type {Map<string, { games: number, timed: number, unknown: number, alreadySet: number, toWrite: number, dayDiffers: number }>} */
+/** @type {Map<string, { games: number, timed: number, unknown: number, placeholder: number, alreadySet: number, toWrite: number, dayDiffers: number }>} */
 const bySeason = new Map();
 /** @type {{ id: number, tipAt: string }[]} */
 const updates = [];
@@ -101,6 +105,7 @@ for (const r of rows) {
     games: 0,
     timed: 0,
     unknown: 0,
+    placeholder: 0,
     alreadySet: 0,
     toWrite: 0,
     dayDiffers: 0,
@@ -118,6 +123,11 @@ for (const r of rows) {
   const tipAt = easternToUtc(wall.day, wall.time);
   if (!tipAt) {
     s.unknown++;
+    continue;
+  }
+  if (season < FIRST_TIMED_SEASON) {
+    // a time in a name from before 2022/23 is a placeholder, not a tip-off
+    s.placeholder++;
     continue;
   }
   s.timed++;
@@ -166,7 +176,7 @@ for (const r of rows) {
 }
 
 console.log(
-  "\nBy season (games / with a time / unknown / already set / to write / game_date differs):",
+  "\nBy season (games / with a time / midnight or none / pre-2022/23 placeholder / already set / to write / game_date differs):",
 );
 console.table(Object.fromEntries(bySeason));
 console.log(`Total to write: ${updates.length}`);
