@@ -1,8 +1,8 @@
 import type { GameTimeline as Timeline } from "@wedgietracker/core/utils/gameMoment";
 
 const TONE = {
-  normal: { dot: "bg-yellow", fill: "bg-white/35", text: "text-yellow" },
-  clutch: { dot: "bg-pink", fill: "bg-pink/50", text: "text-pink" },
+  normal: { dot: "bg-cream", fill: "bg-white/35", text: "text-cream" },
+  clutch: { dot: "bg-violet", fill: "bg-violet/50", text: "text-violet" },
   garbage: { dot: "bg-white/70", fill: "bg-white/25", text: "text-white/60" },
 } as const;
 
@@ -39,7 +39,7 @@ export function GameTimeline({ timeline }: { timeline: Timeline }) {
                     style={{ left: `${timeline.progress * 100}%` }}
                   >
                     {timeline.tone === "clutch" && (
-                      <span className="wt-clutch-ring bg-pink absolute inset-0 rounded-full" />
+                      <span className="wt-clutch-ring bg-violet absolute inset-0 rounded-full" />
                     )}
                     {timeline.tone === "garbage" &&
                       [0, 1.2].map((delay) => (
@@ -53,7 +53,7 @@ export function GameTimeline({ timeline }: { timeline: Timeline }) {
                         </span>
                       ))}
                     <span
-                      className={`ring-darkpurple-dark absolute inset-0 rounded-full ring-2 ${tone.dot}`}
+                      className={`ring-night-dark absolute inset-0 rounded-full ring-2 ${tone.dot}`}
                     />
                   </div>
                 )}

@@ -58,27 +58,18 @@
     --sidebar-ring: 217.2 91.2% 59.8%;
     /*
       Brand palette, from the No Dunks badge: cream lettering on a grainy
-      blue-to-purple gradient. The older token names stay so every page picks
-      the palette up: "yellow" is the cream, "pink" the violet accent and
-      "darkpurple" the night background with its panel shades.
+      blue-to-purple gradient, a violet accent, and the night background with
+      its panel shades.
     */
     --cream: 44 66% 82.7%; /* #F0E1B6 */
     --violet: 264 88% 66.1%; /* #9A5CF5 */
     --night: 257 64% 11%; /* #140A2E */
+    --night-dark: 257 64% 8.8%;
+    --night-darker: 256 65% 6.7%;
     --panel: 254 57% 16.5%; /* #1D1242 */
-    --yellow: var(--cream);
-    --yellow-dark: 44 50% 70%;
-    --yellow-darker: 43 35% 56.9%;
-    --pink: var(--violet);
-    --pink-dark: 263 65% 54.3%;
-    --pink-darker: 263 59% 41.4%;
-    --darkpurple: var(--night);
-    --darkpurple-light: var(--panel);
-    --darkpurple-lighter: 255 56% 23.1%;
-    --darkpurple-dark: 257 64% 8.8%;
-    --darkpurple-darker: 256 65% 6.7%;
-    /* rgb version */
-    --darkpurple-rgb: 20 10 46;
+    --panel-light: 255 56% 23.1%;
+    /* The night as rgb, for the dotted overlays. */
+    --night-rgb: 20 10 46;
   }
   .dark {
     --background: 0 0% 3.9%;
@@ -134,7 +125,7 @@
 /* selection color */
 ::selection {
   /* background color */
-  background-color: hsl(var(--yellow));
+  background-color: hsl(var(--cream));
   /* text color */
   color: hsl(var(--night));
 }
@@ -204,7 +195,6 @@
 .og-animation {
   width: 100%;
   overflow: hidden;
-  background-color: var(--darkpurple);
   position: relative;
 }
 
@@ -406,10 +396,10 @@
 @keyframes wt-hof-glow {
   0%,
   100% {
-    box-shadow: 0 0 0 0 hsl(var(--pink) / 0.5);
+    box-shadow: 0 0 0 0 hsl(var(--violet) / 0.5);
   }
   50% {
-    box-shadow: 0 0 12px 3px hsl(var(--pink) / 0.55);
+    box-shadow: 0 0 12px 3px hsl(var(--violet) / 0.55);
   }
 }
 .wt-bump {

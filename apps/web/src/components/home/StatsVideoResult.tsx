@@ -27,13 +27,13 @@ export function StatsVideoResult({
       <div className="flex w-full flex-row gap-4">
         <button
           onClick={onReset}
-          className="border-pink text-pink hover:bg-pink hover:text-darkpurple flex-1 rounded-full border-2 bg-transparent px-8 py-2 text-center font-bold tracking-wide uppercase transition-all duration-300"
+          className="border-violet text-violet hover:bg-violet hover:text-night flex-1 rounded-full border-2 bg-transparent px-8 py-2 text-center font-bold tracking-wide uppercase transition-all duration-300"
         >
           Generate New
         </button>
         <button
           onClick={onDownload}
-          className="border-yellow bg-yellow text-darkpurple hover:bg-darkpurple hover:text-yellow flex-1 rounded-full border-2 px-8 py-2 text-center font-black tracking-wide uppercase transition-all duration-300"
+          className="border-cream bg-cream text-night hover:bg-night hover:text-cream flex-1 rounded-full border-2 px-8 py-2 text-center font-black tracking-wide uppercase transition-all duration-300"
         >
           Download
         </button>

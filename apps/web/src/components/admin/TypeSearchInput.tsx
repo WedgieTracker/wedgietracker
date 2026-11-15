@@ -62,7 +62,7 @@ export function TypeSearchInput({ value, onChange }: TypeSearchInputProps) {
         />
 
         {showDropdown && (
-          <div className="bg-darkpurple absolute z-10 mt-1 w-full rounded-md border border-gray-700 shadow-lg">
+          <div className="bg-night absolute z-10 mt-1 w-full rounded-md border border-gray-700 shadow-lg">
             {filteredTypes.map((type) => (
               <button
                 key={type.id}
@@ -99,12 +99,12 @@ export function TypeSearchInput({ value, onChange }: TypeSearchInputProps) {
         {value.map((type) => (
           <div
             key={type}
-            className="bg-yellow text-darkpurple flex items-center rounded px-2 py-1 text-sm"
+            className="bg-cream text-night flex items-center rounded px-2 py-1 text-sm"
           >
             <span>{type}</span>
             <button
               onClick={() => handleTypeRemove(type)}
-              className="text-darkpurple ml-2 hover:text-red-600"
+              className="text-night ml-2 hover:text-red-600"
             >
               ×
             </button>

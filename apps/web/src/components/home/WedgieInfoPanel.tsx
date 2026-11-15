@@ -126,7 +126,7 @@ export function WedgieInfoPanel({ wedgie }: WedgieInfoPanelProps) {
   return (
     <div className="relative flex min-h-full w-full flex-col p-6 px-4 max-lg:min-h-[320px] sm:px-6 sm:max-lg:min-h-[460px] md:px-8 lg:pt-3.5 lg:pb-0">
       <div className="space-y-2 sm:space-y-4">
-        <div className="sm:text-wedgie-number from-darkpurple via-darkpurple/95 sticky top-0 z-10 -mx-4 flex flex-row items-center justify-start gap-4 bg-gradient-to-b to-transparent px-4 pb-1 text-xl leading-none sm:-mx-6 sm:px-6 md:-mx-8 md:px-8">
+        <div className="sm:text-wedgie-number from-night via-night/95 sticky top-0 z-10 -mx-4 flex flex-row items-center justify-start gap-4 bg-gradient-to-b to-transparent px-4 pb-1 text-xl leading-none sm:-mx-6 sm:px-6 md:-mx-8 md:px-8">
           <h2 className="bg-button text-cream text-shadow-badge flex size-[70px] flex-row items-center justify-center rounded-xl px-4 py-2 text-[1.6em] font-black italic">
             <span className="mt-[.75em] mr-[0.06em] text-[.45em] opacity-60 [text-shadow:none]">
               #
@@ -152,7 +152,7 @@ export function WedgieInfoPanel({ wedgie }: WedgieInfoPanelProps) {
           <p className="text-right text-[.75em] font-bold tracking-wider text-white/60 uppercase">
             Player
           </p>
-          <p className="text-yellow text-[1.25em] font-bold">
+          <p className="text-cream text-[1.25em] font-bold">
             {wedgie.playerName}
           </p>
 
@@ -185,7 +185,7 @@ export function WedgieInfoPanel({ wedgie }: WedgieInfoPanelProps) {
                           ? `${handle} on Bluesky`
                           : `@${handle} on X`
                       }
-                      className="hover:border-yellow hover:bg-yellow hover:text-darkpurple block rounded-full border border-white/20 bg-white/5 px-2.5 py-0.5 text-[.75em] font-bold text-white transition-colors duration-200"
+                      className="hover:border-cream hover:bg-cream hover:text-night block rounded-full border border-white/20 bg-white/5 px-2.5 py-0.5 text-[.75em] font-bold text-white transition-colors duration-200"
                     >
                       @{handle}
                     </a>
@@ -209,7 +209,7 @@ export function WedgieInfoPanel({ wedgie }: WedgieInfoPanelProps) {
       {/* Sticky to the bottom-left while the details scroll, on a fade of the
           panel's background. It stays in the flow, so at the end of a long
           list it sits below the details instead of over them. */}
-      <div className="to-darkpurple via-darkpurple/90 pointer-events-none sticky bottom-0 -mx-4 mt-auto bg-gradient-to-b from-transparent pt-4 pr-4 pb-2 pl-2 sm:-mx-6 sm:pr-6 sm:pl-3 md:-mx-8 md:pr-8 md:pl-3 lg:pt-2 lg:pb-3">
+      <div className="to-night via-night/90 pointer-events-none sticky bottom-0 -mx-4 mt-auto bg-gradient-to-b from-transparent pt-4 pr-4 pb-2 pl-2 sm:-mx-6 sm:pr-6 sm:pl-3 md:-mx-8 md:pr-8 md:pl-3 lg:pt-2 lg:pb-3">
         <div className="relative w-[120px] sm:w-[150px] lg:w-[140px]">
           <CourtPositionDiagram
             position={wedgie.position}

@@ -74,7 +74,7 @@ async function StandingsWrapper() {
       <div className="flex w-full max-w-2xl flex-col items-center justify-center">
         <Link
           href="/standings"
-          className="border-yellow bg-yellow text-button-text text-darkpurple hover:border-yellow hover:text-yellow w-full rounded-3xl border-2 py-2 text-center font-black transition-all duration-300 hover:bg-transparent"
+          className="border-cream bg-cream text-button-text text-night hover:border-cream hover:text-cream w-full rounded-3xl border-2 py-2 text-center font-black transition-all duration-300 hover:bg-transparent"
         >
           SEE STANDINGS
         </Link>

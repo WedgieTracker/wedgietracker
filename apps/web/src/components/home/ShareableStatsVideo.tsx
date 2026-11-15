@@ -53,7 +53,7 @@ export function ShareableStatsVideo({ stats }: ShareableStatsVideoProps) {
           </Tooltip>
         </TooltipProvider>
       </DialogTrigger>
-      <DialogContent className="border-darkpurple-lighter bg-darkpurple sm:max-w-[600px]">
+      <DialogContent className="border-panel-light bg-night sm:max-w-[600px]">
         <DialogTitle className="sr-only">Share Stats Video</DialogTitle>
         <div className="flex flex-col items-center gap-4 p-6">
           <canvas ref={canvasRef} className="hidden" />
@@ -63,10 +63,10 @@ export function ShareableStatsVideo({ stats }: ShareableStatsVideoProps) {
               <button
                 onClick={generateVideo}
                 disabled={isGenerating}
-                className="group border-yellow bg-yellow text-darkpurple hover:bg-darkpurple hover:text-yellow flex w-full flex-row items-center justify-center gap-2 rounded-full border-2 px-8 py-2 text-center text-xl font-bold uppercase transition-all duration-300 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
+                className="group border-cream bg-cream text-night hover:bg-night hover:text-cream flex w-full flex-row items-center justify-center gap-2 rounded-full border-2 px-8 py-2 text-center text-xl font-bold uppercase transition-all duration-300 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isGenerating ? "Generating Video..." : "Generate Video"}
-                <span className="border-darkpurple bg-darkpurple text-yellow group-hover:bg-yellow group-hover:text-darkpurple rounded-full border-2 px-2 py-0.5 text-xs transition-all duration-300">
+                <span className="border-night bg-night text-cream group-hover:bg-cream group-hover:text-night rounded-full border-2 px-2 py-0.5 text-xs transition-all duration-300">
                   Beta
                 </span>
               </button>
@@ -86,9 +86,9 @@ export function ShareableStatsVideo({ stats }: ShareableStatsVideoProps) {
                   <Loader />
                 </div>
               </div>
-              <div className="bg-darkpurple-lighter relative h-2 w-full overflow-hidden rounded-full">
+              <div className="bg-panel-light relative h-2 w-full overflow-hidden rounded-full">
                 <div
-                  className="bg-pink absolute top-0 left-0 h-full"
+                  className="bg-violet absolute top-0 left-0 h-full"
                   style={{ width: `${progress * 100}%` }}
                 />
               </div>

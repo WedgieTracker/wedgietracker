@@ -13,8 +13,8 @@ interface WedgieVideoTabsProps {
 const tabClass = (active: boolean) =>
   `rounded-xl rounded-b-none px-2 py-1 text-xs font-black ${
     active
-      ? "bg-yellow text-darkpurple"
-      : "bg-darkpurple-lighter hover:bg-yellow/20 text-white"
+      ? "bg-cream text-night"
+      : "bg-panel-light hover:bg-cream/20 text-white"
   }`;
 
 export function WedgieVideoTabs({
