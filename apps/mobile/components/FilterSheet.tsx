@@ -77,12 +77,17 @@ export function FilterPill({
         text
       )}
       {children ?? (
-        <Text
-          style={[styles.caret, set && styles.pillTextOn]}
-          allowFontScaling={false}
-        >
-          ▾
-        </Text>
+        // A drawn chevron: the ▾ glyph was too small to read as a control.
+        <Svg width={14} height={14} viewBox="0 0 24 24" style={styles.caret}>
+          <Path
+            d="M6 9l6 6 6-6"
+            fill="none"
+            stroke={set ? colors.night : colors.cream}
+            strokeWidth={3}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </Svg>
       )}
     </Pressable>
   );
@@ -318,7 +323,7 @@ const styles = StyleSheet.create({
     color: colors.cream,
   },
   pillTextOn: { color: colors.night },
-  caret: { fontSize: 11, color: colors.cream, opacity: 0.6 },
+  caret: { opacity: 0.75 },
   invisible: { opacity: 0 },
   overlay: { position: "absolute", left: 0, right: 0, top: 0, bottom: 0 },
 

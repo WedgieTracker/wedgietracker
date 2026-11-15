@@ -25,6 +25,7 @@ import { WedgiePlayer, pickVideoForApp } from "@/components/WedgiePlayer";
 import { WedgieVideoTabs } from "@/components/WedgieVideoTabs";
 import { api, type RouterOutputs } from "@/lib/api";
 import { track } from "@/lib/observability";
+import { useShotScroll } from "@/lib/screenshot";
 import { GemTag } from "@/components/GemTag";
 import { Matchup } from "@/components/Matchup";
 import { StickySplit } from "@/components/StickySplit";
@@ -136,6 +137,9 @@ function WedgieDetail({
   const sides = useSideInsets();
   const insets = useSafeAreaInsets();
   const [shoutoutNote, setShoutoutNote] = useState(false);
+  // Dev builds only: lets the screenshot driver scroll the sheet.
+  const sheetRef = useRef<React.ComponentRef<typeof ScrollView>>(null);
+  useShotScroll(sheetRef);
   // Drives the pinned video column on a wide screen.
   const scrollY = useRef(new Animated.Value(0)).current;
   const onScroll = useMemo(
@@ -437,6 +441,7 @@ function WedgieDetail({
 
   return (
     <ScrollView
+      ref={sheetRef}
       style={styles.sheet}
       onLayout={onPageLayout}
       // Clear of a side status bar column (the iPhone Duo's outer screen).

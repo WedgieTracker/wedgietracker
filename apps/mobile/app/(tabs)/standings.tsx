@@ -62,6 +62,9 @@ export default function StandingsScreen() {
   }, [params.season]);
 
   const [includeOpponents, setIncludeOpponents] = useState(true);
+  // Lifted from PlayersTeams: the opponents switch only changes the teams, so
+  // on a phone it shows with them. Side by side, both lists always show.
+  const [tab, setTab] = useState<"players" | "teams">("players");
   const [open, setOpen] = useState(false);
 
   // Until a season is picked by hand, follow the one the page opens on.
@@ -105,6 +108,7 @@ export default function StandingsScreen() {
   );
 
   const loading = isLoadingSeasonData || standings.isPending;
+  const teamsShown = wide || tab === "teams";
 
   return (
     <Screen
@@ -130,27 +134,31 @@ export default function StandingsScreen() {
             accessibilityLabel={`Season: ${season || "All time"}`}
             sizeFor="0000/00"
           />
-          <FilterPill
-            label="Including opponents"
-            set={false}
-            open={false}
-            onPress={() => {
-              track("wt_filter_applied", {
-                filter: "includeOpponents",
-                value: String(!includeOpponents),
-              });
-              setIncludeOpponents(!includeOpponents);
-            }}
-            accessibilityLabel="Including opponents"
-          >
-            <Toggle value={includeOpponents} />
-          </FilterPill>
+          {teamsShown ? (
+            <FilterPill
+              label="Including opponents"
+              set={false}
+              open={false}
+              onPress={() => {
+                track("wt_filter_applied", {
+                  filter: "includeOpponents",
+                  value: String(!includeOpponents),
+                });
+                setIncludeOpponents(!includeOpponents);
+              }}
+              accessibilityLabel="Including opponents"
+            >
+              <Toggle value={includeOpponents} />
+            </FilterPill>
+          ) : null}
         </View>
-        <Text style={styles.note} allowFontScaling={false}>
-          {includeOpponents
-            ? "Teams also count the other side's wedgies in their games."
-            : "Teams only count their own players' wedgies."}
-        </Text>
+        {teamsShown ? (
+          <Text style={styles.note} allowFontScaling={false}>
+            {includeOpponents
+              ? "Teams also count the other side's wedgies in their games."
+              : "Teams only count their own players' wedgies."}
+          </Text>
+        ) : null}
       </View>
 
       {all.data ? (
@@ -190,6 +198,8 @@ export default function StandingsScreen() {
             teams={standings.data?.teams ?? []}
             limit={20}
             sideBySide={wide}
+            tab={tab}
+            onTabChange={setTab}
             // The content starts 16pt into the scroll view; ranks stop 8pt
             // below its top edge, which already clears the status bar.
             sticky={{ scrollY, content: contentRef, contentTop: 16, top: 8 }}

@@ -92,11 +92,11 @@ function RootLayout() {
             // at one side; full screen lets the page use both columns.
             presentation: wide ? "fullScreenModal" : "formSheet",
             headerShown: false,
-            // A fixed detent rather than "fitToContents": the latter silently
-            // turns off the system dimming behind the sheet, and a clear
-            // backdrop matters more here than shrink-wrapping the content.
-            // The content scrolls, so a slight over- or under-shoot is safe.
-            sheetAllowedDetents: [0.78],
+            // Full height: from iOS 27 a sheet at a smaller detent floats
+            // clear of the bottom edge and the page shows beneath it. At full
+            // height it stays attached. (A fixed detent, not "fitToContents",
+            // which silently turns off the dimming behind the sheet.)
+            sheetAllowedDetents: [1],
             sheetCornerRadius: 24,
             sheetGrabberVisible: true,
             // No detent is left undimmed, so the page behind is always dimmed.

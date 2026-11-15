@@ -25,6 +25,8 @@ export function PlayersTeams({
   loading = false,
   sideBySide = false,
   sticky,
+  tab: controlledTab,
+  onTabChange,
 }: {
   /** While the lists load: the switch and an empty card with the loader. */
   loading?: boolean;
@@ -36,8 +38,13 @@ export function PlayersTeams({
   /** Both lists at once, with no switch, on a wide screen. */
   sideBySide?: boolean;
   sticky?: Sticky;
+  /** Set both to control the switch from outside (Standings does). */
+  tab?: Tab;
+  onTabChange?: (tab: Tab) => void;
 }) {
-  const [tab, setTab] = useState<Tab>("players");
+  const [ownTab, setOwnTab] = useState<Tab>("players");
+  const tab = controlledTab ?? ownTab;
+  const setTab = onTabChange ?? setOwnTab;
 
   if (sideBySide) {
     return (
