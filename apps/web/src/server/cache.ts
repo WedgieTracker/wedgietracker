@@ -3,6 +3,7 @@ import { revalidateTag } from "next/cache";
 export const CACHE_TAGS = {
   WEDGIE_DATA: "wedgie-data",
   BLOG_DATA: "blog-data",
+  COFFEES: "coffees",
 } as const;
 
 export function invalidateWedgieData() {

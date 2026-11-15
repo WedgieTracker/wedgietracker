@@ -264,3 +264,27 @@ export function resolveTeamQuery(query: string): string[] | null {
   if (!normalised) return null;
   return LOOKUP.get(normalised) ?? null;
 }
+
+/**
+ * Whether a stored team name is a real NBA team. "STARS" (the All-Star Game
+ * and a No Dunks live warm-up) and "Unknown Away Team" (no known opponent)
+ * are placeholders, so they're left out of team standings and not shown as
+ * an opponent.
+ */
+export function isRealTeam(name: string | null | undefined): boolean {
+  return !!name && name !== "STARS" && !name.includes("Unknown");
+}
+
+/**
+ * What to show in place of the teams for a wedgie that wasn't in a normal
+ * game, or null for a normal one.
+ */
+export function specialMatchup(w: {
+  teamName: string;
+  seasonName?: string | null;
+}): { label: string; star: boolean } | null {
+  if (w.teamName !== "STARS") return null;
+  return w.seasonName === "GEMS"
+    ? { label: "No Dunks live", star: false }
+    : { label: "All-Star Game", star: true };
+}
