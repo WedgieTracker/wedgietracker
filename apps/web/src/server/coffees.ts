@@ -1,4 +1,4 @@
-import { and, eq, isNotNull, isNull, sql } from "drizzle-orm";
+import { and, eq, isNotNull, isNull, lt, or, sql } from "drizzle-orm";
 import { cacheLife, cacheTag, revalidateTag } from "next/cache";
 import { coffeeCheckout, global, season } from "@wedgietracker/core/schema";
 import { db } from "~/server/db";
@@ -98,31 +98,46 @@ export type CoffeeRefundResult =
   | { status: "unchanged" }
   | { status: "unknown" };
 
+/** No refund or reversal is stored yet, or the stored one is older. */
+const olderThan = (signedDate: number) =>
+  or(
+    isNull(coffeeCheckout.refundChangedAt),
+    lt(coffeeCheckout.refundChangedAt, signedDate),
+  );
+
 /**
  * Takes a counted purchase's coffees back off the season it was added to, and
- * marks its row refunded at the given time. Only an unrefunded row changes, so
- * the same refund sent again does nothing. The season never goes below 0.
- * Returns "unknown" when no purchase has that key.
+ * marks its row refunded at the given time. Notifications are applied in the
+ * order Apple signed them: one no newer than the last applied (signedDate,
+ * in ms) changes nothing, so the same refund sent again, or an old refund sent
+ * after its reversal, does nothing. A newer one on a row already refunded only
+ * records its date. The season never goes below 0. Returns "unknown" when no
+ * purchase has that key.
  */
 export async function refundSeasonCoffees(
   key: string,
   refundedAt: string,
+  signedDate: number,
 ): Promise<CoffeeRefundResult> {
   const refunded = await db.transaction(async (tx) => {
     const [row] = await tx
       .update(coffeeCheckout)
-      .set({ refundedAt })
+      .set({ refundedAt, refundChangedAt: signedDate })
       .where(
         and(
           eq(coffeeCheckout.sessionId, key),
           isNull(coffeeCheckout.refundedAt),
+          olderThan(signedDate),
         ),
       )
       .returning({
         seasonName: coffeeCheckout.seasonName,
         coffees: coffeeCheckout.coffees,
       });
-    if (!row) return null;
+    if (!row) {
+      await recordNewerChange(tx, key, signedDate);
+      return null;
+    }
     await tx
       .update(season)
       .set({ coffees: sql`max(0, ${season.coffees} - ${row.coffees})` })
@@ -137,27 +152,35 @@ export async function refundSeasonCoffees(
 
 /**
  * Adds a refunded purchase's coffees back to the season it was added to, and
- * clears its refund. Only a refunded row changes, so the same reversal sent
- * again does nothing. Returns "unknown" when no purchase has that key.
+ * clears its refund. Like a refund, it only applies if its signedDate (ms) is
+ * newer than the last refund or reversal applied, so the same reversal sent
+ * again does nothing. A newer reversal on a row that isn't refunded (it came
+ * before its refund) records its date, so that older refund changes nothing
+ * when it arrives. Returns "unknown" when no purchase has that key.
  */
 export async function restoreSeasonCoffees(
   key: string,
+  signedDate: number,
 ): Promise<CoffeeRefundResult> {
   const restored = await db.transaction(async (tx) => {
     const [row] = await tx
       .update(coffeeCheckout)
-      .set({ refundedAt: null })
+      .set({ refundedAt: null, refundChangedAt: signedDate })
       .where(
         and(
           eq(coffeeCheckout.sessionId, key),
           isNotNull(coffeeCheckout.refundedAt),
+          olderThan(signedDate),
         ),
       )
       .returning({
         seasonName: coffeeCheckout.seasonName,
         coffees: coffeeCheckout.coffees,
       });
-    if (!row) return null;
+    if (!row) {
+      await recordNewerChange(tx, key, signedDate);
+      return null;
+    }
     await tx
       .update(season)
       .set({ coffees: sql`${season.coffees} + ${row.coffees}` })
@@ -168,6 +191,19 @@ export async function restoreSeasonCoffees(
   if (restored === null) return unchangedOrUnknown(key);
   revalidateTag(CACHE_TAGS.COFFEES, { expire: 0 });
   return { status: "changed", coffees: restored };
+}
+
+type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
+
+/**
+ * Stores a newer notification's signedDate on a purchase it didn't change,
+ * so an older one arriving after it is still ignored.
+ */
+async function recordNewerChange(tx: Tx, key: string, signedDate: number) {
+  await tx
+    .update(coffeeCheckout)
+    .set({ refundChangedAt: signedDate })
+    .where(and(eq(coffeeCheckout.sessionId, key), olderThan(signedDate)));
 }
 
 async function unchangedOrUnknown(key: string): Promise<CoffeeRefundResult> {
