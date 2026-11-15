@@ -18,6 +18,8 @@ export function StandingsPage() {
 
   const [selectedSeason, setSelectedSeason] = useState(defaultSeason);
   const [includeOpponents, setIncludeOpponents] = useState(true);
+  // Lifted from PlayersTeams so the opponents switch can follow the tab.
+  const [tab, setTab] = useState<"players" | "teams">("players");
   // A season in the address (?season=2025-26, or "all") wins over the default.
   const fromUrl = useRef(false);
   useEffect(() => {
@@ -55,6 +57,7 @@ export function StandingsPage() {
           includeOpponents={includeOpponents}
           setIncludeOpponents={setIncludeOpponents}
           isLoading={isLoading}
+          teamsShown={tab === "teams"}
         />
         <div className="mt-8">
           <StandingsGrid
@@ -88,6 +91,7 @@ export function StandingsPage() {
         includeOpponents={includeOpponents}
         setIncludeOpponents={setIncludeOpponents}
         isLoading={isLoading}
+        teamsShown={tab === "teams"}
       />
       <div className="mt-4 md:mt-8">
         <StandingsGrid
@@ -95,6 +99,8 @@ export function StandingsPage() {
           teams={standings?.teams ?? []}
           isLoading={isLoading}
           currentSeason={selectedSeason}
+          tab={tab}
+          onTabChange={setTab}
         />
       </div>
     </div>
