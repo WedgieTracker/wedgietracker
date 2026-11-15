@@ -5,8 +5,8 @@ const APP_DESCRIPTION =
   "The original NBA wedgie tracker. We count how many times a basketball gets stuck between the rim and the backboard. NoDunks Inspired.";
 export const APP_URL =
   process.env.NEXT_PUBLIC_APP_URL ?? "https://www.wedgietracker.com";
-const DEFAULT_SOCIAL_IMAGE =
-  "https://media.wedgietracker.com/assets/social-wedgietracker_bibnbu.jpg";
+// The site's own share image, so it changes with the artwork in this repo.
+const DEFAULT_SOCIAL_IMAGE = `${APP_URL}/opengraph-image.png`;
 
 export const defaultMetadata: Metadata = {
   applicationName: APP_NAME,
