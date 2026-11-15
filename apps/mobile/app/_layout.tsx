@@ -18,6 +18,7 @@ import { initSentry, report, useScreenTracking } from "@/lib/observability";
 import { ApiProvider } from "@/lib/provider";
 import { useShotDriver } from "@/lib/screenshot";
 import { colors, fonts } from "@/lib/theme";
+import { useWide } from "@/lib/wide";
 
 export { ErrorBoundary } from "expo-router";
 
@@ -35,6 +36,7 @@ LogBox.ignoreLogs(["(ADVICE)", "App Start Span"]);
 void SplashScreen.preventAutoHideAsync();
 
 function RootLayout() {
+  const { wide } = useWide();
   // The site is set in Inter; the heavy weights carry most of its character,
   // the numbers are black italic, and the calendar's stamp is hand lettered.
   const [loaded, error] = useFonts({
@@ -86,7 +88,9 @@ function RootLayout() {
         <Stack.Screen
           name="wedgie/[id]"
           options={{
-            presentation: "formSheet",
+            // On a wide screen (the iPhone Duo opened) a sheet opens narrow
+            // at one side; full screen lets the page use both columns.
+            presentation: wide ? "fullScreenModal" : "formSheet",
             headerShown: false,
             // A fixed detent rather than "fitToContents": the latter silently
             // turns off the system dimming behind the sheet, and a clear

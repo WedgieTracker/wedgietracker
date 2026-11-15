@@ -9,9 +9,12 @@ import {
   Text,
   View,
   useWindowDimensions,
+  type LayoutChangeEvent,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Path } from "react-native-svg";
 
+import { WIDE_MIN, useSideInsets, useWide } from "@/lib/wide";
 import { CourtPositionDiagram } from "@/components/CourtPositionDiagram";
 import { GradientFill } from "@/components/Gradient";
 import { GameTimeline } from "@/components/GameTimeline";
@@ -118,6 +121,16 @@ function WedgieDetail({
   onClose: () => void;
 }) {
   const { height } = useWindowDimensions();
+  // Two columns only when the page itself is wide (full screen on an opened
+  // Duo). A sheet opened while folded stays narrow after unfolding, so this
+  // goes by the page's own width rather than the screen's.
+  const { wide: wideScreen } = useWide();
+  const [pageWidth, setPageWidth] = useState<number | null>(null);
+  const wide = pageWidth === null ? wideScreen : pageWidth >= WIDE_MIN;
+  const onPageLayout = (e: LayoutChangeEvent) =>
+    setPageWidth(e.nativeEvent.layout.width);
+  const sides = useSideInsets();
+  const insets = useSafeAreaInsets();
   const [shoutoutNote, setShoutoutNote] = useState(false);
   const [active, setActive] = useState<ActiveVideo | null>(() =>
     pickVideoForApp(wedgie.videoUrl),
@@ -126,7 +139,13 @@ function WedgieDetail({
   // The sheet is sized to its content, so on a shorter screen the court is the
   // piece that gives way - everything above it carries information the court
   // only illustrates.
-  const courtWidth = height >= 820 ? 130 : height >= 720 ? 112 : 92;
+  const courtWidth = wideScreen
+    ? 190
+    : height >= 820
+      ? 130
+      : height >= 720
+        ? 112
+        : 92;
   const timeline = gameTimeline(wedgie);
 
   // Reset the chosen source when stepping to another wedgie.
@@ -144,12 +163,8 @@ function WedgieDetail({
     });
   }, [wedgie.id, wedgie.number, wedgie.seasonName, wedgie.videoUrl]);
 
-  return (
-    <ScrollView
-      style={styles.sheet}
-      contentContainerStyle={styles.sheetContent}
-      showsVerticalScrollIndicator={false}
-    >
+  const media = (
+    <>
       <View style={styles.topBar}>
         <View style={styles.navGroup}>
           <NavButton
@@ -172,158 +187,198 @@ function WedgieDetail({
       ) : null}
 
       <WedgiePlayer videoUrl={wedgie.videoUrl} active={active} />
-
-      <View style={styles.body}>
-        {/* Number badge beside the date and season, as the info panel has it. */}
-        <View style={styles.headerRow}>
-          <View style={styles.badge}>
-            <GradientFill name="button" radius={radius.md} />
-            <Text
-              style={[
-                styles.badgeHash,
-                {
-                  fontSize: BADGE_HASH,
-                  lineHeight: BADGE_HASH,
-                  // `mt-[.75em]` on the web, dropping the hash to the numeral's foot
-                  marginTop: BADGE_HASH * 0.75,
-                },
-              ]}
-              allowFontScaling={false}
-            >
-              #
-            </Text>
-            <Text
-              style={[
-                styles.badgeNumber,
-                { fontSize: BADGE_NUMBER, lineHeight: BADGE_NUMBER + 4 },
-                badgeTextShadow(BADGE_NUMBER),
-              ]}
-              allowFontScaling={false}
-            >
-              {wedgie.number ?? 1}
-            </Text>
-          </View>
-          <View style={styles.headerText}>
-            {isGem(wedgie.wedgieDate) ? (
-              // GEMS have no real date.
-              <View style={styles.gemRow}>
-                <GemTag />
-                <Text style={styles.date} allowFontScaling={false}>
-                  Not part of a season
-                </Text>
-              </View>
-            ) : (
+    </>
+  );
+  const details = (
+    <View style={styles.body}>
+      {/* Number badge beside the date and season, as the info panel has it. */}
+      <View style={styles.headerRow}>
+        <View style={styles.badge}>
+          <GradientFill name="button" radius={radius.md} />
+          <Text
+            style={[
+              styles.badgeHash,
+              {
+                fontSize: BADGE_HASH,
+                lineHeight: BADGE_HASH,
+                // `mt-[.75em]` on the web, dropping the hash to the numeral's foot
+                marginTop: BADGE_HASH * 0.75,
+              },
+            ]}
+            allowFontScaling={false}
+          >
+            #
+          </Text>
+          <Text
+            style={[
+              styles.badgeNumber,
+              { fontSize: BADGE_NUMBER, lineHeight: BADGE_NUMBER + 4 },
+              badgeTextShadow(BADGE_NUMBER),
+            ]}
+            allowFontScaling={false}
+          >
+            {wedgie.number ?? 1}
+          </Text>
+        </View>
+        <View style={styles.headerText}>
+          {isGem(wedgie.wedgieDate) ? (
+            // GEMS have no real date.
+            <View style={styles.gemRow}>
+              <GemTag />
               <Text style={styles.date} allowFontScaling={false}>
-                {nightDate(wedgie.wedgieDate)}
+                Not part of a season
               </Text>
-            )}
-            {wedgie.seasonName && wedgie.seasonName !== "GEMS" ? (
-              <Text style={styles.season} allowFontScaling={false}>
-                {wedgie.seasonName} SEASON
-              </Text>
-            ) : null}
-          </View>
-        </View>
-
-        <View style={styles.facts}>
-          <Fact label="Player">
-            <Text style={styles.player}>{wedgie.playerName}</Text>
-          </Fact>
-          <Fact label="Teams">
-            <Text style={styles.teams}>
-              <Matchup wedgie={wedgie} teamStyle={styles.teamName} />
+            </View>
+          ) : (
+            <Text style={styles.date} allowFontScaling={false}>
+              {nightDate(wedgie.wedgieDate)}
             </Text>
-          </Fact>
-          {wedgie.types.length > 0 ? (
-            <Fact label="Type">
-              <Text style={styles.types}>
-                {wedgie.types.map((t) => t.name).join(", ")}
-              </Text>
-            </Fact>
+          )}
+          {wedgie.seasonName && wedgie.seasonName !== "GEMS" ? (
+            <Text style={styles.season} allowFontScaling={false}>
+              {wedgie.seasonName} SEASON
+            </Text>
           ) : null}
-          {wedgie.shoutouts.length > 0 ? (
-            <Fact
-              label="Shoutout"
-              info={{
-                open: shoutoutNote,
-                onToggle: () => setShoutoutNote((o) => !o),
-              }}
-            >
-              {/* The X and Bluesky accounts that tagged the wedgie, as pills like the site's. */}
-              <View style={styles.shoutouts}>
-                {wedgie.shoutouts.map((handle) => (
-                  <Pressable
-                    key={handle}
-                    accessibilityRole="link"
-                    accessibilityLabel={
-                      shoutoutNetwork(handle) === "bluesky"
-                        ? `${handle} on Bluesky`
-                        : `@${handle} on X`
-                    }
-                    hitSlop={4}
-                    style={({ pressed }) => [
-                      styles.shoutout,
-                      pressed && styles.shoutoutPressed,
-                    ]}
-                    onPress={() =>
-                      void Linking.openURL(shoutoutProfileUrl(handle))
-                    }
-                  >
-                    {({ pressed }) => (
-                      <Text
-                        style={[
-                          styles.shoutoutText,
-                          pressed && styles.shoutoutTextPressed,
-                        ]}
-                      >
-                        @{handle}
-                      </Text>
-                    )}
-                  </Pressable>
-                ))}
-              </View>
-            </Fact>
-          ) : null}
-        </View>
-
-        {shoutoutNote ? (
-          <ShoutoutNote onClose={() => setShoutoutNote(false)} />
-        ) : null}
-
-        {/* Lined up with the values above (Player, Teams...), not the labels. */}
-        {timeline || wedgie.noDunksTweet ? (
-          <View style={styles.valueColumn}>
-            {timeline ? <GameTimeline timeline={timeline} /> : null}
-
-            {wedgie.noDunksTweet ? (
-              <Pressable
-                accessibilityRole="link"
-                accessibilityLabel="No Dunks tweet"
-                hitSlop={8}
-                style={styles.noDunks}
-                onPress={() => {
-                  const tweet = wedgie.noDunksTweet;
-                  if (tweet)
-                    void Linking.openURL(tweetUrl("NoDunksInc", tweet.id));
-                }}
-              >
-                <Image
-                  source={require("../../assets/images/nodunks-logo.png")}
-                  style={styles.noDunksLogo}
-                />
-              </Pressable>
-            ) : null}
-          </View>
-        ) : null}
-
-        <View style={styles.courtWrap}>
-          <CourtPositionDiagram
-            position={wedgie.position}
-            width={courtWidth}
-            dotSize={Math.max(9, Math.round(courtWidth * 0.09))}
-          />
         </View>
       </View>
+
+      <View style={styles.facts}>
+        <Fact label="Player">
+          <Text style={styles.player}>{wedgie.playerName}</Text>
+        </Fact>
+        <Fact label="Teams">
+          <Text style={styles.teams}>
+            <Matchup wedgie={wedgie} teamStyle={styles.teamName} />
+          </Text>
+        </Fact>
+        {wedgie.types.length > 0 ? (
+          <Fact label="Type">
+            <Text style={styles.types}>
+              {wedgie.types.map((t) => t.name).join(", ")}
+            </Text>
+          </Fact>
+        ) : null}
+        {wedgie.shoutouts.length > 0 ? (
+          <Fact
+            label="Shoutout"
+            info={{
+              open: shoutoutNote,
+              onToggle: () => setShoutoutNote((o) => !o),
+            }}
+          >
+            {/* The X and Bluesky accounts that tagged the wedgie, as pills like the site's. */}
+            <View style={styles.shoutouts}>
+              {wedgie.shoutouts.map((handle) => (
+                <Pressable
+                  key={handle}
+                  accessibilityRole="link"
+                  accessibilityLabel={
+                    shoutoutNetwork(handle) === "bluesky"
+                      ? `${handle} on Bluesky`
+                      : `@${handle} on X`
+                  }
+                  hitSlop={4}
+                  style={({ pressed }) => [
+                    styles.shoutout,
+                    pressed && styles.shoutoutPressed,
+                  ]}
+                  onPress={() =>
+                    void Linking.openURL(shoutoutProfileUrl(handle))
+                  }
+                >
+                  {({ pressed }) => (
+                    <Text
+                      style={[
+                        styles.shoutoutText,
+                        pressed && styles.shoutoutTextPressed,
+                      ]}
+                    >
+                      @{handle}
+                    </Text>
+                  )}
+                </Pressable>
+              ))}
+            </View>
+          </Fact>
+        ) : null}
+      </View>
+
+      {shoutoutNote ? (
+        <ShoutoutNote onClose={() => setShoutoutNote(false)} />
+      ) : null}
+
+      {/* Lined up with the values above (Player, Teams...), not the labels. */}
+      {timeline || wedgie.noDunksTweet ? (
+        <View style={styles.valueColumn}>
+          {timeline ? <GameTimeline timeline={timeline} /> : null}
+
+          {wedgie.noDunksTweet ? (
+            <Pressable
+              accessibilityRole="link"
+              accessibilityLabel="No Dunks tweet"
+              hitSlop={8}
+              style={styles.noDunks}
+              onPress={() => {
+                const tweet = wedgie.noDunksTweet;
+                if (tweet)
+                  void Linking.openURL(tweetUrl("NoDunksInc", tweet.id));
+              }}
+            >
+              <Image
+                source={require("../../assets/images/nodunks-logo.png")}
+                style={styles.noDunksLogo}
+              />
+            </Pressable>
+          ) : null}
+        </View>
+      ) : null}
+
+      <View style={styles.courtWrap}>
+        <CourtPositionDiagram
+          position={wedgie.position}
+          width={courtWidth}
+          dotSize={Math.max(9, Math.round(courtWidth * 0.09))}
+        />
+      </View>
+    </View>
+  );
+
+  if (wide) {
+    // Full screen on a wide screen: the video on the left and the details on
+    // the right, meeting in the middle of the screen (on the Duo's fold).
+    return (
+      <ScrollView
+        style={styles.sheet}
+        onLayout={onPageLayout}
+        contentContainerStyle={[
+          styles.wideContent,
+          {
+            paddingTop: insets.top + 8,
+            paddingLeft: sides.left + 16,
+            paddingRight: sides.right + 16,
+          },
+        ]}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.wideColumn}>{media}</View>
+        <View style={styles.wideColumn}>{details}</View>
+      </ScrollView>
+    );
+  }
+
+  return (
+    <ScrollView
+      style={styles.sheet}
+      onLayout={onPageLayout}
+      // Clear of a side status bar column (the iPhone Duo's outer screen).
+      contentContainerStyle={[
+        styles.sheetContent,
+        { paddingLeft: insets.left, paddingRight: insets.right },
+      ]}
+      showsVerticalScrollIndicator={false}
+    >
+      {media}
+      {details}
     </ScrollView>
   );
 }
@@ -515,6 +570,14 @@ const styles = StyleSheet.create({
   closePressed: { opacity: 0.7 },
   // Everything under the full-bleed video keeps the page gutter.
   body: { padding: space.lg, gap: space.md },
+  wideContent: {
+    flexGrow: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 36,
+    paddingBottom: 32,
+  },
+  wideColumn: { flex: 1 },
   padded: { flex: 1, padding: space.lg, backgroundColor: colors.darkpurple },
 
   headerRow: { flexDirection: "row", alignItems: "center", gap: space.lg },
