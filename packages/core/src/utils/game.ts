@@ -160,3 +160,31 @@ export function wedgieDateForGame(game: GameLike & { createdAt?: string }) {
   }
   return c ? `${c.gameDate}T12:00:00.000Z` : null;
 }
+
+/**
+ * Why a wedgie can't be saved on this game, or null when it can: its team and
+ * opponent must be the game's two teams (see gameTeamsProblem) and its date, when
+ * it has one, must fall on the game's day (see wedgieDateOnGameDay).
+ */
+export function wedgieGameProblem(
+  wedgie: {
+    teamName: string;
+    teamAgainstName: string;
+    seasonName?: string | null;
+    wedgieDate?: string | null;
+  },
+  game: GameLike,
+): string | null {
+  const teams = gameTeamsProblem(wedgie, game);
+  if (teams) return teams;
+  const c = gameColumns(game);
+  if (
+    wedgie.seasonName !== "GEMS" &&
+    c &&
+    wedgie.wedgieDate &&
+    !wedgieDateOnGameDay(wedgie.wedgieDate, c.gameDate)
+  ) {
+    return `The date ${wedgie.wedgieDate} is not the day of ${gameLabel(c)} (${c.gameDate}, US Eastern)`;
+  }
+  return null;
+}

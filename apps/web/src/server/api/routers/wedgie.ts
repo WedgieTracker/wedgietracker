@@ -25,6 +25,10 @@ import {
 } from "@wedgietracker/core/schema";
 import { CACHE_TAGS, invalidateWedgieData } from "~/server/cache";
 import { findLinkedGame } from "~/server/games";
+import {
+  wedgieDateForGame,
+  wedgieGameProblem,
+} from "@wedgietracker/core/utils/game";
 import { getNerdExtras } from "~/server/nerd-extras";
 import {
   buildTeamStandings,
@@ -38,7 +42,8 @@ const wedgieInput = z.object({
   teamAgainstName: z.string(),
   number: z.number(),
   seasonName: z.string(),
-  wedgieDate: z.date(),
+  // left out, the wedgie takes its game's date
+  wedgieDate: z.date().optional(),
   position: z
     .object({
       x: z.number(),
@@ -58,19 +63,41 @@ const wedgieInput = z.object({
   shoutouts: z.array(z.string().regex(SHOUTOUT_PATTERN)).default([]),
 });
 
-// The game_id and game_name a wedgie saved from the admin gets: the picked game's id and its name,
-// both from the game row, or neither for a wedgie without a game (GEMS).
-async function linkGame(
+// The row a wedgie saved from the admin gets, checked against its game: game_id and game_name come
+// from the game row (neither for a wedgie without a game, as GEMS), the team and opponent must be
+// the game's two teams and the date must fall on its day. With no date sent, the game's date is
+// used.
+async function wedgieRecord(
   database: typeof db,
-  pick: { gameId?: number | null; gameName?: string | null },
+  {
+    types: _types,
+    gameId,
+    gameName,
+    wedgieDate: sent,
+    ...fields
+  }: z.infer<typeof wedgieInput>,
 ) {
-  const found = await findLinkedGame(database, pick);
+  const found = await findLinkedGame(database, { gameId, gameName });
   if ("error" in found) {
     throw new TRPCError({ code: "BAD_REQUEST", message: found.error });
   }
+  const { game: picked } = found;
+  const sentDate = sent?.toISOString();
+  if (picked) {
+    const problem = wedgieGameProblem(
+      { ...fields, wedgieDate: sentDate },
+      picked,
+    );
+    if (problem) throw new TRPCError({ code: "BAD_REQUEST", message: problem });
+  }
+  const wedgieDate =
+    sentDate ?? (picked ? wedgieDateForGame(picked) : null) ?? undefined;
   return {
-    gameId: found.game?.id ?? null,
-    gameName: found.game?.name ?? null,
+    ...fields,
+    position: fields.position ?? { x: 0, y: 0 },
+    gameId: picked?.id ?? null,
+    gameName: picked?.name ?? null,
+    ...(wedgieDate && { wedgieDate }),
   };
 }
 
@@ -577,18 +604,10 @@ export const wedgieRouter = createTRPCRouter({
   create: protectedProcedure
     .input(wedgieInput)
     .mutation(async ({ ctx, input }) => {
-      const { types: typeNames, gameId, gameName, ...data } = input;
-      const linked = await linkGame(ctx.db, { gameId, gameName });
+      const typeNames = input.types;
+      const record = await wedgieRecord(ctx.db, input);
 
-      const [created] = await ctx.db
-        .insert(wedgie)
-        .values({
-          ...data,
-          ...linked,
-          position: data.position ?? { x: 0, y: 0 },
-          wedgieDate: data.wedgieDate.toISOString(),
-        })
-        .returning();
+      const [created] = await ctx.db.insert(wedgie).values(record).returning();
 
       if (created) {
         await syncWedgieTypes(ctx.db, created.id, typeNames);
@@ -657,17 +676,12 @@ export const wedgieRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const { types: typeNames, gameId, gameName, ...data } = input.data;
-      const linked = await linkGame(ctx.db, { gameId, gameName });
+      const typeNames = input.data.types;
+      const record = await wedgieRecord(ctx.db, input.data);
 
       const [updated] = await ctx.db
         .update(wedgie)
-        .set({
-          ...data,
-          ...linked,
-          position: data.position ?? { x: 0, y: 0 },
-          wedgieDate: data.wedgieDate.toISOString(),
-        })
+        .set(record)
         .where(eq(wedgie.id, input.id))
         .returning();
 

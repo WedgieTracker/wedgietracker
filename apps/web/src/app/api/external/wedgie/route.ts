@@ -1,3 +1,8 @@
+import {
+  gameLabel,
+  wedgieDateForGame,
+  wedgieGameProblem,
+} from "@wedgietracker/core/utils/game";
 import { SHOUTOUT_PATTERN } from "@wedgietracker/core/utils/shoutout";
 import { timingSafeEqual } from "crypto";
 import { NextResponse } from "next/server";
@@ -24,7 +29,8 @@ import {
 // once the clip is posted, and replaces the shoutouts when more fans turn up after the wedgie was
 // added, and corrects a record that went on wrong (player, court position, types, period, clock,
 // score), and attaches NoDunks' tweet to a wedgie added before he tweeted it; DELETE undoes a
-// wedgie added by mistake.
+// wedgie added by mistake. A POST whose team and opponent are not the two teams of the game it
+// names (All-Star games aside), or whose date is not that game's day, gets a 400 naming the game.
 
 function authorised(request: Request) {
   const given = Buffer.from(request.headers.get("x-api-key") ?? "");
@@ -59,6 +65,8 @@ const createInput = key.extend({
   teamName: z.string().min(2),
   teamAgainstName: z.string().min(2),
   gameName: z.string().min(5),
+  // left out (as usual), the wedgie takes its game's date; sent, it must fall on the game's day
+  wedgieDate: z.string().datetime({ offset: true }).optional(),
   position: z.object({ x: z.number(), y: z.number() }).nullable(),
   types: z.array(z.string()).min(1),
   videoUrl: videoUrl.default({}),
@@ -101,11 +109,30 @@ export async function POST(request: Request) {
   }
 
   // The game comes from the site's own game list, as when it is picked in the admin; its
-  // date is the wedgie's date.
+  // date is the wedgie's date unless the caller sends one.
   const picked = await pickGame(db, data.gameName);
   if (!picked) {
     return NextResponse.json(
       { error: `Unknown game ${data.gameName}` },
+      { status: 400 },
+    );
+  }
+
+  // The team and opponent must be the two teams that played it, in either order
+  const problem = wedgieGameProblem(data, picked);
+  if (problem) {
+    return NextResponse.json(
+      {
+        error: problem,
+        game: {
+          id: picked.id,
+          name: picked.name,
+          label: gameLabel(picked),
+          homeTeam: picked.homeTeam,
+          awayTeam: picked.awayTeam,
+          date: picked.gameDate,
+        },
+      },
       { status: 400 },
     );
   }
@@ -115,7 +142,9 @@ export async function POST(request: Request) {
     gameId: picked.id,
     gameName: picked.name,
     position: data.position ?? { x: 0, y: 0 },
-    wedgieDate: new Date(picked.createdAt).toISOString(),
+    wedgieDate: data.wedgieDate
+      ? new Date(data.wedgieDate).toISOString()
+      : (wedgieDateForGame(picked) ?? new Date(picked.createdAt).toISOString()),
   };
   if (dryRun) {
     return NextResponse.json({

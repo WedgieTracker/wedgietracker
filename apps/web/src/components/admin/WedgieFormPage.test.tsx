@@ -243,6 +243,7 @@ describe("WedgieFormPage", () => {
       expect(push).not.toHaveBeenCalled();
       expect(refresh).not.toHaveBeenCalled();
       expect(errorSpy).toHaveBeenCalled();
+      expect(screen.getByRole("alert")).toHaveTextContent("boom");
       errorSpy.mockRestore();
     });
   });

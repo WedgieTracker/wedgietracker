@@ -18,7 +18,7 @@ interface WedgieFormPageProps {
 }
 
 export function WedgieFormPage({ wedgie, currentSeason }: WedgieFormPageProps) {
-  const { formData, setFormData, handleSubmit, router } = useWedgieForm(
+  const { formData, setFormData, handleSubmit, router, error } = useWedgieForm(
     wedgie,
     currentSeason,
   );
@@ -276,6 +276,12 @@ export function WedgieFormPage({ wedgie, currentSeason }: WedgieFormPageProps) {
             </div>
           </div>
         </div>
+
+        {error && (
+          <p role="alert" className="rounded-md bg-red-900/50 p-3 text-white">
+            {error}
+          </p>
+        )}
 
         <div className="flex justify-end space-x-4">
           <button

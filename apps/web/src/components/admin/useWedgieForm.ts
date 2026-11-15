@@ -83,11 +83,14 @@ export function useWedgieForm(wedgie?: EditableWedgie, currentSeason?: string) {
     initialFormData(wedgie, currentSeason),
   );
 
+  // why the last save was refused, e.g. a team that did not play in the picked game
+  const [error, setError] = useState<string | null>(null);
   const createMutation = api.wedgie.create.useMutation();
   const updateMutation = api.wedgie.update.useMutation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
     try {
       const payload = toPayload(formData);
       if (wedgie?.id) {
@@ -97,10 +100,13 @@ export function useWedgieForm(wedgie?: EditableWedgie, currentSeason?: string) {
       }
       router.push("/admin/wedgies");
       router.refresh();
-    } catch (error) {
-      console.error("Error submitting wedgie:", error);
+    } catch (err) {
+      console.error("Error submitting wedgie:", err);
+      setError(
+        err instanceof Error ? err.message : "Could not save the wedgie",
+      );
     }
   };
 
-  return { formData, setFormData, handleSubmit, router };
+  return { formData, setFormData, handleSubmit, router, error };
 }

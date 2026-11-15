@@ -8,6 +8,7 @@ import {
   parseGameName,
   wedgieDateForGame,
   wedgieDateOnGameDay,
+  wedgieGameProblem,
 } from "./game";
 
 const rockets = {
@@ -136,5 +137,43 @@ describe("wedgie dates", () => {
     expect(
       wedgieDateForGame({ ...rockets, createdAt: "2018-03-23T23:00:00.000Z" }),
     ).toBe("2018-03-24T12:00:00.000Z");
+  });
+});
+
+describe("wedgieGameProblem", () => {
+  const onRockets = { teamName: "POR", teamAgainstName: "HOU" };
+
+  it("passes a wedgie on the right game and day, or with no date yet", () => {
+    expect(
+      wedgieGameProblem(
+        { ...onRockets, wedgieDate: "2018-03-24T12:00:00.000Z" },
+        rockets,
+      ),
+    ).toBeNull();
+    expect(wedgieGameProblem(onRockets, rockets)).toBeNull();
+  });
+
+  it("names the teams before the date", () => {
+    expect(
+      wedgieGameProblem(
+        {
+          teamName: "SAS",
+          teamAgainstName: "HOU",
+          wedgieDate: "2018-03-20T12:00:00.000Z",
+        },
+        rockets,
+      ),
+    ).toMatch(/^SAS v HOU is not the game POR @ HOU/);
+  });
+
+  it("refuses a date off the game's day", () => {
+    expect(
+      wedgieGameProblem(
+        { ...onRockets, wedgieDate: "2018-03-23T12:00:00.000Z" },
+        rockets,
+      ),
+    ).toBe(
+      "The date 2018-03-23T12:00:00.000Z is not the day of POR @ HOU (2018-03-24, US Eastern)",
+    );
   });
 });
