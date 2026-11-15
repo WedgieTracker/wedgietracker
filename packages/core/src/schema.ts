@@ -120,6 +120,11 @@ export const coffeeCheckout = sqliteTable("coffee_checkout", {
     .notNull(),
   /** When the purchase was refunded or revoked, or null while it counts. */
   refundedAt: text("refunded_at"),
+  /**
+   * The signedDate (ms) of the newest App Store refund or reversal applied to
+   * this purchase; an older or equal one changes nothing.
+   */
+  refundChangedAt: integer("refund_changed_at"),
 });
 
 /**

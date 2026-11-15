@@ -1,87 +1,13 @@
 import { NextResponse } from "next/server";
-import { eq, inArray } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { db } from "~/server/db";
-import { global, season, game } from "@wedgietracker/core/schema";
+import { global, season } from "@wedgietracker/core/schema";
 import { env } from "~/env";
 import { calculatePace } from "~/server/pace";
 import { invalidateWedgieData } from "~/server/cache";
-import { gameColumnsFromName } from "~/server/games";
+import { syncIncomingGames, type IncomingGame } from "~/server/games";
 
 const wedgieTrackerApiKey = env.WEDGIETRACKER_API_KEY;
-
-interface NewGameInput {
-  id: number;
-  name: string;
-  createdAt: Date;
-  seasonName: string;
-  live: boolean;
-}
-
-async function syncIncomingGames(newGames: NewGameInput[]) {
-  if (newGames.length === 0) return;
-
-  const existingGames = await db
-    .select({ id: game.id, name: game.name })
-    .from(game)
-    .where(
-      inArray(
-        game.name,
-        newGames.map((g) => g.name),
-      ),
-    );
-
-  const existingGamesMap = new Map(existingGames.map((g) => [g.name, g.id]));
-
-  const newGamesToCreate: NewGameInput[] = [];
-  const existingGamesToUpdate: { id: number; live: boolean }[] = [];
-
-  for (const g of newGames) {
-    const existingId = existingGamesMap.get(g.name);
-    if (existingId) {
-      existingGamesToUpdate.push({ id: existingId, live: g.live });
-    } else {
-      newGamesToCreate.push(g);
-    }
-  }
-
-  if (newGamesToCreate.length > 0) {
-    console.log(`Creating ${newGamesToCreate.length} new games`);
-    await db.insert(game).values(
-      newGamesToCreate.map((g) => ({
-        name: g.name,
-        // the teams and day as columns, so nothing has to read them from the name
-        ...gameColumnsFromName(g.name),
-        createdAt: new Date(g.createdAt).toISOString(),
-        seasonName: g.seasonName,
-        live: g.live,
-      })),
-    );
-  }
-
-  if (existingGamesToUpdate.length > 0) {
-    console.log(
-      `Updating live status for ${existingGamesToUpdate.length} existing games`,
-    );
-    const liveIds: number[] = [];
-    const notLiveIds: number[] = [];
-    for (const g of existingGamesToUpdate) {
-      (g.live ? liveIds : notLiveIds).push(g.id);
-    }
-
-    if (liveIds.length > 0) {
-      await db
-        .update(game)
-        .set({ live: true })
-        .where(inArray(game.id, liveIds));
-    }
-    if (notLiveIds.length > 0) {
-      await db
-        .update(game)
-        .set({ live: false })
-        .where(inArray(game.id, notLiveIds));
-    }
-  }
-}
 
 async function resolveTotalWedgies(newValue: number) {
   if (newValue > 0) return newValue;
@@ -129,13 +55,8 @@ export async function POST(request: Request) {
     newWedgieCount?: number;
     newTotalGamesCount?: number;
     newLiveGames?: boolean;
-    newGames?: {
-      id: number;
-      name: string;
-      createdAt: Date;
-      seasonName: string;
-      live: boolean;
-    }[];
+    // each game may carry its NBA game id as `id` ("0022600150" or 22600150)
+    newGames?: IncomingGame[];
     newTotalMinutes?: number;
     newTotalPoss?: number;
     newTotalFGA?: number;
@@ -182,7 +103,7 @@ export async function POST(request: Request) {
     globalUpdate.currentTotalFGA = newTotalFGA;
   }
 
-  await syncIncomingGames(newGames);
+  await syncIncomingGames(db, newGames);
 
   // Recalculate pace once games are being played, including before the
   // season's first wedgie, so a dry start lowers the projection
