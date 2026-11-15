@@ -24,8 +24,8 @@ export function Newsletter() {
             Never miss a wedgie
           </h2>
           <p className="text-cream/70 mt-1 text-sm leading-snug font-bold">
-            One short email when a new wedgie lands. Free, and you can
-            unsubscribe anytime.
+            A short recap the morning after a wedgie, at 8am Eastern. Free, and
+            you can unsubscribe anytime.
           </p>
         </div>
       </div>
