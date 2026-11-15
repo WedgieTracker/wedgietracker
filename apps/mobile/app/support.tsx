@@ -54,13 +54,14 @@ type Status =
   | { kind: "idle" }
   | { kind: "buying" }
   | { kind: "thanks"; coffees: number }
-  | { kind: "failed" };
+  | { kind: "failed" }
+  | { kind: "unavailable" };
 
 /**
  * Port of apps/web/src/app/support-us: the coffee stack with its picks, then
- * the Coffees vs Wedgies scoreboard. When the store has no coffees to sell
- * (not set up yet, or no connection) the stack and scoreboard still show and
- * the button says coffees are coming soon.
+ * the Coffees vs Wedgies scoreboard. The buy button always reads as the real
+ * thing; the price joins it once the App Store has answered. If the store
+ * can't sell right now (no connection), pressing it says so instead.
  */
 export default function SupportScreen() {
   const [count, setCount] = useState<1 | 3 | 5>(3);
@@ -124,12 +125,12 @@ export default function SupportScreen() {
   const product = products.find(
     (p: Product) => p.id === PRODUCTS.find((x) => x.coffees === count)?.id,
   );
-  const available = PRODUCTS.every((p) =>
-    products.some((x: Product) => x.id === p.id),
-  );
 
   const buy = async () => {
-    if (!product) return;
+    if (!product) {
+      setStatus({ kind: "unavailable" });
+      return;
+    }
     setStatus({ kind: "buying" });
     try {
       await requestPurchase({
@@ -146,14 +147,13 @@ export default function SupportScreen() {
     }
   };
 
+  const coffeesLabel = `Buy ${count} ${count === 1 ? "coffee" : "coffees"}`;
   const label =
     status.kind === "buying"
       ? "Opening the App Store…"
-      : available && product
-        ? `Buy ${count} ${count === 1 ? "coffee" : "coffees"} · ${product.displayPrice}`
-        : checked
-          ? "Coffees in the app are coming soon"
-          : "Loading coffees…";
+      : product
+        ? `${coffeesLabel} · ${product.displayPrice}`
+        : coffeesLabel;
 
   return (
     <>
@@ -223,20 +223,23 @@ export default function SupportScreen() {
             </View>
           ) : null}
 
-          <View style={!available && styles.soon}>
-            <StickerButton
-              label={label}
-              onPress={() => void buy()}
-              disabled={!available || status.kind === "buying"}
-              variant={available ? "violet" : "flat"}
-            />
-          </View>
-          <Text style={styles.small} allowFontScaling={false}>
+          <StickerButton
+            label={label}
+            onPress={() => void buy()}
+            disabled={status.kind === "buying"}
+          />
+          <Text
+            style={styles.small}
+            allowFontScaling={false}
+            accessibilityLiveRegion="polite"
+          >
             {status.kind === "failed"
               ? "That didn't go through. Nothing was charged. Try again in a moment."
-              : available
-                ? "Paid through the App Store"
-                : "They will be paid through the App Store."}
+              : status.kind === "unavailable"
+                ? checked
+                  ? "The App Store isn't answering right now. Try again in a moment."
+                  : "Still loading the coffees. Try again in a moment."
+                : "Paid through the App Store"}
           </Text>
 
           {/* Not on every server yet, so a failure only hides the board. */}
@@ -402,7 +405,6 @@ const styles = StyleSheet.create({
   pickText: { fontFamily: fonts.black, fontSize: 17, color: colors.cream },
   pickTextOn: { color: colors.night },
 
-  soon: { opacity: 0.6 },
   small: {
     marginTop: -4,
     textAlign: "center",
