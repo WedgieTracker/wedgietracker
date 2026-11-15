@@ -15,13 +15,16 @@ const STATS: { key: keyof StatsPerWedgie; word: string }[] = [
   { key: "games", word: "GAMES" },
   { key: "minutes", word: "MINUTES" },
 ];
-const NUM_FLAPS = 5;
+/** Digit flaps: up to 9999, written without a thousands comma. */
+const NUM_FLAPS = 4;
 const WORD_FLAPS = 11;
-/** Columns on the board: the figure, one blank, then the word. */
-const COLS = NUM_FLAPS + 1 + WORD_FLAPS;
+/** Column widths: the digits, a half-width gap, then the letters. */
+const TEMPLATE = `repeat(${NUM_FLAPS}, 1fr) 0.5fr repeat(${WORD_FLAPS}, 1fr)`;
+/** The same total in flap widths, for sizing the letters. */
+const UNITS = NUM_FLAPS + 0.5 + WORD_FLAPS;
 
 /** The figure's flaps only carry digits, the word's only letters. */
-const DIGITS = " 0123456789,";
+const DIGITS = " 0123456789";
 const LETTERS = " ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const STEP_MS = 45;
 const HOLD_MS = 4200;
@@ -29,11 +32,11 @@ const HOLD_MS = 4200;
 /** The board's text for one stat: the figure right-aligned, the word left. */
 function boardText(stats: StatsPerWedgie, i: number) {
   const s = STATS[i % STATS.length]!;
-  const num = stats[s.key]
-    .toLocaleString("en-US")
-    .padStart(NUM_FLAPS, " ")
-    .slice(-NUM_FLAPS);
-  return [...num, " ", ...s.word.padEnd(WORD_FLAPS, " ").slice(0, WORD_FLAPS)];
+  const value = Math.min(stats[s.key], 9999);
+  return {
+    digits: [...String(value).padStart(NUM_FLAPS, " ")],
+    word: [...s.word.padEnd(WORD_FLAPS, " ").slice(0, WORD_FLAPS)],
+  };
 }
 
 /** One flap. It steps through its characters in order until it reaches `target`. */
@@ -102,7 +105,15 @@ export function TypingStats({ stats }: { stats: StatsPerWedgie }) {
   const current = STATS[index % STATS.length]!;
 
   return (
-    <div className="wt-board" style={{ "--cols": COLS } as React.CSSProperties}>
+    <div
+      className="wt-board"
+      style={
+        {
+          "--cols": UNITS,
+          gridTemplateColumns: TEMPLATE,
+        } as React.CSSProperties
+      }
+    >
       <p className="sr-only" aria-live="polite">
         That&apos;s a wedgie every {stats[current.key].toLocaleString("en-US")}{" "}
         {current.word.toLowerCase()}
@@ -110,8 +121,17 @@ export function TypingStats({ stats }: { stats: StatsPerWedgie }) {
       <span className="wt-board-label" aria-hidden="true">
         A wedgie every
       </span>
-      {text.map((ch, i) => (
-        <Flap key={i} target={ch} delay={i * 25} amber={i < NUM_FLAPS} />
+      {text.digits.map((ch, i) => (
+        <Flap key={`d${i}`} target={ch} delay={i * 25} amber />
+      ))}
+      <span aria-hidden="true" />
+      {text.word.map((ch, i) => (
+        <Flap
+          key={`w${i}`}
+          target={ch}
+          delay={(NUM_FLAPS + i) * 25}
+          amber={false}
+        />
       ))}
     </div>
   );
