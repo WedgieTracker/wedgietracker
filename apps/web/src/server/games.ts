@@ -166,11 +166,14 @@ async function updateKnownGame(db: typeof Db, row: Game, g: IncomingGame) {
 
 /**
  * Saves the games the external API is sent. A game sent with its NBA game id
- * is stored under that id; a game already stored under it is the same game
- * and is updated, never added twice. A game sent without one is matched by
- * name and otherwise added with the next free id, as before. Older games keep
- * the ids they have. If the NBA id is already taken by a different game, the
- * new game gets the next free id instead and the clash is logged.
+ * is stored under that id, marked id_source 'nba'; a game already stored under
+ * it is the same game and is updated, never added twice. A game sent without
+ * one is matched by name and otherwise added with the next free id, marked
+ * 'site'. Older games keep the ids they have: when a 'site' game arrives with
+ * its real NBA id it is logged, not renumbered, since renumbering is a
+ * separate reviewed step. If the NBA id is already taken by a different game,
+ * the new game gets the next free id instead, as 'site', and the clash is
+ * logged.
  */
 export async function syncIncomingGames(
   db: typeof Db,
@@ -180,12 +183,20 @@ export async function syncIncomingGames(
   let updated = 0;
 
   for (const g of incoming) {
-    let id = parseNbaGameId(g.id ?? g.gameId);
+    const nbaId = parseNbaGameId(g.id ?? g.gameId);
+    let id = nbaId;
 
     if (id != null) {
       const byId = await db.query.game.findFirst({ where: eq(game.id, id) });
       if (byId && isSameGame(byId, g.name)) {
         await updateKnownGame(db, byId, g);
+        if (byId.idSource === "derived") {
+          // the NBA has now sent the id that was worked out for this game
+          await db
+            .update(game)
+            .set({ idSource: "nba" })
+            .where(eq(game.id, byId.id));
+        }
         updated++;
         continue;
       }
@@ -201,6 +212,13 @@ export async function syncIncomingGames(
       where: eq(game.name, g.name),
     });
     if (byName) {
+      if (nbaId != null && nbaId !== byName.id) {
+        console.warn(
+          byName.idSource === "site"
+            ? `Game ${byName.id} ${byName.name} has NBA id ${nbaId}; left under its site number until it is renumbered`
+            : `Game ${byName.id} ${byName.name} (id_source ${byName.idSource}) was sent with NBA id ${nbaId}; left as it is`,
+        );
+      }
       if (byName.live !== g.live) {
         await db
           .update(game)
@@ -214,7 +232,10 @@ export async function syncIncomingGames(
     const inserted = await db
       .insert(game)
       .values({
-        ...(id != null ? { id } : {}),
+        // the NBA id when there is one, else the next free id, a site number
+        ...(id != null
+          ? { id, idSource: "nba" as const }
+          : { idSource: "site" as const }),
         name: g.name,
         // the teams and day as columns, so nothing has to read them from the name
         ...gameColumnsFromName(g.name),

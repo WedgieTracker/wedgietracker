@@ -133,6 +133,14 @@ export const coffeeCheckout = sqliteTable("coffee_checkout", {
  * notation); read the teams and day from the columns instead, and build labels
  * with utils/game.ts.
  */
+/**
+ * Where a game's id comes from: the NBA's own game id, one worked out from the
+ * NBA's numbering pattern, or a number the site gave it because no NBA id was
+ * known.
+ */
+export const GAME_ID_SOURCES = ["nba", "derived", "site"] as const;
+export type GameIdSource = (typeof GAME_ID_SOURCES)[number];
+
 export const game = sqliteTable(
   "game",
   {
@@ -151,6 +159,9 @@ export const game = sqliteTable(
       .$onUpdate(() => new Date().toISOString()),
     seasonName: text("season_name"),
     live: integer("live", { mode: "boolean" }).default(false).notNull(),
+    idSource: text("id_source", { enum: GAME_ID_SOURCES })
+      .default("nba")
+      .notNull(),
   },
   (table) => [
     index("game_season_name_idx").on(table.seasonName),

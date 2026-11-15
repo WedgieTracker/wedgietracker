@@ -22,7 +22,7 @@ const client = createClient({ url: `file:${dbDir}/test.db` });
 const db = drizzle(client, { schema });
 
 /** Runs a migration file the way scripts/migrate.mjs does. */
-async function migrate(name: string) {
+async function migrate(name: string, on = client) {
   const sql = readFileSync(
     path.join(__dirname, "../../migrations", name),
     "utf8",
@@ -31,7 +31,7 @@ async function migrate(name: string) {
     .split(/;\s*$/m)
     .map((s) => s.replace(/^\s*--.*$/gm, "").trim())
     .filter(Boolean);
-  await client.batch(statements, "write");
+  await on.batch(statements, "write");
 }
 
 async function games() {
@@ -46,6 +46,14 @@ async function games() {
     date: r.game_date,
     live: Number(r.live),
   }));
+}
+
+/** Each game's id and where it comes from. */
+async function idSources() {
+  const { rows } = await client.execute(
+    "SELECT id, id_source FROM game ORDER BY id",
+  );
+  return Object.fromEntries(rows.map((r) => [Number(r.id), r.id_source]));
 }
 
 async function wedgies() {
@@ -87,6 +95,7 @@ beforeAll(async () => {
     "write",
   );
   await migrate("0002_game_structure.sql");
+  await migrate("0005_game_id_source.sql");
 });
 
 afterAll(() => {
@@ -100,11 +109,11 @@ beforeEach(async () => {
       "DELETE FROM wedgie",
       "DELETE FROM game",
       "DELETE FROM sqlite_sequence",
-      // an NBA-id game, and two older games with small ids
-      `INSERT INTO game (id, name, home_team, away_team, game_date, season_name)
-       VALUES (21701091, 'HOU @ NOP - 2018-03-24T00:00:00.000Z', 'HOU', 'NOP', '2018-03-24', '2017-18'),
-              (1, 'BOS @ LAL - 2025-01-02T19:00:00Z', 'BOS', 'LAL', '2025-01-02', '2024-25'),
-              (2, 'MIA @ CHI - 2025-01-03T19:00:00Z', 'MIA', 'CHI', '2025-01-03', '2024-25')`,
+      // an NBA-id game, and two older games with small site ids
+      `INSERT INTO game (id, name, home_team, away_team, game_date, season_name, id_source)
+       VALUES (21701091, 'HOU @ NOP - 2018-03-24T00:00:00.000Z', 'HOU', 'NOP', '2018-03-24', '2017-18', 'nba'),
+              (1, 'BOS @ LAL - 2025-01-02T19:00:00Z', 'BOS', 'LAL', '2025-01-02', '2024-25', 'site'),
+              (2, 'MIA @ CHI - 2025-01-03T19:00:00Z', 'MIA', 'CHI', '2025-01-03', '2024-25', 'site')`,
       `INSERT INTO wedgie (id, game_id, game_name)
        VALUES (1, 21701091, 'HOU @ NOP - 2018-03-24T00:00:00.000Z'),
               (2, 2, 'MIA @ CHI - 2025-01-03T19:00:00Z')`,
@@ -259,5 +268,108 @@ describe("syncIncomingGames", () => {
     ]);
     const rows = (await games()).filter((g) => g.name === name);
     expect(rows).toEqual([expect.objectContaining({ id: 22600150, live: 1 })]);
+  });
+
+  describe("id_source", () => {
+    it("marks a game added under its NBA id as nba", async () => {
+      await syncIncomingGames(db, [
+        sent("NYK @ SAS - 2026-11-09T00:30:00Z", { id: "0022600150" }),
+      ]);
+      expect((await idSources())[22600150]).toBe("nba");
+    });
+
+    it("marks a game added without an id as site", async () => {
+      await syncIncomingGames(db, [sent("NYK @ SAS - 2026-11-09T00:30:00Z")]);
+      expect((await idSources())[21701092]).toBe("site");
+    });
+
+    it("marks a game whose NBA id was taken as site", async () => {
+      await syncIncomingGames(db, [
+        sent("NYK @ SAS - 2026-11-09T00:30:00Z", { id: "0000000002" }),
+      ]);
+      const sources = await idSources();
+      expect(sources[21701092]).toBe("site");
+      expect(sources[2]).toBe("site");
+    });
+
+    it("logs a site game sent with its NBA id and leaves it under its site number", async () => {
+      const name = "BOS @ LAL - 2025-01-02T19:00:00Z";
+      await syncIncomingGames(db, [sent(name, { id: "0022400500" })]);
+      expect(await idSources()).toEqual({
+        1: "site",
+        2: "site",
+        21701091: "nba",
+      });
+      expect(await wedgies()).toContainEqual({
+        id: 2,
+        gameId: 2,
+        gameName: "MIA @ CHI - 2025-01-03T19:00:00Z",
+      });
+      expect(console.warn).toHaveBeenCalledWith(
+        "Game 1 BOS @ LAL - 2025-01-02T19:00:00Z has NBA id 22400500; left under its site number until it is renumbered",
+      );
+    });
+
+    it("keeps an nba game nba when it is sent again", async () => {
+      await syncIncomingGames(db, [
+        sent("HOU @ NOP - 2018-03-24T20:00:00Z", { id: "0021701091" }),
+      ]);
+      expect((await idSources())[21701091]).toBe("nba");
+      expect(console.warn).not.toHaveBeenCalled();
+    });
+
+    it("turns a derived game into nba when the NBA sends that id", async () => {
+      await client.execute(
+        "UPDATE game SET id_source = 'derived' WHERE id = 21701091",
+      );
+      await syncIncomingGames(db, [
+        sent("HOU @ NOP - 2018-03-24T00:00:00.000Z", { id: "0021701091" }),
+      ]);
+      expect((await idSources())[21701091]).toBe("nba");
+    });
+  });
+});
+
+describe("0005_game_id_source.sql", () => {
+  it("marks small ids and the 2025/26 and 2026/27 games in the 523 range as site", async () => {
+    const other = createClient({ url: `file:${dbDir}/migration.db` });
+    try {
+      await other.execute(
+        `CREATE TABLE game (
+          id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+          name text NOT NULL UNIQUE,
+          season_name text
+        )`,
+      );
+      await other.execute(
+        `INSERT INTO game (id, name, season_name) VALUES
+          (243, 'a', '2024/25'),
+          (9999999, 'b', '2025/26'),
+          (21701091, 'c', '2017/18'),
+          (52300101, 'd', '2023/24'),
+          (52300211, 'e', '2023/24'),
+          (52300212, 'f', '2025/26'),
+          (52300616, 'g', '2026/27'),
+          (22600150, 'h', '2026/27')`,
+      );
+      await migrate("0005_game_id_source.sql", other);
+      const { rows } = await other.execute(
+        "SELECT id, id_source FROM game ORDER BY id",
+      );
+      expect(
+        Object.fromEntries(rows.map((r) => [Number(r.id), r.id_source])),
+      ).toEqual({
+        243: "site",
+        9999999: "site",
+        21701091: "nba",
+        22600150: "nba",
+        52300101: "nba",
+        52300211: "nba",
+        52300212: "site",
+        52300616: "site",
+      });
+    } finally {
+      other.close();
+    }
   });
 });
