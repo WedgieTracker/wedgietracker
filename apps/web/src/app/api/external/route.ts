@@ -5,7 +5,11 @@ import { global, season } from "@wedgietracker/core/schema";
 import { env } from "~/env";
 import { calculatePace } from "~/server/pace";
 import { invalidateWedgieData } from "~/server/cache";
-import { syncIncomingGames, type IncomingGame } from "~/server/games";
+import {
+  incomingGamesProblem,
+  syncIncomingGames,
+  type IncomingGame,
+} from "~/server/games";
 
 const wedgieTrackerApiKey = env.WEDGIETRACKER_API_KEY;
 
@@ -56,11 +60,18 @@ export async function POST(request: Request) {
     newTotalGamesCount?: number;
     newLiveGames?: boolean;
     // each game may carry its NBA game id as `id` ("0022600150" or 22600150)
+    // and its real tip-off as `tipUtc` ("2026-11-15T01:00:00Z")
     newGames?: IncomingGame[];
     newTotalMinutes?: number;
     newTotalPoss?: number;
     newTotalFGA?: number;
   };
+
+  // a tipUtc that is there but isn't a date-time is refused before anything is written
+  const gamesProblem = incomingGamesProblem(body.newGames);
+  if (gamesProblem) {
+    return NextResponse.json({ error: gamesProblem }, { status: 400 });
+  }
 
   const {
     newWedgieCount = 0,

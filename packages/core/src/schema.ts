@@ -150,6 +150,11 @@ export const game = sqliteTable(
     awayTeam: text("away_team"),
     /** The US Eastern calendar day the game was played, YYYY-MM-DD. */
     gameDate: text("game_date"),
+    /**
+     * The real tip-off, an ISO UTC instant ("2026-11-15T01:00:00.000Z"); null
+     * when unknown. The time in `name` is never read as a tip-off.
+     */
+    tipAt: text("tip_at"),
     createdAt: text("created_at")
       .default(sql`(CURRENT_TIMESTAMP)`)
       .notNull(),

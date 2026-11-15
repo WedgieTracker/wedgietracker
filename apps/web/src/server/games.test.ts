@@ -14,7 +14,13 @@ import {
   it,
   vi,
 } from "vitest";
-import { parseNbaGameId, syncIncomingGames } from "./games";
+import {
+  incomingGamesProblem,
+  parseNbaGameId,
+  parseTipUtc,
+  pickGame,
+  syncIncomingGames,
+} from "./games";
 
 // A real SQLite file, so ids, unique names and the wedgie links behave as on Turso.
 const dbDir = mkdtempSync(path.join(tmpdir(), "wt-games-"));
@@ -54,6 +60,16 @@ async function idSources() {
     "SELECT id, id_source FROM game ORDER BY id",
   );
   return Object.fromEntries(rows.map((r) => [Number(r.id), r.id_source]));
+}
+
+/** Each game's tip_at and game_date. */
+async function tips() {
+  const { rows } = await client.execute(
+    "SELECT id, tip_at, game_date FROM game ORDER BY id",
+  );
+  return Object.fromEntries(
+    rows.map((r) => [Number(r.id), { tipAt: r.tip_at, date: r.game_date }]),
+  );
 }
 
 async function wedgies() {
@@ -96,6 +112,7 @@ beforeAll(async () => {
   );
   await migrate("0002_game_structure.sql");
   await migrate("0005_game_id_source.sql");
+  await migrate("0006_game_tip_at.sql");
 });
 
 afterAll(() => {
@@ -371,5 +388,157 @@ describe("0005_game_id_source.sql", () => {
     } finally {
       other.close();
     }
+  });
+});
+
+describe("parseTipUtc", () => {
+  it("stores the instant in UTC", () => {
+    expect(parseTipUtc("2026-11-15T01:00:00Z")).toBe(
+      "2026-11-15T01:00:00.000Z",
+    );
+    expect(parseTipUtc("2026-11-14T20:00:00-05:00")).toBe(
+      "2026-11-15T01:00:00.000Z",
+    );
+  });
+
+  it("is undefined when not sent, null when it isn't a date-time with a zone", () => {
+    expect(parseTipUtc(undefined)).toBeUndefined();
+    expect(parseTipUtc(null)).toBeUndefined();
+    for (const bad of [
+      "",
+      "tonight",
+      "2026-11-15",
+      "2026-11-15T01:00:00",
+      "2026-02-30T01:00:00Z",
+      "2026-11-15T25:00:00Z",
+      1763168400000,
+      {},
+    ]) {
+      expect(parseTipUtc(bad)).toBeNull();
+    }
+  });
+
+  it("names the game whose tipUtc is wrong", () => {
+    expect(incomingGamesProblem([sent("A @ B - 2026-11-14T20:00:00Z")])).toBe(
+      null,
+    );
+    expect(
+      incomingGamesProblem([
+        sent("A @ B - 2026-11-14T20:00:00Z", {
+          tipUtc: "2026-11-15T01:00:00Z",
+        }),
+        sent("C @ D - 2026-11-14T20:00:00Z", { tipUtc: "8pm" }),
+      ]),
+    ).toMatch(
+      /^tipUtc of C @ D - 2026-11-14T20:00:00Z must be an ISO date-time/,
+    );
+    expect(incomingGamesProblem(undefined)).toBeNull();
+  });
+});
+
+describe("syncIncomingGames with tipUtc", () => {
+  it("stores tip_at and takes game_date as the Eastern day of the tip-off", async () => {
+    // 01:00 UTC on the 15th is 20:00 Eastern on the 14th
+    await syncIncomingGames(db, [
+      sent("LAL @ BOS - 2026-11-14T20:00:00Z", {
+        id: "0022600200",
+        tipUtc: "2026-11-15T01:00:00Z",
+      }),
+    ]);
+    expect((await tips())[22600200]).toEqual({
+      tipAt: "2026-11-15T01:00:00.000Z",
+      date: "2026-11-14",
+    });
+  });
+
+  it("takes the day from tipUtc, not from the name, when they differ", async () => {
+    await syncIncomingGames(db, [
+      sent("LAL @ BOS - 2026-11-15T00:00:00.000Z", {
+        id: 22600201,
+        tipUtc: "2026-11-15T03:30:00Z",
+      }),
+    ]);
+    expect((await tips())[22600201]).toEqual({
+      tipAt: "2026-11-15T03:30:00.000Z",
+      date: "2026-11-14",
+    });
+  });
+
+  it("leaves tip_at empty and reads the day from the name without tipUtc, as before", async () => {
+    await syncIncomingGames(db, [
+      sent("LAL @ BOS - 2026-11-14T20:00:00Z", { id: 22600202 }),
+    ]);
+    expect((await tips())[22600202]).toEqual({
+      tipAt: null,
+      date: "2026-11-14",
+    });
+  });
+
+  it("sets tip_at and the day on a game it already has, matched by id", async () => {
+    await syncIncomingGames(db, [
+      sent("HOU @ NOP - 2018-03-24T00:00:00.000Z", {
+        id: "0021701091",
+        tipUtc: "2018-03-25T00:00:00Z",
+      }),
+    ]);
+    expect((await tips())[21701091]).toEqual({
+      tipAt: "2018-03-25T00:00:00.000Z",
+      date: "2018-03-24",
+    });
+
+    // a later send without tipUtc keeps it
+    await syncIncomingGames(db, [
+      sent("HOU @ NOP - 2018-03-24T00:00:00.000Z", { id: 21701091 }),
+    ]);
+    expect((await tips())[21701091]?.tipAt).toBe("2018-03-25T00:00:00.000Z");
+
+    // a tip-off moved after midnight UTC on another day moves the Eastern day too
+    await syncIncomingGames(db, [
+      sent("HOU @ NOP - 2018-03-24T00:00:00.000Z", {
+        id: 21701091,
+        tipUtc: "2018-03-27T00:30:00Z",
+      }),
+    ]);
+    expect((await tips())[21701091]).toEqual({
+      tipAt: "2018-03-27T00:30:00.000Z",
+      date: "2018-03-26",
+    });
+  });
+
+  it("sets tip_at on a game it matches by name", async () => {
+    await syncIncomingGames(db, [
+      sent("BOS @ LAL - 2025-01-02T19:00:00Z", {
+        tipUtc: "2025-01-03T00:00:00Z",
+      }),
+    ]);
+    expect((await tips())[1]).toEqual({
+      tipAt: "2025-01-03T00:00:00.000Z",
+      date: "2025-01-02",
+    });
+  });
+});
+
+describe("pickGame", () => {
+  it("finds a game by its stored tip_at within 12 hours, teams either way round", async () => {
+    await client.execute(
+      "UPDATE game SET tip_at = '2025-01-03T00:00:00.000Z' WHERE id = 1",
+    );
+    expect((await pickGame(db, "LAL @ BOS - 2025-01-03T00:30:00Z"))?.id).toBe(
+      1,
+    );
+    expect(
+      await pickGame(db, "LAL @ BOS - 2025-01-03T13:00:00Z"),
+    ).toBeUndefined();
+  });
+
+  it("never reads a stored name's time: without tip_at only the Eastern day counts", async () => {
+    // game 2 is named 19:00 on 3 January but has no tip_at
+    expect((await pickGame(db, "CHI @ MIA - 2025-01-04T03:30:00Z"))?.id).toBe(
+      2,
+    );
+    // 19:05 UTC is within minutes of the name's "19:00", but on the next day
+    expect(
+      await pickGame(db, "CHI @ MIA - 2025-01-04T19:05:00Z"),
+    ).toBeUndefined();
   });
 });
