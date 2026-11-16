@@ -410,7 +410,9 @@ function drawPace(scene: Scene, layout: Layout, t: number) {
     if (showPace) {
       // The arc from PaceGauge: half a circle that ends at the record.
       const r = box.w * 0.36;
-      const cy = box.y + box.h * 0.7;
+      // The arc's top and the labels' foot sit the same distance from the
+      // card's edges.
+      const cy = box.y + box.h * 0.622;
       const stroke = box.w * 0.075;
       ctx.lineCap = "round";
       ctx.lineWidth = stroke;
@@ -449,7 +451,7 @@ function drawPace(scene: Scene, layout: Layout, t: number) {
       ctx.font = font(800, box.w * 0.05);
       ctx.fillStyle = "rgb(240 225 182 / 0.55)";
       // 0 and the record sit along the card's bottom edge.
-      const labelY = box.y + box.h - box.h * 0.09;
+      const labelY = box.y + box.h - box.h * 0.16;
       ctx.fillText("0", cx - r, labelY);
       ctx.fillStyle = CREAM;
       ctx.fillText(`Record ${stats.previousRecord}`, cx + r * 0.75, labelY);
