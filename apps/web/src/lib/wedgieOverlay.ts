@@ -205,7 +205,8 @@ export function drawWedgieOverlay(
   // "WEDGIE" label
   ctx.font = `${p(44 * k)}px InterExtraBold`;
   ctx.fillStyle = SUB;
-  trackedText(ctx, "WEDGIE", cx, p(L.label), p(6 * k));
+  // Tracking also trails the last letter, so shift by half of it to centre.
+  trackedText(ctx, "WEDGIE", cx + p(3 * k), p(L.label), p(6 * k));
 
   // The number, shrunk only if it would run off the side
   const num = String(data.number);
@@ -213,7 +214,16 @@ export function drawWedgieOverlay(
     fitSize(ctx, [num], "InterBlackItalic", L.numSize, W * 0.86, -0.03),
   );
   ctx.font = `${numSize}px InterBlackItalic`;
-  shadowedText(ctx, num, cx, p(L.num), numSize, -0.03 * numSize);
+  // The italic slant leans the figures right of where they measure; pulled
+  // back by 0.044em, measured on the Reel, so they look centred.
+  shadowedText(
+    ctx,
+    num,
+    cx - 0.044 * numSize,
+    p(L.num),
+    numSize,
+    -0.03 * numSize,
+  );
 
   // The player's name, cover only, two lines with no box
   const lines = data.player ? nameLines(data.player) : [];
