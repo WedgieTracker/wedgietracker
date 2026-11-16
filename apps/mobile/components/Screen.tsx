@@ -11,6 +11,7 @@ import { TopSafeArea } from "@/components/TopSafeArea";
 import { useTabBarClearance } from "@/lib/layout";
 import { useShotScroll } from "@/lib/screenshot";
 import { colors, space, type } from "@/lib/theme";
+import { useSideInsets } from "@/lib/wide";
 
 interface ScreenProps {
   heading: React.ReactNode;
@@ -33,6 +34,10 @@ export function Screen({
   contentRef,
 }: ScreenProps) {
   const tabBar = useTabBarClearance();
+  // A pushed screen sits under the native header, outside TopSafeArea, so it
+  // pads its own sides: on the opened Duo the status bar and back button sit
+  // in a column down the right edge, and the content would run under them.
+  const sides = useSideInsets();
   const shotRef = useAnimatedRef<Animated.ScrollView>();
   useShotScroll(shotRef);
   const fallback = useSharedValue(0);
@@ -58,7 +63,14 @@ export function Screen({
   );
 
   return underHeader ? (
-    <View style={styles.safe}>{scroll}</View>
+    <View
+      style={[
+        styles.safe,
+        { paddingLeft: sides.left, paddingRight: sides.right },
+      ]}
+    >
+      {scroll}
+    </View>
   ) : (
     <TopSafeArea style={styles.safe}>{scroll}</TopSafeArea>
   );
