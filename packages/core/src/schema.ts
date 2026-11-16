@@ -120,6 +120,11 @@ export const coffeeCheckout = sqliteTable("coffee_checkout", {
     .notNull(),
   /** When the purchase was refunded or revoked, or null while it counts. */
   refundedAt: text("refunded_at"),
+  /**
+   * The signedDate (ms) of the newest App Store refund or reversal applied to
+   * this purchase; an older or equal one changes nothing.
+   */
+  refundChangedAt: integer("refund_changed_at"),
 });
 
 /**
@@ -128,6 +133,14 @@ export const coffeeCheckout = sqliteTable("coffee_checkout", {
  * notation); read the teams and day from the columns instead, and build labels
  * with utils/game.ts.
  */
+/**
+ * Where a game's id comes from: the NBA's own game id, one worked out from the
+ * NBA's numbering pattern, or a number the site gave it because no NBA id was
+ * known.
+ */
+export const GAME_ID_SOURCES = ["nba", "derived", "site"] as const;
+export type GameIdSource = (typeof GAME_ID_SOURCES)[number];
+
 export const game = sqliteTable(
   "game",
   {
@@ -137,6 +150,11 @@ export const game = sqliteTable(
     awayTeam: text("away_team"),
     /** The US Eastern calendar day the game was played, YYYY-MM-DD. */
     gameDate: text("game_date"),
+    /**
+     * The real tip-off, an ISO UTC instant ("2026-11-15T01:00:00.000Z"); null
+     * when unknown. The time in `name` is never read as a tip-off.
+     */
+    tipAt: text("tip_at"),
     createdAt: text("created_at")
       .default(sql`(CURRENT_TIMESTAMP)`)
       .notNull(),
@@ -146,6 +164,9 @@ export const game = sqliteTable(
       .$onUpdate(() => new Date().toISOString()),
     seasonName: text("season_name"),
     live: integer("live", { mode: "boolean" }).default(false).notNull(),
+    idSource: text("id_source", { enum: GAME_ID_SOURCES })
+      .default("nba")
+      .notNull(),
   },
   (table) => [
     index("game_season_name_idx").on(table.seasonName),

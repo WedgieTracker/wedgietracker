@@ -80,12 +80,13 @@ function signTransaction(overrides: Record<string, unknown> = {}): string {
 function signNotification(
   notificationType: string,
   data: Record<string, unknown> = {},
+  signedDate = Date.now(),
 ): string {
   return signJws({
     notificationType,
     notificationUUID: crypto.randomUUID(),
     version: "2.0",
-    signedDate: Date.now(),
+    signedDate,
     data: {
       bundleId: "com.wedgietracker.app",
       environment: "Production",
@@ -97,6 +98,10 @@ function signNotification(
 
 const notify = (jws: string) => handleAppStoreNotification(jws, testRoot);
 const key = "appstore:2000000123456789";
+// signedDates a minute apart, inside the test certificates' validity.
+const T1 = Date.now() - 180_000;
+const T2 = T1 + 60_000;
+const T3 = T2 + 60_000;
 
 async function seasonCoffees(name: string): Promise<number> {
   const { rows } = await client.execute({
@@ -112,6 +117,14 @@ async function refundedAt(sessionId: string): Promise<unknown> {
     args: [sessionId],
   });
   return rows[0]?.refunded_at;
+}
+
+async function refundChangedAt(sessionId: string): Promise<unknown> {
+  const { rows } = await client.execute({
+    sql: "SELECT refund_changed_at FROM coffee_checkout WHERE session_id = ?",
+    args: [sessionId],
+  });
+  return rows[0]?.refund_changed_at;
 }
 
 /** Runs a migration file the way scripts/migrate.mjs does. */
@@ -155,6 +168,7 @@ beforeAll(async () => {
   );
   await migrate("0001_season_coffees.sql");
   await migrate("0003_coffee_refunds.sql");
+  await migrate("0004_coffee_refund_order.sql");
 });
 
 afterAll(() => {
@@ -229,12 +243,14 @@ describe("handleAppStoreNotification", () => {
 
   it("adds the coffees back once when a refund is reversed", async () => {
     await recordAppStoreCoffee(signTransaction(), testRoot);
-    await notify(signNotification("REFUND"));
+    await notify(signNotification("REFUND", {}, T1));
     expect(await seasonCoffees("2026-27")).toBe(10);
 
-    const reversal = signNotification("REFUND_REVERSED", {
-      signedTransactionInfo: signTransaction(),
-    });
+    const reversal = signNotification(
+      "REFUND_REVERSED",
+      { signedTransactionInfo: signTransaction() },
+      T2,
+    );
     expect(await notify(reversal)).toEqual({ status: "restored", coffees: 3 });
     expect(await seasonCoffees("2026-27")).toBe(13);
     expect(await refundedAt(key)).toBeNull();
@@ -242,6 +258,102 @@ describe("handleAppStoreNotification", () => {
     expect(await notify(reversal)).toEqual({
       status: "ignored",
       reason: "already-done",
+    });
+    expect(await seasonCoffees("2026-27")).toBe(13);
+  });
+
+  it("ignores an old refund sent again after its reversal", async () => {
+    await recordAppStoreCoffee(signTransaction(), testRoot);
+    const refund = signNotification("REFUND", {}, T1);
+    const reversal = signNotification(
+      "REFUND_REVERSED",
+      { signedTransactionInfo: signTransaction() },
+      T2,
+    );
+    expect(await notify(refund)).toEqual({ status: "refunded", coffees: 3 });
+    expect(await notify(reversal)).toEqual({ status: "restored", coffees: 3 });
+    expect(await seasonCoffees("2026-27")).toBe(13);
+    revalidateTag.mockClear();
+
+    // Apple resends the first refund: it is older than the reversal.
+    expect(await notify(refund)).toEqual({
+      status: "ignored",
+      reason: "already-done",
+    });
+    expect(await seasonCoffees("2026-27")).toBe(13);
+    expect(await refundedAt(key)).toBeNull();
+    expect(await refundChangedAt(key)).toBe(T2);
+    expect(revalidateTag).not.toHaveBeenCalled();
+
+    // A later refund of the same purchase still counts.
+    expect(await notify(signNotification("REFUND", {}, T3))).toEqual({
+      status: "refunded",
+      coffees: 3,
+    });
+    expect(await seasonCoffees("2026-27")).toBe(10);
+  });
+
+  it("keeps the coffees when a reversal arrives before its refund", async () => {
+    await recordAppStoreCoffee(signTransaction(), testRoot);
+    const reversal = signNotification(
+      "REFUND_REVERSED",
+      { signedTransactionInfo: signTransaction() },
+      T2,
+    );
+    expect(await notify(reversal)).toEqual({
+      status: "ignored",
+      reason: "already-done",
+    });
+    expect(await refundChangedAt(key)).toBe(T2);
+
+    expect(await notify(signNotification("REFUND", {}, T1))).toEqual({
+      status: "ignored",
+      reason: "already-done",
+    });
+    expect(await seasonCoffees("2026-27")).toBe(13);
+    expect(await refundedAt(key)).toBeNull();
+  });
+
+  it("applies the same notification once", async () => {
+    await recordAppStoreCoffee(signTransaction(), testRoot);
+    revalidateTag.mockClear();
+    const refund = signNotification("REFUND", {}, T1);
+    expect(await notify(refund)).toEqual({ status: "refunded", coffees: 3 });
+    expect(await notify(refund)).toEqual({
+      status: "ignored",
+      reason: "already-done",
+    });
+    expect(await seasonCoffees("2026-27")).toBe(10);
+    expect(revalidateTag).toHaveBeenCalledOnce();
+
+    const reversal = signNotification(
+      "REFUND_REVERSED",
+      { signedTransactionInfo: signTransaction() },
+      T2,
+    );
+    expect(await notify(reversal)).toEqual({ status: "restored", coffees: 3 });
+    expect(await notify(reversal)).toEqual({
+      status: "ignored",
+      reason: "already-done",
+    });
+    expect(await seasonCoffees("2026-27")).toBe(13);
+    expect(revalidateTag).toHaveBeenCalledTimes(2);
+  });
+
+  it("rejects a refund without a signedDate and changes nothing", async () => {
+    await recordAppStoreCoffee(signTransaction(), testRoot);
+    const undated = signJws({
+      notificationType: "REFUND",
+      notificationUUID: crypto.randomUUID(),
+      data: {
+        bundleId: "com.wedgietracker.app",
+        environment: "Production",
+        signedTransactionInfo: signTransaction({ revocationDate: Date.now() }),
+      },
+    });
+    expect(await notify(undated)).toEqual({
+      status: "rejected",
+      reason: "invalid",
     });
     expect(await seasonCoffees("2026-27")).toBe(13);
   });
