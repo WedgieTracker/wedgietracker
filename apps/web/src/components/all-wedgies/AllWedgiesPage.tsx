@@ -186,31 +186,31 @@ export function AllWedgiesPage() {
             setSelectedWedgieData(null);
           }}
           onPrevious={() => {
-            const currentIndex =
-              wedgies?.findIndex((w) => w.id === selectedWedgieData.id) ?? -1;
+            const currentIndex = filteredWedgies.findIndex(
+              (w) => w.id === selectedWedgieData.id,
+            );
 
-            const prevWedgie = wedgies?.[currentIndex - 1];
+            const prevWedgie = filteredWedgies[currentIndex - 1];
             if (prevWedgie) {
               setSelectedWedgieData(prevWedgie);
             }
           }}
           onNext={() => {
-            const currentIndex =
-              wedgies?.findIndex((w) => w.id === selectedWedgieData.id) ?? -1;
+            const currentIndex = filteredWedgies.findIndex(
+              (w) => w.id === selectedWedgieData.id,
+            );
 
-            const nextWedgie = wedgies?.[currentIndex + 1];
+            const nextWedgie = filteredWedgies[currentIndex + 1];
             if (nextWedgie) {
               setSelectedWedgieData(nextWedgie);
             }
           }}
           hasPrevious={
-            !!wedgies &&
-            wedgies.findIndex((w) => w.id === selectedWedgieData.id) > 0
+            filteredWedgies.findIndex((w) => w.id === selectedWedgieData.id) > 0
           }
           hasNext={
-            !!wedgies &&
-            wedgies.findIndex((w) => w.id === selectedWedgieData.id) <
-              wedgies.length - 1
+            filteredWedgies.findIndex((w) => w.id === selectedWedgieData.id) <
+            filteredWedgies.length - 1
           }
         />
       )}
