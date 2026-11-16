@@ -50,7 +50,13 @@ const ITALIC_SKEW = -0.2;
 export interface SceneAssets {
   logo: CanvasImageSource | null;
   logoAspect: number;
+  /** CSS family for the calendar's NEW WEDGIE! stamp. */
+  stampFont?: string;
 }
+
+/** The stamp's inks, as on the site's calendar. */
+const BALL_INK = "#ff6fd8";
+const BANNER_INK = "#ad3792";
 
 interface Box {
   x: number;
@@ -419,7 +425,7 @@ function drawPace(scene: Scene, layout: Layout, t: number) {
       ctx.font = font(700, box.w * 0.06);
       ctx.textAlign = "center";
       ctx.fillStyle = "rgb(240 225 182 / 0.7)";
-      ctx.fillText("On pace for", cx, cy - r * 0.62);
+      ctx.fillText("On pace for", cx, cy - r * 0.5);
       const pace = countUp(stats.currentPace, t, 1.7, 1.4);
       const paceSize = fitSize(
         ctx,
@@ -428,7 +434,9 @@ function drawPace(scene: Scene, layout: Layout, t: number) {
         r * 0.6,
         r * 1.4,
       );
-      badgeText(ctx, pace.toString(), cx, cy, paceSize, { italic: true });
+      badgeText(ctx, pace.toString(), cx, cy + r * 0.12, paceSize, {
+        italic: true,
+      });
 
       ctx.font = font(800, box.w * 0.05);
       ctx.fillStyle = "rgb(240 225 182 / 0.55)";
@@ -464,25 +472,97 @@ function drawPace(scene: Scene, layout: Layout, t: number) {
   ctx.restore();
 }
 
-/** The circle drawn round NEW WEDGIE on the calendar, drawn on over time. */
-function circleAround(
+/**
+ * The site's rubber stamp for the day of a new wedgie: a reversed basketball
+ * behind an inked NEW WEDGIE! banner, thumped down at an angle over a patch of
+ * plain paper, its seams turning slowly. Drawn on the artwork's 120 by 104
+ * grid, fitted into the calendar page.
+ */
+function drawStamp(
   ctx: CanvasRenderingContext2D,
-  box: Box,
-  progress: number,
+  page: Box,
+  t: number,
+  font: string,
 ) {
-  if (progress <= 0) return;
-  const cx = box.x + box.w / 2;
-  const cy = box.y + box.h / 2;
-  const rx = box.w * 0.46;
-  const ry = box.h * 0.4;
-  const start = -Math.PI * 0.45;
+  const thump = phase(t, 2.3, 0.45);
+  if (thump <= 0) return;
+  const cx = page.x + page.w / 2;
+  const cy = page.y + page.h * 0.52;
+  const rot = (-10 * Math.PI) / 180;
+
+  // The patch of paper the banner cuts out of the faded count.
   ctx.save();
-  ctx.lineWidth = box.w * 0.025;
-  ctx.lineCap = "round";
-  ctx.strokeStyle = "#ff6fd8";
+  ctx.globalAlpha = Math.min(1, thump / 0.6);
+  ctx.translate(cx, cy);
+  ctx.rotate(rot);
+  ctx.fillStyle = CREAM;
   ctx.beginPath();
-  ctx.ellipse(cx, cy, rx, ry, -0.05, start, start + Math.PI * 2.1 * progress);
+  ctx.roundRect(
+    -page.w * 0.42,
+    -page.h * 0.185,
+    page.w * 0.84,
+    page.h * 0.37,
+    6,
+  );
+  ctx.fill();
+  ctx.restore();
+
+  // From 2.2 times the size and clear, past 0.92, settling at full size.
+  const scale =
+    thump < 0.6
+      ? 2.2 - (1.28 * thump) / 0.6
+      : 0.92 + (0.08 * (thump - 0.6)) / 0.4;
+  const s = Math.min((page.w * 0.88) / 120, (page.h * 0.74) / 104) * scale;
+  ctx.save();
+  ctx.globalAlpha = Math.min(1, thump / 0.6);
+  ctx.translate(cx, cy);
+  ctx.rotate(rot);
+  ctx.scale(s, s);
+  ctx.translate(-60, -52);
+
+  // The ball, its seams turning, with the banner's rectangle cut out of it.
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(-10, -10, 140, 124);
+  ctx.roundRect(-2, 26, 124, 52, 8);
+  ctx.clip("evenodd");
+  ctx.translate(60, 52);
+  ctx.rotate(Math.max(0, t - 2.8) * (Math.PI / 3));
+  ctx.translate(-50, -50);
+  ctx.fillStyle = BALL_INK;
+  ctx.beginPath();
+  ctx.arc(50, 50, 48, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = CREAM;
+  ctx.lineWidth = 3.5;
+  ctx.beginPath();
+  ctx.moveTo(4, 50);
+  ctx.lineTo(96, 50);
+  ctx.moveTo(50, 4);
+  ctx.lineTo(50, 96);
+  ctx.moveTo(18, 18);
+  ctx.quadraticCurveTo(40, 50, 18, 82);
+  ctx.moveTo(82, 18);
+  ctx.quadraticCurveTo(60, 50, 82, 82);
   ctx.stroke();
+  ctx.restore();
+
+  ctx.strokeStyle = BANNER_INK;
+  ctx.lineWidth = 3.5;
+  ctx.beginPath();
+  ctx.roundRect(2, 30, 116, 44, 6);
+  ctx.stroke();
+  ctx.font = `19px ${font}`;
+  ctx.textAlign = "center";
+  ctx.fillStyle = BANNER_INK;
+  ctx.lineWidth = 0.7;
+  for (const [text, y] of [
+    ["NEW", 50],
+    ["WEDGIE!", 69],
+  ] as const) {
+    ctx.strokeText(text, 60, y);
+    ctx.fillText(text, 60, y);
+  }
   ctx.restore();
 }
 
@@ -538,43 +618,35 @@ function drawCalendar(scene: Scene, layout: Layout, t: number) {
     };
     const cx = body.x + body.w / 2;
     ctx.textAlign = "center";
+    // On a new wedgie's day the count fades to 0 under the stamp.
+    if (hasNewWedgie) ctx.globalAlpha = 0.3;
+    const days = countUp(daysWithoutWedgie, t, 1.9, 1);
+    const size = fitSize(
+      ctx,
+      String(daysWithoutWedgie),
+      900,
+      body.h * 0.56,
+      body.w * 0.8,
+    );
+    ctx.save();
+    const y = body.y + body.h * 0.6;
+    ctx.translate(cx, y);
+    ctx.transform(1, 0, ITALIC_SKEW, 1, 0, 0);
+    ctx.font = font(900, size);
+    ctx.fillStyle = "#502394";
+    ctx.fillText(String(days), 0, 0);
+    ctx.restore();
+    ctx.font = font(900, body.w * 0.085);
+    ctx.fillStyle = NIGHT;
+    ctx.fillText(
+      `${daysWithoutWedgie === 1 ? "day" : "days"} without`,
+      cx,
+      body.y + body.h * 0.77,
+    );
+    ctx.fillText("a wedgie", cx, body.y + body.h * 0.9);
+    ctx.globalAlpha = 1;
     if (hasNewWedgie) {
-      circleAround(
-        ctx,
-        { ...body, x: body.x + 12, w: body.w - 24 },
-        easeOutCubic(phase(t, 2.3, 0.9)),
-      );
-      const size = fitSize(ctx, "WEDGIE", 900, body.w * 0.22, body.w * 0.72);
-      ctx.font = font(900, size);
-      ctx.fillStyle = "#ff6fd8";
-      ctx.fillText("NEW", cx, body.y + body.h * 0.47);
-      ctx.fillStyle = "#502394";
-      ctx.fillText("WEDGIE", cx, body.y + body.h * 0.47 + size * 0.95);
-    } else {
-      const days = countUp(daysWithoutWedgie, t, 1.9, 1);
-      const size = fitSize(
-        ctx,
-        String(daysWithoutWedgie),
-        900,
-        body.h * 0.56,
-        body.w * 0.8,
-      );
-      ctx.save();
-      const y = body.y + body.h * 0.6;
-      ctx.translate(cx, y);
-      ctx.transform(1, 0, ITALIC_SKEW, 1, 0, 0);
-      ctx.font = font(900, size);
-      ctx.fillStyle = "#502394";
-      ctx.fillText(String(days), 0, 0);
-      ctx.restore();
-      ctx.font = font(900, body.w * 0.085);
-      ctx.fillStyle = NIGHT;
-      ctx.fillText(
-        `${daysWithoutWedgie === 1 ? "day" : "days"} without`,
-        cx,
-        body.y + body.h * 0.77,
-      );
-      ctx.fillText("a wedgie", cx, body.y + body.h * 0.9);
+      drawStamp(ctx, body, t, scene.assets.stampFont ?? "cursive");
     }
   }
   ctx.restore();
@@ -672,13 +744,16 @@ export async function loadLogo(
 }
 
 /** Waits for the weights the video uses, so the first frames are not drawn in a fallback face. */
-export async function loadVideoFonts() {
+export async function loadVideoFonts(stampFont?: string) {
   if (typeof document === "undefined" || !document.fonts) return;
-  await Promise.all(
-    [700, 800, 900].map((w) =>
+  await Promise.all([
+    ...[700, 800, 900].map((w) =>
       document.fonts
         .load(`${w} 100px Inter`, "0123456789WEDGIES")
         .catch(() => []),
     ),
-  );
+    stampFont
+      ? document.fonts.load(`19px ${stampFont}`, "NEW WEDGIE!").catch(() => [])
+      : Promise.resolve([]),
+  ]);
 }

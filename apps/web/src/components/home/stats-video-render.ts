@@ -18,6 +18,7 @@ import {
   loadLogo,
   loadVideoFonts,
 } from "./stats-video-canvas";
+import { STAMP_FONT } from "./stampFont";
 
 /*
   Turns the stats into a video file.
@@ -198,7 +199,7 @@ export async function renderStatsVideo({
   const startedAt = performance.now();
   const [webCodecs, , logo] = await Promise.all([
     canEncodeWithWebCodecs(format),
-    loadVideoFonts(),
+    loadVideoFonts(STAMP_FONT),
     loadLogo(LOGO_URL, signal),
   ]);
   if (signal.aborted) throw abortError();
@@ -221,7 +222,11 @@ export async function renderStatsVideo({
     ctx,
     format,
     stats,
-    { logo: logo?.image ?? null, logoAspect: logo?.aspect ?? 200 / 63 },
+    {
+      logo: logo?.image ?? null,
+      logoAspect: logo?.aspect ?? 200 / 63,
+      stampFont: STAMP_FONT,
+    },
     now,
   );
 
