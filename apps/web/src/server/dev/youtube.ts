@@ -13,7 +13,7 @@ import { probeSeconds, renderWaveBand } from "./waveBand";
 // would clash with the runtime instances.
 type OAuth2Client = InstanceType<typeof google.auth.OAuth2>;
 
-async function createShort(
+export async function createShort(
   inputPath: string,
   outputPath: string,
   number: number,

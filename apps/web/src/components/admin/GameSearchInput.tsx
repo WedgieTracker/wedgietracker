@@ -3,6 +3,7 @@ import {
   gameLabel,
   gameLabelWithDate,
   gameMatchup,
+  gameTipEastern,
   parseGameName,
   wedgieDateForGame,
 } from "@wedgietracker/core/utils/game";
@@ -14,6 +15,7 @@ interface Game {
   homeTeam: string | null;
   awayTeam: string | null;
   gameDate: string | null;
+  tipAt: string | null;
   seasonName: string | null;
   createdAt: string;
 }
@@ -105,7 +107,8 @@ export function GameSearchInput({
         <div className="bg-panel absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md shadow-lg">
           {games.data.map((game) => {
             const day = game.gameDate ?? parseGameName(game.name)?.gameDate;
-            const tip = parseGameName(game.name)?.tip;
+            // the tip-off from tip_at; none when it isn't known
+            const tip = gameTipEastern(game);
             return (
               <button
                 type="button"

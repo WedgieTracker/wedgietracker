@@ -61,6 +61,16 @@ jobs:
             turso db destroy "$STAGING_DB" --yes
           fi
           turso db create "$STAGING_DB" --group "$STAGING_GROUP" --wait
+          # --wait returns before the new database always accepts queries
+          # ("Namespace ... doesn't exist"), so wait until it answers before
+          # loading, rather than leave staging empty.
+          for i in $(seq 1 30); do
+            if turso db shell "$STAGING_DB" "SELECT 1" >/dev/null 2>&1; then
+              break
+            fi
+            [ "$i" = 30 ] && { echo "::error::$STAGING_DB never became ready"; exit 1; }
+            sleep 2
+          done
           turso db shell "$STAGING_DB" < live.sql
           rm -f live.sql
           turso db shell "$STAGING_DB" "SELECT count(*) AS wedgies FROM wedgie"

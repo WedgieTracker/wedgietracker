@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
+  easternDay,
   gameColumns,
   gameLabel,
   gameLabelWithDate,
   gameMatchup,
   gameTeamsProblem,
+  gameTipEastern,
   parseGameName,
   wedgieDateForGame,
   wedgieDateOnGameDay,
@@ -24,22 +26,50 @@ describe("parseGameName", () => {
       homeTeam: "HOU",
       awayTeam: "NOP",
       gameDate: "2018-03-24",
-      tip: null,
     });
   });
 
-  it("keeps the tip-off of newer games and copes with the All-Star names", () => {
-    expect(parseGameName("NYK @ SAS - 2026-11-08T20:30:00Z")).toMatchObject({
+  it("reads only the teams and day, never a time, and copes with the All-Star names", () => {
+    // the time in a name is not a time: the result has no field for one
+    expect(parseGameName("NYK @ SAS - 2026-11-08T20:30:00Z")).toEqual({
+      homeTeam: "NYK",
+      awayTeam: "SAS",
       gameDate: "2026-11-08",
-      tip: "20:30",
     });
-    expect(parseGameName("EST @ WST - 2024-02-18T20:00:00")).toMatchObject({
+    expect(parseGameName("EST @ WST - 2024-02-18T20:00:00")).toEqual({
       homeTeam: "EST",
       awayTeam: "WST",
-      tip: "20:00",
+      gameDate: "2024-02-18",
     });
     expect(parseGameName("LAL @ BOS")).toBeNull();
     expect(parseGameName(null)).toBeNull();
+  });
+});
+
+describe("gameTipEastern", () => {
+  it("shows tip_at in US Eastern time, across both DST changes", () => {
+    // 01:00 UTC on 15 Nov is 20:00 EST the evening before
+    expect(gameTipEastern({ tipAt: "2026-11-15T01:00:00Z" })).toBe("20:00");
+    // summer time: 23:30 UTC is 19:30 EDT
+    expect(gameTipEastern({ tipAt: "2026-04-10T23:30:00.000Z" })).toBe("19:30");
+  });
+
+  it("has no time without tip_at, whatever the name says", () => {
+    expect(
+      gameTipEastern({
+        name: "NYK @ SAS - 2026-11-08T20:30:00Z",
+        tipAt: null,
+      }),
+    ).toBeNull();
+    expect(gameTipEastern({})).toBeNull();
+    expect(gameTipEastern({ tipAt: "not a time" })).toBeNull();
+  });
+});
+
+describe("easternDay", () => {
+  it("is the Eastern day, which is the day before for an early-UTC tip-off", () => {
+    expect(easternDay("2026-11-15T01:00:00Z")).toBe("2026-11-14");
+    expect(easternDay("2026-11-15T05:00:00Z")).toBe("2026-11-15");
   });
 });
 

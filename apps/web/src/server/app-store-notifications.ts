@@ -53,7 +53,9 @@ export type AppStoreNotificationResult =
 /**
  * Handles an App Store Server Notification V2 (the signedPayload Apple posts).
  * A refund or revocation takes a counted coffee's coffees back off its season,
- * and a reversed refund adds them back, each once. Everything else verified,
+ * and a reversed refund adds them back, each once and in the order Apple
+ * signed them (signedDate), so an old refund sent again after its reversal
+ * changes nothing. Everything else verified,
  * TEST included, is acknowledged and changes nothing. "rejected" means the
  * payload isn't a notification Apple signed for this app.
  */
@@ -73,7 +75,7 @@ export async function handleAppStoreNotification(
     return { status: "rejected", reason: "invalid" };
   }
 
-  const { notificationType, data, summary } = notification;
+  const { notificationType, signedDate, data, summary } = notification;
   const bundleId = data?.bundleId ?? summary?.bundleId;
   if (bundleId != null && bundleId !== APP_BUNDLE_ID) {
     return { status: "rejected", reason: "wrong-app" };
@@ -90,6 +92,11 @@ export async function handleAppStoreNotification(
   // Sandbox and Xcode purchases were never counted, so there's nothing to undo.
   if (data?.environment !== "Production") {
     return { status: "ignored", reason: "sandbox" };
+  }
+  // Refunds and reversals are applied in the order Apple signed them.
+  if (signedDate == null) {
+    console.warn(`App Store ${notificationType} without a signedDate`);
+    return { status: "rejected", reason: "invalid" };
   }
   if (!data.signedTransactionInfo) {
     console.warn(`App Store ${notificationType} without a transaction`);
@@ -120,9 +127,9 @@ export async function handleAppStoreNotification(
   let result: CoffeeRefundResult;
   if (action === "refund") {
     const at = new Date(transaction.revocationDate ?? Date.now());
-    result = await refundSeasonCoffees(key, at.toISOString());
+    result = await refundSeasonCoffees(key, at.toISOString(), signedDate);
   } else {
-    result = await restoreSeasonCoffees(key);
+    result = await restoreSeasonCoffees(key, signedDate);
   }
 
   if (result.status === "unknown") {

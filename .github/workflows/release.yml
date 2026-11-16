@@ -4,7 +4,23 @@ on:
   push:
     branches:
       - main
+  # A minor or major release, or an exact version (1.1.0 at the joint web and
+  # app launch), is chosen here on purpose. Merges only ever bump the patch,
+  # so the web keeps its major.minor in step with the iOS app.
   workflow_dispatch:
+    inputs:
+      bump:
+        description: "Which part to bump"
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+        default: patch
+      version:
+        description: "Or an exact version, e.g. 1.1.0 (overrides bump)"
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -33,25 +49,10 @@ jobs:
           LATEST_VERSION=${LATEST_TAG}
           IFS='.' read -r MAJOR MINOR PATCH <<< "$LATEST_VERSION"
 
-          # Get commit messages appropriately
-          if [ "$LATEST_TAG" = "0.0.0" ]; then
-            COMMITS=$(git log --pretty=format:"%s")
-          else
-            COMMITS=$(git log ${LATEST_TAG}..HEAD --pretty=format:"%s")
-          fi
-
-          # Initialize bump type
-          BUMP="patch"
-
-          # Check commit messages
-          while IFS= read -r commit; do
-            if [[ $commit == feat:* ]]; then
-              BUMP="minor"
-            elif [[ $commit == BREAKING* ]]; then
-              BUMP="major"
-              break
-            fi
-          done <<< "$COMMITS"
+          # Merges bump the patch. Minor and major come only from a manual
+          # run, never from commit messages.
+          BUMP="${{ github.event.inputs.bump || 'patch' }}"
+          EXACT="${{ github.event.inputs.version }}"
 
           # Calculate new version
           case $BUMP in
@@ -65,6 +66,18 @@ jobs:
               NEW_VERSION="${MAJOR}.${MINOR}.$((PATCH + 1))"
               ;;
           esac
+
+          if [ -n "$EXACT" ]; then
+            if ! [[ "$EXACT" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "::error::version must look like 1.1.0, got $EXACT"
+              exit 1
+            fi
+            if git rev-parse -q --verify "refs/tags/$EXACT" >/dev/null; then
+              echo "::error::tag $EXACT already exists"
+              exit 1
+            fi
+            NEW_VERSION="$EXACT"
+          fi
 
           echo "new_version=${NEW_VERSION}" >> $GITHUB_OUTPUT
           echo "New version will be: ${NEW_VERSION}"
