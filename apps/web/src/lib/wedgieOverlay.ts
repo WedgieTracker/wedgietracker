@@ -206,7 +206,7 @@ export function drawWedgieOverlay(
   ctx.font = `${p(44 * k)}px InterExtraBold`;
   ctx.fillStyle = SUB;
   // Tracking also trails the last letter, so shift by half of it to centre.
-  trackedText(ctx, "WEDGIE", cx + p(3 * k), p(L.label), p(6 * k));
+  trackedText(ctx, "WEDGIE", cx + p(3 * k), p(L.label + 2 * k), p(6 * k));
 
   // The number, shrunk only if it would run off the side
   const num = String(data.number);
