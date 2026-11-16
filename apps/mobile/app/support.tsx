@@ -16,6 +16,7 @@ import { Screen } from "@/components/Screen";
 import { StickerButton } from "@/components/StickerButton";
 import { api } from "@/lib/api";
 import { report, track } from "@/lib/observability";
+import { useWide } from "@/lib/wide";
 import { colors, fonts } from "@/lib/theme";
 
 /**
@@ -66,6 +67,7 @@ type Status =
 export default function SupportScreen() {
   // Dev builds only: `?cups=5` opens on another pick, for screenshots.
   const { cups } = useLocalSearchParams<{ cups?: string }>();
+  const { wide } = useWide();
   const [count, setCount] = useState<1 | 3 | 5>(() =>
     __DEV__ && (cups === "1" || cups === "5") ? (Number(cups) as 1 | 5) : 3,
   );
@@ -180,77 +182,156 @@ export default function SupportScreen() {
           </View>
         }
       >
-        <View style={styles.body}>
-          <CoffeeStack count={count} />
+        {wide ? (
+          // The opened Duo: the cups and picks on the left half, buying and
+          // the scoreboard on the right, meeting on the fold.
+          <View style={styles.split}>
+            <View style={styles.half}>
+              <CoffeeStack count={count} tall={wide} />
 
-          <View
-            style={styles.picks}
-            accessibilityRole="radiogroup"
-            accessibilityLabel="How many coffees"
-          >
-            {PRODUCTS.map(({ coffees }) => {
-              const on = count === coffees;
-              return (
-                <Pressable
-                  key={coffees}
-                  onPress={() => setCount(coffees)}
-                  accessibilityRole="radio"
-                  accessibilityLabel={`${coffees} ${coffees === 1 ? "coffee" : "coffees"}`}
-                  accessibilityState={{ checked: on }}
-                  style={({ pressed }) => [
-                    styles.pick,
-                    on && styles.pickOn,
-                    pressed && !on && styles.pickPressed,
-                  ]}
-                >
-                  <Text
-                    style={[styles.pickText, on && styles.pickTextOn]}
-                    allowFontScaling={false}
-                  >
-                    {coffees}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </View>
-
-          {status.kind === "thanks" ? (
-            <View style={styles.thanks} accessibilityLiveRegion="polite">
-              <Text style={styles.thanksTitle} allowFontScaling={false}>
-                Thank you!
-              </Text>
-              <Text style={styles.thanksText} allowFontScaling={false}>
-                {status.coffees === 1
-                  ? "That coffee keeps the tracker running."
-                  : `Those ${status.coffees} coffees keep the tracker running.`}
-              </Text>
+              <View
+                style={styles.picks}
+                accessibilityRole="radiogroup"
+                accessibilityLabel="How many coffees"
+              >
+                {PRODUCTS.map(({ coffees }) => {
+                  const on = count === coffees;
+                  return (
+                    <Pressable
+                      key={coffees}
+                      onPress={() => setCount(coffees)}
+                      accessibilityRole="radio"
+                      accessibilityLabel={`${coffees} ${coffees === 1 ? "coffee" : "coffees"}`}
+                      accessibilityState={{ checked: on }}
+                      style={({ pressed }) => [
+                        styles.pick,
+                        on && styles.pickOn,
+                        pressed && !on && styles.pickPressed,
+                      ]}
+                    >
+                      <Text
+                        style={[styles.pickText, on && styles.pickTextOn]}
+                        allowFontScaling={false}
+                      >
+                        {coffees}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
             </View>
-          ) : null}
+            <View style={[styles.half, styles.halfRight]}>
+              {status.kind === "thanks" ? (
+                <View style={styles.thanks} accessibilityLiveRegion="polite">
+                  <Text style={styles.thanksTitle} allowFontScaling={false}>
+                    Thank you!
+                  </Text>
+                  <Text style={styles.thanksText} allowFontScaling={false}>
+                    {status.coffees === 1
+                      ? "That coffee keeps the tracker running."
+                      : `Those ${status.coffees} coffees keep the tracker running.`}
+                  </Text>
+                </View>
+              ) : null}
 
-          <StickerButton
-            label={label}
-            onPress={() => void buy()}
-            disabled={status.kind === "buying"}
-          />
-          <Text
-            style={styles.small}
-            allowFontScaling={false}
-            accessibilityLiveRegion="polite"
-          >
-            {status.kind === "failed"
-              ? "That didn't go through. Nothing was charged. Try again in a moment."
-              : status.kind === "unavailable"
-                ? checked
-                  ? "The App Store isn't answering right now. Try again in a moment."
-                  : "Still loading the coffees. Try again in a moment."
-                : "Paid through the App Store"}
-          </Text>
+              <StickerButton
+                label={label}
+                onPress={() => void buy()}
+                disabled={status.kind === "buying"}
+              />
+              <Text
+                style={styles.small}
+                allowFontScaling={false}
+                accessibilityLiveRegion="polite"
+              >
+                {status.kind === "failed"
+                  ? "That didn't go through. Nothing was charged. Try again in a moment."
+                  : status.kind === "unavailable"
+                    ? checked
+                      ? "The App Store isn't answering right now. Try again in a moment."
+                      : "Still loading the coffees. Try again in a moment."
+                    : "Paid through the App Store"}
+              </Text>
 
-          {/* Not on every server yet, so a failure only hides the board. */}
-          {scoreboard.error ? null : (
-            <CoffeeScoreboard data={scoreboard.data ?? null} />
-          )}
-        </View>
+              {/* Not on every server yet, so a failure only hides the board. */}
+              {scoreboard.error ? null : (
+                <CoffeeScoreboard data={scoreboard.data ?? null} />
+              )}
+            </View>
+          </View>
+        ) : (
+          <View style={styles.body}>
+            <CoffeeStack count={count} />
+
+            <View
+              style={styles.picks}
+              accessibilityRole="radiogroup"
+              accessibilityLabel="How many coffees"
+            >
+              {PRODUCTS.map(({ coffees }) => {
+                const on = count === coffees;
+                return (
+                  <Pressable
+                    key={coffees}
+                    onPress={() => setCount(coffees)}
+                    accessibilityRole="radio"
+                    accessibilityLabel={`${coffees} ${coffees === 1 ? "coffee" : "coffees"}`}
+                    accessibilityState={{ checked: on }}
+                    style={({ pressed }) => [
+                      styles.pick,
+                      on && styles.pickOn,
+                      pressed && !on && styles.pickPressed,
+                    ]}
+                  >
+                    <Text
+                      style={[styles.pickText, on && styles.pickTextOn]}
+                      allowFontScaling={false}
+                    >
+                      {coffees}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+
+            {status.kind === "thanks" ? (
+              <View style={styles.thanks} accessibilityLiveRegion="polite">
+                <Text style={styles.thanksTitle} allowFontScaling={false}>
+                  Thank you!
+                </Text>
+                <Text style={styles.thanksText} allowFontScaling={false}>
+                  {status.coffees === 1
+                    ? "That coffee keeps the tracker running."
+                    : `Those ${status.coffees} coffees keep the tracker running.`}
+                </Text>
+              </View>
+            ) : null}
+
+            <StickerButton
+              label={label}
+              onPress={() => void buy()}
+              disabled={status.kind === "buying"}
+            />
+            <Text
+              style={styles.small}
+              allowFontScaling={false}
+              accessibilityLiveRegion="polite"
+            >
+              {status.kind === "failed"
+                ? "That didn't go through. Nothing was charged. Try again in a moment."
+                : status.kind === "unavailable"
+                  ? checked
+                    ? "The App Store isn't answering right now. Try again in a moment."
+                    : "Still loading the coffees. Try again in a moment."
+                  : "Paid through the App Store"}
+            </Text>
+
+            {/* Not on every server yet, so a failure only hides the board. */}
+            {scoreboard.error ? null : (
+              <CoffeeScoreboard data={scoreboard.data ?? null} />
+            )}
+          </View>
+        )}
       </Screen>
     </>
   );
@@ -285,7 +366,13 @@ function useRotatingAttribute() {
  * badge in a pyramid, each new one dropping onto the stack, with a rotating
  * attribute boost in the corner.
  */
-function CoffeeStack({ count }: { count: number }) {
+function CoffeeStack({
+  count,
+  tall = false,
+}: {
+  count: number;
+  tall?: boolean;
+}) {
   const attribute = useRotatingAttribute();
   const shown = useRef(count);
   const prev = shown.current;
@@ -303,7 +390,7 @@ function CoffeeStack({ count }: { count: number }) {
 
   return (
     <View
-      style={styles.stack}
+      style={[styles.stack, tall && styles.stackTall]}
       accessible
       accessibilityRole="image"
       accessibilityLabel={`${count} ${count === 1 ? "coffee" : "coffees"}`}
@@ -372,6 +459,10 @@ const styles = StyleSheet.create({
 
   // `bg-badge grain relative h-[250px] rounded-[22px]`
   stack: { height: 250, borderRadius: 22, overflow: "hidden" },
+  stackTall: { height: 320 },
+  split: { flexDirection: "row", gap: 36, marginTop: 20 },
+  half: { flex: 1, gap: 16 },
+  halfRight: { justifyContent: "center" },
   attribute: {
     position: "absolute",
     top: 16,
