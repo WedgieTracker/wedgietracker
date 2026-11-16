@@ -2,8 +2,8 @@ import { isGemsDate } from "@wedgietracker/core/utils/formatDate";
 
 /**
  * The text drawn over the Reel, Short and cover templates: a small
- * "WEDGIE No." label, the number in Inter Black Italic with the Home
- * counter's two shadows, the player's name on the cover, then the date and
+ * "WEDGIE" label, the number in Inter Black Italic with the Home counter's
+ * two shadows and a small faded hash before it, as the site's rows have, the player's name on the cover, then the date and
  * the season in a pill. Shared by the server (node-canvas) and the admin
  * preview (browser canvas), so the two can't drift apart.
  *
@@ -35,6 +35,7 @@ export interface OverlayContext {
   shadowBlur: number;
   shadowOffsetX: number;
   shadowOffsetY: number;
+  globalAlpha: number;
   save(): void;
   restore(): void;
   beginPath(): void;
@@ -201,18 +202,40 @@ export function drawWedgieOverlay(
 
   ctx.save();
 
-  // "WEDGIE No." label
+  // "WEDGIE" label
   ctx.font = `${p(44 * k)}px InterExtraBold`;
   ctx.fillStyle = SUB;
-  trackedText(ctx, "WEDGIE No.", cx, p(L.label), p(6 * k));
+  trackedText(ctx, "WEDGIE", cx, p(L.label), p(6 * k));
 
-  // The number, shrunk only if it would run off the side
+  // The number, shrunk only if it would run off the side, with the site's
+  // small hash before it (0.42em, faded, on the number's baseline). The pair
+  // is centred together.
   const num = String(data.number);
   const numSize = p(
-    fitSize(ctx, [num], "InterBlackItalic", L.numSize, W * 0.86, -0.03),
+    fitSize(ctx, [`#${num}`], "InterBlackItalic", L.numSize, W * 0.86, -0.03),
   );
+  const hashSize = numSize * 0.42;
+  ctx.font = `${hashSize}px InterBlackItalic`;
+  const hashW = ctx.measureText("#").width;
+  const hashGap = numSize * 0.06;
   ctx.font = `${numSize}px InterBlackItalic`;
-  shadowedText(ctx, num, cx, p(L.num), numSize, -0.03 * numSize);
+  const numW = trackedWidth(ctx, num, -0.03 * numSize);
+  const numLeft = cx - (hashW + hashGap + numW) / 2;
+  shadowedText(
+    ctx,
+    num,
+    numLeft + hashW + hashGap + numW / 2,
+    p(L.num),
+    numSize,
+    -0.03 * numSize,
+  );
+  ctx.save();
+  ctx.font = `${hashSize}px InterBlackItalic`;
+  ctx.textAlign = "left";
+  ctx.globalAlpha = 0.55;
+  ctx.fillStyle = CREAM;
+  ctx.fillText("#", numLeft, p(L.num));
+  ctx.restore();
 
   // The player's name, cover only, two lines with no box
   const lines = data.player ? nameLines(data.player) : [];
