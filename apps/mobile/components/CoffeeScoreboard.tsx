@@ -126,7 +126,8 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     paddingHorizontal: 4,
-    paddingVertical: 6,
+    paddingTop: 10,
+    paddingBottom: 0,
     borderRadius: 10,
     backgroundColor: "rgba(10, 4, 30, 0.45)",
   },
@@ -136,8 +137,12 @@ const styles = StyleSheet.create({
   digits: {
     fontSize: 54,
     lineHeight: 60,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
+    // At least the glow's radius on every side. Left is the right side plus
+    // the letter spacing the last digit trails, so the pair sits centred
+    // under its label (the led style's own paddingLeft would otherwise win).
+    paddingLeft: 12 + 1.6,
+    paddingRight: 12,
+    paddingVertical: 10,
     fontVariant: ["tabular-nums"],
     textShadowRadius: 10,
     textShadowOffset: { width: 0, height: 0 },

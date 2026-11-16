@@ -297,8 +297,8 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     alignItems: "center",
     justifyContent: "center",
-    paddingTop: 12,
-    paddingBottom: 0,
+    paddingTop: 15,
+    paddingBottom: 3,
   },
   count: {
     fontFamily: fonts.blackItalic,
@@ -312,7 +312,8 @@ const styles = StyleSheet.create({
     color: "#502394",
   },
   caption: {
-    marginTop: 0,
+    // Tucked up under the count, whose line box runs below its digits.
+    marginTop: -6,
     fontFamily: fonts.black,
     fontSize: 11,
     lineHeight: 13,
