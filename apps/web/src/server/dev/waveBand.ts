@@ -10,22 +10,22 @@ import { drawWedgieOverlay, type OverlayData } from "~/lib/wedgieOverlay";
  * number drawn over it. It is rendered frame by frame into its own video and
  * laid over the still template, so only this band ever changes.
  *
- * Sizes are the templates' pixels. `top` is just under the clip; `crest` is
- * where the wave settles, where the template's own wave sits.
+ * The wave settles as high up the band as the season is towards 50
+ * wedgies, the same fill the hero and the stats video show: low early in the
+ * season, the whole band at 50. Sizes are the templates' pixels; `top` is
+ * just under the clip.
  */
 export const WAVE_BANDS = {
   reel: {
     width: 1080,
     height: 1920,
     top: 1308,
-    crest: 1372,
     template: "reel-template.png",
   },
   short: {
     width: 2160,
     height: 3840,
     top: 2616,
-    crest: 2728,
     template: "shorts-template.png",
   },
 } as const;
@@ -33,6 +33,8 @@ export const WAVE_BANDS = {
 export type BandType = keyof typeof WAVE_BANDS;
 
 const FPS = 30;
+/** The season total that fills the band, as on the site's hero. */
+const FULL_AT = 50;
 const GLOW_STOPS: [number, string][] = [
   [0, "#5f84e6"],
   [0.5, "#7b6bf0"],
@@ -131,8 +133,10 @@ export async function renderWaveBand(
   for (let i = 0; i < frames; i++) {
     const t = i / FPS;
     ctx.drawImage(night, 0, 0);
-    // Rises from below the bottom edge to its crest, then keeps rolling.
-    const settled = band.crest - band.top;
+    // Rises from below the bottom edge to the season's level, then keeps
+    // rolling.
+    const level = Math.min(Math.max(data.number / FULL_AT, 0), 1);
+    const settled = h - level * h + amplitude * 2;
     const baseY =
       h + amplitude * 2 - (h + amplitude * 2 - settled) * easeOutCubic(t / 1.4);
     for (const layer of LAYERS) {
