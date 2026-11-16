@@ -46,6 +46,13 @@ const GLOW_STOPS: [number, string][] = [
 ];
 /** The slant of the italic numbers, done by hand so every browser draws it alike. */
 const ITALIC_SKEW = -0.2;
+/**
+ * How far the slant moves a line's middle right of where it is drawn: half
+ * the cap height (0.73em in Inter) times the skew, less the side bearing,
+ * measured on the hero. Italic text is drawn this
+ * much to the left so it looks centred.
+ */
+const italicLean = (size: number) => -ITALIC_SKEW * 0.3 * size;
 
 export interface SceneAssets {
   logo: CanvasImageSource | null;
@@ -322,6 +329,7 @@ function badgeText(
   ctx.textAlign = "center";
   ctx.textBaseline = "alphabetic";
   if (italic) {
+    x -= italicLean(size);
     ctx.translate(x, y);
     ctx.transform(1, 0, ITALIC_SKEW, 1, 0, 0);
     ctx.translate(-x, -y);
@@ -630,7 +638,7 @@ function drawCalendar(scene: Scene, layout: Layout, t: number) {
     );
     ctx.save();
     const y = body.y + body.h * 0.6;
-    ctx.translate(cx, y);
+    ctx.translate(cx - italicLean(size), y);
     ctx.transform(1, 0, ITALIC_SKEW, 1, 0, 0);
     ctx.font = font(900, size);
     ctx.fillStyle = "#502394";
