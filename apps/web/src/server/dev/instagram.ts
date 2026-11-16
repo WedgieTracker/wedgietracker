@@ -3,6 +3,7 @@ import { spawn } from "child_process";
 import fs from "fs";
 import { createBackground } from "./createBackground";
 import { uploadFile } from "~/server/services/r2";
+import { probeSeconds, renderWaveBand } from "./waveBand";
 
 interface InstagramContainerResponse {
   id: string;
@@ -35,21 +36,38 @@ export async function createReel(
       date,
     );
 
+    // The band under the clip, where the wave rises and rolls, rendered to
+    // its own video for the clip's length and laid over the still template.
+    const seconds = await probeSeconds(inputPath);
+    const bandPath = `/tmp/band_${Date.now()}.mp4`;
+    await renderWaveBand(
+      "reel",
+      { number, season, player, date },
+      seconds,
+      bandPath,
+    );
+
     return new Promise((resolve, reject) => {
       const ffmpeg = spawn("ffmpeg", [
         "-i",
         inputPath,
+        "-loop",
+        "1",
         "-i",
         backgroundPath ?? "",
+        "-i",
+        bandPath,
         "-filter_complex",
         [
-          // Scale video to 1080 width while maintaining aspect ratio
           "[0:v]scale=1080:608:force_original_aspect_ratio=decrease[scaled]",
-          // Pad if necessary to ensure exact dimensions
           "[scaled]pad=1080:608:(ow-iw)/2:(oh-ih)/2[video]",
-          // Overlay video at y=656 (positioned about 1/3 from the top in a 1920px height)
-          "[1:v][video]overlay=0:700",
+          "[1:v][2:v]overlay=0:1308:shortest=1[bg]",
+          "[bg][video]overlay=0:700:shortest=1[out]",
         ].join(";"),
+        "-map",
+        "[out]",
+        "-map",
+        "0:a?",
         "-c:a",
         "aac",
         "-c:v",
@@ -71,6 +89,7 @@ export async function createReel(
             if (backgroundPath) {
               await fs.promises.unlink(backgroundPath);
             }
+            await fs.promises.unlink(bandPath).catch(console.error);
 
             if (code === 0) {
               resolve(true);

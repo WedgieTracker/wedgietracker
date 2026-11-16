@@ -46,6 +46,7 @@ function recorder() {
     shadowBlur: 0,
     shadowOffsetX: 0,
     shadowOffsetY: 0,
+    globalAlpha: 1,
     save: noop,
     restore: noop,
     beginPath: noop,

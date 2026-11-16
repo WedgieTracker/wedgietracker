@@ -4,6 +4,7 @@ import * as fs from "fs";
 import { type Session } from "next-auth";
 import { spawn } from "child_process";
 import { createBackground } from "./createBackground";
+import { probeSeconds, renderWaveBand } from "./waveBand";
 
 // Use the OAuth2 client type that google.auth.OAuth2 actually produces, which
 // is the same one google.youtube() expects. The googleapis `Auth` namespace
@@ -29,27 +30,48 @@ async function createShort(
       date,
     );
 
+    // The band under the clip, where the wave rises and rolls, rendered to
+    // its own video for the clip's length and laid over the still template.
+    const seconds = await probeSeconds(inputPath);
+    const bandPath = `/tmp/band_${Date.now()}.mp4`;
+    await renderWaveBand(
+      "short",
+      { number, season, player, date },
+      seconds,
+      bandPath,
+    );
+
     return new Promise((resolve, reject) => {
       const ffmpeg = spawn("ffmpeg", [
         "-i",
         inputPath,
+        "-loop",
+        "1",
         "-i",
         backgroundPath ?? "",
+        "-i",
+        bandPath,
         "-filter_complex",
         [
-          // First scale the video to have a width of 2160 while maintaining aspect ratio
           "[0:v]scale=2160:1216:force_original_aspect_ratio=decrease[scaled]",
-          // Then pad if necessary to ensure exact dimensions
           "[scaled]pad=2160:1216:(ow-iw)/2:(oh-ih)/2[video]",
-          // Overlay video at y=1400
-          "[1:v][video]overlay=0:1400",
+          "[1:v][2:v]overlay=0:2616:shortest=1[bg]",
+          "[bg][video]overlay=0:1400:shortest=1[out]",
         ].join(";"),
+        "-map",
+        "[out]",
+        "-map",
+        "0:a?",
         "-c:a",
-        "copy",
+        "aac",
         "-c:v",
         "libx264",
         "-preset",
         "fast",
+        "-movflags",
+        "+faststart",
+        "-pix_fmt",
+        "yuv420p",
         "-y",
         outputPath,
       ]);
@@ -58,6 +80,7 @@ async function createShort(
         void (async () => {
           // Clean up background image
           await fs.promises.unlink(backgroundPath ?? "").catch(console.error);
+          await fs.promises.unlink(bandPath).catch(console.error);
 
           if (code === 0) {
             resolve(true);
