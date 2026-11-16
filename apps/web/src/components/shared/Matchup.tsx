@@ -23,7 +23,7 @@ export function Matchup({
     return (
       <span className="text-cream font-black">
         {special.star && (
-          <span aria-hidden="true" className="mr-1 text-[#ffd66b]">
+          <span aria-hidden="true" className="mr-1 text-[#ffd36b]">
             ★
           </span>
         )}

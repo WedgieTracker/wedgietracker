@@ -3,7 +3,7 @@ import { Permanent_Marker } from "next/font/google";
 const marker = Permanent_Marker({ weight: "400", subsets: ["latin"] });
 
 /** The stamp's inks: the ball in pink, the banner and its lettering darker. */
-const BALL_INK = "#ff4fc8";
+const BALL_INK = "#ff6fd8";
 const BANNER_INK = "#ad3792";
 const PAPER = "#f0e1b6";
 

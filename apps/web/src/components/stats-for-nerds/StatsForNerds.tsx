@@ -148,7 +148,7 @@ function Bars({ rows }: { rows: { label: string; count: number }[] }) {
           <span className="text-cream truncate">{r.label}</span>
           <span className="bg-violet/20 h-2 overflow-hidden rounded-full">
             <span
-              className={`block h-full rounded-full ${i === 0 ? "bg-[#F25CB5] shadow-[0_0_8px_rgb(242_92_181/0.6)]" : "bg-button"}`}
+              className={`block h-full rounded-full ${i === 0 ? "bg-[#FF6FD8] shadow-[0_0_8px_rgb(255_111_216/0.6)]" : "bg-button"}`}
               style={{ width: `${(r.count / max) * 100}%` }}
             />
           </span>
@@ -174,7 +174,7 @@ function Columns({ rows }: { rows: { label: string; count: number }[] }) {
             {r.count}
           </span>
           <span
-            className={`w-full rounded-t-md rounded-b-sm ${r.count === max ? "bg-[#F25CB5] shadow-[0_0_8px_rgb(242_92_181/0.5)]" : "bg-violet/40"}`}
+            className={`w-full rounded-t-md rounded-b-sm ${r.count === max ? "bg-[#FF6FD8] shadow-[0_0_8px_rgb(255_111_216/0.5)]" : "bg-violet/40"}`}
             style={{ height: `${(r.count / max) * 100}%` }}
           />
           <span className="text-cream/60 text-[10.5px] font-black">
@@ -203,7 +203,7 @@ function CourtHeat({ points }: { points: { x: number; y: number }[] }) {
           cx={(p.x / 100) * VIEW_W}
           cy={(p.y / 100) * VIEW_H}
           r={9}
-          fill="#F25CB5"
+          fill="#FF6FD8"
           fillOpacity={0.38}
         />
       ))}
