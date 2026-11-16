@@ -7,6 +7,7 @@ import { PlayButton } from "@/components/PlayButton";
 import { isGem, shortDate } from "@/lib/dates";
 import { colors, fonts } from "@/lib/theme";
 import type { VideoUrls } from "@wedgietracker/core/types/wedgie";
+import { wedgieNumberColour } from "@wedgietracker/core/utils/wedgieNumberColour";
 
 export interface WedgieRowData {
   id: number;
@@ -50,7 +51,10 @@ export function WedgieRow({
       style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
     >
       <View style={styles.numberCol}>
-        <Text style={styles.number} allowFontScaling={false}>
+        <Text
+          style={[styles.number, { color: wedgieNumberColour(wedgie.number) }]}
+          allowFontScaling={false}
+        >
           <Text style={styles.hash}>#</Text>
           {wedgie.number ?? 1}
         </Text>
@@ -122,7 +126,8 @@ const styles = StyleSheet.create({
     color: colors.cream,
   },
   // `text-[0.42em] opacity-55`, on the number's baseline.
-  hash: { fontSize: 15, letterSpacing: 0, color: "rgba(240, 225, 182, 0.55)" },
+  // In the number's own colour, faded.
+  hash: { fontSize: 15, letterSpacing: 0, opacity: 0.55 },
   gem: { marginTop: 4 },
   date: {
     marginTop: 3,

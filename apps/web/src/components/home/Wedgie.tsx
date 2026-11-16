@@ -8,6 +8,7 @@ import { CourtPositionDiagram } from "./CourtPositionDiagram";
 import type { WedgieWithTypes } from "@wedgietracker/core/types/wedgie";
 import { LocalDate } from "~/components/shared/LocalDate";
 import { PlayButton } from "./PlayIcon";
+import { wedgieNumberColour } from "@wedgietracker/core/utils/wedgieNumberColour";
 
 interface WedgieProps {
   wedgie: WedgieWithTypes;
@@ -47,7 +48,11 @@ export function Wedgie({
           }
         }}
       >
-        <span className="text-cream group-hover:text-violet text-4xl leading-none font-black tracking-[-0.04em] whitespace-nowrap italic transition-colors duration-200">
+        <span
+          // Each number in its own step of the badge ramp; cream on hover.
+          style={{ color: wedgieNumberColour(wedgie.number) }}
+          className="group-hover:text-cream! text-4xl leading-none font-black tracking-[-0.04em] whitespace-nowrap italic transition-colors duration-200"
+        >
           <span className="mr-[0.06em] text-[0.42em] tracking-normal opacity-55">
             #
           </span>
