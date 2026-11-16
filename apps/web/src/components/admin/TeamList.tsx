@@ -21,18 +21,18 @@ export function TeamList() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
-          <h2 className="text-xl font-bold text-white">Teams</h2>
+          <h2 className="text-cream text-xl font-bold">Teams</h2>
           <input
             type="text"
             placeholder="Search teams..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="rounded-md bg-white/10 px-3 py-2 text-white placeholder:text-white/50"
+            className="bg-panel text-cream placeholder:text-cream/50 rounded-md px-3 py-2"
           />
         </div>
         <Link
           href="/admin/teams/new"
-          className="border-cream bg-night text-cream hover:bg-cream rounded-md border-2 px-4 py-2 font-bold uppercase transition-colors duration-300 hover:text-black"
+          className="border-cream bg-night text-cream hover:bg-cream hover:text-night rounded-md border-2 px-4 py-2 font-bold uppercase transition-colors duration-300"
         >
           Add New Team
         </Link>
@@ -42,19 +42,19 @@ export function TeamList() {
         {filteredTeams?.map((team) => (
           <div
             key={team.id}
-            className="rounded-lg bg-white/10 p-6 text-white shadow-xs"
+            className="bg-panel text-cream rounded-lg p-6 shadow-xs"
           >
             <h3 className="text-lg font-semibold">{team.name}</h3>
-            <p className="mt-2 text-sm text-gray-300">
+            <p className="text-cream/70 mt-2 text-sm">
               Home Wedgies: {team.teamGames.length}
             </p>
-            <p className="mt-1 text-sm text-gray-300">
+            <p className="text-cream/70 mt-1 text-sm">
               Away Wedgies: {team.teamAgainstGames.length}
             </p>
             <div className="mt-4 flex space-x-4">
               <Link
                 href={`/admin/teams/${team.id}`}
-                className="border-cream bg-cream hover:bg-cream/80 rounded-md border-2 px-4 py-1 font-bold text-black uppercase transition-colors duration-300"
+                className="border-cream bg-cream hover:bg-cream/80 text-night rounded-md border-2 px-4 py-1 font-bold uppercase transition-colors duration-300"
               >
                 Edit
               </Link>
@@ -66,7 +66,7 @@ export function TeamList() {
                     });
                   }
                 }}
-                className="rounded-md border-2 border-red-500 bg-red-500 px-4 py-1 font-bold text-white uppercase transition-colors duration-300 hover:bg-red-600"
+                className="text-cream rounded-md border-2 border-[#FF6FD8] bg-[#FF6FD8] px-4 py-1 font-bold uppercase transition-colors duration-300 hover:bg-[#FF6FD8]/80"
               >
                 Delete
               </button>

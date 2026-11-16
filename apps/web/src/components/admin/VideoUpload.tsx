@@ -123,7 +123,7 @@ export function VideoUpload({
         />
         <label
           htmlFor="video-upload"
-          className={`hover:border-cream flex cursor-pointer items-center justify-center rounded-md border border-dashed border-gray-300 bg-white/5 p-6 text-white transition-all ${
+          className={`hover:border-cream border-violet/30 bg-panel text-cream flex cursor-pointer items-center justify-center rounded-md border border-dashed p-6 transition-all ${
             uploading ? "opacity-50" : ""
           }`}
         >
@@ -167,7 +167,7 @@ export function VideoUpload({
                     ? `Uploading... ${progress}%`
                     : "Click to upload or drag and drop"}
                 </p>
-                <p className="mt-1 text-xs text-gray-400">
+                <p className="text-cream/70 mt-1 text-xs">
                   MP4, WebM, Ogg, MOV (max 100MB)
                 </p>
               </>
@@ -177,8 +177,8 @@ export function VideoUpload({
       </div>
 
       {uploadedUrl && (
-        <div className="mt-2 rounded-md bg-green-500/10 p-3">
-          <p className="text-sm text-white">
+        <div className="bg-violet/15 mt-2 rounded-md p-3">
+          <p className="text-cream text-sm">
             <span className="font-semibold">Video URL:</span>{" "}
             <a
               href={uploadedUrl}

@@ -30,10 +30,10 @@ export function ShoutoutsInput({ id, value, onChange }: ShoutoutsInputProps) {
           onChange(parseShoutouts(e.target.value));
         }}
         onBlur={() => setText(parsed.map((h) => `@${h}`).join(", "))}
-        className="block w-full rounded-md border-gray-300 bg-white/5 p-2 text-white"
+        className="border-violet/30 bg-panel text-cream block w-full rounded-md p-2"
       />
       {parsed.length > 0 && (
-        <p className="text-xs text-white/60">
+        <p className="text-cream/60 text-xs">
           Will show: {parsed.map((h) => `@${h}`).join(", ")}
         </p>
       )}

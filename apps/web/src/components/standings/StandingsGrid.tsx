@@ -12,6 +12,8 @@ interface StandingsGridProps {
   }>;
   isLoading: boolean;
   currentSeason: string;
+  tab?: "players" | "teams";
+  onTabChange?: (tab: "players" | "teams") => void;
 }
 
 export function StandingsGrid({
@@ -19,6 +21,8 @@ export function StandingsGrid({
   teams,
   isLoading,
   currentSeason,
+  tab,
+  onTabChange,
 }: StandingsGridProps) {
   if (isLoading) {
     return (
@@ -36,6 +40,8 @@ export function StandingsGrid({
       teams={teams}
       season={currentSeason || ""}
       limit={20}
+      tab={tab}
+      onTabChange={onTabChange}
     />
   );
 }

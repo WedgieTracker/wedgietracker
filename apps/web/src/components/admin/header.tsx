@@ -8,7 +8,7 @@ export function AdminHeader() {
       <div className="flex items-center gap-4">
         <SidebarTrigger
           variant={"secondary"}
-          className="bg-cream hover:bg-cream/80 text-black"
+          className="bg-cream hover:bg-cream/80 text-night"
         />
         <LogoComponent />
       </div>

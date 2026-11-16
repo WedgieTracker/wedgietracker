@@ -78,11 +78,11 @@ export function YouTubeUploadForm({ wedgie }: YouTubeUploadFormProps) {
   };
 
   return (
-    <div className="w-full space-y-8 rounded-lg bg-white/10 p-6 text-white">
+    <div className="bg-panel text-cream w-full space-y-8 rounded-lg p-6">
       <div className="flex items-center justify-between">
         <button
           onClick={() => setShowPreview(!showPreview)}
-          className="rounded bg-blue-500 px-3 py-1 text-sm font-bold text-white hover:bg-blue-600"
+          className="bg-violet text-cream hover:bg-violet rounded px-3 py-1 text-sm font-bold"
         >
           {showPreview ? "Hide Preview" : "Show Preview"}
         </button>
@@ -129,7 +129,7 @@ export function YouTubeUploadForm({ wedgie }: YouTubeUploadFormProps) {
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="mt-1 block w-full rounded border border-gray-600 bg-gray-700 px-3 py-2"
+            className="border-violet/30 bg-panel mt-1 block w-full rounded border px-3 py-2"
             required
           />
         </div>
@@ -142,7 +142,7 @@ export function YouTubeUploadForm({ wedgie }: YouTubeUploadFormProps) {
             id="yt-description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="mt-1 block w-full rounded border border-gray-600 bg-gray-700 px-3 py-2"
+            className="border-violet/30 bg-panel mt-1 block w-full rounded border px-3 py-2"
             rows={6}
           />
         </div>
@@ -152,7 +152,7 @@ export function YouTubeUploadForm({ wedgie }: YouTubeUploadFormProps) {
           disabled={
             uploading || !hostedVideo(wedgie.videoUrl as VideoUrls | null)
           }
-          className="w-full rounded bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+          className="bg-violet text-cream hover:bg-violet/80 w-full rounded px-4 py-2 font-medium disabled:opacity-50"
         >
           {uploading ? "Uploading..." : "Upload Video"}
         </button>
@@ -161,7 +161,7 @@ export function YouTubeUploadForm({ wedgie }: YouTubeUploadFormProps) {
       {result && (
         <div
           className={`mt-4 rounded p-3 ${
-            result.success ? "bg-green-800/50" : "bg-red-800/50"
+            result.success ? "bg-violet/20" : "bg-[#FF6FD8]/15"
           }`}
         >
           {result.success ? (
