@@ -125,15 +125,19 @@ const styles = StyleSheet.create({
   board: {
     flex: 1,
     alignItems: "center",
-    paddingHorizontal: 8,
-    paddingVertical: 10,
+    paddingHorizontal: 4,
+    paddingVertical: 6,
     borderRadius: 10,
     backgroundColor: "rgba(10, 4, 30, 0.45)",
   },
   boardLabel: { fontSize: 11, color: "rgba(240, 225, 182, 0.75)" },
+  // iOS clips a text shadow to the text's own box, so the glow needs room
+  // inside it: padding around the digits rather than margin.
   digits: {
     fontSize: 54,
     lineHeight: 60,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
     fontVariant: ["tabular-nums"],
     textShadowRadius: 10,
     textShadowOffset: { width: 0, height: 0 },
