@@ -74,7 +74,7 @@ const LAYOUTS: Record<VideoFormat, Layout> = {
     date: { cx: 540, y: 345, size: 34 },
     hero: { x: 110, y: 420, w: 860, h: 780 },
     pace: { x: 110, y: 1270, w: 470, h: 400 },
-    calendar: { x: 640, y: 1270, w: 330, h: 400 },
+    calendar: { x: 640, y: 1318, w: 330, h: 304 },
     footer: { cx: 540, y: 1760, size: 44 },
   },
   landscape: {
@@ -82,7 +82,7 @@ const LAYOUTS: Record<VideoFormat, Layout> = {
     date: { cx: 960, y: 200, size: 26 },
     hero: { x: 640, y: 250, w: 640, h: 600 },
     pace: { x: 150, y: 370, w: 420, h: 360 },
-    calendar: { x: 1400, y: 370, w: 300, h: 360 },
+    calendar: { x: 1400, y: 412, w: 300, h: 276 },
     footer: { cx: 960, y: 930, size: 34 },
   },
 };
@@ -334,7 +334,7 @@ function badgeText(
 
 function drawLogo(scene: Scene, layout: Layout, t: number) {
   const { ctx, assets } = scene;
-  const { logo, date } = layout;
+  const { logo } = layout;
   const h = logo.w / assets.logoAspect;
   ctx.save();
   if (enter(ctx, t, 0, 0.6, { x: 0, y: logo.y, w: 0, h }, { lift: -30 })) {
@@ -343,17 +343,6 @@ function drawLogo(scene: Scene, layout: Layout, t: number) {
     } else {
       badgeText(ctx, "WEDGIETRACKER", logo.cx, logo.y + h * 0.7, h * 0.5);
     }
-    ctx.font = font(800, date.size);
-    ctx.textAlign = "center";
-    ctx.fillStyle = "rgb(240 225 182 / 0.75)";
-    const label = scene.now
-      .toLocaleDateString("en-GB", {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-      })
-      .toUpperCase();
-    ctx.fillText(label, date.cx, date.y);
   }
   ctx.restore();
 }
@@ -407,7 +396,7 @@ function drawPace(scene: Scene, layout: Layout, t: number) {
     if (showPace) {
       // The arc from PaceGauge: half a circle that ends at the record.
       const r = box.w * 0.36;
-      const cy = box.y + box.h * 0.66;
+      const cy = box.y + box.h * 0.7;
       const stroke = box.w * 0.075;
       ctx.lineCap = "round";
       ctx.lineWidth = stroke;
@@ -443,13 +432,11 @@ function drawPace(scene: Scene, layout: Layout, t: number) {
 
       ctx.font = font(800, box.w * 0.05);
       ctx.fillStyle = "rgb(240 225 182 / 0.55)";
-      ctx.fillText("0", cx - r, cy + box.h * 0.17);
+      // 0 and the record sit along the card's bottom edge.
+      const labelY = box.y + box.h - box.h * 0.09;
+      ctx.fillText("0", cx - r, labelY);
       ctx.fillStyle = CREAM;
-      ctx.fillText(
-        `Record ${stats.previousRecord}`,
-        cx + r * 0.75,
-        cy + box.h * 0.17,
-      );
+      ctx.fillText(`Record ${stats.previousRecord}`, cx + r * 0.75, labelY);
     } else {
       // Before the pace means anything, the page shows games played instead.
       const games = countUp(stats.gamesPlayed, t, 1.7, 1.4);
@@ -569,11 +556,11 @@ function drawCalendar(scene: Scene, layout: Layout, t: number) {
         ctx,
         String(daysWithoutWedgie),
         900,
-        body.h * 0.5,
+        body.h * 0.56,
         body.w * 0.8,
       );
       ctx.save();
-      const y = body.y + body.h * 0.58;
+      const y = body.y + body.h * 0.6;
       ctx.translate(cx, y);
       ctx.transform(1, 0, ITALIC_SKEW, 1, 0, 0);
       ctx.font = font(900, size);
@@ -585,9 +572,9 @@ function drawCalendar(scene: Scene, layout: Layout, t: number) {
       ctx.fillText(
         `${daysWithoutWedgie === 1 ? "day" : "days"} without`,
         cx,
-        body.y + body.h * 0.76,
+        body.y + body.h * 0.77,
       );
-      ctx.fillText("a wedgie", cx, body.y + body.h * 0.87);
+      ctx.fillText("a wedgie", cx, body.y + body.h * 0.9);
     }
   }
   ctx.restore();
