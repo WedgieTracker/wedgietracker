@@ -92,7 +92,7 @@ export function ShareableStatsVideo({ stats }: ShareableStatsVideoProps) {
               {status.kind === "error" && (
                 <p
                   role="alert"
-                  className="rounded-[14px] border border-[#ff4fc8]/40 bg-[#ff4fc8]/10 px-4 py-3 text-sm font-bold text-[#ffb3e6]"
+                  className="rounded-[14px] border border-[#ff6fd8]/40 bg-[#ff6fd8]/10 px-4 py-3 text-sm font-bold text-[#ffb3e6]"
                 >
                   {status.message}
                 </p>

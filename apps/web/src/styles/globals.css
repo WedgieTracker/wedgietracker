@@ -786,7 +786,7 @@ html {
   background: rgb(5 2 12 / 0.55);
 }
 .wt-flap-amber {
-  color: #ffcf6b;
+  color: #ffd36b;
   text-shadow: 0 0 8px rgb(255 207 107 / 0.45);
 }
 @media (prefers-reduced-motion: no-preference) {
@@ -845,7 +845,7 @@ html {
   left: 0;
   height: 2px;
   border-radius: 2px;
-  background: #f25cb5;
+  background: #ff6fd8;
   box-shadow: 0 0 6px rgb(242 92 181 / 0.9);
 }
 .wt-live-ball {

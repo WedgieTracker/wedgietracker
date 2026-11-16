@@ -191,7 +191,7 @@ export const CONFETTI_COLORS = [
   "#f0e1b6",
   "#9a5cf5",
   "#5f84e6",
-  "#ff4fc8",
+  "#ff6fd8",
   "#f7e8c7",
 ] as const;
 

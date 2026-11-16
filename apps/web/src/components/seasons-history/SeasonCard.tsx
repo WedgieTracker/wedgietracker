@@ -79,7 +79,7 @@ export function SeasonCard({ season }: SeasonCardProps) {
               key={i}
               className={`h-3.5 min-w-0 flex-1 rounded-[3px] ${
                 i === perWedgie - 1
-                  ? "bg-[#F25CB5] shadow-[0_0_8px_rgb(242_92_181/0.6)]"
+                  ? "bg-[#FF6FD8] shadow-[0_0_8px_rgb(255_111_216/0.6)]"
                   : "bg-cream/15"
               }`}
             />

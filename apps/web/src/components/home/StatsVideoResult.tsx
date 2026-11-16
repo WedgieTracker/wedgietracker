@@ -44,7 +44,7 @@ export function StatsVideoResult({ video, onReset }: StatsVideoResultProps) {
         {(video.renderMs / 1000).toFixed(1)}s
       </p>
       {isWebm && (
-        <p className="text-cream/80 rounded-[14px] border border-[#ff4fc8]/40 bg-[#ff4fc8]/10 px-4 py-3 text-sm font-semibold">
+        <p className="text-cream/80 rounded-[14px] border border-[#ff6fd8]/40 bg-[#ff6fd8]/10 px-4 py-3 text-sm font-semibold">
           This browser could only make a WebM, which Instagram and iPhones
           won&apos;t take. For an MP4, use the latest Chrome, Edge or Safari.
         </p>
