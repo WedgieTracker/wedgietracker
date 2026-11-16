@@ -98,11 +98,11 @@ export function GameSearchInput({
           onChange(e.target.value);
         }}
         onFocus={() => setIsOpen(true)}
-        className="mt-1 block w-full rounded-md border-gray-300 bg-white/10 p-2 text-white"
+        className="border-violet/30 bg-panel text-cream mt-1 block w-full rounded-md p-2"
         placeholder="Search a game (POR @ HOU, a team, or 2018-03-24)..."
       />
       {isOpen && games.data && (
-        <div className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-gray-800 shadow-lg">
+        <div className="bg-panel absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md shadow-lg">
           {games.data.map((game) => {
             const day = game.gameDate ?? parseGameName(game.name)?.gameDate;
             const tip = parseGameName(game.name)?.tip;
@@ -110,11 +110,11 @@ export function GameSearchInput({
               <button
                 type="button"
                 key={game.id}
-                className="w-full cursor-pointer px-4 py-2 text-left text-white hover:bg-gray-700"
+                className="text-cream hover:bg-panel w-full cursor-pointer px-4 py-2 text-left"
                 onClick={() => handleGameSelect(game)}
               >
                 <div className="font-bold">{gameLabel(game)}</div>
-                <div className="text-sm text-gray-400">
+                <div className="text-cream/70 text-sm">
                   {gameMatchup(game)}
                   {day ? `, ${formatDay(day)}` : ""}
                   {tip ? `, ${tip} ET` : ""}

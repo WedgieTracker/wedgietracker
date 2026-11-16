@@ -17,6 +17,12 @@ interface StandingsFiltersProps {
   includeOpponents: boolean;
   setIncludeOpponents: (value: boolean) => void;
   isLoading: boolean;
+  /**
+   * Whether the Teams list is showing on a phone. The opponents switch only
+   * changes the teams, so below md it shows with them; from md up both lists
+   * are side by side and it always shows.
+   */
+  teamsShown: boolean;
 }
 
 /**
@@ -29,6 +35,7 @@ export function StandingsFilters({
   includeOpponents,
   setIncludeOpponents,
   isLoading,
+  teamsShown,
 }: StandingsFiltersProps) {
   const { data: allWedgies } = api.wedgie.getAll.useQuery();
   const [open, setOpen] = useState(false);
@@ -82,7 +89,7 @@ export function StandingsFilters({
         aria-checked={includeOpponents}
         onClick={() => setIncludeOpponents(!includeOpponents)}
         aria-describedby="opponents-note"
-        className="bg-panel border-violet/30 text-cream hover:border-cream/60 focus-visible:outline-cream inline-flex min-h-10 items-center gap-2.5 rounded-xl border pr-2 pl-3 text-[13.5px] font-extrabold transition-colors focus-visible:outline-2"
+        className={`${teamsShown ? "inline-flex" : "hidden md:inline-flex"} bg-panel border-violet/30 text-cream hover:border-cream/60 focus-visible:outline-cream min-h-10 items-center gap-2.5 rounded-xl border pr-2 pl-3 text-[13.5px] font-extrabold transition-colors focus-visible:outline-2`}
       >
         Including opponents
         <span
@@ -99,7 +106,7 @@ export function StandingsFilters({
 
       <p
         id="opponents-note"
-        className="text-cream/50 w-full pl-0.5 text-[12.5px] font-bold"
+        className={`${teamsShown ? "" : "hidden md:block"} text-cream/50 w-full pl-0.5 text-[12.5px] font-bold`}
       >
         {includeOpponents
           ? "Teams also count the other side's wedgies in their games."

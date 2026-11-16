@@ -25,7 +25,7 @@ export function CourtPositionPicker({
       {/* Aspect ratio container */}
       <div
         style={{ paddingBottom: "73.3%" }}
-        className="relative border-2 border-white/10"
+        className="border-violet/20 relative border-2"
       >
         {/* Court background - Click handler moved here */}
         <button
@@ -54,7 +54,7 @@ export function CourtPositionPicker({
         </div>
       </div>
 
-      <div className="mt-2 text-center text-sm text-white">
+      <div className="text-cream mt-2 text-center text-sm">
         Position: x: {position.x}, y: {position.y}
       </div>
     </div>

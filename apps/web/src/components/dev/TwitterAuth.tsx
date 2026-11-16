@@ -14,11 +14,9 @@ export function TwitterAuth() {
   return (
     <div className="space-y-4">
       {isAuthenticated ? (
-        <p className="text-sm text-green-500">
-          ✓ Twitter credentials configured
-        </p>
+        <p className="text-violet text-sm">✓ Twitter credentials configured</p>
       ) : (
-        <p className="text-sm text-red-500">
+        <p className="text-sm text-[#FF6FD8]">
           × Twitter credentials not configured
         </p>
       )}

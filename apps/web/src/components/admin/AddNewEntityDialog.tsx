@@ -21,17 +21,17 @@ export function AddNewEntityDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <div className="fixed inset-0 z-50 bg-black/50" />
       <div className="bg-night fixed top-1/2 left-1/2 z-50 -translate-x-1/2 -translate-y-1/2 rounded-lg p-6">
-        <h2 className="mb-4 text-lg font-bold text-white">
+        <h2 className="text-cream mb-4 text-lg font-bold">
           Add New {entityLabel}
         </h2>
-        <p className="mb-4 text-white">
+        <p className="text-cream mb-4">
           Are you sure you want to add &quot;{searchValue}&quot; as a new{" "}
           {entityLabel.toLowerCase()}?
         </p>
         <div className="flex justify-end space-x-4">
           <button
             type="button"
-            className="px-4 py-2 text-white hover:text-gray-300"
+            className="text-cream hover:text-cream/70 px-4 py-2"
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
@@ -42,7 +42,7 @@ export function AddNewEntityDialog({
           </button>
           <button
             type="button"
-            className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+            className="bg-violet text-cream hover:bg-violet/80 rounded-md px-4 py-2"
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();

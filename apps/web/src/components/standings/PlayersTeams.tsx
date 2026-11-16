@@ -19,14 +19,21 @@ export function PlayersTeams({
   season,
   limit,
   showCount,
+  tab: controlledTab,
+  onTabChange,
 }: {
   players: Item[];
   teams: Item[];
   season?: string;
   limit?: number;
   showCount?: boolean;
+  /** Set both to control the phone switch from outside (Standings does). */
+  tab?: "players" | "teams";
+  onTabChange?: (tab: "players" | "teams") => void;
 }) {
-  const [tab, setTab] = useState<"players" | "teams">("players");
+  const [ownTab, setOwnTab] = useState<"players" | "teams">("players");
+  const tab = controlledTab ?? ownTab;
+  const setTab = onTabChange ?? setOwnTab;
   const href = (name: string) =>
     `/all-wedgies?${buildAllWedgiesQuery({ playerOrTeam: name, ...(season !== undefined ? { season } : {}) })}`;
 
