@@ -1,11 +1,13 @@
 /**
  * Games, read from their own columns.
  *
- * A game row has `home_team`, `away_team` and `game_date` (the US Eastern
- * calendar day, YYYY-MM-DD). Its `name` is the older text key,
- * "HOME @ AWAY - <tip>", home team first: the reverse of NBA notation, where
- * "@" means away @ home. Nothing should show `name` or parse it outside this
- * file; every label is built here from the columns.
+ * A game row has `home_team`, `away_team`, `game_date` (the US Eastern
+ * calendar day, YYYY-MM-DD) and `tip_at` (the real tip-off as an ISO UTC
+ * instant, null when unknown). Its `name` is the older text key,
+ * "HOME @ AWAY - <date and time>", home team first: the reverse of NBA
+ * notation, where "@" means away @ home. Nothing should show `name` or parse it
+ * outside this file; every label is built here from the columns. The time in a
+ * name is never read as a time: a game's tip-off is `tip_at` or unknown.
  */
 
 /** Teams of the All-Star Game, whose wedgies don't name a real opponent. */
@@ -30,28 +32,47 @@ export interface GameLike {
   homeTeam?: string | null;
   awayTeam?: string | null;
   gameDate?: string | null;
+  /** The real tip-off, an ISO UTC instant; null when unknown. */
+  tipAt?: string | null;
 }
 
-const NAME = /^(.+?) @ (.+?) - (\d{4}-\d{2}-\d{2})(?:T(.*))?$/;
+const NAME = /^(.+?) @ (.+?) - (\d{4}-\d{2}-\d{2})(?:T.*)?$/;
 
 /**
- * The columns a game name stands for, the same way migration 0002 backfilled
- * them: "HOU @ NOP - 2018-03-24T00:00:00.000Z" is Houston at home to New
- * Orleans on 24 March 2018.
+ * The teams and day a game name stands for, the same way migration 0002
+ * backfilled them: "HOU @ NOP - 2018-03-24T00:00:00.000Z" is Houston at home
+ * to New Orleans on 24 March 2018. Whatever follows the day is ignored: the
+ * tip-off is `tip_at`, never the name.
  */
 export function parseGameName(
   name: string | null | undefined,
-): (GameColumns & { tip: string | null }) | null {
+): GameColumns | null {
   const m = name ? NAME.exec(name) : null;
   if (!m) return null;
-  const time = m[4]?.replace(/Z$/, "").replace(/\.\d+$/, "") ?? "";
-  return {
-    homeTeam: m[1]!,
-    awayTeam: m[2]!,
-    gameDate: m[3]!,
-    // the tip-off in Eastern local time; older games are stored at midnight, which means unknown
-    tip: time && !/^00:00(:00)?$/.test(time) ? time.slice(0, 5) : null,
-  };
+  return { homeTeam: m[1]!, awayTeam: m[2]!, gameDate: m[3]! };
+}
+
+/** The US Eastern calendar day of an instant, YYYY-MM-DD. */
+export function easternDay(date: Date | string): string {
+  return new Date(date).toLocaleDateString("en-CA", {
+    timeZone: "America/New_York",
+  });
+}
+
+/**
+ * The game's tip-off as US Eastern wall-clock time, "19:30", from `tipAt`;
+ * null when the tip-off isn't known, whatever the name says.
+ */
+export function gameTipEastern(game: GameLike): string | null {
+  if (!game.tipAt) return null;
+  const at = new Date(game.tipAt);
+  if (Number.isNaN(at.getTime())) return null;
+  return at.toLocaleTimeString("en-GB", {
+    timeZone: "America/New_York",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  });
 }
 
 /** The game's teams and day, from its columns (or its name on a row not yet backfilled). */
@@ -120,10 +141,6 @@ export function gameTeamsProblem(
     (team === c.awayTeam && against === c.homeTeam);
   if (matches) return null;
   return `${team} v ${against} is not the game ${gameLabel(c)} on ${c.gameDate} (${c.awayTeam} at ${c.homeTeam})`;
-}
-
-function easternDay(date: Date) {
-  return date.toLocaleDateString("en-CA", { timeZone: "America/New_York" });
 }
 
 /**
