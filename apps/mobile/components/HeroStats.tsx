@@ -147,7 +147,7 @@ function PaceRow({
 
 /** The live badge's own colours: the coffee scoreboard's glass, a pink rim. */
 const GLASS = "#0D0620";
-const RIM = "#F25CB5";
+const RIM = "#FF6FD8";
 
 /**
  * One bounce, 0.9s, as the web's `lb-bounce` keyframes: the ball drops 7pt
@@ -352,7 +352,7 @@ const styles = StyleSheet.create({
     height: 2,
     borderRadius: 2,
     backgroundColor: RIM,
-    boxShadow: "0 0 6px rgba(242, 92, 181, 0.9)",
+    boxShadow: "0 0 6px rgba(255, 111, 216, 0.9)",
   },
   liveBall: {
     position: "absolute",

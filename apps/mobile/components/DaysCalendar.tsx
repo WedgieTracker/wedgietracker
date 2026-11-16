@@ -17,7 +17,7 @@ import { GradientFill } from "@/components/Gradient";
 import { colors, fonts } from "@/lib/theme";
 
 /** The stamp's inks: the ball in pink, the banner and its lettering darker. */
-const BALL_INK = "#ff4fc8";
+const BALL_INK = "#ff6fd8";
 const BANNER_INK = "#ad3792";
 
 const WIDTH = 118;

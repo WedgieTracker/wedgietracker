@@ -36,7 +36,7 @@ const DIGITS = " 0123456789";
 const LETTERS = " ABCDEFGHIJKLMNOPQRSTUVWXYZ.";
 const STEP_MS = 45;
 const HOLD_MS = 4200;
-const AMBER = "#FFCF6B";
+const AMBER = "#FFD36B";
 
 /** The board's text for one stat: the figure right-aligned, the word left. */
 function boardText(stats: StatsPerWedgie, i: number) {
@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
   },
   amber: {
     color: AMBER,
-    textShadowColor: "rgba(255, 207, 107, 0.45)",
+    textShadowColor: "rgba(255, 211, 107, 0.45)",
     textShadowRadius: 8,
     textShadowOffset: { width: 0, height: 0 },
   },

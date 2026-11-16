@@ -26,7 +26,7 @@ export function Matchup({
   if (special) {
     return (
       <Text style={{ fontFamily: fonts.black, color: colors.cream }}>
-        {special.star ? <Text style={{ color: "#FFD66B" }}>★ </Text> : null}
+        {special.star ? <Text style={{ color: "#FFD36B" }}>★ </Text> : null}
         {special.label}
       </Text>
     );

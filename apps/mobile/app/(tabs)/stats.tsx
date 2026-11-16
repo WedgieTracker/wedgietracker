@@ -32,7 +32,7 @@ import { TEAMS } from "@wedgietracker/core/utils/teamAliases";
 type NerdStats = RouterOutputs["wedgie"]["getNerdStats"];
 type NerdExtras = RouterOutputs["wedgie"]["getNerdExtras"];
 
-const PINK = "#F25CB5";
+const PINK = "#FF6FD8";
 const VIEW_W = 1023.9248;
 const VIEW_H = 751.14307;
 

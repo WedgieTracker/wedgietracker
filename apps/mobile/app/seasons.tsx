@@ -311,7 +311,7 @@ function SeasonCard({
   );
 }
 
-const PINK = "#F25CB5";
+const PINK = "#FF6FD8";
 
 const styles = StyleSheet.create({
   sortRow: { marginTop: 24, marginBottom: 14, alignItems: "flex-end" },

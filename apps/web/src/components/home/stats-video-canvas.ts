@@ -492,7 +492,7 @@ function circleAround(
   ctx.save();
   ctx.lineWidth = box.w * 0.025;
   ctx.lineCap = "round";
-  ctx.strokeStyle = "#ff4fc8";
+  ctx.strokeStyle = "#ff6fd8";
   ctx.beginPath();
   ctx.ellipse(cx, cy, rx, ry, -0.05, start, start + Math.PI * 2.1 * progress);
   ctx.stroke();
@@ -559,7 +559,7 @@ function drawCalendar(scene: Scene, layout: Layout, t: number) {
       );
       const size = fitSize(ctx, "WEDGIE", 900, body.w * 0.22, body.w * 0.72);
       ctx.font = font(900, size);
-      ctx.fillStyle = "#e0359f";
+      ctx.fillStyle = "#ff6fd8";
       ctx.fillText("NEW", cx, body.y + body.h * 0.47);
       ctx.fillStyle = "#502394";
       ctx.fillText("WEDGIE", cx, body.y + body.h * 0.47 + size * 0.95);
