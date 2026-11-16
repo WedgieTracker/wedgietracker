@@ -185,7 +185,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 20,
     paddingHorizontal: 14,
-    paddingTop: 18,
+    // Less than the site's 18: keeps the pace and calendar row short.
+    paddingTop: 10,
     paddingBottom: 12,
   },
   dial: {

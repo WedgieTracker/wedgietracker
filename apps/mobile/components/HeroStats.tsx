@@ -277,8 +277,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     paddingTop: 48,
     // Room for the live badge under the grid, kept whether or not it shows,
-    // so a live night does not push the page down when the stats land.
-    paddingBottom: 46,
+    // so a live night does not push the page down when the stats land. The
+    // badge sits midway, the same gap above it as below it.
+    paddingBottom: 50,
   },
   // Straddles the seam between the badge and the night.
   moreStats: {
@@ -326,7 +327,8 @@ const styles = StyleSheet.create({
   // Centred under the pace and calendar, as the site does on phones.
   liveBadge: {
     position: "absolute",
-    bottom: 10,
+    // About 30 tall: 14 clear above it and 14 (with the column's 8) below.
+    bottom: 6,
     alignSelf: "center",
     flexDirection: "row",
     alignItems: "center",
