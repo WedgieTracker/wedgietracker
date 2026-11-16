@@ -14,7 +14,7 @@ async function AuthenticatedAdmin({ children }: { children: React.ReactNode }) {
 
   if (!session) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-gray-100">
+      <main className="bg-night flex min-h-screen items-center justify-center">
         <div className="text-center">
           <SignIn />
         </div>
@@ -24,7 +24,7 @@ async function AuthenticatedAdmin({ children }: { children: React.ReactNode }) {
 
   if (!isAllowedEmail(session.user.email)) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-gray-100">
+      <main className="bg-night flex min-h-screen items-center justify-center">
         <div className="space-y-4 text-center">
           <p>This account doesn&apos;t have admin access.</p>
           <SignOut />
@@ -55,7 +55,7 @@ export default function AdminLayout({
     <Suspense
       fallback={
         <main className="bg-night flex min-h-screen items-center justify-center">
-          <div className="text-white">Loading...</div>
+          <div className="text-cream">Loading...</div>
         </main>
       }
     >

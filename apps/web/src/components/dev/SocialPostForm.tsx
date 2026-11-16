@@ -81,11 +81,11 @@ export function SocialPostForm({
   };
 
   return (
-    <div className="w-full rounded-lg bg-white/10 p-6 text-white">
+    <div className="bg-panel text-cream w-full rounded-lg p-6">
       <div className="mb-6 flex items-center justify-between">
         <button
           onClick={() => setShowPreview(!showPreview)}
-          className="rounded bg-blue-500 px-3 py-1 text-sm font-bold text-white hover:bg-blue-600"
+          className="bg-violet text-cream hover:bg-violet rounded px-3 py-1 text-sm font-bold"
         >
           {showPreview ? "Hide Preview" : "Show Preview"}
         </button>
@@ -106,13 +106,13 @@ export function SocialPostForm({
         <div>
           <label
             htmlFor="social-custom-message"
-            className="mb-2 block text-sm font-medium text-white"
+            className="text-cream mb-2 block text-sm font-medium"
           >
             Custom Message (optional)
           </label>
           <textarea
             id="social-custom-message"
-            className="w-full rounded-md border border-white/10 p-2 text-black focus:border-indigo-500 focus:ring-indigo-500"
+            className="border-violet/20 text-night focus:border-violet focus:ring-violet w-full rounded-md border p-2"
             placeholder="Enter your custom message"
             value={customMessage}
             onChange={(e) => setCustomMessage(e.target.value)}
@@ -120,15 +120,15 @@ export function SocialPostForm({
           />
         </div>
 
-        <div className="rounded-md border border-white/10 p-4">
+        <div className="border-violet/20 rounded-md border p-4">
           <h3 className="mb-2 font-semibold">Preview:</h3>
-          <p className="text-sm whitespace-pre-wrap text-white">
+          <p className="text-cream text-sm whitespace-pre-wrap">
             {generatePreview()}
           </p>
         </div>
 
         <Button
-          className="w-full bg-blue-500 hover:bg-blue-600"
+          className="bg-violet hover:bg-violet w-full"
           onClick={handlePost}
           disabled={isPosting}
         >

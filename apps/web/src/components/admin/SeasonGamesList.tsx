@@ -11,7 +11,7 @@ export function SeasonGamesList() {
 
   if (isLoading) {
     return (
-      <div className="text-center text-white">
+      <div className="text-cream text-center">
         <p>Loading seasons data...</p>
       </div>
     );
@@ -19,7 +19,7 @@ export function SeasonGamesList() {
 
   if (!seasonsWithGames) {
     return (
-      <div className="text-center text-white">
+      <div className="text-cream text-center">
         <p>No seasons data available</p>
       </div>
     );
@@ -28,17 +28,17 @@ export function SeasonGamesList() {
   return (
     <div>
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-white">Games per Season</h2>
+        <h2 className="text-cream text-2xl font-bold">Games per Season</h2>
       </div>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {seasonsWithGames.map((season) => (
           <div
             key={season.id}
-            className="rounded-lg bg-white/10 p-6 text-white shadow-xs"
+            className="bg-panel text-cream rounded-lg p-6 shadow-xs"
           >
             <h3 className="text-lg font-semibold">{season.name}</h3>
             <div className="mt-4 space-y-2">
-              <p className="text-sm text-gray-300">
+              <p className="text-cream/70 text-sm">
                 Total Games: {season._count.games}
               </p>
             </div>

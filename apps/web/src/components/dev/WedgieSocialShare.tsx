@@ -13,30 +13,30 @@ interface WedgieSocialShareProps {
 export function WedgieSocialShare({ wedgie }: WedgieSocialShareProps) {
   return (
     <div className="mt-8">
-      <h2 className="mb-6 text-2xl font-bold text-white">Share Wedgie</h2>
+      <h2 className="text-cream mb-6 text-2xl font-bold">Share Wedgie</h2>
       <Tabs defaultValue="youtube" className="mb-6">
-        <TabsList className="mb-2 grid w-full grid-cols-4 bg-white/10">
+        <TabsList className="bg-panel mb-2 grid w-full grid-cols-4">
           <TabsTrigger
             value="youtube"
-            className="data-[state=active]:bg-cream text-white"
+            className="data-[state=active]:bg-cream text-cream"
           >
             YouTube
           </TabsTrigger>
           <TabsTrigger
             value="instagram"
-            className="data-[state=active]:bg-cream text-white"
+            className="data-[state=active]:bg-cream text-cream"
           >
             Instagram
           </TabsTrigger>
           <TabsTrigger
             value="twitter"
-            className="data-[state=active]:bg-cream text-white"
+            className="data-[state=active]:bg-cream text-cream"
           >
             Twitter
           </TabsTrigger>
           <TabsTrigger
             value="bluesky"
-            className="data-[state=active]:bg-cream text-white"
+            className="data-[state=active]:bg-cream text-cream"
           >
             Bluesky
           </TabsTrigger>

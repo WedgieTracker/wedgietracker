@@ -20,10 +20,10 @@ export function VideoUrlInput({
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="block w-full rounded-md border-gray-300 bg-white/5 p-2 text-white"
+        className="border-violet/30 bg-panel text-cream block w-full rounded-md p-2"
       />
       {value && (
-        <span className="absolute top-2 right-2 rounded bg-green-500 px-2 py-1 text-xs font-bold text-black">
+        <span className="bg-violet text-night absolute top-2 right-2 rounded px-2 py-1 text-xs font-bold">
           {badge}
         </span>
       )}

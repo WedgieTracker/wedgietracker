@@ -29,11 +29,11 @@ export function WedgieList({ seasons, currentSeason }: WedgieListProps) {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
-          <h2 className="text-xl font-bold text-white">Wedgies</h2>
+          <h2 className="text-cream text-xl font-bold">Wedgies</h2>
           <select
             value={selectedSeason}
             onChange={(e) => setSelectedSeason(e.target.value)}
-            className="rounded-md bg-white/10 px-3 py-2 text-white"
+            className="bg-panel text-cream rounded-md px-3 py-2"
           >
             {seasons.map((season) => (
               <option key={season.name} value={season.name}>
@@ -44,7 +44,7 @@ export function WedgieList({ seasons, currentSeason }: WedgieListProps) {
         </div>
         <Link
           href="/admin/wedgies/new"
-          className="border-cream bg-night text-cream hover:bg-cream rounded-md border-2 px-4 py-2 font-bold uppercase transition-colors duration-300 hover:text-black"
+          className="border-cream bg-night text-cream hover:bg-cream hover:text-night rounded-md border-2 px-4 py-2 font-bold uppercase transition-colors duration-300"
         >
           Add New Wedgie
         </Link>
@@ -54,12 +54,12 @@ export function WedgieList({ seasons, currentSeason }: WedgieListProps) {
         {wedgies?.map((wedgie) => (
           <div
             key={wedgie.id}
-            className="rounded-lg bg-white/10 p-6 text-white shadow-xs"
+            className="bg-panel text-cream rounded-lg p-6 shadow-xs"
           >
             <h3 className="text-lg font-semibold">
               #{wedgie.number} - {wedgie.playerName}
             </h3>
-            <p suppressHydrationWarning className="mt-1 text-sm text-gray-300">
+            <p suppressHydrationWarning className="text-cream/70 mt-1 text-sm">
               {wedgie.teamName} - {wedgie.teamAgainstName} |{" "}
               {isGemsDate(new Date(wedgie.wedgieDate))
                 ? "GEM, no date"
@@ -68,7 +68,7 @@ export function WedgieList({ seasons, currentSeason }: WedgieListProps) {
             <div className="mt-3 flex space-x-4">
               <Link
                 href={`/admin/wedgies/${wedgie.id}`}
-                className="bg-cream hover:bg-cream/80 rounded-md px-4 py-1 font-bold text-black uppercase"
+                className="bg-cream hover:bg-cream/80 text-night rounded-md px-4 py-1 font-bold uppercase"
               >
                 Edit
               </Link>
@@ -80,7 +80,7 @@ export function WedgieList({ seasons, currentSeason }: WedgieListProps) {
                     });
                   }
                 }}
-                className="rounded-md bg-red-500 px-4 py-1 font-bold text-white uppercase hover:bg-red-600"
+                className="text-cream rounded-md bg-[#FF6FD8] px-4 py-1 font-bold uppercase hover:bg-[#FF6FD8]/80"
               >
                 Delete
               </button>

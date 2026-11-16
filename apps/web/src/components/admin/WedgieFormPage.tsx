@@ -26,12 +26,12 @@ export function WedgieFormPage({ wedgie, currentSeason }: WedgieFormPageProps) {
   return (
     <div className="mx-auto max-w-4xl">
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-white">
+        <h1 className="text-cream text-2xl font-bold">
           {wedgie ? "Edit Wedgie" : "Create New Wedgie"}
         </h1>
         <button
           onClick={() => router.back()}
-          className="rounded-md bg-gray-600 px-4 py-2 text-white hover:bg-gray-700"
+          className="bg-panel-light text-cream hover:bg-panel rounded-md px-4 py-2"
         >
           Back
         </button>
@@ -39,13 +39,13 @@ export function WedgieFormPage({ wedgie, currentSeason }: WedgieFormPageProps) {
 
       <form
         onSubmit={handleSubmit}
-        className="space-y-6 rounded-lg bg-white/10 p-6"
+        className="bg-panel space-y-6 rounded-lg p-6"
       >
         <div className="grid grid-cols-2 gap-6">
           <div>
             <label
               htmlFor="playerName"
-              className="block text-sm font-medium text-white"
+              className="text-cream block text-sm font-medium"
             >
               Player Name
             </label>
@@ -60,7 +60,7 @@ export function WedgieFormPage({ wedgie, currentSeason }: WedgieFormPageProps) {
           <div>
             <label
               htmlFor="wedgieNumber"
-              className="block text-sm font-medium text-white"
+              className="text-cream block text-sm font-medium"
             >
               Wedgie Number
             </label>
@@ -74,14 +74,14 @@ export function WedgieFormPage({ wedgie, currentSeason }: WedgieFormPageProps) {
                   number: parseInt(e.target.value),
                 }))
               }
-              className="mt-1 block w-full rounded-md border-gray-300 bg-white/5 p-2 text-white"
+              className="border-violet/30 bg-panel text-cream mt-1 block w-full rounded-md p-2"
             />
           </div>
 
           <div>
             <label
               htmlFor="teamName"
-              className="block text-sm font-medium text-white"
+              className="text-cream block text-sm font-medium"
             >
               Player&apos;s Team
             </label>
@@ -96,7 +96,7 @@ export function WedgieFormPage({ wedgie, currentSeason }: WedgieFormPageProps) {
           <div>
             <label
               htmlFor="teamAgainstName"
-              className="block text-sm font-medium text-white"
+              className="text-cream block text-sm font-medium"
             >
               Opponent
             </label>
@@ -111,7 +111,7 @@ export function WedgieFormPage({ wedgie, currentSeason }: WedgieFormPageProps) {
           <div>
             <label
               htmlFor="wedgieDate"
-              className="block text-sm font-medium text-white"
+              className="text-cream block text-sm font-medium"
             >
               Date
             </label>
@@ -125,14 +125,14 @@ export function WedgieFormPage({ wedgie, currentSeason }: WedgieFormPageProps) {
                   wedgieDate: new Date(e.target.value),
                 }))
               }
-              className="mt-1 block w-full rounded-md border-gray-300 bg-white/5 p-2 text-white"
+              className="border-violet/30 bg-panel text-cream mt-1 block w-full rounded-md p-2"
             />
           </div>
 
           <div>
             <label
               htmlFor="seasonName"
-              className="block text-sm font-medium text-white"
+              className="text-cream block text-sm font-medium"
             >
               Season
             </label>
@@ -143,14 +143,14 @@ export function WedgieFormPage({ wedgie, currentSeason }: WedgieFormPageProps) {
               onChange={(e) =>
                 setFormData((prev) => ({ ...prev, seasonName: e.target.value }))
               }
-              className="mt-1 block w-full rounded-md border-gray-300 bg-white/5 p-2 text-white"
+              className="border-violet/30 bg-panel text-cream mt-1 block w-full rounded-md p-2"
             />
           </div>
 
           <div>
             <label
               htmlFor="gameName"
-              className="block text-sm font-medium text-white"
+              className="text-cream block text-sm font-medium"
             >
               Game
             </label>
@@ -180,7 +180,7 @@ export function WedgieFormPage({ wedgie, currentSeason }: WedgieFormPageProps) {
           <div>
             <label
               htmlFor="wedgieTypes"
-              className="block text-sm font-medium text-white"
+              className="text-cream block text-sm font-medium"
             >
               Types
             </label>
@@ -193,7 +193,7 @@ export function WedgieFormPage({ wedgie, currentSeason }: WedgieFormPageProps) {
           <div className="col-span-2">
             <label
               htmlFor="shoutouts"
-              className="block text-sm font-medium text-white"
+              className="text-cream block text-sm font-medium"
             >
               Shoutouts (X and Bluesky handles that tagged us)
             </label>
@@ -209,7 +209,7 @@ export function WedgieFormPage({ wedgie, currentSeason }: WedgieFormPageProps) {
           <div className="col-span-2">
             <label
               htmlFor="courtPosition"
-              className="block text-sm font-medium text-white"
+              className="text-cream block text-sm font-medium"
             >
               Position
             </label>
@@ -226,7 +226,7 @@ export function WedgieFormPage({ wedgie, currentSeason }: WedgieFormPageProps) {
           <div className="col-span-2">
             <label
               htmlFor="videoUrls"
-              className="block text-sm font-medium text-white"
+              className="text-cream block text-sm font-medium"
             >
               Video URLs
             </label>
@@ -278,7 +278,7 @@ export function WedgieFormPage({ wedgie, currentSeason }: WedgieFormPageProps) {
         </div>
 
         {error && (
-          <p role="alert" className="rounded-md bg-red-900/50 p-3 text-white">
+          <p role="alert" className="text-cream rounded-md bg-[#FF6FD8]/15 p-3">
             {error}
           </p>
         )}
@@ -287,13 +287,13 @@ export function WedgieFormPage({ wedgie, currentSeason }: WedgieFormPageProps) {
           <button
             type="button"
             onClick={() => router.back()}
-            className="rounded-md bg-gray-600 px-4 py-2 text-white hover:bg-gray-700"
+            className="bg-panel-light text-cream hover:bg-panel rounded-md px-4 py-2"
           >
             Cancel
           </button>
           <button
             type="submit"
-            className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+            className="bg-violet text-cream hover:bg-violet/80 rounded-md px-4 py-2"
           >
             {wedgie ? "Update" : "Create"} Wedgie
           </button>
@@ -301,7 +301,7 @@ export function WedgieFormPage({ wedgie, currentSeason }: WedgieFormPageProps) {
       </form>
 
       {wedgie && (
-        <div className="mt-8 border-t border-white/10 pt-8">
+        <div className="border-violet/20 mt-8 border-t pt-8">
           <WedgieSocialShareWrapper wedgie={wedgie} />
         </div>
       )}

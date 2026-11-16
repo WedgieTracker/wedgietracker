@@ -184,18 +184,18 @@ export function InstagramUploadForm({ wedgie }: InstagramUploadFormProps) {
   };
 
   return (
-    <div className="w-full rounded-lg bg-white/10 p-6 text-white">
+    <div className="bg-panel text-cream w-full rounded-lg p-6">
       <div className="mb-6 flex items-center justify-between">
         <button
           onClick={() => setShowPreview(!showPreview)}
-          className="rounded bg-blue-500 px-3 py-1 text-sm font-bold text-white hover:bg-blue-600"
+          className="bg-violet text-cream hover:bg-violet rounded px-3 py-1 text-sm font-bold"
         >
           {showPreview ? "Hide Preview" : "Show Preview"}
         </button>
         {instagramToken && (
           <button
             onClick={handleLogout}
-            className="rounded bg-red-500 px-3 py-1 text-sm font-bold text-white hover:bg-red-600"
+            className="text-cream rounded bg-[#FF6FD8] px-3 py-1 text-sm font-bold hover:bg-[#FF6FD8]/80"
           >
             Disconnect Instagram
           </button>
@@ -229,7 +229,7 @@ export function InstagramUploadForm({ wedgie }: InstagramUploadFormProps) {
           <button
             type="button"
             onClick={handleInstagramConnect}
-            className="block w-full rounded bg-blue-500 px-4 py-2 text-center font-bold text-white hover:bg-blue-600"
+            className="bg-violet text-cream hover:bg-violet block w-full rounded px-4 py-2 text-center font-bold"
           >
             Connect Instagram Account
           </button>
@@ -260,7 +260,7 @@ export function InstagramUploadForm({ wedgie }: InstagramUploadFormProps) {
                   id="ig-description"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="w-full rounded border border-gray-600 bg-gray-700 p-2"
+                  className="border-violet/30 bg-panel w-full rounded border p-2"
                   rows={4}
                 />
               </div>
@@ -269,7 +269,7 @@ export function InstagramUploadForm({ wedgie }: InstagramUploadFormProps) {
                 <button
                   type="button"
                   onClick={handleDownloadThumbnail}
-                  className="w-full rounded bg-gray-500 px-4 py-2 font-bold text-white hover:bg-gray-600 disabled:bg-gray-400"
+                  className="bg-panel-light text-cream hover:bg-panel-light disabled:bg-panel-light w-full rounded px-4 py-2 font-bold"
                 >
                   Download Thumbnail
                 </button>
@@ -278,7 +278,7 @@ export function InstagramUploadForm({ wedgie }: InstagramUploadFormProps) {
                   type="button"
                   onClick={handleGeneratePreview}
                   disabled={uploading}
-                  className="w-full rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-600 disabled:bg-gray-500"
+                  className="bg-violet text-cream hover:bg-violet disabled:bg-panel-light w-full rounded px-4 py-2 font-bold"
                 >
                   {uploading ? "Generating..." : "Generate Preview"}
                 </button>
@@ -286,7 +286,7 @@ export function InstagramUploadForm({ wedgie }: InstagramUploadFormProps) {
             </form>
           ) : (
             <div className="space-y-4">
-              <div className="rounded border border-gray-600 p-4">
+              <div className="border-violet/30 rounded border p-4">
                 <h3 className="mb-2 font-bold">Preview</h3>
                 <video
                   src={previewUrl ?? ""}
@@ -296,14 +296,14 @@ export function InstagramUploadForm({ wedgie }: InstagramUploadFormProps) {
                 <div className="flex gap-2">
                   <button
                     onClick={() => setPreviewStep(false)}
-                    className="w-full rounded bg-gray-500 px-4 py-2 font-bold text-white hover:bg-gray-600"
+                    className="bg-panel-light text-cream hover:bg-panel-light w-full rounded px-4 py-2 font-bold"
                   >
                     Back to Edit
                   </button>
                   <button
                     onClick={handleSubmit}
                     disabled={uploading}
-                    className="w-full rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-600 disabled:bg-gray-500"
+                    className="bg-violet text-cream hover:bg-violet disabled:bg-panel-light w-full rounded px-4 py-2 font-bold"
                   >
                     {uploading ? "Uploading..." : "Upload to Instagram"}
                   </button>
@@ -317,7 +317,7 @@ export function InstagramUploadForm({ wedgie }: InstagramUploadFormProps) {
       {result && (
         <div className="mt-4">
           {result.success ? (
-            <div className="text-green-400">
+            <div className="text-violet">
               Upload successful!{" "}
               <a
                 href={result.reel?.url}
@@ -329,7 +329,7 @@ export function InstagramUploadForm({ wedgie }: InstagramUploadFormProps) {
               </a>
             </div>
           ) : (
-            <div className="text-red-400">Error: {result.error}</div>
+            <div className="text-[#FF6FD8]">Error: {result.error}</div>
           )}
         </div>
       )}
