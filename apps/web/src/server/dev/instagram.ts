@@ -284,10 +284,20 @@ async function uploadToInstagramAPI(
       throw new Error(`Failed to publish: ${JSON.stringify(publishData)}`);
     }
 
-    return {
-      id: publishData.id,
-      url: `https://www.instagram.com/reel/${publishData.id}/`,
-    };
+    // The publish call returns the media id, not the short code a reel URL
+    // needs, so ask for the permalink. Without one, link the profile.
+    let url = "https://www.instagram.com/wedgie.tracker/";
+    try {
+      const linkResponse = await fetch(
+        `https://graph.instagram.com/v21.0/${publishData.id}?fields=permalink&access_token=${ACCESS_TOKEN}`,
+      );
+      const linkData = (await linkResponse.json()) as { permalink?: string };
+      if (linkResponse.ok && linkData.permalink) url = linkData.permalink;
+    } catch (error) {
+      console.error("Instagram permalink lookup failed:", error);
+    }
+
+    return { id: publishData.id, url };
   } catch (error) {
     console.error("Instagram API Error:", error);
     throw error;
