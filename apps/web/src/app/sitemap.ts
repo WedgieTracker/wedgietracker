@@ -6,7 +6,7 @@ import { db } from "~/server/db";
 import { CACHE_TAGS } from "~/server/cache";
 import { APP_URL } from "~/config/metadata";
 import { getWedgiesForSitemap } from "~/server/wedgie-meta";
-import { buildAllWedgiesQuery } from "@wedgietracker/core/utils/allWedgiesUrl";
+import { wedgiePath } from "@wedgietracker/core/utils/allWedgiesUrl";
 
 // The public pages. Left out: /privacy (noindex), /blog and /store (they redirect), the
 // thank-you pages, /admin and the API. Then every wedgie's own link, which has its own title,
@@ -74,11 +74,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: p.priority,
   }));
   const each: MetadataRoute.Sitemap = wedgies.map((w) => ({
-    // Next writes <loc> as given, and a bare & breaks the XML (Search Console: parsing error)
-    url: `${APP_URL}/all-wedgies?${buildAllWedgiesQuery({
-      season: w.seasonName,
-      wedgie: w.number,
-    }).replaceAll("&", "&amp;")}`,
+    // each wedgie's own page, where the clip is the main content (Search Console: video
+    // isn't on a watch page, for the ?season&wedgie list links)
+    url: `${APP_URL}${wedgiePath(w.seasonName, w.number)}`,
     lastModified: new Date(w.updatedAt),
     changeFrequency: "monthly",
     priority: 0.5,

@@ -7,7 +7,9 @@ import {
 
 import { Cross2Icon } from "@radix-ui/react-icons";
 import type { Wedgie, VideoUrls } from "@wedgietracker/core/types/wedgie";
+import Link from "next/link";
 import { useState } from "react";
+import { wedgiePath } from "@wedgietracker/core/utils/allWedgiesUrl";
 import { ShareButtons } from "~/components/shared/ShareButtons";
 import { WedgieVideoTabs } from "./WedgieVideoTabs";
 import { CourtPositionDiagram } from "./CourtPositionDiagram";
@@ -18,9 +20,9 @@ import { ReportWedgieButton } from "./ReportWedgieButton";
 import { buildShareParams, useCopyWedgieLink } from "./useCopyWedgieLink";
 import {
   pickInitialVideo,
-  getVideoSrc,
   type ActiveVideo,
 } from "@wedgietracker/core/utils/wedgieVideo";
+import { WedgieVideoFrame } from "./WedgieVideoFrame";
 
 interface WedgieModalProps {
   wedgie: Wedgie & {
@@ -76,46 +78,11 @@ export function WedgieModal({
         {/* Below lg the dialog scrolls: the panel keeps its full height instead of shrinking to fit
             and clipping a long shoutout list (16 fans on No. 1 of 2026/27). */}
         <div className="border-darkpurple-lighter bg-darkpurple flex flex-col overflow-hidden rounded-xl max-lg:shrink-0 lg:flex-row">
-          <div
-            className={`w-full lg:w-[65%] ${
-              activeVideo === "instagram"
-                ? "bg-darkpurple-darker aspect-video max-h-[80vh]"
-                : "aspect-video"
-            }`}
-          >
-            <div
-              className={
-                activeVideo === "instagram"
-                  ? "mx-auto h-full w-full max-w-md overflow-y-auto rounded-xl py-4"
-                  : "h-full w-full"
-              }
-            >
-              {(!wedgie.videoUrl || activeVideo === "hosted") && (
-                <div className="bg-darkpurple-darker flex h-full w-full items-center justify-center p-6 text-center text-sm font-bold tracking-wider text-white/60 uppercase">
-                  Video not available at the moment
-                </div>
-              )}
-              {wedgie.videoUrl && activeVideo !== "hosted" && (
-                <iframe
-                  title="Video player"
-                  width="100%"
-                  height="100%"
-                  src={getVideoSrc(activeVideo, wedgie.videoUrl)}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  {...(activeVideo === "instagram" && {
-                    loading: "lazy",
-                    scrolling: "yes",
-                    style: {
-                      border: "none",
-                      overflow: "visible",
-                      maxHeight: "80vh",
-                    },
-                  })}
-                />
-              )}
-            </div>
-          </div>
+          <WedgieVideoFrame
+            videoUrl={wedgie.videoUrl}
+            activeVideo={activeVideo}
+            className="w-full lg:w-[65%]"
+          />
 
           {/* On desktop the row takes the video's height and the details scroll
               inside it, so the modal keeps one size from wedgie to wedgie. */}
@@ -156,6 +123,28 @@ export function WedgieModal({
                 />
               </svg>
             </button>
+            {wedgie.seasonName && (
+              <Link
+                href={wedgiePath(wedgie.seasonName, wedgie.number)}
+                aria-label="Open the wedgie's page"
+                title="Open the wedgie's page"
+                className="bg-yellow text-darkpurple hover:bg-yellow/80 flex size-7 items-center justify-center rounded-md transition-all duration-300 sm:size-8"
+              >
+                <svg
+                  className="size-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 8V4h4M20 8V4h-4M4 16v4h4M20 16v4h-4"
+                  />
+                </svg>
+              </Link>
+            )}
             <ShareButtons
               url={`/all-wedgies?${buildShareParams(wedgie).toString()}`}
               title={`Check out this wedgie by ${wedgie.playerName} - ${wedgie.teamName} vs ${wedgie.teamAgainstName} on WedgieTracker!`}
