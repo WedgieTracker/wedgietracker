@@ -1,7 +1,5 @@
 import { spawn } from "child_process";
-import type { Readable, Writable } from "stream";
-import fs from "fs";
-import os from "os";
+import type { Writable } from "stream";
 import { createCanvas, loadImage } from "canvas";
 import path from "path";
 import { drawWedgieOverlay, type OverlayData } from "~/lib/wedgieOverlay";
@@ -38,56 +36,41 @@ export type BandType = keyof typeof WAVE_BANDS;
 const FPS = 30;
 /** The season total that fills the band, as on the site's hero. */
 const FULL_AT = 50;
-/**
- * Takes whole frames off a worker's stdout. It holds at most two frames
- * ahead (a 4K band frame is about 10 MB), pausing the worker until the
- * parent catches up.
- */
-class FrameReader {
-  private chunks: Buffer[] = [];
-  private size = 0;
-  private ended = false;
-  private waiting: (() => void) | null = null;
+const GLOW_STOPS: [number, string][] = [
+  [0, "#5f84e6"],
+  [0.5, "#7b6bf0"],
+  [1, "#a65ff5"],
+];
+const LAYERS = [
+  { colour: "rgba(95, 132, 230, 0.4)", lift: 0, speed: 70 },
+  { colour: "rgba(166, 95, 245, 0.3)", lift: 14, speed: -55 },
+  { colour: "rgba(123, 107, 240, 0.2)", lift: 24, speed: 40 },
+];
 
-  constructor(
-    private stream: Readable,
-    private frameBytes: number,
-  ) {
-    stream.on("data", (chunk: Buffer) => {
-      this.chunks.push(chunk);
-      this.size += chunk.length;
-      if (this.size >= this.frameBytes * 2) stream.pause();
-      this.wake();
-    });
-    stream.on("end", () => {
-      this.ended = true;
-      this.wake();
-    });
-  }
+const easeOutCubic = (x: number) =>
+  1 - Math.pow(1 - Math.min(Math.max(x, 0), 1), 3);
 
-  private wake() {
-    const w = this.waiting;
-    this.waiting = null;
-    w?.();
-  }
+type Ctx = ReturnType<ReturnType<typeof createCanvas>["getContext"]>;
 
-  async next(): Promise<Buffer | null> {
-    while (this.size < this.frameBytes) {
-      if (this.ended) return null;
-      await new Promise<void>((r) => (this.waiting = r));
-    }
-    const all = Buffer.concat(this.chunks, this.size);
-    const frame = all.subarray(0, this.frameBytes);
-    const rest = all.subarray(this.frameBytes);
-    this.chunks = rest.length ? [rest] : [];
-    this.size = rest.length;
-    if (this.size < this.frameBytes * 2) this.stream.resume();
-    return frame;
+function wavePath(
+  ctx: Ctx,
+  width: number,
+  bottom: number,
+  baseY: number,
+  amplitude: number,
+  wavelength: number,
+  offset: number,
+) {
+  ctx.beginPath();
+  ctx.moveTo(0, bottom);
+  for (let x = 0; x <= width + 12; x += 12) {
+    ctx.lineTo(
+      x,
+      baseY + Math.sin(((x + offset) / wavelength) * Math.PI * 2) * amplitude,
+    );
   }
-
-  stop() {
-    this.stream.destroy();
-  }
+  ctx.lineTo(width, bottom);
+  ctx.closePath();
 }
 
 /** The clip's box in each template: where it is scaled to and drawn. */
@@ -138,20 +121,23 @@ export async function composeWithWaveBand({
   textCtx.translate(0, -band.top);
   drawWedgieOverlay(textCtx, data, type);
 
-  // The night and the text go to the workers as images.
-  const stamp = `${Date.now()}_${process.pid}`;
-  const nightPath = path.join(os.tmpdir(), `band_night_${stamp}.png`);
-  const textPath = path.join(os.tmpdir(), `band_text_${stamp}.png`);
-  await fs.promises.writeFile(nightPath, night.toBuffer("image/png"));
-  await fs.promises.writeFile(textPath, text.toBuffer("image/png"));
+  const canvas = createCanvas(w, h);
+  const ctx = canvas.getContext("2d");
+  const glow = ctx.createLinearGradient(0, 0, w, 0);
+  for (const [stop, colour] of GLOW_STOPS) glow.addColorStop(stop, colour);
 
   const ffmpeg = spawn(
     "ffmpeg",
     [
       "-i",
       inputPath,
+      // The looped template sets the output's pace. Left alone it runs at
+      // ffmpeg's 25 fps for images, dropping frames from the clip and the
+      // 30 fps band; at 30 it matches the band.
       "-loop",
       "1",
+      "-framerate",
+      String(FPS),
       "-i",
       backgroundPath,
       "-f",
@@ -164,9 +150,6 @@ export async function composeWithWaveBand({
       String(FPS),
       "-i",
       "pipe:3",
-      // The overlays run at 4K for a Short; let them use every core.
-      "-filter_complex_threads",
-      process.env.WT_FILTER_THREADS ?? String(os.availableParallelism()),
       "-filter_complex",
       [
         `[0:v]scale=${clip.width}:${clip.height}:force_original_aspect_ratio=decrease[scaled]`,
@@ -183,8 +166,8 @@ export async function composeWithWaveBand({
       "-c:v",
       "libx264",
       // The platforms re-encode on upload, so a faster preset with a lower
-      // CRF keeps the look and only makes the file bigger. Both can be
-      // tuned per machine (a Raspberry Pi wants the fastest preset).
+      // CRF keeps the look and only makes the file bigger. Both can be set
+      // per machine (ultrafast at CRF 18 is about 13% quicker on a Pi 5).
       "-preset",
       process.env.WT_X264_PRESET ?? "veryfast",
       "-crf",
@@ -216,57 +199,40 @@ export async function composeWithWaveBand({
   // ffmpeg stops reading once the clip ends; that is not an error.
   frameSink.on("error", () => undefined);
 
-  // Frames are drawn by worker processes, round-robin, on the free cores;
-  // ffmpeg needs at least one of the rest.
   const level = Math.min(Math.max(data.number / FULL_AT, 0), 1);
   const settled = h - level * h + amplitude * 2;
   const frames = Math.max(1, Math.ceil(seconds * FPS));
-  const workerCount = Math.max(
-    1,
-    Math.min(
-      Number(process.env.WT_BAND_WORKERS) || os.availableParallelism() - 1,
-      4,
-      frames,
-    ),
-  );
-  const workerScript = path.join(
-    process.cwd(),
-    "src/server/dev/waveBandWorker.mjs",
-  );
-  const frameBytes = w * h * 4;
-  const readers = Array.from({ length: workerCount }, (_, start) => {
-    const job = {
-      w,
-      h,
-      fps: FPS,
-      frames,
-      start,
-      step: workerCount,
-      settled,
-      nightPath,
-      textPath,
-    };
-    const child = spawn(process.execPath, [workerScript, JSON.stringify(job)], {
-      stdio: ["ignore", "pipe", "inherit"],
-    });
-    return new FrameReader(child.stdout, frameBytes);
-  });
-
-  try {
-    for (let i = 0; i < frames && !frameSink.destroyed; i++) {
-      const frame = await readers[i % workerCount]!.next();
-      if (!frame) throw new Error(`wave band worker stopped at frame ${i}`);
-      if (!frameSink.write(frame)) {
-        await new Promise<void>((r) => {
-          frameSink.once("drain", () => r());
-          frameSink.once("close", () => r());
-        });
-      }
+  for (let i = 0; i < frames && !frameSink.destroyed; i++) {
+    const t = i / FPS;
+    ctx.drawImage(night, 0, 0);
+    // Rises from below the bottom edge to the season's level, then keeps
+    // rolling.
+    const baseY =
+      h + amplitude * 2 - (h + amplitude * 2 - settled) * easeOutCubic(t / 1.4);
+    for (const layer of LAYERS) {
+      wavePath(
+        ctx,
+        w,
+        h,
+        baseY - (36 - layer.lift) * unit,
+        amplitude,
+        wavelength,
+        layer.speed * unit * t + layer.lift * 20,
+      );
+      ctx.fillStyle = layer.colour;
+      ctx.fill();
     }
-  } finally {
-    for (const reader of readers) reader.stop();
-    await fs.promises.unlink(nightPath).catch(() => undefined);
-    await fs.promises.unlink(textPath).catch(() => undefined);
+    wavePath(ctx, w, h, baseY, amplitude, wavelength, -90 * unit * t);
+    ctx.fillStyle = glow;
+    ctx.fill();
+    ctx.drawImage(text, 0, 0);
+
+    if (!frameSink.write(canvas.toBuffer("raw"))) {
+      await new Promise<void>((r) => {
+        frameSink.once("drain", () => r());
+        frameSink.once("close", () => r());
+      });
+    }
   }
   frameSink.end();
   await done;
