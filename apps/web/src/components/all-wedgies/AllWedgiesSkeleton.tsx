@@ -1,5 +1,5 @@
 import { PageHeading } from "~/components/shared/PageHeading";
-import { PillLabel } from "~/components/shared/FilterPopover";
+import { PillChevron, PillLabel } from "~/components/shared/FilterPopover";
 
 /**
  * What All wedgies shows while it loads: the same heading, search, pills and
@@ -32,9 +32,7 @@ export function AllWedgiesSkeleton() {
               className="bg-panel border-violet/30 text-cream/40 inline-flex min-h-10 items-center gap-1.5 rounded-xl border px-3 text-[13.5px] font-extrabold"
             >
               <PillLabel kind={kind}>{label}</PillLabel>
-              <span aria-hidden="true" className="text-[11px] opacity-60">
-                ▾
-              </span>
+              <PillChevron />
             </span>
           ))}
         </div>
