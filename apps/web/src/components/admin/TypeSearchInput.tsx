@@ -58,16 +58,16 @@ export function TypeSearchInput({ value, onChange }: TypeSearchInputProps) {
           }}
           onFocus={() => setShowDropdown(true)}
           placeholder="Search types..."
-          className="mt-1 block w-full rounded-md border-gray-300 bg-white/5 p-2 text-white"
+          className="border-violet/30 bg-panel text-cream mt-1 block w-full rounded-md p-2"
         />
 
         {showDropdown && (
-          <div className="bg-darkpurple absolute z-10 mt-1 w-full rounded-md border border-gray-700 shadow-lg">
+          <div className="bg-night border-violet/30 absolute z-10 mt-1 w-full rounded-md border shadow-lg">
             {filteredTypes.map((type) => (
               <button
                 key={type.id}
                 type="button"
-                className="block w-full px-4 py-2 text-left text-white hover:bg-white/10"
+                className="text-cream hover:bg-panel block w-full px-4 py-2 text-left"
                 onClick={(e) => {
                   e.preventDefault();
                   handleTypeSelect(type.name);
@@ -82,7 +82,7 @@ export function TypeSearchInput({ value, onChange }: TypeSearchInputProps) {
               ) && (
                 <button
                   type="button"
-                  className="block w-full px-4 py-2 text-left text-blue-400 hover:bg-white/10"
+                  className="text-violet hover:bg-panel block w-full px-4 py-2 text-left"
                   onClick={(e) => {
                     e.preventDefault();
                     setIsAddingNew(true);
@@ -99,12 +99,12 @@ export function TypeSearchInput({ value, onChange }: TypeSearchInputProps) {
         {value.map((type) => (
           <div
             key={type}
-            className="bg-yellow text-darkpurple flex items-center rounded px-2 py-1 text-sm"
+            className="bg-cream text-night flex items-center rounded px-2 py-1 text-sm"
           >
             <span>{type}</span>
             <button
               onClick={() => handleTypeRemove(type)}
-              className="text-darkpurple ml-2 hover:text-red-600"
+              className="text-night hover:text-cream ml-2"
             >
               ×
             </button>

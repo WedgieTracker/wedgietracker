@@ -1,5 +1,5 @@
 export const main = {
-  backgroundColor: "#17002d",
+  backgroundColor: "#140a2e",
   fontFamily:
     '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif',
 };
@@ -13,7 +13,7 @@ export const paragraph = {
 
 export const orderDetails = {
   padding: "8px 24px",
-  backgroundColor: "#130135",
+  backgroundColor: "#140a2e",
   borderRadius: "12px",
   marginBottom: "16px",
 };
@@ -21,7 +21,7 @@ export const orderDetails = {
 export const subheading = {
   fontSize: "20px",
   fontWeight: "600",
-  color: "#ebff00",
+  color: "#f0e1b6",
   marginBottom: "0px",
 };
 

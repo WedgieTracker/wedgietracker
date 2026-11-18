@@ -12,12 +12,14 @@ export async function POST(req: Request) {
     const number = parseInt(formData.get("number") as string);
     const season = formData.get("season") as string;
     const player = formData.get("player") as string;
+    const date = (formData.get("date") as string | null) ?? null;
 
     const thumbnailPath = await createBackground(
       number,
       season,
       player,
       "thumbnail",
+      date,
     );
 
     if (!thumbnailPath) {

@@ -49,7 +49,7 @@ export function GlobalSettingsForm() {
         <div>
           <label
             htmlFor="totalWedgies"
-            className="block text-sm font-medium text-white"
+            className="text-cream block text-sm font-medium"
           >
             Total Wedgies
           </label>
@@ -63,14 +63,14 @@ export function GlobalSettingsForm() {
                 currentTotalWedgies: parseInt(e.target.value),
               }))
             }
-            className="mt-1 block w-full rounded-md border-gray-300 bg-white/5 p-2 text-white"
+            className="border-violet/30 bg-panel text-cream mt-1 block w-full rounded-md p-2"
           />
         </div>
 
         <div>
           <label
             htmlFor="totalGames"
-            className="block text-sm font-medium text-white"
+            className="text-cream block text-sm font-medium"
           >
             Total Games
           </label>
@@ -84,14 +84,14 @@ export function GlobalSettingsForm() {
                 currentTotalGames: parseInt(e.target.value),
               }))
             }
-            className="mt-1 block w-full rounded-md border-gray-300 bg-white/5 p-2 text-white"
+            className="border-violet/30 bg-panel text-cream mt-1 block w-full rounded-md p-2"
           />
         </div>
 
         <div>
           <label
             htmlFor="totalMinutes"
-            className="block text-sm font-medium text-white"
+            className="text-cream block text-sm font-medium"
           >
             Total Minutes
           </label>
@@ -105,14 +105,14 @@ export function GlobalSettingsForm() {
                 currentTotalMinutes: parseInt(e.target.value),
               }))
             }
-            className="mt-1 block w-full rounded-md border-gray-300 bg-white/5 p-2 text-white"
+            className="border-violet/30 bg-panel text-cream mt-1 block w-full rounded-md p-2"
           />
         </div>
 
         <div>
           <label
             htmlFor="totalFGA"
-            className="block text-sm font-medium text-white"
+            className="text-cream block text-sm font-medium"
           >
             Total Field Goal Attempts
           </label>
@@ -126,14 +126,14 @@ export function GlobalSettingsForm() {
                 currentTotalFGA: parseInt(e.target.value),
               }))
             }
-            className="mt-1 block w-full rounded-md border-gray-300 bg-white/5 p-2 text-white"
+            className="border-violet/30 bg-panel text-cream mt-1 block w-full rounded-md p-2"
           />
         </div>
 
         <div>
           <label
             htmlFor="totalPoss"
-            className="block text-sm font-medium text-white"
+            className="text-cream block text-sm font-medium"
           >
             Total Possessions
           </label>
@@ -147,14 +147,14 @@ export function GlobalSettingsForm() {
                 currentTotalPoss: parseInt(e.target.value),
               }))
             }
-            className="mt-1 block w-full rounded-md border-gray-300 bg-white/5 p-2 text-white"
+            className="border-violet/30 bg-panel text-cream mt-1 block w-full rounded-md p-2"
           />
         </div>
 
         <div>
           <label
             htmlFor="pace"
-            className="block text-sm font-medium text-white"
+            className="text-cream block text-sm font-medium"
           >
             Pace
           </label>
@@ -168,14 +168,14 @@ export function GlobalSettingsForm() {
                 pace: parseInt(e.target.value),
               }))
             }
-            className="mt-1 block w-full rounded-md border-gray-300 bg-white/5 p-2 text-white"
+            className="border-violet/30 bg-panel text-cream mt-1 block w-full rounded-md p-2"
           />
         </div>
 
         <div>
           <label
             htmlFor="simplePace"
-            className="block text-sm font-medium text-white"
+            className="text-cream block text-sm font-medium"
           >
             Simple Pace
           </label>
@@ -189,14 +189,14 @@ export function GlobalSettingsForm() {
                 simplePace: parseInt(e.target.value),
               }))
             }
-            className="mt-1 block w-full rounded-md border-gray-300 bg-white/5 p-2 text-white"
+            className="border-violet/30 bg-panel text-cream mt-1 block w-full rounded-md p-2"
           />
         </div>
 
         <div>
           <label
             htmlFor="mathPace"
-            className="block text-sm font-medium text-white"
+            className="text-cream block text-sm font-medium"
           >
             Math Pace
           </label>
@@ -210,7 +210,7 @@ export function GlobalSettingsForm() {
                 mathPace: parseInt(e.target.value),
               }))
             }
-            className="mt-1 block w-full rounded-md border-gray-300 bg-white/5 p-2 text-white"
+            className="border-violet/30 bg-panel text-cream mt-1 block w-full rounded-md p-2"
           />
         </div>
       </div>
@@ -218,7 +218,7 @@ export function GlobalSettingsForm() {
       <div className="flex justify-end">
         <button
           type="submit"
-          className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+          className="bg-violet text-cream hover:bg-violet/80 rounded-md px-4 py-2"
           disabled={updateMutation.isPending}
         >
           {updateMutation.isPending ? "Saving..." : "Save Changes"}

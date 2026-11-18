@@ -1,7 +1,5 @@
-import { buildAllWedgiesQuery } from "@wedgietracker/core/utils/allWedgiesUrl";
-import { Card } from "~/components/ui/card";
 import { Loader } from "~/components/shared/Loader";
-import { StandingsList } from "./StandingsList";
+import { PlayersTeams } from "./PlayersTeams";
 
 interface StandingsGridProps {
   players: Array<{
@@ -14,6 +12,8 @@ interface StandingsGridProps {
   }>;
   isLoading: boolean;
   currentSeason: string;
+  tab?: "players" | "teams";
+  onTabChange?: (tab: "players" | "teams") => void;
 }
 
 export function StandingsGrid({
@@ -21,6 +21,8 @@ export function StandingsGrid({
   teams,
   isLoading,
   currentSeason,
+  tab,
+  onTabChange,
 }: StandingsGridProps) {
   if (isLoading) {
     return (
@@ -33,30 +35,13 @@ export function StandingsGrid({
   }
 
   return (
-    <Card className="md:bg-darkpurple-light/30 w-full overflow-hidden border-none bg-transparent">
-      <div className="grid grid-cols-5 gap-3 p-0 md:gap-8 md:p-4">
-        <div className="col-span-3">
-          <StandingsList
-            title="PLAYERS"
-            items={players}
-            buildHref={(name) =>
-              `/all-wedgies?${buildAllWedgiesQuery({ playerOrTeam: name, season: currentSeason || "" })}`
-            }
-            countClassName="pl-2"
-          />
-        </div>
-
-        <div className="col-span-2">
-          <StandingsList
-            title="TEAMS"
-            items={teams}
-            buildHref={(name) =>
-              `/all-wedgies?${buildAllWedgiesQuery({ playerOrTeam: name, season: currentSeason || "" })}`
-            }
-            countClassName="pl-2"
-          />
-        </div>
-      </div>
-    </Card>
+    <PlayersTeams
+      players={players}
+      teams={teams}
+      season={currentSeason || ""}
+      limit={20}
+      tab={tab}
+      onTabChange={onTabChange}
+    />
   );
 }

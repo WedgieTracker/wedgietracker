@@ -9,80 +9,132 @@ interface StatsPerWedgie {
   minutes: number;
 }
 
-interface TypingStatsProps {
-  stats: StatsPerWedgie;
+/** `word` is shown on the flaps; `spoken` is read to screen readers. */
+const STATS: { key: keyof StatsPerWedgie; word: string; spoken: string }[] = [
+  { key: "possessions", word: "POSS.", spoken: "possessions" },
+  { key: "fga", word: "SHOTS", spoken: "shots" },
+  { key: "games", word: "GAMES", spoken: "games" },
+  { key: "minutes", word: "MINUTES", spoken: "minutes" },
+];
+/** Digit flaps: up to 9999, written without a thousands comma. */
+const NUM_FLAPS = 4;
+/** Letter flaps: the longest word, MINUTES. */
+const WORD_FLAPS = 7;
+/** Column widths: the digits, a half-width gap, then the letters. */
+const TEMPLATE = `repeat(${NUM_FLAPS}, 1fr) 0.5fr repeat(${WORD_FLAPS}, 1fr)`;
+/** The same total in flap widths, for sizing the letters. */
+const UNITS = NUM_FLAPS + 0.5 + WORD_FLAPS;
+
+/** The figure's flaps only carry digits, the word's only letters. */
+const DIGITS = " 0123456789";
+const LETTERS = " ABCDEFGHIJKLMNOPQRSTUVWXYZ.";
+const STEP_MS = 45;
+const HOLD_MS = 4200;
+
+/** The board's text for one stat: the figure right-aligned, the word left. */
+function boardText(stats: StatsPerWedgie, i: number) {
+  const s = STATS[i % STATS.length]!;
+  const value = Math.min(stats[s.key], 9999);
+  return {
+    digits: [...String(value).padStart(NUM_FLAPS, " ")],
+    word: [...s.word.padEnd(WORD_FLAPS, " ").slice(0, WORD_FLAPS)],
+  };
 }
 
-type StatKey = keyof StatsPerWedgie;
-const STATS_ORDER: StatKey[] = ["fga", "possessions", "games", "minutes"];
-
-const LABELS: Record<StatKey, string> = {
-  fga: "FGA",
-  possessions: "POSSESSIONS",
-  games: "GAMES",
-  minutes: "MINUTES PLAYED",
-};
-
-const wait = (ms: number) =>
-  new Promise<void>((resolve) => setTimeout(resolve, ms));
-
-export function TypingStats({ stats }: TypingStatsProps) {
-  const [index, setIndex] = useState(0);
-  const [text, setText] = useState("");
-  // What is on screen right now, so a new phrase erases from there
-  const shownRef = useRef("");
-
-  const key = STATS_ORDER[index % STATS_ORDER.length]!;
-  const value = stats[key];
-  const target = `${Number.isNaN(value) ? 0 : value.toLocaleString()} ${LABELS[key]}`;
+/** One flap. It steps through its characters in order until it reaches `target`. */
+function Flap({
+  target,
+  delay,
+  amber,
+}: {
+  target: string;
+  delay: number;
+  amber: boolean;
+}) {
+  const [shown, setShown] = useState(" ");
+  const [flipping, setFlipping] = useState(false);
+  const shownRef = useRef(" ");
 
   useEffect(() => {
-    // Each run has its own flag. A flag shared between runs was reset by the
-    // next run, so an interrupted run kept typing over it and cut it short.
-    let cancelled = false;
-    const show = (t: string) => {
-      shownRef.current = t;
-      setText(t);
-    };
-
-    const run = async () => {
-      const shown = shownRef.current;
-      for (let i = shown.length - 1; i >= 0; i--) {
-        await wait(50);
-        if (cancelled) return;
-        show(shown.slice(0, i));
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      shownRef.current = target;
+      setShown(target);
+      return;
+    }
+    let timer: ReturnType<typeof setTimeout>;
+    const step = () => {
+      if (shownRef.current === target) {
+        setFlipping(false);
+        return;
       }
-      await wait(500);
-      for (let i = 1; i <= target.length; i++) {
-        if (cancelled) return;
-        show(target.slice(0, i));
-        await wait(100);
-      }
-      await wait(2500);
-      if (cancelled) return;
-      setIndex((n) => n + 1);
+      const chars = amber ? DIGITS : LETTERS;
+      const next =
+        chars[(chars.indexOf(shownRef.current) + 1) % chars.length] ?? " ";
+      shownRef.current = next;
+      setShown(next);
+      setFlipping(true);
+      timer = setTimeout(step, STEP_MS);
     };
-
-    void run();
-    return () => {
-      cancelled = true;
-    };
-    // The phrase, not the stats object, so a new object with the same numbers
-    // does not restart it
-  }, [target]);
-
-  const [amount, ...rest] = text.split(" ");
+    timer = setTimeout(step, delay);
+    return () => clearTimeout(timer);
+  }, [target, delay, amber]);
 
   return (
-    <div className="from-darkpurple-light to-darkpurple-lighter w-full max-w-xl rounded-b-xl bg-linear-to-b text-base text-white md:text-xl">
-      <div className="relative flex min-h-18 flex-col items-center justify-center md:min-h-24">
-        <span className="block font-bold">THAT IS A WEDGIE EVERY</span>
-        <span className="text-xl font-black md:text-3xl">
-          <span className="text-yellow">{amount}</span>{" "}
-          <span className="text-pink font-bold">{rest.join(" ")}</span>
-          <span className="animate-blink mb-[-0.1em] ml-1 inline-block h-[1em] w-2 bg-white" />
-        </span>
-      </div>
+    <span
+      aria-hidden="true"
+      className={`wt-flap ${amber ? "wt-flap-amber" : ""} ${flipping ? "wt-flap-flip" : ""}`}
+    >
+      {shown}
+    </span>
+  );
+}
+
+/**
+ * "A wedgie every 2,837 possessions" on a board across the bottom of the
+ * season card: a fixed label, then a row of split flaps cycling through
+ * possessions, shots, games and minutes. The flaps scale with the card's
+ * width, so the board fills it and never changes size.
+ */
+export function TypingStats({ stats }: { stats: StatsPerWedgie }) {
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    const id = setInterval(() => setIndex((i) => i + 1), HOLD_MS);
+    return () => clearInterval(id);
+  }, []);
+
+  const text = boardText(stats, index);
+  const current = STATS[index % STATS.length]!;
+
+  return (
+    <div
+      className="wt-board"
+      style={
+        {
+          "--cols": UNITS,
+          gridTemplateColumns: TEMPLATE,
+        } as React.CSSProperties
+      }
+    >
+      <p className="sr-only" aria-live="polite">
+        That&apos;s a wedgie every {stats[current.key].toLocaleString("en-US")}{" "}
+        {current.spoken}
+      </p>
+      <span className="wt-board-label" aria-hidden="true">
+        A wedgie every
+      </span>
+      {text.digits.map((ch, i) => (
+        <Flap key={`d${i}`} target={ch} delay={i * 25} amber />
+      ))}
+      <span aria-hidden="true" />
+      {text.word.map((ch, i) => (
+        <Flap
+          key={`w${i}`}
+          target={ch}
+          delay={(NUM_FLAPS + i) * 25}
+          amber={false}
+        />
+      ))}
     </div>
   );
 }

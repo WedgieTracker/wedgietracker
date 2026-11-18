@@ -30,7 +30,7 @@ async function RecordCoffees({
   }
   if (!coffees) return null;
   return (
-    <p className="mt-3 text-base font-extrabold text-white">
+    <p className="text-cream mt-3 text-base font-extrabold">
       +{coffees} {coffees === 1 ? "point" : "points"} for the coffees on this
       season&apos;s scoreboard.
     </p>
@@ -49,7 +49,7 @@ export default function ThanksPage({
           <p className="text-5xl" aria-hidden="true">
             ☕
           </p>
-          <h1 className="text-yellow mt-4 text-4xl font-black uppercase">
+          <h1 className="text-cream mt-4 text-4xl font-black uppercase">
             Thank you!
           </h1>
           <p className="mt-4 text-xl text-white">
@@ -64,7 +64,7 @@ export default function ThanksPage({
           </p>
           <Link
             href="/"
-            className="bg-pink hover:bg-pink/80 rounded-xl px-8 py-4 font-black text-white uppercase transition-all"
+            className="bg-violet hover:bg-violet/80 rounded-xl px-8 py-4 font-black text-white uppercase transition-all"
           >
             Back to the wedgies
           </Link>

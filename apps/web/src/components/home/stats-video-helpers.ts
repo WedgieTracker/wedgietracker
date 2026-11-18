@@ -35,11 +35,11 @@ export const RECORDER_MIME_TYPES = [
 ] as const;
 
 export const CONFETTI_COLORS = [
-  "#eaff00",
-  "#ff03ff",
-  "#180138",
-  "#542299",
-  "#efff40",
+  "#f0e1b6",
+  "#9a5cf5",
+  "#140a2e",
+  "#502394",
+  "#f7e8c7",
 ] as const;
 
 export const INITIAL_WAVE_LAYERS: WaveLayer[] = [

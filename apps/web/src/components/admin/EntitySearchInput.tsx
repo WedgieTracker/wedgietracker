@@ -49,17 +49,17 @@ export function EntitySearchInput({
           setShowDropdown(true);
         }}
         onFocus={() => setShowDropdown(true)}
-        className="mt-1 block w-full rounded-md border-gray-300 bg-white/5 p-2 text-white"
+        className="border-violet/30 bg-panel text-cream mt-1 block w-full rounded-md p-2"
         placeholder={`Search for a ${lowerLabel}...`}
       />
 
       {showDropdown && (
-        <div className="bg-darkpurple absolute z-10 mt-1 w-full rounded-md border border-gray-700 shadow-lg">
+        <div className="bg-night border-violet/30 absolute z-10 mt-1 w-full rounded-md border shadow-lg">
           {filteredItems.map((item) => (
             <button
               key={item.id}
               type="button"
-              className="block w-full px-4 py-2 text-left text-white hover:bg-white/10"
+              className="text-cream hover:bg-panel block w-full px-4 py-2 text-left"
               onClick={(e) => {
                 e.preventDefault();
                 onChange(item.name);
@@ -76,7 +76,7 @@ export function EntitySearchInput({
             ) && (
               <button
                 type="button"
-                className="block w-full px-4 py-2 text-left text-blue-400 hover:bg-white/10"
+                className="text-violet hover:bg-panel block w-full px-4 py-2 text-left"
                 onClick={(e) => {
                   e.preventDefault();
                   setIsAddingNew(true);

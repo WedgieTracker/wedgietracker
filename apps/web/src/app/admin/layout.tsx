@@ -14,7 +14,7 @@ async function AuthenticatedAdmin({ children }: { children: React.ReactNode }) {
 
   if (!session) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-gray-100">
+      <main className="bg-night flex min-h-screen items-center justify-center">
         <div className="text-center">
           <SignIn />
         </div>
@@ -24,7 +24,7 @@ async function AuthenticatedAdmin({ children }: { children: React.ReactNode }) {
 
   if (!isAllowedEmail(session.user.email)) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-gray-100">
+      <main className="bg-night flex min-h-screen items-center justify-center">
         <div className="space-y-4 text-center">
           <p>This account doesn&apos;t have admin access.</p>
           <SignOut />
@@ -37,7 +37,7 @@ async function AuthenticatedAdmin({ children }: { children: React.ReactNode }) {
     <HydrateClient>
       <SidebarProvider defaultOpen={false}>
         <AppSidebar />
-        <main className="bg-darkpurple min-h-screen w-full">
+        <main className="bg-night min-h-screen w-full">
           <AdminHeader />
           <div className="container mx-auto p-6">{children}</div>
         </main>
@@ -54,8 +54,8 @@ export default function AdminLayout({
   return (
     <Suspense
       fallback={
-        <main className="bg-darkpurple flex min-h-screen items-center justify-center">
-          <div className="text-white">Loading...</div>
+        <main className="bg-night flex min-h-screen items-center justify-center">
+          <div className="text-cream">Loading...</div>
         </main>
       }
     >

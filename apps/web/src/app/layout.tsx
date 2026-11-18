@@ -75,7 +75,7 @@ export default function RootLayout({
 
   return (
     <html lang="en" className={`${inter.variable}`}>
-      <body className="bg-darkpurple">
+      <body className="bg-night">
         {analyticsEnabled && (
           <>
             {/*

@@ -1,8 +1,8 @@
 import { type Session } from "next-auth";
-import { spawn } from "child_process";
 import fs from "fs";
 import { createBackground } from "./createBackground";
 import { uploadFile } from "~/server/services/r2";
+import { composeWithWaveBand } from "./waveBand";
 
 interface InstagramContainerResponse {
   id: string;
@@ -24,6 +24,7 @@ export async function createReel(
   number: number,
   season: string,
   player: string,
+  date: string | null = null,
 ): Promise<boolean> {
   try {
     const backgroundPath = await createBackground(
@@ -31,64 +32,21 @@ export async function createReel(
       season,
       player,
       "reel",
+      date,
     );
 
-    return new Promise((resolve, reject) => {
-      const ffmpeg = spawn("ffmpeg", [
-        "-i",
+    try {
+      await composeWithWaveBand({
+        type: "reel",
+        data: { number, season, player, date },
         inputPath,
-        "-i",
-        backgroundPath ?? "",
-        "-filter_complex",
-        [
-          // Scale video to 1080 width while maintaining aspect ratio
-          "[0:v]scale=1080:608:force_original_aspect_ratio=decrease[scaled]",
-          // Pad if necessary to ensure exact dimensions
-          "[scaled]pad=1080:608:(ow-iw)/2:(oh-ih)/2[video]",
-          // Overlay video at y=656 (positioned about 1/3 from the top in a 1920px height)
-          "[1:v][video]overlay=0:700",
-        ].join(";"),
-        "-c:a",
-        "aac",
-        "-c:v",
-        "libx264",
-        "-preset",
-        "fast",
-        "-movflags",
-        "+faststart",
-        "-pix_fmt",
-        "yuv420p",
-        "-y",
+        backgroundPath,
         outputPath,
-      ]);
-
-      ffmpeg.on("close", (code) => {
-        void (async () => {
-          try {
-            // Clean up background image
-            if (backgroundPath) {
-              await fs.promises.unlink(backgroundPath);
-            }
-
-            if (code === 0) {
-              resolve(true);
-            } else {
-              reject(new Error(`FFmpeg process exited with code ${code}`));
-            }
-          } catch (error) {
-            reject(
-              new Error(
-                error instanceof Error ? error.message : "Unknown error",
-              ),
-            );
-          }
-        })();
       });
-
-      ffmpeg.stderr.on("data", (data) => {
-        console.log(`FFmpeg: ${data}`);
-      });
-    });
+      return true;
+    } finally {
+      await fs.promises.unlink(backgroundPath).catch(console.error);
+    }
   } catch (error) {
     console.error("Error creating reel:", error);
     return false;
@@ -99,12 +57,14 @@ async function createCoverImage(
   number: number,
   season: string,
   player: string,
+  date: string | null,
 ) {
   const backgroundPath = await createBackground(
     number,
     season,
     player,
     "thumbnail",
+    date,
   );
   return backgroundPath;
 }
@@ -118,10 +78,11 @@ export async function uploadToInstagram(
   season: string,
   player: string,
   instagramToken: string,
+  date: string | null = null,
 ) {
   try {
     // Create cover image
-    const coverImagePath = await createCoverImage(number, season, player);
+    const coverImagePath = await createCoverImage(number, season, player, date);
 
     // Download the original video
     const tempInputPath = `/tmp/input_${Date.now()}.mp4`;
@@ -133,7 +94,14 @@ export async function uploadToInstagram(
     await fs.promises.writeFile(tempInputPath, Buffer.from(buffer));
 
     // Create the reel with background
-    await createReel(tempInputPath, tempOutputPath, number, season, player);
+    await createReel(
+      tempInputPath,
+      tempOutputPath,
+      number,
+      season,
+      player,
+      date,
+    );
 
     // Upload so Instagram can fetch the reel from a public URL
     const reelUrl = await uploadFile(

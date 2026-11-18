@@ -25,7 +25,7 @@ export function CourtPositionPicker({
       {/* Aspect ratio container */}
       <div
         style={{ paddingBottom: "73.3%" }}
-        className="relative border-2 border-white/10"
+        className="border-violet/20 relative border-2"
       >
         {/* Court background - Click handler moved here */}
         <button
@@ -44,17 +44,17 @@ export function CourtPositionPicker({
 
         {/* Position marker */}
         <div
-          className="bg-yellow absolute size-3 -translate-x-1/2 -translate-y-1/2 rounded-full shadow-lg"
+          className="bg-cream absolute size-3 -translate-x-1/2 -translate-y-1/2 rounded-full shadow-lg"
           style={{
             left: `${position.x}%`,
             top: `${position.y}%`,
           }}
         >
-          <div className="border-darkpurple bg-yellow absolute top-1/2 left-1/2 size-[calc(100%-0.2rem)] -translate-x-1/2 -translate-y-1/2 rounded-full border" />
+          <div className="border-night bg-cream absolute top-1/2 left-1/2 size-[calc(100%-0.2rem)] -translate-x-1/2 -translate-y-1/2 rounded-full border" />
         </div>
       </div>
 
-      <div className="mt-2 text-center text-sm text-white">
+      <div className="text-cream mt-2 text-center text-sm">
         Position: x: {position.x}, y: {position.y}
       </div>
     </div>

@@ -2,8 +2,8 @@ import { google } from "googleapis";
 import path from "path";
 import * as fs from "fs";
 import { type Session } from "next-auth";
-import { spawn } from "child_process";
 import { createBackground } from "./createBackground";
+import { composeWithWaveBand } from "./waveBand";
 
 // Use the OAuth2 client type that google.auth.OAuth2 actually produces, which
 // is the same one google.youtube() expects. The googleapis `Auth` namespace
@@ -18,52 +18,29 @@ export async function createShort(
   number: number,
   season: string,
   player: string,
+  date: string | null,
 ): Promise<boolean> {
   try {
-    const backgroundPath = await createBackground(number, season, player);
+    const backgroundPath = await createBackground(
+      number,
+      season,
+      player,
+      "short",
+      date,
+    );
 
-    return new Promise((resolve, reject) => {
-      const ffmpeg = spawn("ffmpeg", [
-        "-i",
+    try {
+      await composeWithWaveBand({
+        type: "short",
+        data: { number, season, player, date },
         inputPath,
-        "-i",
-        backgroundPath ?? "",
-        "-filter_complex",
-        [
-          // First scale the video to have a width of 2160 while maintaining aspect ratio
-          "[0:v]scale=2160:1216:force_original_aspect_ratio=decrease[scaled]",
-          // Then pad if necessary to ensure exact dimensions
-          "[scaled]pad=2160:1216:(ow-iw)/2:(oh-ih)/2[video]",
-          // Overlay video at y=1400
-          "[1:v][video]overlay=0:1400",
-        ].join(";"),
-        "-c:a",
-        "copy",
-        "-c:v",
-        "libx264",
-        "-preset",
-        "fast",
-        "-y",
+        backgroundPath,
         outputPath,
-      ]);
-
-      ffmpeg.on("close", (code) => {
-        void (async () => {
-          // Clean up background image
-          await fs.promises.unlink(backgroundPath ?? "").catch(console.error);
-
-          if (code === 0) {
-            resolve(true);
-          } else {
-            reject(new Error(`FFmpeg process exited with code ${code}`));
-          }
-        })();
       });
-
-      ffmpeg.stderr.on("data", (data) => {
-        console.log(`FFmpeg: ${data}`);
-      });
-    });
+      return true;
+    } finally {
+      await fs.promises.unlink(backgroundPath).catch(console.error);
+    }
   } catch (error) {
     console.error("Error creating short:", error);
     return false;
@@ -134,6 +111,7 @@ export async function uploadToYoutube(
   number: number,
   season: string,
   player: string,
+  date: string | null = null,
 ): Promise<{
   success: boolean;
   short?: { videoId: string; videoUrl: string };
@@ -170,7 +148,7 @@ export async function uploadToYoutube(
     const shortPath = `/tmp/short_${path.basename(videoPath)}`;
 
     // Convert the video to Short format
-    await createShort(videoPath, shortPath, number, season, player);
+    await createShort(videoPath, shortPath, number, season, player, date);
 
     console.log("user session", session?.user);
 
@@ -240,6 +218,7 @@ export async function uploadToYoutube(
             number,
             season,
             player,
+            date,
           );
         }
       } catch (refreshError) {

@@ -6,7 +6,7 @@ import {
   wedgie,
   wedgieToType,
 } from "@wedgietracker/core/schema";
-import { gameLabel } from "@wedgietracker/core/utils/game";
+import { gameColumns, gameLabel } from "@wedgietracker/core/utils/game";
 import { db } from "~/server/db";
 import { CACHE_TAGS } from "~/server/cache";
 
@@ -74,7 +74,10 @@ export async function getNerdExtras() {
 
   // Records: per game, per night, and the longest run of games without one.
   const gamesById = new Map(games.map((g) => [g.id, g]));
-  const byGame = new Map<number, { players: string[]; name: string }>();
+  const byGame = new Map<
+    number,
+    { players: string[]; name: string; date: string }
+  >();
   const byNight = new Map<string, number>();
   for (const w of wedgies) {
     const played = w.gameId == null ? undefined : gamesById.get(w.gameId);
@@ -82,6 +85,7 @@ export async function getNerdExtras() {
       const g = byGame.get(played.id) ?? {
         players: [],
         name: gameLabel(played),
+        date: gameColumns(played)?.gameDate ?? played.createdAt.slice(0, 10),
       };
       g.players.push(w.playerName);
       byGame.set(played.id, g);
@@ -144,7 +148,11 @@ export async function getNerdExtras() {
     totalWedgies: wedgies.length,
     records: {
       mostInGame: topGame
-        ? { count: topGame.players.length, game: topGame.name }
+        ? {
+            count: topGame.players.length,
+            game: topGame.name,
+            date: topGame.date,
+          }
         : null,
       mostInNight: {
         count: nightMax,

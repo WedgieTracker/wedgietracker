@@ -10,7 +10,7 @@ export default {
         sans: ["var(--font-inter)", ...defaultTheme.fontFamily.sans],
       },
       fontSize: {
-        "big-number": "clamp(8rem, 8rem + 10vw, 20rem)",
+        "big-number": "clamp(8rem, 7rem + 8.4vw, 16.75rem)",
         "big-number-mobile": "clamp(7rem, 6rem + 16vw, 18rem)",
         "big-number-medium": "clamp(4rem, 1rem + 16vw, 12rem)",
         "button-text": "clamp(1rem, 0.8rem + 0.5vw, 2rem)",
@@ -29,26 +29,16 @@ export default {
       colors: {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
-        yellow: {
-          DEFAULT: "hsl(var(--yellow))",
-          light: "hsl(var(--yellow) / 0.8)",
-          lighter: "hsl(var(--yellow) / 0.6)",
-          dark: "hsl(65 100% 40%)",
-          darker: "hsl(65 100% 30%)",
+        cream: "hsl(var(--cream))",
+        violet: "hsl(var(--violet))",
+        night: {
+          DEFAULT: "hsl(var(--night))",
+          dark: "hsl(var(--night-dark))",
+          darker: "hsl(var(--night-darker))",
         },
-        pink: {
-          DEFAULT: "hsl(var(--pink))",
-          light: "hsl(var(--pink) / 0.8)",
-          lighter: "hsl(var(--pink) / 0.6)",
-          dark: "hsl(300 100% 40%)",
-          darker: "hsl(300 100% 30%)",
-        },
-        darkpurple: {
-          DEFAULT: "hsl(var(--darkpurple))",
-          light: "hsl(264 100% 15%)",
-          lighter: "hsl(264 100% 20%)",
-          dark: "hsl(264 100% 7%)",
-          darker: "hsl(264 100% 5%)",
+        panel: {
+          DEFAULT: "hsl(var(--panel))",
+          light: "hsl(var(--panel-light))",
         },
         card: {
           DEFAULT: "hsl(var(--card))",
@@ -108,10 +98,10 @@ export default {
       keyframes: {
         colorShift: {
           "0%, 100%": {
-            color: "hsl(var(--yellow))",
+            color: "hsl(var(--cream))",
           },
           "50%": {
-            color: "hsl(var(--pink))",
+            color: "hsl(var(--violet))",
           },
         },
         blink: {
@@ -132,33 +122,33 @@ export default {
           css: {
             color: "white",
             a: {
-              color: "hsl(var(--pink))",
+              color: "hsl(var(--violet))",
               "&:hover": {
-                color: "hsl(var(--pink))",
+                color: "hsl(var(--violet))",
                 opacity: 0.8,
               },
             },
             h1: {
-              color: "hsl(var(--yellow))",
+              color: "hsl(var(--cream))",
             },
             h2: {
-              color: "hsl(var(--yellow))",
+              color: "hsl(var(--cream))",
             },
             h3: {
-              color: "hsl(var(--yellow))",
+              color: "hsl(var(--cream))",
             },
             h4: {
-              color: "hsl(var(--yellow))",
+              color: "hsl(var(--cream))",
             },
             strong: {
               color: "white",
             },
             blockquote: {
-              color: "hsl(var(--yellow))",
-              borderLeftColor: "hsl(var(--yellow))",
+              color: "hsl(var(--cream))",
+              borderLeftColor: "hsl(var(--cream))",
             },
             code: {
-              color: "hsl(var(--pink))",
+              color: "hsl(var(--violet))",
             },
             "code::before": {
               content: '""',

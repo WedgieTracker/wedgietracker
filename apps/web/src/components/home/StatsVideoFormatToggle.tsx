@@ -25,7 +25,7 @@ function FormatOption({
     <button
       onClick={onClick}
       className={`flex-1 rounded-full px-4 py-2 text-sm font-bold transition-all ${
-        active ? "bg-pink text-darkpurple" : "text-pink hover:bg-pink/10"
+        active ? "bg-violet text-night" : "text-violet hover:bg-violet/10"
       }`}
     >
       <div className="flex flex-col items-center gap-1">
@@ -42,7 +42,7 @@ export function StatsVideoFormatToggle({
   onChange,
 }: StatsVideoFormatToggleProps) {
   return (
-    <div className="border-pink flex w-full items-center justify-center gap-4 rounded-full border-2 p-2">
+    <div className="border-violet flex w-full items-center justify-center gap-4 rounded-full border-2 p-2">
       <FormatOption
         active={value === "desktop"}
         onClick={() => onChange("desktop")}

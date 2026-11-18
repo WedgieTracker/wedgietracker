@@ -1,95 +1,145 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
+import { TEAMS } from "@wedgietracker/core/utils/teamAliases";
 import { cn } from "~/lib/utils";
 
-const standingsSizes = {
-  number: "clamp(0.875rem, 0.8rem + 0.5vw, 1.125rem)",
-  hash: "clamp(0.75rem, 0.7rem + 0.3vw, 0.875rem)",
-  title: "clamp(1.2rem, .8rem + .5vw, 1.75rem)",
-  name: "clamp(.85rem, 0.75rem + 0.5vw, 1.25rem)",
-};
+const TEAM_NAMES = new Map(TEAMS.map((t) => [t.code, t.fullName]));
 
-function calculateRanks<T extends { count: number }>(items: T[]) {
-  let currentRank = 1;
-  let previousCount = items[0]?.count ?? 0;
-  let isRepeatedRank = false;
+interface Item {
+  name: string;
+  count: number;
+}
 
-  return items.map((item, index) => {
-    if (index > 0) {
-      isRepeatedRank = item.count === previousCount;
-      if (!isRepeatedRank) {
-        currentRank += 1;
-      }
-    }
-    previousCount = item.count;
-    return { rank: currentRank, isRepeated: isRepeatedRank };
-  });
+/**
+ * Consecutive items with the same count, numbered 1, 2, 3 by count (a tie
+ * shares a number and the next count takes the next one).
+ */
+function groupByCount(items: Item[]) {
+  const groups: { rank: number; items: Item[] }[] = [];
+  for (const item of items) {
+    const last = groups.at(-1);
+    if (last && last.items[0]?.count === item.count) last.items.push(item);
+    else groups.push({ rank: groups.length + 1, items: [item] });
+  }
+  return groups;
 }
 
 interface StandingsListProps {
-  title: string;
-  items: Array<{ name: string; count: number }>;
+  title?: string;
+  items: Item[];
+  /** Teams are stored as codes; show their full names. */
+  kind?: "players" | "teams";
   buildHref: (name: string) => string;
-  titleClassName?: string;
-  countClassName?: string;
+  /** Show this many, then a button for the rest. */
+  limit?: number;
+  /** Show how many are listed next to the title. */
+  showCount?: boolean;
+  className?: string;
 }
 
+/**
+ * A ranked list where a tie is one rounded bracket: the shared rank sits at
+ * the top of the bracket and stays in view while a long tie scrolls past.
+ */
 export function StandingsList({
   title,
   items,
+  kind = "players",
   buildHref,
-  titleClassName = "pl-2",
-  countClassName = "pr-2",
+  limit,
+  showCount = true,
+  className,
 }: StandingsListProps) {
-  const ranks = calculateRanks(items);
+  const [showAll, setShowAll] = useState(false);
+  const shown = limit && !showAll ? items.slice(0, limit) : items;
+  const label = (name: string) =>
+    kind === "teams" ? (TEAM_NAMES.get(name) ?? name) : name;
+
+  const row = (item: Item) => (
+    <Link
+      href={buildHref(item.name)}
+      className="text-cream hover:text-cream/80 focus-visible:outline-cream flex min-h-[50px] items-center justify-between gap-3 text-[15px] font-bold transition-colors focus-visible:outline-2"
+    >
+      <span className="truncate">{label(item.name)}</span>
+      <span className="font-black tabular-nums">{item.count}</span>
+    </Link>
+  );
 
   return (
-    <>
-      <h2
-        className={cn(
-          "text-yellow mb-2 leading-none font-black md:mb-3",
-          titleClassName,
-        )}
-        style={{ fontSize: standingsSizes.title }}
-      >
-        {title}
-      </h2>
-      <div className="space-y-1">
-        {items.map((item, index) => (
-          <Link
-            key={item.name}
-            href={buildHref(item.name)}
-            className="group bg-darkpurple-light/30 hover:bg-darkpurple-light/80 flex cursor-pointer items-center justify-between rounded-sm p-1.5 transition-all duration-300 md:p-2"
-          >
-            <div className="flex items-baseline gap-2">
-              <span
-                className={`font-black ${ranks[index]?.isRepeated ? "text-pink/50" : "text-pink"}`}
-                style={{ fontSize: standingsSizes.number }}
+    <div
+      className={cn(
+        "bg-panel border-violet/20 rounded-[20px] border px-4 py-1",
+        className,
+      )}
+    >
+      {title && (
+        <h3 className="text-cream flex items-baseline justify-between pt-4 pb-1.5 text-lg font-extrabold">
+          {title}
+          {showCount && (
+            <small className="text-cream/50 text-[13px] font-bold">
+              {items.length}
+            </small>
+          )}
+        </h3>
+      )}
+      {items.length === 0 ? (
+        <p className="text-cream/70 py-6 font-bold">
+          No wedgies this season yet.
+        </p>
+      ) : (
+        <ol>
+          {groupByCount(shown).map(({ rank, items: group }) =>
+            group.length === 1 ? (
+              <li
+                key={group[0]!.name}
+                className="border-violet/15 grid grid-cols-[58px_1fr] items-center border-t first:border-t-0"
               >
-                <span
-                  className={`${standingsSizes.hash} ${
-                    ranks[index]?.isRepeated ? "text-pink/20" : "text-pink/50"
-                  }`}
-                >
-                  #
+                <span className="text-violet pt-[3px] pr-[34px] text-right text-lg font-black italic">
+                  {rank}
                 </span>
-                {ranks[index]?.rank}
-              </span>
-              <span
-                className="group-hover:text-yellow font-black text-white transition-all duration-300"
-                style={{ fontSize: standingsSizes.name }}
+                {row(group[0]!)}
+              </li>
+            ) : (
+              <li
+                key={`rank-${rank}`}
+                aria-label={`Tied ${rank}`}
+                className="border-violet/15 grid grid-cols-[38px_10px_1fr] border-t first:border-t-0"
               >
-                {item.name}
-              </span>
-            </div>
-            <span
-              className={cn("text-yellow font-black", countClassName)}
-              style={{ fontSize: standingsSizes.name }}
-            >
-              {item.count}
-            </span>
-          </Link>
-        ))}
-      </div>
-    </>
+                <span className="text-violet sticky top-[72px] z-[1] self-start pt-[3px] pr-3.5 text-right text-lg leading-[50px] font-black italic md:top-[88px]">
+                  {rank}
+                </span>
+                <span
+                  aria-hidden="true"
+                  className="border-violet/60 my-[25px] rounded-l-[7px] border-2 border-r-0"
+                />
+                <ul>
+                  {group.map((item) => (
+                    <li
+                      key={item.name}
+                      className="border-violet/15 border-t pl-2.5 first:border-t-0"
+                    >
+                      {row(item)}
+                    </li>
+                  ))}
+                </ul>
+              </li>
+            ),
+          )}
+        </ol>
+      )}
+      {limit && items.length > limit && (
+        <button
+          type="button"
+          onClick={() => setShowAll((s) => !s)}
+          className="border-violet/45 bg-violet/10 text-cream focus-visible:outline-cream my-3.5 flex min-h-[52px] w-full items-center justify-center rounded-2xl border-[1.5px] text-[15px] font-extrabold focus-visible:outline-2"
+        >
+          {showAll
+            ? `Show top ${limit}`
+            : `Show all ${items.length} ${kind === "teams" ? "teams" : "players"}`}
+        </button>
+      )}
+    </div>
   );
 }

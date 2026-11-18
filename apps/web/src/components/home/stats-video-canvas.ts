@@ -102,7 +102,7 @@ function drawWaveLayer(
     ctx.lineTo(0, height);
     ctx.closePath();
 
-    ctx.fillStyle = `rgba(255, 0, 255, ${layer.opacity})`;
+    ctx.fillStyle = `rgba(154, 92, 245, ${layer.opacity})`;
     ctx.fill();
   }
 }
@@ -120,7 +120,7 @@ function drawLogoAndUrlBadge(
     const logoHeight = 100;
     const logoX = width / 2 - logoWidth / 2;
 
-    ctx.fillStyle = "rgba(31, 0, 77, 0.75)";
+    ctx.fillStyle = "rgba(29, 18, 66, 0.75)";
     ctx.beginPath();
     ctx.roundRect(
       logoX - 60,
@@ -142,13 +142,13 @@ function drawLogoAndUrlBadge(
   const buttonX = width / 2 - buttonWidth / 2;
   const buttonY = height - urlBottomOffset;
 
-  ctx.strokeStyle = "rgb(23,0,43)";
+  ctx.strokeStyle = "rgb(20, 10, 46)";
   ctx.lineWidth = 2;
   ctx.beginPath();
   ctx.roundRect(buttonX, buttonY, buttonWidth, buttonHeight, buttonHeight / 2);
   ctx.stroke();
 
-  ctx.fillStyle = "rgb(23,0,43)";
+  ctx.fillStyle = "rgb(20, 10, 46)";
   ctx.textAlign = "center";
   ctx.fillText(urlText, width / 2, buttonY + 34);
 }
@@ -193,7 +193,7 @@ function setupFrame(
     ((progress * 20) / 2) * 100,
   );
 
-  ctx.fillStyle = "rgb(23,0,43)";
+  ctx.fillStyle = "rgb(20, 10, 46)";
   ctx.fillRect(0, 0, width, height);
 
   const baseY = height - (currentFillPercentage / 100) * height;
@@ -234,13 +234,13 @@ export function drawFrame(
   const statsX = (width - statsWidth) / 2;
   const statsY = (height - statsHeight) / 2 + 60;
 
-  ctx.fillStyle = "rgba(31, 0, 77, 0.75)";
+  ctx.fillStyle = "rgba(29, 18, 66, 0.75)";
   ctx.beginPath();
   ctx.roundRect(statsX, statsY, statsWidth, statsHeight, 20);
   ctx.fill();
 
   ctx.font = "700 32px Inter";
-  ctx.fillStyle = "#EAFF00";
+  ctx.fillStyle = "#F0E1B6";
   ctx.textAlign = "center";
   ctx.fillText(
     pickStatusText(stats.totalWedgies, stats.previousRecord),
@@ -250,11 +250,11 @@ export function drawFrame(
 
   ctx.font = "900 280px Inter";
   ctx.textAlign = "center";
-  ctx.shadowColor = "rgba(23, 0, 43, 0.8)";
+  ctx.shadowColor = "rgba(20, 10, 46, 0.8)";
   ctx.shadowBlur = 30;
   ctx.shadowOffsetX = 0;
   ctx.shadowOffsetY = 0;
-  ctx.fillStyle = "#EAFF00";
+  ctx.fillStyle = "#F0E1B6";
   ctx.fillText(
     currentTotalWedgies.toString(),
     width / 2,
@@ -272,7 +272,7 @@ export function drawFrame(
   const bottomY = (height - statsHeight) / 2 + 180;
   const showPace = stats.currentPace !== stats.totalWedgies;
 
-  ctx.fillStyle = "rgba(31, 0, 77, 0.75)";
+  ctx.fillStyle = "rgba(29, 18, 66, 0.75)";
   ctx.beginPath();
   ctx.roundRect(leftStatX, bottomY, statBoxWidth, statBoxHeight, 20);
   ctx.roundRect(rightStatX, bottomY, statBoxWidth, statBoxHeight, 20);
@@ -280,14 +280,14 @@ export function drawFrame(
 
   if (showPace) {
     ctx.font = "900 60px Inter";
-    ctx.fillStyle = "#FF00FF";
+    ctx.fillStyle = "#9A5CF5";
     ctx.textAlign = "center";
     ctx.fillText("PACE", width * 0.25, bottomY + 180);
     ctx.font = "900 120px Inter";
-    ctx.fillStyle = "#EAFF00";
+    ctx.fillStyle = "#F0E1B6";
     ctx.fillText(currentPaceValue.toString(), width * 0.25, bottomY + 120);
   } else {
-    ctx.fillStyle = "#EAFF00";
+    ctx.fillStyle = "#F0E1B6";
     ctx.textAlign = "center";
     const size = fitNumberFont(
       ctx,
@@ -302,7 +302,7 @@ export function drawFrame(
       bottomY + 116 - yShift,
     );
     ctx.font = "700 28px Inter";
-    ctx.fillStyle = "#FF00FF";
+    ctx.fillStyle = "#9A5CF5";
     ctx.fillText("GAMES", width * 0.25, bottomY + 152);
     ctx.fillText("PLAYED", width * 0.25, bottomY + 182);
   }
@@ -311,17 +311,17 @@ export function drawFrame(
 
   if (hasNewWedgie) {
     ctx.font = "900 64px Inter";
-    ctx.fillStyle = "#FF00FF";
+    ctx.fillStyle = "#9A5CF5";
     ctx.fillText("NEW", width * 0.75, bottomY + 110);
     ctx.font = "900 50px Inter";
-    ctx.fillStyle = "#EAFF00";
+    ctx.fillStyle = "#F0E1B6";
     ctx.fillText("WEDGIE", width * 0.75, bottomY + 150);
   } else {
     ctx.font = "900 120px Inter";
-    ctx.fillStyle = "#EAFF00";
+    ctx.fillStyle = "#F0E1B6";
     ctx.fillText(daysWithoutWedgie.toString(), width * 0.75, bottomY + 116);
     ctx.font = "700 28px Inter";
-    ctx.fillStyle = "#FF00FF";
+    ctx.fillStyle = "#9A5CF5";
     ctx.fillText("DAYS WITHOUT", width * 0.75, bottomY + 152);
     ctx.fillText("WEDGIES", width * 0.75, bottomY + 182);
   }
@@ -348,13 +348,13 @@ export function drawVerticalFrame(
   const statsX = (width - statsWidth) / 2;
   const statsY = (height - statsHeight) / 2 - 150;
 
-  ctx.fillStyle = "rgba(31, 0, 77, 0.75)";
+  ctx.fillStyle = "rgba(29, 18, 66, 0.75)";
   ctx.beginPath();
   ctx.roundRect(statsX, statsY, statsWidth, statsHeight, 20);
   ctx.fill();
 
   ctx.font = "700 32px Inter";
-  ctx.fillStyle = "#EAFF00";
+  ctx.fillStyle = "#F0E1B6";
   ctx.textAlign = "center";
   ctx.fillText(
     pickStatusText(stats.totalWedgies, stats.previousRecord),
@@ -364,11 +364,11 @@ export function drawVerticalFrame(
 
   ctx.font = "900 380px Inter";
   ctx.textAlign = "center";
-  ctx.shadowColor = "rgba(23, 0, 43, 0.8)";
+  ctx.shadowColor = "rgba(20, 10, 46, 0.8)";
   ctx.shadowBlur = 30;
   ctx.shadowOffsetX = 0;
   ctx.shadowOffsetY = 0;
-  ctx.fillStyle = "#EAFF00";
+  ctx.fillStyle = "#F0E1B6";
   ctx.fillText(
     currentTotalWedgies.toString(),
     width / 2,
@@ -386,7 +386,7 @@ export function drawVerticalFrame(
   const bottomY = (height - statsHeight) / 2 + 550;
   const showPace = stats.currentPace !== stats.totalWedgies;
 
-  ctx.fillStyle = "rgba(31, 0, 77, 0.75)";
+  ctx.fillStyle = "rgba(29, 18, 66, 0.75)";
   ctx.beginPath();
   ctx.roundRect(rightStatX, bottomY, statBoxWidth, statBoxHeight, 20);
   ctx.roundRect(leftStatX, bottomY, statBoxWidth, statBoxHeight, 20);
@@ -394,14 +394,14 @@ export function drawVerticalFrame(
 
   if (showPace) {
     ctx.font = "900 90px Inter";
-    ctx.fillStyle = "#FF00FF";
+    ctx.fillStyle = "#9A5CF5";
     ctx.textAlign = "center";
     ctx.fillText("PACE", width * 0.32, bottomY + 215);
     ctx.font = "900 165px Inter";
-    ctx.fillStyle = "#EAFF00";
+    ctx.fillStyle = "#F0E1B6";
     ctx.fillText(currentPaceValue.toString(), width * 0.32, bottomY + 155);
   } else {
-    ctx.fillStyle = "#EAFF00";
+    ctx.fillStyle = "#F0E1B6";
     ctx.textAlign = "center";
     const size = fitNumberFont(
       ctx,
@@ -416,7 +416,7 @@ export function drawVerticalFrame(
       bottomY + 140 - yShift,
     );
     ctx.font = "700 36px Inter";
-    ctx.fillStyle = "#FF00FF";
+    ctx.fillStyle = "#9A5CF5";
     ctx.fillText("GAMES", width * 0.32, bottomY + 185);
     ctx.fillText("PLAYED", width * 0.32, bottomY + 225);
   }
@@ -425,17 +425,17 @@ export function drawVerticalFrame(
 
   if (hasNewWedgie) {
     ctx.font = "900 94px Inter";
-    ctx.fillStyle = "#FF00FF";
+    ctx.fillStyle = "#9A5CF5";
     ctx.fillText("NEW", width * 0.68, bottomY + 135);
     ctx.font = "900 60px Inter";
-    ctx.fillStyle = "#EAFF00";
+    ctx.fillStyle = "#F0E1B6";
     ctx.fillText("WEDGIE", width * 0.68, bottomY + 195);
   } else {
     ctx.font = "900 140px Inter";
-    ctx.fillStyle = "#EAFF00";
+    ctx.fillStyle = "#F0E1B6";
     ctx.fillText(daysWithoutWedgie.toString(), width * 0.68, bottomY + 140);
     ctx.font = "700 36px Inter";
-    ctx.fillStyle = "#FF00FF";
+    ctx.fillStyle = "#9A5CF5";
     ctx.fillText("DAYS WITHOUT", width * 0.685, bottomY + 185);
     ctx.fillText("WEDGIES", width * 0.685, bottomY + 225);
   }

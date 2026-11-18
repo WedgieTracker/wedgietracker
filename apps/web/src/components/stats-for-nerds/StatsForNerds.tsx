@@ -1,340 +1,459 @@
 "use client";
 
-import { TypingStats } from "./TypingStats";
 import Link from "next/link";
-import { Cta } from "../shared/Cta";
+import { TEAMS } from "@wedgietracker/core/utils/teamAliases";
+import { TypingStats } from "./TypingStats";
 import { Wave } from "../home/Wave";
 import { Counter } from "../ui/Counter";
+import { PaceGauge } from "../home/PaceGauge";
+import { COURT_PATHS, VIEW_H, VIEW_W } from "../home/CourtPositionDiagram";
+import type { api } from "~/trpc/server";
 
-interface StatsForNerdsProps {
-  stats: {
-    currentSeason: string;
-    wedgiesThisSeason: number;
-    fgaPerWedgie: number;
-    pace: number;
-    previousRecord: number;
-    averageLastTenSeasons: number;
-    averageSeasonsCount: number;
-    gamesSinceLastWedgie?: number | undefined;
-    lastWedgiePlayer: string | null;
-    totalWedgiesOverall: number;
-    totalGamesOverall: number;
-    totalSeasonsOverall: number;
-    statsPerWedgie: {
-      fga: number;
-      possessions: number;
-      games: number;
-      minutes: number;
-    };
-    leaders: {
-      teams: {
-        name: string;
-        wedgies: number;
-      }[];
-      players: {
-        name: string;
-        count: number;
-      }[];
-    };
-  };
-}
+type NerdStats = Awaited<ReturnType<typeof api.wedgie.getNerdStats>>;
+type NerdExtras = Awaited<ReturnType<typeof api.wedgie.getNerdExtras>>;
 
-export function StatsForNerds({ stats }: StatsForNerdsProps) {
-  return (
-    <div className="bg-darkpurple flex w-full flex-col">
-      <div className="relative flex flex-col lg:flex-row">
-        <div className="flex w-full flex-col items-center gap-0 p-0 text-center md:justify-center md:gap-0 md:p-8 lg:sticky lg:top-20 lg:h-[calc(100svh-80px)] lg:w-1/2 lg:flex-col lg:p-4">
-          <SeasonHeaderWrapper stats={stats} />
-          <WedgieCounterWrapper stats={stats} />
-          <TypingStatsWrapper stats={stats.statsPerWedgie} />
-        </div>
+const nickname = (code: string) =>
+  TEAMS.find((t) => t.code === code)?.nickname ?? code;
+const nf = (n: number) => n.toLocaleString("en-US");
+const niceDate = (iso: string) =>
+  new Date(`${iso}T12:00:00Z`).toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  });
 
-        <div className="flex w-full flex-col items-center justify-center gap-4 px-0 py-4 md:gap-12 md:px-4 lg:w-1/2 lg:px-8 lg:py-8">
-          <SeasonComparisonWrapper stats={stats} />
-          <LastWedgieWrapper stats={stats} />
-          <LeadersWrapper stats={stats} />
-          <SeasonHistoryWrapper stats={stats} />
-          <Cta
-            links={[
-              { title: "All wedgies", url: "/all-wedgies" },
-              { title: "Standings", url: "/standings" },
-              { title: "Seasons history", url: "/seasons-history" },
-            ]}
-            variant="small"
-          />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function SeasonHeaderWrapper({ stats }: StatsForNerdsProps) {
-  return (
-    <div className="mb-4 text-base font-bold text-white md:text-2xl lg:mb-8">
-      IN THE{" "}
-      <span className="bg-pink text-darkpurple rounded-lg px-2">
-        {stats.currentSeason}
-      </span>{" "}
-      SEASON
-    </div>
-  );
-}
-
-function WedgieCounterWrapper({ stats }: StatsForNerdsProps) {
-  const fillPercentage = Math.min((stats.wedgiesThisSeason / 50) * 100, 100);
-
-  return (
-    <div className="bg-darkpurple-light relative w-full max-w-xl overflow-hidden rounded-t-3xl pt-3 pb-3">
-      <Wave fillPercentage={fillPercentage} showConfetti />
-      <div className="bg-darkpurple-light/50 relative z-10 mx-auto max-w-[18rem] rounded-lg p-4 text-center md:w-[90%] lg:w-[65%] lg:max-w-120 lg:min-w-[24rem]">
-        <div className="text-yellow text-sm leading-none font-bold md:text-base">
-          {stats.wedgiesThisSeason > stats.previousRecord
-            ? "NEW ALL-TIME RECORD"
-            : stats.wedgiesThisSeason === stats.previousRecord
-              ? "ALL-TIME RECORD TIED"
-              : "WE'RE AT"}
-        </div>
-        <div className="text-big-number-mobile text-yellow md:text-big-number-medium lg:text-big-number leading-none font-black whitespace-nowrap">
-          <Counter
-            end={stats.wedgiesThisSeason}
-            format={(n) => n.toLocaleString()}
-          />
-        </div>
-        <div className="text-wedgies-text-mobile text-yellow md:text-wedgies-text lg:text-wedgies-text leading-none font-black">
-          WEDGIES
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function TypingStatsWrapper({
-  stats,
+function Card({
+  children,
+  className = "",
 }: {
-  stats: StatsForNerdsProps["stats"]["statsPerWedgie"];
+  children: React.ReactNode;
+  className?: string;
 }) {
-  return <TypingStats stats={stats} />;
+  return (
+    <section
+      className={`bg-panel border-violet/20 relative flex flex-col overflow-hidden rounded-[22px] border p-[18px] ${className}`}
+    >
+      {children}
+    </section>
+  );
 }
 
-function SeasonComparisonWrapper({ stats }: StatsForNerdsProps) {
-  const showPace = stats.pace !== stats.wedgiesThisSeason;
-  const isMatchingAverage = stats.pace === stats.averageLastTenSeasons;
-  const diff = Math.abs(stats.pace - stats.averageLastTenSeasons);
-  const isMore = stats.pace > stats.averageLastTenSeasons;
-
+function Kicker({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex w-full max-w-xl flex-col items-center justify-center">
-      <div className="bg-darkpurple-dark flex w-full flex-col items-center justify-center gap-2 rounded-t-3xl py-4 md:flex-row md:gap-5 md:py-8">
-        {showPace ? (
-          <div className="text-center">
-            <div className="text-pace-text-mobile text-pink md:text-pace-text w-full leading-none font-black tracking-wider uppercase">
-              Pace
-            </div>
-            <div className="shadow-lg-darkpurple-light text-pace-number-mobile text-yellow md:text-pace-number mt-[-.2em] w-full leading-none font-black">
-              {stats.pace.toFixed(0)}
-            </div>
-          </div>
+    <h2 className="text-cream/60 text-[11.5px] font-black tracking-[0.12em] uppercase">
+      {children}
+    </h2>
+  );
+}
+
+function Big({
+  children,
+  className = "text-[64px]",
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <p
+      className={`text-cream mt-2 leading-[0.88] font-black tracking-[-0.04em] italic ${className}`}
+    >
+      {children}
+    </p>
+  );
+}
+
+function Line({
+  children,
+  bottom = false,
+}: {
+  children: React.ReactNode;
+  bottom?: boolean;
+}) {
+  return (
+    <p
+      className={`text-cream/75 [&_b]:text-cream text-sm leading-snug font-extrabold ${bottom ? "mt-auto pt-3" : "mt-2"}`}
+    >
+      {children}
+    </p>
+  );
+}
+
+function More({ href, children }: { href: string; children: React.ReactNode }) {
+  return (
+    <Link
+      href={href}
+      className="btn-sticker btn-sticker-sm inline-flex min-h-10 self-start px-4 text-[13px]"
+    >
+      {children}
+    </Link>
+  );
+}
+
+/** Tied leaders: how many, then every name. */
+function Leaders({
+  label,
+  names,
+  count,
+  plural,
+}: {
+  label: string;
+  names: string[];
+  count: number;
+  plural: string;
+}) {
+  if (!names.length) return null;
+  return (
+    <div className="mt-3 first:mt-0">
+      <Kicker>{label}</Kicker>
+      <Line>
+        {names.length === 1 ? (
+          <>
+            <b>{names[0]}</b> leads with {count}
+          </>
         ) : (
-          !isMatchingAverage && (
-            <div className="text-center">
-              <div className="shadow-lg-darkpurple-light text-pace-number-mobile text-yellow md:text-pace-number w-full leading-none font-black">
-                {diff}
-              </div>
-              <div className="text-pace-text-mobile text-pink md:text-pace-text mt-[-.6em] w-full leading-none font-black tracking-wider uppercase">
-                {isMore ? "More" : "Less"}
-              </div>
-            </div>
-          )
+          <>
+            <b>
+              {names.length} {plural}
+            </b>{" "}
+            tied on {count}
+          </>
         )}
-        <div className="text-center text-xl font-bold text-white md:text-left">
-          {isMatchingAverage ? (
-            <>
-              WE ARE ON PACE TO MATCH
-              <br />
-              THE AVERAGE OF{" "}
-              <span className="text-pink font-black">
-                {stats.averageLastTenSeasons}
-              </span>
-              <br />
-              OF THE PAST{" "}
-              <span className="text-pink font-black">
-                {stats.averageSeasonsCount} SEASONS
-              </span>
-            </>
-          ) : showPace ? (
-            <div>
-              IT IS <span className="text-pink font-black">{diff}</span>{" "}
-              {isMore ? "MORE" : "LESS"} THAN
-              <br />
-              THE AVERAGE OF{" "}
-              <span className="text-pink font-black">
-                {stats.averageLastTenSeasons}
-              </span>
-              <br />
-              OF THE PAST{" "}
-              <span className="text-pink font-black">
-                {stats.averageSeasonsCount} SEASONS
-              </span>
-            </div>
-          ) : (
-            <div>
-              THAN THE AVERAGE OF{" "}
-              <span className="text-pink font-black">
-                {stats.averageLastTenSeasons}
-              </span>
-              <br />
-              OF THE PAST{" "}
-              <span className="text-pink font-black">
-                {stats.averageSeasonsCount} SEASONS
-              </span>
-            </div>
-          )}
-        </div>
-      </div>
-      <Link
-        href="/stats-for-nerds/pace"
-        className="border-yellow bg-yellow text-button-text text-darkpurple hover:bg-darkpurple hover:text-yellow w-full rounded-b-3xl border-2 py-1.5 text-center font-bold transition-all duration-300"
-      >
-        HOW THE PACE WORKS
-      </Link>
-    </div>
-  );
-}
-
-function LastWedgieWrapper({ stats }: StatsForNerdsProps) {
-  if (!stats.lastWedgiePlayer || stats.gamesSinceLastWedgie === undefined)
-    return null;
-
-  return (
-    <div className="flex w-full max-w-xl flex-col items-center justify-center">
-      <div className="bg-darkpurple-dark flex w-full flex-col items-center justify-center rounded-t-3xl p-4 text-base font-bold text-white md:p-8 md:text-xl">
-        <span className="mb-2 flex flex-row items-center justify-center">
-          <span className="border-yellow bg-darkpurple text-yellow mr-2 inline-flex h-12 w-12 items-center justify-center rounded-full border-2 text-center text-xl leading-none font-black md:h-16 md:w-16 md:text-3xl">
-            {stats.gamesSinceLastWedgie}
-          </span>{" "}
-          GAMES PLAYED
-        </span>
-        SINCE THE LAST
-        <br />
-        <span className="text-yellow text-xl font-black uppercase md:text-3xl">
-          {stats.lastWedgiePlayer}&apos;S
-        </span>{" "}
-        WEDGIE
-      </div>
-      <Link
-        href={`/all-wedgies`}
-        className="border-yellow bg-yellow text-button-text text-darkpurple hover:bg-darkpurple hover:text-yellow w-full rounded-b-3xl border-2 py-1.5 text-center font-bold transition-all duration-300"
-      >
-        VIEW ALL WEDGIES
-      </Link>
-    </div>
-  );
-}
-
-function LeadersWrapper({ stats }: StatsForNerdsProps) {
-  // Hide leaders content when there are 0 wedgies this season
-  if (stats.wedgiesThisSeason === 0) {
-    return (
-      <div className="flex w-full flex-col items-center justify-center">
-        <Link
-          href="/standings"
-          className="border-yellow bg-yellow text-button-text text-darkpurple hover:bg-darkpurple hover:text-yellow w-full rounded-3xl border-2 py-1.5 text-center font-bold transition-all duration-300"
-        >
-          SEE STANDINGS
-        </Link>
-      </div>
-    );
-  }
-
-  // Find all teams that share the highest wedgie count
-  const maxWedgies = stats.leaders.teams[0]?.wedgies ?? 0;
-  const leadingTeams = stats.leaders.teams.flatMap((team) =>
-    team.wedgies === maxWedgies ? [team.name] : [],
-  );
-
-  return (
-    <div className="flex w-full flex-col items-center justify-center">
-      <div className="bg-darkpurple-dark flex w-full flex-col items-center justify-center rounded-t-3xl px-2 py-4 text-center md:p-8 md:px-4">
-        <div className="mb-2 text-base font-bold text-white md:mb-4 lg:text-xl xl:text-2xl">
-          {leadingTeams.length > 1 ? (
-            <>
-              {leadingTeams.slice(0, -1).map((team) => (
-                <span key={team} className="mb-1 ml-1 inline-block xl:ml-2">
-                  <span className="bg-pink text-darkpurple inline-block rounded-lg px-1 py-0 whitespace-nowrap md:px-2 md:py-0">
-                    {team}
-                  </span>
-                </span>
-              ))}{" "}
-              AND{" "}
-              <span className="bg-pink text-darkpurple inline-block rounded-lg px-1 py-0 whitespace-nowrap md:px-2 md:py-0">
-                {leadingTeams.slice(-1)[0]}
-              </span>{" "}
-              ARE TIED FOR THE LEAD WITH{" "}
-              <span className="text-pink">#{maxWedgies}</span> WEDGIES
-            </>
-          ) : (
-            <>
-              <span className="bg-pink text-darkpurple inline-block rounded-lg px-1 py-0 whitespace-nowrap md:px-2 md:py-0">
-                {leadingTeams[0] ?? "NO TEAM"}
-              </span>{" "}
-              CURRENTLY LEADS THE NBA WITH{" "}
-              <span className="text-pink">#{maxWedgies}</span> WEDGIES FOR THE
-              SEASON
-            </>
-          )}
-        </div>
-        <div className="mb-2 text-base font-bold text-white md:mb-3 lg:text-xl xl:text-2xl">
-          AND THE LEADING PLAYER{stats.leaders.players.length > 1 ? "S" : ""}{" "}
-          WITH{" "}
-          <span className="text-pink">
-            #{stats.leaders.players[0]?.count ?? 0}
-          </span>{" "}
-          <span>{stats.leaders.players.length > 1 ? "ARE" : "IS"}</span>
-        </div>
-        <div className="text-base font-bold md:text-xl xl:text-2xl">
-          {stats.leaders.players.map((p) => (
-            <span key={p.name} className="mb-1 ml-1 inline-block xl:ml-2">
-              <span className="bg-pink text-darkpurple inline-block rounded-lg px-1 py-0 whitespace-nowrap md:px-2 md:py-0">
-                {p.name}
-              </span>
+      </Line>
+      {names.length > 1 && (
+        <p className="mt-2.5 flex flex-wrap gap-1.5">
+          {names.map((n) => (
+            <span
+              key={n}
+              className="bg-violet/20 text-cream rounded-full px-2.5 py-1 text-[12.5px] font-extrabold"
+            >
+              {n}
             </span>
           ))}
-        </div>
-      </div>
-      <Link
-        href="/standings"
-        className="border-yellow bg-yellow text-button-text text-darkpurple hover:bg-darkpurple hover:text-yellow w-full rounded-b-3xl border-2 py-1.5 text-center font-bold transition-all duration-300"
-      >
-        SEE STANDINGS
-      </Link>
+        </p>
+      )}
     </div>
   );
 }
 
-function SeasonHistoryWrapper({ stats }: StatsForNerdsProps) {
+function Bars({ rows }: { rows: { label: string; count: number }[] }) {
+  const max = Math.max(1, ...rows.map((r) => r.count));
   return (
-    <div className="flex w-full max-w-xl flex-col items-center justify-center">
-      <div className="bg-darkpurple-dark flex w-full flex-col items-center justify-center rounded-t-3xl p-4 text-center md:p-8">
-        <div className="text-xl font-bold text-white md:text-2xl">
-          <span className="text-pink">{stats.totalWedgiesOverall}</span> TOTAL
-          WEDGIES
-          <br />
-          TRACKED OVER{" "}
-          <span className="text-pink">{stats.totalSeasonsOverall}</span> SEASONS
-          <br />
-          OR{" "}
-          <span className="text-pink">
-            {stats.totalGamesOverall.toLocaleString()}
+    <div className="mt-3 grid gap-1.5">
+      {rows.map((r, i) => (
+        <div
+          key={r.label}
+          className="grid grid-cols-[8.75rem_1fr_28px] items-center gap-2 text-[12.5px] font-extrabold"
+        >
+          <span className="text-cream truncate">{r.label}</span>
+          <span className="bg-violet/20 h-2 overflow-hidden rounded-full">
+            <span
+              className={`block h-full rounded-full ${i === 0 ? "bg-[#FF6FD8] shadow-[0_0_8px_rgb(255_111_216/0.6)]" : "bg-button"}`}
+              style={{ width: `${(r.count / max) * 100}%` }}
+            />
+          </span>
+          <span className="text-cream/65 text-right tabular-nums">
+            {r.count}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function Columns({ rows }: { rows: { label: string; count: number }[] }) {
+  const max = Math.max(1, ...rows.map((r) => r.count));
+  return (
+    <div className="mt-4 flex h-28 items-end gap-1.5">
+      {rows.map((r) => (
+        <div
+          key={r.label}
+          className="flex h-full flex-1 flex-col items-center justify-end gap-1.5"
+        >
+          <span className="text-cream/60 text-[10.5px] font-black tabular-nums">
+            {r.count}
+          </span>
+          <span
+            className={`w-full rounded-t-md rounded-b-sm ${r.count === max ? "bg-[#FF6FD8] shadow-[0_0_8px_rgb(255_111_216/0.5)]" : "bg-violet/40"}`}
+            style={{ height: `${(r.count / max) * 100}%` }}
+          />
+          <span className="text-cream/60 text-[10.5px] font-black">
+            {r.label}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function CourtHeat({ points }: { points: { x: number; y: number }[] }) {
+  return (
+    <svg
+      viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
+      role="img"
+      aria-label={`Where ${points.length} wedgies happened on the court`}
+      className="my-auto block w-full"
+    >
+      {COURT_PATHS.map((d) => (
+        <path key={d.slice(0, 12)} d={d} fill="rgb(240 225 182 / 0.55)" />
+      ))}
+      {points.map((p, i) => (
+        <circle
+          key={i}
+          cx={(p.x / 100) * VIEW_W}
+          cy={(p.y / 100) * VIEW_H}
+          r={9}
+          fill="#FF6FD8"
+          fillOpacity={0.38}
+        />
+      ))}
+    </svg>
+  );
+}
+
+function Section({
+  title,
+  hideTitle = false,
+  children,
+}: {
+  title: string;
+  /** Keep the heading for screen readers only. */
+  hideTitle?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="w-full max-w-2xl">
+      <h2
+        className={
+          hideTitle
+            ? "sr-only"
+            : "text-cream mb-3 text-[21px] font-extrabold tracking-[-0.01em]"
+        }
+      >
+        {title}
+      </h2>
+      {children}
+    </section>
+  );
+}
+
+/**
+ * The right-hand column of Stats for nerds, beside the home hero: this
+ * season, all time, then where, how and when wedgies happen, records and
+ * career leaders.
+ */
+export function StatsForNerds({
+  stats,
+  extras,
+}: {
+  stats: NerdStats;
+  extras: NerdExtras;
+}) {
+  const topTeamCount = stats.leaders.teams[0]?.wedgies ?? 0;
+  const teamLeaders = stats.leaders.teams
+    .filter((t) => t.wedgies === topTeamCount && topTeamCount > 0)
+    .map((t) => t.name);
+  const playerLeaders = stats.leaders.players.map((p) => p.name);
+  const playerTop = stats.leaders.players[0]?.count ?? 0;
+  const perGames = Math.round(
+    stats.totalGamesOverall / Math.max(1, stats.totalWedgiesOverall),
+  );
+  const { records } = extras;
+
+  const fillPercentage = Math.min((stats.wedgiesThisSeason / 50) * 100, 100);
+  const diff = stats.pace - stats.averageLastTenSeasons;
+
+  return (
+    <div className="flex w-full flex-col lg:flex-row">
+      <div className="flex w-full flex-col items-center justify-center gap-5 px-4 py-6 lg:sticky lg:top-20 lg:h-[calc(100svh-80px)] lg:w-1/2 lg:px-8">
+        <p className="text-cream text-xl font-extrabold md:text-2xl">
+          In the{" "}
+          <span className="bg-violet rounded-md px-2 py-0.5">
+            {stats.currentSeason}
           </span>{" "}
-          GAMES
+          season
+        </p>
+        <div className="border-violet/20 w-full max-w-xl overflow-hidden rounded-[22px] border">
+          <div className="bg-badge grain relative flex min-h-[20em] flex-col items-center justify-center overflow-hidden p-8">
+            <Wave fillPercentage={fillPercentage} showConfetti />
+            <div className="bg-panel/50 relative z-10 w-full max-w-[22rem] rounded-lg p-4 text-center">
+              <p className="text-cream text-sm leading-none font-bold md:text-base">
+                WE&apos;RE AT
+              </p>
+              <p className="text-cream text-shadow-badge text-[clamp(7rem,6rem+6vw,11rem)] leading-[0.88] font-black">
+                <Counter end={stats.wedgiesThisSeason} />
+              </p>
+              <p className="text-cream text-shadow-badge mt-1 text-4xl leading-none font-black md:text-5xl">
+                WEDGIES
+              </p>
+            </div>
+          </div>
+          <TypingStats stats={stats.statsPerWedgie} />
         </div>
       </div>
-      <Link
-        href="/seasons-history"
-        className="border-yellow bg-yellow text-button-text text-darkpurple hover:bg-darkpurple hover:text-yellow w-full rounded-b-3xl border-2 py-1.5 text-center font-bold transition-all duration-300"
-      >
-        SEE SEASONS HISTORY
-      </Link>
+
+      <div className="flex w-full flex-col items-center gap-10 px-[18px] pt-2 pb-6 lg:w-1/2 lg:px-8 lg:pt-6">
+        <Section title="Pace" hideTitle>
+          <Card className="items-center text-center">
+            <div className="mx-auto w-full max-w-[245px]">
+              <PaceGauge
+                pace={stats.pace}
+                record={stats.previousRecord}
+                recordSeason={null}
+                bare
+              />
+            </div>
+            <Line>
+              <b>
+                {Math.abs(diff)} {diff >= 0 ? "more" : "fewer"}
+              </b>{" "}
+              than the average of {stats.averageLastTenSeasons} over the past{" "}
+              {stats.averageSeasonsCount} seasons.
+            </Line>
+            <div className="mt-4">
+              <More href="/stats-for-nerds/pace">How the pace works</More>
+            </div>
+          </Card>
+        </Section>
+
+        <Section title={`${stats.currentSeason} so far`} hideTitle>
+          <Card>
+            <div className="flex items-center gap-4">
+              <div className="bg-badge grain text-cream text-shadow-badge grid size-20 shrink-0 place-items-center rounded-2xl pr-[0.12em] text-[44px] leading-none font-black italic">
+                {stats.gamesSinceLastWedgie ?? 0}
+              </div>
+              <div>
+                <Kicker>
+                  {stats.gamesSinceLastWedgie === 1 ? "Game" : "Games"} since
+                  the last wedgie
+                </Kicker>
+                {stats.lastWedgiePlayer && (
+                  <p className="text-cream mt-1 text-[22px] leading-tight font-black">
+                    {stats.lastWedgiePlayer}
+                  </p>
+                )}
+              </div>
+            </div>
+            <div className="border-violet/20 mt-4 grid gap-4 border-t pt-4 sm:grid-cols-2 [&>div]:mt-0">
+              <Leaders
+                label="Leading teams"
+                names={teamLeaders.map(nickname)}
+                count={topTeamCount}
+                plural="teams"
+              />
+              <Leaders
+                label="Leading players"
+                names={playerLeaders}
+                count={playerTop}
+                plural="players"
+              />
+            </div>
+            <div className="mt-4">
+              <More href="/standings">Leaderboard</More>
+            </div>
+          </Card>
+        </Section>
+
+        <section className="grid w-full max-w-2xl gap-3.5 sm:grid-cols-[0.8fr_1.2fr]">
+          <h2 className="sr-only">All time</h2>
+          <Card>
+            <Kicker>All time</Kicker>
+            <Big>{nf(stats.totalWedgiesOverall)}</Big>
+            <p className="text-cream/60 mt-1.5 text-[11.5px] font-black tracking-[0.14em] uppercase">
+              Wedgies
+            </p>
+            <dl className="mt-4 grid gap-2.5">
+              {[
+                [String(stats.totalSeasonsOverall), "seasons"],
+                [nf(stats.totalGamesOverall), "games"],
+                [String(perGames), "games per wedgie"],
+              ].map(([n, label]) => (
+                <div
+                  key={label}
+                  className="border-violet/20 flex items-baseline justify-between gap-3 border-t pt-2.5"
+                >
+                  <dt className="text-cream/60 text-[11.5px] font-black tracking-[0.1em] uppercase">
+                    {label}
+                  </dt>
+                  <dd className="text-cream pr-[0.1em] text-[26px] leading-none font-black whitespace-nowrap italic">
+                    {n}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+            <div className="mt-auto pt-4">
+              <More href="/seasons-history">Seasons history</More>
+            </div>
+          </Card>
+          <Card>
+            <h3 className="sr-only">Where they happen</h3>
+            <CourtHeat points={extras.positions} />
+          </Card>
+        </section>
+
+        <Section title="Records" hideTitle>
+          <Card>
+            <dl className="grid gap-3">
+              {[
+                records.drought.games > 0 && [
+                  nf(records.drought.games),
+                  `games without a wedgie, from ${records.drought.fromPlayer} on ${niceDate(records.drought.fromDate)} to ${records.drought.toPlayer} on ${niceDate(records.drought.toDate)}`,
+                ],
+                records.mostInGame && [
+                  records.mostInGame.count,
+                  `in one game: ${records.mostInGame.game}, ${niceDate(records.mostInGame.date)}`,
+                ],
+                [
+                  records.mostInNight.count,
+                  `in one night: ${records.mostInNight.dates.map(niceDate).join(" and ")}`,
+                ],
+                [records.multiGames, "games with more than one wedgie"],
+              ]
+                .filter((r): r is [string | number, string] => !!r)
+                .map(([n, text]) => (
+                  <div
+                    key={text}
+                    className="grid grid-cols-[3.75rem_1fr] items-center gap-2.5"
+                  >
+                    <dt className="text-cream text-center text-[30px] leading-none font-black tracking-[-0.03em] italic">
+                      {n}
+                    </dt>
+                    <dd className="text-cream/75 text-[13.5px] leading-snug font-extrabold">
+                      {text}
+                    </dd>
+                  </div>
+                ))}
+            </dl>
+          </Card>
+        </Section>
+
+        <Section title="Shot types">
+          <Card>
+            <Bars
+              rows={extras.types
+                .slice(0, 8)
+                .map((t) => ({ label: t.name, count: t.count }))}
+            />
+          </Card>
+        </Section>
+
+        <Section title="When in the game">
+          <Card>
+            <Columns rows={extras.quarters} />
+          </Card>
+        </Section>
+
+        <Section title="Career leaders">
+          <Card>
+            <Bars
+              rows={extras.career.map((p) => ({
+                label: p.name,
+                count: p.count,
+              }))}
+            />
+          </Card>
+        </Section>
+      </div>
     </div>
   );
 }

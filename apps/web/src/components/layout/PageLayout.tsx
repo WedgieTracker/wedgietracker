@@ -12,10 +12,11 @@ export function PageLayout({
 }) {
   return (
     <MenuProvider>
-      <div className="bg-darkpurple flex min-h-screen flex-col">
+      <div className="bg-night flex min-h-screen flex-col">
         <Header />
         {showCircleMenu && <CircleMenu />}
-        <div className="flex flex-1 flex-col">{children}</div>
+        {/* At least a screen tall, so the footer never starts in view and jumps as content loads. */}
+        <div className="flex min-h-svh flex-1 flex-col">{children}</div>
         <Footer />
       </div>
     </MenuProvider>

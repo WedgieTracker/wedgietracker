@@ -1,3 +1,5 @@
+import { isGemsDate } from "@wedgietracker/core/utils/formatDate";
+import { ExploreFooter } from "~/components/shared/ExploreFooter";
 import type { Metadata } from "next";
 import { connection } from "next/server";
 import {
@@ -6,9 +8,9 @@ import {
 } from "@wedgietracker/core/utils/allWedgiesUrl";
 import { TEAMS } from "@wedgietracker/core/utils/teamAliases";
 import { AllWedgiesPage } from "~/components/all-wedgies/AllWedgiesPage";
+import { AllWedgiesSkeleton } from "~/components/all-wedgies/AllWedgiesSkeleton";
 import { PageLayout } from "~/components/layout/PageLayout";
 import { Suspense } from "react";
-import { Loader } from "~/components/shared/Loader";
 import { APP_URL, generateMetadata as pageMetadata } from "~/config/metadata";
 import { getWedgieForMeta } from "~/server/wedgie-meta";
 
@@ -57,7 +59,9 @@ export async function generateMetadata({
   const w = await getWedgieForMeta(seasonFromParam(season), number);
   if (!w) return ALL_WEDGIES;
 
-  // the date is the tip-off in US Eastern time written as if UTC
+  // the date is the tip-off in US Eastern time written as if UTC; GEMS
+  // wedgies have no real date (stored as a zero timestamp), so none is said
+  const gems = isGemsDate(new Date(w.wedgieDate));
   const night = new Date(w.wedgieDate).toLocaleDateString("en-GB", {
     day: "numeric",
     month: "long",
@@ -68,7 +72,7 @@ export async function generateMetadata({
   const shot = types.length ? `${types.join(", ")} ` : "";
   return pageMetadata({
     title: `${w.playerName}, Wedgie No. ${w.number} of ${w.seasonName}`,
-    description: `${w.playerName}'s ${shot}wedgie for the ${teamName(w.teamName)} against the ${teamName(w.teamAgainstName)} on ${night}, the ${ordinal(w.number)} of the ${w.seasonName} season. Watch the clip on WedgieTracker.`,
+    description: `${w.playerName}'s ${shot}wedgie for the ${teamName(w.teamName)} against the ${teamName(w.teamAgainstName)}${gems ? "" : ` on ${night}`}, the ${ordinal(w.number)} of the ${w.seasonName} season. Watch the clip on WedgieTracker.`,
     image: youtubeThumbnail(w.videoUrl?.youtube),
     canonical: `${APP_URL}/all-wedgies?${buildAllWedgiesQuery({
       season: w.seasonName,
@@ -89,18 +93,17 @@ export default async function Page() {
     <PageLayout>
       <div className="flex flex-col lg:flex-row">
         <div className="flex w-full flex-col items-center justify-center gap-8 px-4 py-4 md:gap-8 md:py-8 lg:px-8 lg:py-8">
-          <h1 className="text-center text-6xl leading-none font-black uppercase md:text-7xl">
-            <span className="text-shadow-darkpurple text-yellow relative z-10 block leading-none">
-              All{" "}
-            </span>
-            <span className="text-pink relative z-0 mt-[-.4em] block text-[.5em] leading-none">
-              Wedgies
-            </span>
-          </h1>
-
-          <Suspense fallback={<LoaderWrapper />}>
+          <Suspense fallback={<AllWedgiesSkeleton />}>
             <AllWedgiesPage />
           </Suspense>
+          <ExploreFooter
+            className="max-w-7xl md:grid-cols-[1.15fr_1fr]"
+            links={[
+              { title: "Standings", url: "/standings" },
+              { title: "Stats for nerds", url: "/stats-for-nerds" },
+              { title: "Seasons history", url: "/seasons-history" },
+            ]}
+          />
           <Suspense>
             <Connection />
           </Suspense>
@@ -109,13 +112,3 @@ export default async function Page() {
     </PageLayout>
   );
 }
-
-const LoaderWrapper = () => {
-  return (
-    <div className="items-top flex w-full justify-center">
-      <div className="-mr-[3em] w-full max-w-[100px] md:max-w-[200px]">
-        <Loader />
-      </div>
-    </div>
-  );
-};

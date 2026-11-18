@@ -2,6 +2,7 @@ import { Fragment } from "react";
 import Link from "next/link";
 import { buildAllWedgiesQuery } from "@wedgietracker/core/utils/allWedgiesUrl";
 import { PageLayout } from "~/components/layout/PageLayout";
+import { ExploreFooter } from "~/components/shared/ExploreFooter";
 import { APP_STORE_URL } from "~/components/shared/AppStoreBadge";
 import { generateMetadata } from "~/config/metadata";
 import { TweetEmbed } from "./TweetEmbed";
@@ -22,7 +23,7 @@ interface Milestone {
 }
 
 const linkClass =
-  "text-yellow font-bold underline decoration-yellow/40 underline-offset-4 hover:decoration-yellow";
+  "text-cream font-bold underline decoration-cream/40 underline-offset-4 hover:decoration-cream";
 
 function Out({ href, children }: { href: string; children: React.ReactNode }) {
   return (
@@ -61,7 +62,7 @@ function Archive({
 function Segment({ className }: { className: string }) {
   return (
     <span
-      className={`bg-yellow absolute top-0 -bottom-6 w-0.5 ${className}`}
+      className={`bg-cream absolute top-0 -bottom-6 w-0.5 ${className}`}
       aria-hidden="true"
     />
   );
@@ -295,10 +296,10 @@ export default function HistoryPage() {
     <PageLayout>
       <div className="flex w-full flex-col items-center gap-10 px-4 py-4 md:py-8 lg:px-8">
         <h1 className="text-center text-4xl leading-none font-black uppercase md:text-6xl">
-          <span className="text-shadow-darkpurple text-yellow relative z-10 block leading-none">
+          <span className="text-cream relative z-10 block leading-none">
             The
           </span>
-          <span className="text-pink relative z-0 mt-[-.3em] block text-[1.2em] leading-none">
+          <span className="text-violet relative z-0 mt-[-.3em] block text-[1.2em] leading-none">
             Story
           </span>
         </h1>
@@ -313,7 +314,7 @@ export default function HistoryPage() {
             <Fragment key={year}>
               <li className="relative -ml-[25px] pt-4 first:pt-0">
                 <Segment className="left-0" />
-                <h2 className="bg-yellow text-darkpurple relative inline-block rounded-r-full py-0.5 pr-4 pl-3 text-2xl font-black md:text-3xl">
+                <h2 className="bg-cream text-night relative inline-block rounded-r-full py-0.5 pr-4 pl-3 text-2xl font-black md:text-3xl">
                   {year}
                 </h2>
               </li>
@@ -323,10 +324,10 @@ export default function HistoryPage() {
                     <Segment className="-left-[25px]" />
                   )}
                   <span
-                    className="bg-pink ring-darkpurple absolute top-0 -left-8 size-4 rounded-full ring-4"
+                    className="bg-violet ring-night absolute top-0 -left-8 size-4 rounded-full ring-4"
                     aria-hidden="true"
                   />
-                  <p className="text-pink text-xs font-black tracking-wider uppercase">
+                  <p className="text-violet text-xs font-black tracking-wider uppercase">
                     {m.date}
                   </p>
                   <h3 className="mt-1 text-xl font-black text-white">
@@ -338,7 +339,7 @@ export default function HistoryPage() {
                       href={m.link.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-yellow mt-2 inline-block text-sm font-bold underline-offset-4 hover:underline"
+                      className="text-cream mt-2 inline-block text-sm font-bold underline-offset-4 hover:underline"
                     >
                       {m.link.label} ↗
                     </a>
@@ -352,14 +353,14 @@ export default function HistoryPage() {
           ))}
         </ol>
 
-        <div className="flex flex-wrap justify-center gap-3">
-          <Link
-            href="/support-us"
-            className="bg-yellow text-darkpurple rounded-xl px-6 py-3 font-black uppercase"
-          >
-            Keep me awake ☕
-          </Link>
-        </div>
+        <ExploreFooter
+          className="max-w-2xl"
+          links={[
+            { title: "All wedgies", url: "/all-wedgies" },
+            { title: "Standings", url: "/standings" },
+            { title: "Seasons history", url: "/seasons-history" },
+          ]}
+        />
       </div>
     </PageLayout>
   );
