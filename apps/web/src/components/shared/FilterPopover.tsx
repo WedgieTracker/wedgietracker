@@ -58,10 +58,30 @@ export function FilterPill({
       }`}
     >
       {children}
-      <span aria-hidden="true" className="text-[11px] opacity-60">
-        ▾
-      </span>
+      <PillChevron />
     </button>
+  );
+}
+
+/** A drawn chevron, as in the app: the ▾ glyph was too small to read as a control. */
+export function PillChevron() {
+  return (
+    <svg
+      aria-hidden="true"
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      className="shrink-0 opacity-70"
+    >
+      <path
+        d="M6 9l6 6 6-6"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }
 
