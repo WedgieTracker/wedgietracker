@@ -23,12 +23,12 @@ function pieceCount(width: number, height: number): number {
 }
 
 /**
- * The web palette (Wave.tsx). The two dark values are unreadable as foreground
- * pieces against a full pink wave, so they are used only for the small, slow,
- * translucent pieces where they read as depth rather than dirt.
+ * The web palette (Wave.tsx). The blue and violet sink into a full gradient
+ * wave as foreground pieces, so they are used only for the small, slow,
+ * translucent pieces where they read as depth.
  */
-const NEAR_COLORS = ["#eaff00", "#ff03ff", "#efff40", "#ffffff"] as const;
-const FAR_COLORS = ["#542299", "#180138"] as const;
+const NEAR_COLORS = ["#f0e1b6", "#ff6fd8", "#ffffff"] as const;
+const FAR_COLORS = ["#9a5cf5", "#5f84e6"] as const;
 
 interface Piece {
   key: number;
@@ -55,7 +55,7 @@ export function Confetti({ width, height }: { width: number; height: number }) {
       return {
         key: i,
         x: Math.random() * width,
-        color: palette[i % palette.length] ?? "#eaff00",
+        color: palette[i % palette.length] ?? "#f0e1b6",
         // Spread starts across a full cycle so nothing resets in unison.
         delay: Math.random() * 7000,
         duration: 9000 - depth * 4500,

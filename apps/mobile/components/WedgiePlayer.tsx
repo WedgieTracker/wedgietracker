@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
   surface: { flex: 1, backgroundColor: "#000" },
   placeholder: {
     aspectRatio: 16 / 9,
-    backgroundColor: colors.darkpurpleLight,
+    backgroundColor: colors.panel,
     borderWidth: 1,
     borderColor: colors.hairline,
     alignItems: "center",

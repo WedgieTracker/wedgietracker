@@ -1,3 +1,7 @@
+import { router, useLocalSearchParams, type Href } from "expo-router";
+import { useEffect, type RefObject } from "react";
+import { LogBox } from "react-native";
+
 import type { HeroStatsData } from "@/components/HeroStats";
 
 /**
@@ -35,4 +39,61 @@ export function heroForScreenshot(stats: HeroStatsData): HeroStatsData {
  */
 export function latestForScreenshot<T>(rows: T[]): T[] {
   return SCREENSHOT_MODE ? rows.slice(1) : rows;
+}
+
+/**
+ * For capturing below the fold: with EXPO_PUBLIC_SHOT_SCROLL=1 on Metro, a
+ * `shotY` param on the deep link (wedgietracker://standings?shotY=900)
+ * scrolls the screen there once it has loaded. Dev builds only, like the
+ * rest of this file.
+ */
+const SHOT_SCROLL = __DEV__ && process.env.EXPO_PUBLIC_SHOT_SCROLL === "1";
+
+type Scrollable = {
+  scrollTo?: (o: { y: number; animated: boolean }) => void;
+  scrollToOffset?: (o: { offset: number; animated: boolean }) => void;
+};
+
+export function useShotScroll(ref: RefObject<unknown>) {
+  const { shotY } = useLocalSearchParams<{ shotY?: string }>();
+  useEffect(() => {
+    if (!SHOT_SCROLL || !shotY) return;
+    const y = Number(shotY);
+    const timer = setTimeout(() => {
+      const list = ref.current as Scrollable | null;
+      list?.scrollTo?.({ y, animated: false });
+      list?.scrollToOffset?.({ offset: y, animated: false });
+    }, 2500);
+    return () => clearTimeout(timer);
+  }, [shotY, ref]);
+}
+
+/**
+ * A screenshot driver for the simulator, where deep links ask for
+ * confirmation and nothing can tap. With EXPO_PUBLIC_SHOT_DRIVER set to a
+ * URL on Metro (http://localhost:8099/shot.json), the app polls it each
+ * second for `{ "seq": 3, "route": "/standings?shotY=900" }` and opens the
+ * route whenever `seq` changes. Dev builds only.
+ */
+const SHOT_DRIVER = __DEV__ ? process.env.EXPO_PUBLIC_SHOT_DRIVER : undefined;
+
+export function useShotDriver() {
+  useEffect(() => {
+    if (!SHOT_DRIVER) return;
+    // The dev warning toast would land in the captures.
+    LogBox.ignoreAllLogs(true);
+    let last = -1;
+    const timer = setInterval(() => {
+      fetch(SHOT_DRIVER)
+        .then((r) => r.json() as Promise<{ seq: number; route: string }>)
+        .then(({ seq, route }) => {
+          if (seq === last) return;
+          last = seq;
+          if (route === "back") router.back();
+          else router.navigate(route as Href);
+        })
+        .catch(() => undefined);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
 }

@@ -1,7 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 
-import { colors, fonts, space } from "@/lib/theme";
+import { colors, fonts } from "@/lib/theme";
 
 export interface StatsPerWedgie {
   fga: number;
@@ -10,112 +16,225 @@ export interface StatsPerWedgie {
   minutes: number;
 }
 
-const STATS_ORDER = ["fga", "possessions", "games", "minutes"] as const;
-type StatKey = (typeof STATS_ORDER)[number];
+/** `word` is shown on the flaps; `spoken` is read to screen readers. */
+const STATS: { key: keyof StatsPerWedgie; word: string; spoken: string }[] = [
+  { key: "possessions", word: "POSS.", spoken: "possessions" },
+  { key: "fga", word: "SHOTS", spoken: "shots" },
+  { key: "games", word: "GAMES", spoken: "games" },
+  { key: "minutes", word: "MINUTES", spoken: "minutes" },
+];
+/** Digit flaps: up to 9999, written without a thousands comma. */
+const NUM_FLAPS = 4;
+/** Letter flaps: the longest word, MINUTES. */
+const WORD_FLAPS = 7;
+/** The board's width in flap widths: digits, a half-width gap, letters. */
+const UNITS = NUM_FLAPS + 0.5 + WORD_FLAPS;
+const FLAP_GAP = 3;
+const BOARD_PAD = 12;
+/** The figure's flaps only carry digits, the word's only letters. */
+const DIGITS = " 0123456789";
+const LETTERS = " ABCDEFGHIJKLMNOPQRSTUVWXYZ.";
+const STEP_MS = 45;
+const HOLD_MS = 4200;
+const AMBER = "#FFD36B";
 
-const LABELS: Record<StatKey, string> = {
-  fga: "FGA",
-  possessions: "POSSESSIONS",
-  games: "GAMES",
-  minutes: "MINUTES PLAYED",
-};
+/** The board's text for one stat: the figure right-aligned, the word left. */
+function boardText(stats: StatsPerWedgie, i: number) {
+  const s = STATS[i % STATS.length]!;
+  const raw = Number.isFinite(stats[s.key]) ? stats[s.key] : 0;
+  const value = Math.min(Math.round(raw), 9999);
+  return {
+    digits: [...String(value).padStart(NUM_FLAPS, " ")],
+    word: [...s.word.padEnd(WORD_FLAPS, " ").slice(0, WORD_FLAPS)],
+  };
+}
 
-/**
- * Port of apps/web/src/components/stats-for-nerds/TypingStats.tsx - types out
- * "a wedgie every N <unit>", cycling through the four measures.
- */
-const wait = (ms: number) =>
-  new Promise<void>((resolve) => setTimeout(resolve, ms));
-
-export function TypingStats({ stats }: { stats: StatsPerWedgie }) {
-  const [index, setIndex] = useState(0);
-  const [text, setText] = useState("");
-  // What is on screen right now, so a new phrase erases from there
-  const shownRef = useRef("");
-
-  const key = STATS_ORDER[index % STATS_ORDER.length] ?? "fga";
-  const value = stats[key];
-  const target = `${Number.isNaN(value) ? 0 : value.toLocaleString()} ${LABELS[key]}`;
+/** One flap. It steps through its characters in order until it reaches `target`. */
+function Flap({
+  target,
+  delay,
+  amber,
+  height,
+  still,
+}: {
+  target: string;
+  delay: number;
+  amber: boolean;
+  height: number;
+  still: boolean;
+}) {
+  const [shown, setShown] = useState(still ? target : " ");
+  const shownRef = useRef(shown);
+  const flip = useSharedValue(1);
 
   useEffect(() => {
-    // Each run has its own flag. A flag shared between runs was reset by the
-    // next run (a refetch hands over a new stats object), so the interrupted
-    // run kept typing over the new one and cut it short.
-    let cancelled = false;
-    const show = (t: string) => {
-      shownRef.current = t;
-      setText(t);
+    if (still) {
+      shownRef.current = target;
+      setShown(target);
+      return;
+    }
+    let timer: ReturnType<typeof setTimeout>;
+    const step = () => {
+      if (shownRef.current === target) return;
+      const chars = amber ? DIGITS : LETTERS;
+      const next =
+        chars[(chars.indexOf(shownRef.current) + 1) % chars.length] ?? " ";
+      shownRef.current = next;
+      setShown(next);
+      flip.value = 0.6;
+      flip.value = withTiming(1, { duration: STEP_MS });
+      timer = setTimeout(step, STEP_MS);
     };
+    timer = setTimeout(step, delay);
+    return () => clearTimeout(timer);
+  }, [target, delay, amber, still, flip]);
 
-    const run = async () => {
-      const shown = shownRef.current;
-      for (let i = shown.length - 1; i >= 0; i--) {
-        await wait(50);
-        if (cancelled) return;
-        show(shown.slice(0, i));
-      }
-      await wait(500);
-      for (let i = 1; i <= target.length; i++) {
-        if (cancelled) return;
-        show(target.slice(0, i));
-        await wait(100);
-      }
-      await wait(2000);
-      if (cancelled) return;
-      setIndex((n) => n + 1);
-    };
-
-    void run();
-    return () => {
-      cancelled = true;
-    };
-    // The phrase, not the stats object, so a refetch with the same numbers
-    // does not restart it
-  }, [target]);
-
-  const [amount, ...rest] = text.split(" ");
+  const flipping = useAnimatedStyle(() => ({
+    transform: [{ scaleY: flip.value }],
+  }));
 
   return (
-    <View style={styles.panel}>
-      <Text style={styles.lead} allowFontScaling={false}>
-        THAT IS A WEDGIE EVERY
-      </Text>
-      <Text style={styles.value} allowFontScaling={false}>
-        <Text style={styles.amount}>{amount}</Text>
-        {rest.length > 0 ? (
-          <Text style={styles.unit}> {rest.join(" ")}</Text>
-        ) : null}
-        <Caret />
-      </Text>
+    <View
+      style={[styles.flap, { width: height * 0.72, height, borderRadius: 4 }]}
+    >
+      <View style={styles.flapTop} />
+      <Animated.Text
+        style={[
+          styles.flapText,
+          {
+            fontSize: height * 0.56,
+            lineHeight: height,
+          },
+          amber && styles.amber,
+          flipping,
+        ]}
+        allowFontScaling={false}
+      >
+        {shown}
+      </Animated.Text>
+      <View style={styles.seam} />
     </View>
   );
 }
 
-/** The blinking block cursor from the web version's `animate-blink`. */
-function Caret() {
-  const [on, setOn] = useState(true);
+/**
+ * Port of apps/web/src/components/stats-for-nerds/TypingStats.tsx: "A wedgie
+ * every 2837 poss." on a board across the foot of the season card, a fixed
+ * caption over a row of split flaps cycling through possessions, shots,
+ * games and minutes. The flaps are sized from the board's width, so it
+ * fills the card and never changes size. With reduced motion it holds still
+ * on each figure.
+ */
+export function TypingStats({ stats }: { stats: StatsPerWedgie }) {
+  const [index, setIndex] = useState(0);
+  const [width, setWidth] = useState(0);
+  const still = useReducedMotion();
 
   useEffect(() => {
-    const id = setInterval(() => setOn((v) => !v), 500);
+    const id = setInterval(() => setIndex((i) => i + 1), HOLD_MS);
     return () => clearInterval(id);
   }, []);
 
-  return <Text style={[styles.caret, !on && styles.caretOff]}>▌</Text>;
+  const text = boardText(stats, index);
+  const current = STATS[index % STATS.length]!;
+  const inner = width - BOARD_PAD * 2;
+  // Gaps between flaps: one less than the flaps, plus the gap column's own two.
+  const gaps = (NUM_FLAPS + WORD_FLAPS) * FLAP_GAP;
+  const flapW = inner > 0 ? (inner - gaps) / UNITS : 0;
+  const flapH = flapW / 0.72;
+
+  return (
+    <View
+      style={styles.board}
+      onLayout={(e) => setWidth(e.nativeEvent.layout.width)}
+      accessible
+      accessibilityLiveRegion="polite"
+      accessibilityLabel={`That's a wedgie every ${stats[current.key].toLocaleString("en-US")} ${current.spoken}`}
+    >
+      <Text
+        style={[
+          styles.caption,
+          { fontSize: Math.min(20, Math.max(13, width * 0.042)) },
+        ]}
+        allowFontScaling={false}
+      >
+        A WEDGIE EVERY
+      </Text>
+      {flapW > 0 ? (
+        <View style={styles.row}>
+          {text.digits.map((ch, i) => (
+            <Flap
+              key={`d${i}`}
+              target={ch}
+              delay={i * 25}
+              amber
+              height={flapH}
+              still={still}
+            />
+          ))}
+          <View style={{ width: flapW * 0.5 }} />
+          {text.word.map((ch, i) => (
+            <Flap
+              key={`w${i}`}
+              target={ch}
+              delay={(NUM_FLAPS + i) * 25}
+              amber={false}
+              height={flapH}
+              still={still}
+            />
+          ))}
+        </View>
+      ) : null}
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-  panel: {
+  // `.wt-board`: edge to edge across the foot of the season card.
+  board: {
     width: "100%",
-    backgroundColor: colors.darkpurpleLighter,
-    minHeight: 84,
-    alignItems: "center",
-    justifyContent: "center",
-    padding: space.md,
+    padding: BOARD_PAD,
+    backgroundColor: "#0B0518",
   },
-  lead: { fontFamily: fonts.bold, color: colors.white, fontSize: 14 },
-  value: { fontSize: 22, textAlign: "center", marginTop: 2 },
-  amount: { fontFamily: fonts.black, color: colors.yellow },
-  unit: { fontFamily: fonts.bold, color: colors.pink },
-  caret: { color: colors.white },
-  caretOff: { color: "transparent" },
+  // `.wt-board-label`: the fixed words, lit like a scoreboard caption.
+  caption: {
+    textAlign: "center",
+    fontFamily: fonts.black,
+    letterSpacing: 3,
+    color: colors.cream,
+    paddingBottom: 8,
+    textShadowColor: "rgba(240, 225, 182, 0.35)",
+    textShadowRadius: 10,
+    textShadowOffset: { width: 0, height: 0 },
+  },
+  row: { flexDirection: "row", gap: FLAP_GAP },
+  flap: { overflow: "hidden", backgroundColor: "#1B1036" },
+  // The top half is a shade lighter, like the web's split gradient.
+  flapTop: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    height: "50%",
+    backgroundColor: "#251847",
+  },
+  flapText: {
+    textAlign: "center",
+    fontFamily: fonts.black,
+    color: colors.cream,
+  },
+  amber: {
+    color: AMBER,
+    textShadowColor: "rgba(255, 211, 107, 0.45)",
+    textShadowRadius: 8,
+    textShadowOffset: { width: 0, height: 0 },
+  },
+  seam: {
+    position: "absolute",
+    top: "50%",
+    left: 0,
+    right: 0,
+    height: 1,
+    backgroundColor: "rgba(5, 2, 12, 0.55)",
+  },
 });

@@ -23,7 +23,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     padding: space.xl,
-    backgroundColor: colors.darkpurple,
+    backgroundColor: colors.night,
     gap: space.lg,
   },
   title: {
@@ -32,5 +32,5 @@ const styles = StyleSheet.create({
     color: colors.white,
     textAlign: "center",
   },
-  link: { ...type.body, color: colors.yellow, fontWeight: "800" },
+  link: { ...type.body, color: colors.cream, fontWeight: "800" },
 });

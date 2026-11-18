@@ -18,8 +18,8 @@ export default function TabLayout() {
 
   return (
     <NativeTabs
-      tintColor={colors.yellow}
-      labelStyle={{ fontFamily: fonts.bold, color: colors.white60 }}
+      tintColor={colors.cream}
+      labelStyle={{ fontFamily: fonts.bold, color: colors.cream70 }}
     >
       <NativeTabs.Trigger name="index">
         <NativeTabs.Trigger.Icon sf="house.fill" md="home" />

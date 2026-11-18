@@ -1,4 +1,5 @@
-import { useWindowDimensions } from "react-native";
+import { useWide } from "@/lib/wide";
+import { createContext, useContext } from "react";
 
 const ROOT_FONT_SIZE = 16;
 
@@ -25,11 +26,23 @@ export function clampRem(
 }
 
 /**
+ * The width fluid sizes are worked out against. A column on a wide screen
+ * (the iPhone Duo opened up) sets it to its own width, so what sits inside
+ * is sized as it would be on a phone of that width.
+ */
+export const FluidWidth = createContext<number | null>(null);
+
+export function useFluidWidth(): number {
+  const { width } = useWide();
+  return useContext(FluidWidth) ?? width;
+}
+
+/**
  * The fluid sizes used by the home screen, resolved for the current viewport.
  * Names and values mirror the web app so the two stay in step.
  */
 export function useFluidType() {
-  const { width } = useWindowDimensions();
+  const width = useFluidWidth();
   const c = (min: number, rem: number, vw: number, max: number) =>
     clampRem(min, rem, vw, max, width);
 

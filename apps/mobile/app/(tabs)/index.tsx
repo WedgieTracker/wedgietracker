@@ -1,5 +1,7 @@
 import { useRouter } from "expo-router";
+import { useMemo, useRef } from "react";
 import {
+  Animated,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -7,31 +9,70 @@ import {
   View,
 } from "react-native";
 
+import { CoffeeCup } from "@/components/CoffeeCup";
+import { CoffeeScoreboard } from "@/components/CoffeeScoreboard";
+import { FeaturedWedgie } from "@/components/FeaturedWedgie";
 import { HeroStats } from "@/components/HeroStats";
-import { PillButton } from "@/components/PillButton";
-import { StandingsList } from "@/components/StandingsList";
-import { ErrorState, ScreenLoading } from "@/components/States";
+import { Loader } from "@/components/Loader";
+import { Logo } from "@/components/Logo";
+import { HiddenHeading } from "@/components/PageHeading";
+import { PlayersTeams } from "@/components/PlayersTeams";
+import { ErrorState } from "@/components/States";
+import { StickerButton } from "@/components/StickerButton";
+import { StickySplit } from "@/components/StickySplit";
 import { TopSafeArea } from "@/components/TopSafeArea";
 import { WedgieRow } from "@/components/WedgieRow";
-import { useFluidType } from "@/lib/fluid";
-import { useTabBarClearance } from "@/lib/layout";
 import { api } from "@/lib/api";
-import { colors, fonts, radius, space } from "@/lib/theme";
-import { heroForScreenshot, latestForScreenshot } from "@/lib/screenshot";
+import { useWide } from "@/lib/wide";
+import { useTabBarClearance } from "@/lib/layout";
+import { colors, fonts, space } from "@/lib/theme";
+import {
+  heroForScreenshot,
+  latestForScreenshot,
+  useShotScroll,
+} from "@/lib/screenshot";
 
 /**
- * Mirrors the composition of apps/web/src/app/page.tsx: the stats hero, the
- * latest three wedgies, the standings summary, then the all-time total.
+ * Mirrors apps/web/src/app/page.tsx: the badge hero, the latest wedgies, the
+ * leaders, then the all-time total.
+ *
+ * The hero draws at once as a skeleton of itself and fills in when the stats
+ * land. Everything below it waits for its three queries together and appears
+ * in one go under the hero, so nothing already on screen moves.
  */
 export default function HomeScreen() {
   const router = useRouter();
-  const t = useFluidType();
   const tabBar = useTabBarClearance();
+  const shotRef = useRef<React.ComponentRef<typeof ScrollView>>(null);
+  useShotScroll(shotRef);
+  // Drives the pinned left column on a wide screen.
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const onScroll = useMemo(
+    () =>
+      Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], {
+        useNativeDriver: true,
+      }),
+    [scrollY],
+  );
 
   const stats = api.wedgie.getStats.useQuery();
   const latest = api.wedgie.getLatestWedgies.useQuery();
   const standings = api.wedgie.getTopStandings.useQuery();
   const total = api.wedgie.getTotalWedgies.useQuery();
+  const seasons = api.season.getAllWithStats.useQuery();
+  // Not on every server yet, so a failure only hides the board.
+  const coffees = api.donations.getSeasonCoffees.useQuery(undefined, {
+    retry: 1,
+  });
+  const { wide } = useWide();
+
+  // Which season set the record, for the gauge's note, worked out from the
+  // seasons list where the stats do not carry it.
+  const recordSeason = useMemo(() => {
+    const record = stats.data?.previousRecord;
+    if (!record || !seasons.data) return null;
+    return seasons.data.find((s) => s.totalWedgies === record)?.name ?? null;
+  }, [stats.data?.previousRecord, seasons.data]);
 
   const refreshing =
     stats.isRefetching ||
@@ -39,54 +80,147 @@ export default function HomeScreen() {
     standings.isRefetching ||
     total.isRefetching;
 
-  // What the top of the hero is actually painted with, so the status-bar strip
-  // and the pull-to-refresh overscroll match it instead of showing a dark seam.
-  const heroTop =
-    stats.data && stats.data.totalWedgies / 50 >= 1
-      ? colors.pink
-      : colors.darkpurpleLight;
-
   const refetchAll = () => {
     void stats.refetch();
     void latest.refetch();
     void standings.refetch();
     void total.refetch();
+    void coffees.refetch();
   };
 
-  // Any of the four failing leaves a hole in the page, not only the hero.
   const loadError =
     stats.error ?? latest.error ?? standings.error ?? total.error;
+  const columnReady = latest.data && standings.data && total.data !== undefined;
 
-  // The hero, the list and the tables arrive from four queries; showing the
-  // page before they are all in means three separate reflows.
-  if (
-    stats.isPending ||
-    latest.isPending ||
-    standings.isPending ||
-    total.isPending
-  ) {
-    return <ScreenLoading />;
-  }
+  const rows = latest.data ? latestForScreenshot(latest.data).slice(0, 3) : [];
+  const [first, ...rest] = rows;
+
+  const hero = (
+    <HeroStats
+      stats={stats.data ? heroForScreenshot(stats.data) : null}
+      recordSeason={recordSeason}
+      onMoreStats={() => router.push("/stats")}
+      onExplainPace={() => router.push("/pace")}
+    />
+  );
+  const column = columnReady ? (
+    <View style={[styles.column, wide && styles.columnWide]}>
+      {first ? (
+        <View style={styles.section}>
+          <HiddenHeading>Latest wedgies</HiddenHeading>
+          <FeaturedWedgie
+            wedgie={first}
+            onPress={() => router.push(`/wedgie/${first.id}`)}
+          />
+          <View style={styles.rows}>
+            {rest.map((wedgie) => (
+              <WedgieRow
+                key={wedgie.id}
+                wedgie={wedgie}
+                onPress={() => router.push(`/wedgie/${wedgie.id}`)}
+              />
+            ))}
+          </View>
+          <StickerButton
+            label="See all wedgies"
+            onPress={() => router.push("/all-wedgies")}
+            style={styles.sectionButton}
+          />
+        </View>
+      ) : null}
+
+      {coffees.error ? null : (
+        <CoffeeScoreboard
+          data={coffees.data ?? null}
+          onSupport={() => router.push("/support")}
+        />
+      )}
+
+      {/* The web hides the leaders until the season has a wedgie. */}
+      {standings.data?.hasWedgiesThisSeason ? (
+        <View style={styles.section}>
+          <HiddenHeading>Leaders</HiddenHeading>
+          <PlayersTeams
+            players={standings.data.players}
+            teams={standings.data.teams}
+            showCount={false}
+            onPressItem={(name, kind) =>
+              router.push({
+                pathname: "/all-wedgies",
+                params: kind === "teams" ? { wt: name } : { wp: name },
+              })
+            }
+          />
+          <StickerButton
+            label="Full standings"
+            onPress={() => router.push("/standings")}
+            style={styles.sectionButton}
+          />
+        </View>
+      ) : (
+        <StickerButton
+          label="Full standings"
+          onPress={() => router.push("/standings")}
+        />
+      )}
+
+      {typeof total.data === "number" ? (
+        <View style={styles.total}>
+          <View style={styles.totalRow}>
+            <Text style={styles.totalNumber} allowFontScaling={false}>
+              {total.data}
+            </Text>
+            <View>
+              <Text style={styles.totalLabel} allowFontScaling={false}>
+                TOTAL WEDGIES
+              </Text>
+              <Text style={styles.totalSince} allowFontScaling={false}>
+                FROM THE 2014/15 SEASON
+              </Text>
+            </View>
+          </View>
+          <StickerButton
+            label="Seasons history"
+            onPress={() => router.push("/seasons?from=Home")}
+          />
+        </View>
+      ) : null}
+    </View>
+  ) : loadError ? null : (
+    <View style={styles.loading}>
+      <Loader size={112} />
+    </View>
+  );
 
   return (
-    <TopSafeArea style={[styles.safe, { backgroundColor: heroTop }]}>
-      <ScrollView
+    <TopSafeArea style={styles.safe}>
+      <Animated.ScrollView
+        ref={shotRef}
         style={styles.scroll}
-        contentContainerStyle={[styles.content, { paddingBottom: tabBar }]}
+        onScroll={onScroll}
+        scrollEventThrottle={16}
+        contentContainerStyle={{ paddingBottom: tabBar }}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={refetchAll}
-            tintColor={colors.yellow}
+            tintColor={colors.cream}
           />
         }
       >
-        {/* Fills the rubber-band area above the content when pulled down. */}
-        <View
-          style={[styles.overscroll, { backgroundColor: heroTop }]}
-          pointerEvents="none"
-        />
+        <View style={styles.header}>
+          {/* As on the website's header: the way into the coffees. */}
+          <StickerButton
+            small
+            label="SUPPORT"
+            icon={<CoffeeCup width={11} />}
+            labelStyle={styles.supportLabel}
+            style={styles.support}
+            onPress={() => router.push("/support")}
+          />
+          <Logo width={84} />
+        </View>
 
         {loadError ? (
           <View style={styles.errorWrap}>
@@ -94,188 +228,90 @@ export default function HomeScreen() {
           </View>
         ) : null}
 
-        {stats.data ? (
-          <HeroStats
-            stats={heroForScreenshot(stats.data)}
-            onMoreStats={() => router.push("/stats")}
+        {wide ? (
+          <StickySplit
+            scrollY={scrollY}
+            left={hero}
+            right={column}
+            // The right column's own padding is dropped on this side, so
+            // the gap is split evenly either side of the Duo's fold.
+            gap={36}
           />
-        ) : null}
-
-        <View style={styles.column}>
-          {latest.data && latest.data.length > 0 ? (
-            <View style={styles.card}>
-              <View style={styles.cardBody}>
-                {latestForScreenshot(latest.data)
-                  .slice(0, 3)
-                  .map((wedgie, index, rows) => (
-                    <WedgieRow
-                      key={wedgie.id}
-                      wedgie={wedgie}
-                      first={index === 0}
-                      last={index === rows.length - 1}
-                      onPress={() => router.push(`/wedgie/${wedgie.id}`)}
-                    />
-                  ))}
-              </View>
-              <PillButton
-                label="WATCH THEM ALL"
-                variant="bar"
-                onPress={() => router.push("/all-wedgies")}
-              />
-            </View>
-          ) : null}
-
-          {/* The web page hides the tables entirely until the season opens. */}
-          {standings.data ? (
-            standings.data.hasWedgiesThisSeason ? (
-              <View style={styles.standingsCard}>
-                <View style={styles.standingsGrid}>
-                  <View style={styles.standingsPlayers}>
-                    <StandingsList
-                      title="PLAYERS"
-                      items={standings.data.players}
-                      onPressItem={(name) =>
-                        router.push({
-                          pathname: "/all-wedgies",
-                          params: { wp: name },
-                        })
-                      }
-                    />
-                  </View>
-                  <View style={styles.standingsTeams}>
-                    <StandingsList
-                      title="TEAMS"
-                      items={standings.data.teams}
-                      onPressItem={(name) =>
-                        router.push({
-                          pathname: "/all-wedgies",
-                          params: { wt: name },
-                        })
-                      }
-                    />
-                  </View>
-                </View>
-                <PillButton
-                  label="SEE STANDINGS"
-                  variant="bar"
-                  onPress={() => router.push("/standings")}
-                />
-              </View>
-            ) : (
-              <PillButton
-                label="SEE STANDINGS"
-                onPress={() => router.push("/standings")}
-              />
-            )
-          ) : null}
-
-          {typeof total.data === "number" ? (
-            <View style={styles.totalBlock}>
-              <View style={styles.totalRow}>
-                <Text
-                  style={[
-                    styles.totalNumber,
-                    { fontSize: t.wedgiesText * 1.5 },
-                  ]}
-                  allowFontScaling={false}
-                >
-                  {total.data}
-                </Text>
-                <View style={styles.totalLabels}>
-                  <Text
-                    style={[
-                      styles.totalLabel,
-                      { fontSize: t.wedgiesText * 0.6 },
-                    ]}
-                    allowFontScaling={false}
-                  >
-                    TOTAL WEDGIES
-                  </Text>
-                  <Text
-                    style={[
-                      styles.totalSince,
-                      { fontSize: t.wedgiesText * 0.4 },
-                    ]}
-                    allowFontScaling={false}
-                  >
-                    FROM THE 2014/15 SEASON
-                  </Text>
-                </View>
-              </View>
-              <PillButton
-                label="SEASONS HISTORY"
-                onPress={() => router.push("/seasons?from=Home")}
-              />
-            </View>
-          ) : null}
-        </View>
-      </ScrollView>
+        ) : (
+          <>
+            {hero}
+            {column}
+          </>
+        )}
+      </Animated.ScrollView>
     </TopSafeArea>
   );
 }
 
+const TOTAL = 30;
+
 const styles = StyleSheet.create({
-  safe: { flex: 1 },
-  scroll: { backgroundColor: colors.darkpurpleDark },
-  content: {},
-  overscroll: {
-    position: "absolute",
-    top: -900,
-    left: 0,
-    right: 0,
-    height: 900,
-  },
-  heroFallback: {
-    minHeight: 400,
-    backgroundColor: colors.darkpurpleLight,
+  safe: { flex: 1, backgroundColor: colors.night },
+  scroll: { backgroundColor: colors.night },
+  header: {
+    height: 52,
+    alignItems: "center",
     justifyContent: "center",
+    backgroundColor: colors.night,
   },
+  support: {
+    position: "absolute",
+    // In line with the cards below, clear of the screen's rounded corner.
+    left: 20,
+    flexDirection: "row",
+    gap: 6,
+    // Tighter than a standard small sticker: it sits in a 52pt header.
+    minHeight: 34,
+    paddingHorizontal: 9,
+    paddingVertical: 0,
+  },
+  supportLabel: { fontSize: 11, letterSpacing: 1 },
   errorWrap: { padding: space.lg },
 
-  // The dark column that holds the lists on the web page.
+  // `bg-night gap-12 px-[18px] pb-12`
   column: {
-    backgroundColor: colors.darkpurpleDark,
-    paddingHorizontal: space.lg,
-    paddingVertical: space.xl,
+    backgroundColor: colors.night,
+    paddingHorizontal: 18,
+    paddingTop: 8,
+    paddingBottom: 48,
     gap: 48,
-    alignItems: "center",
   },
+  section: { width: "100%" },
+  // Hero on the left, wedgies and leaders on the right, as on the desktop site.
+  columnWide: { paddingTop: 0, paddingLeft: 0 },
+  rows: { marginTop: 12, gap: 10 },
+  sectionButton: { marginTop: 18 },
+  loading: { minHeight: 240, alignItems: "center", justifyContent: "center" },
 
-  card: {
-    width: "100%",
-    maxWidth: 672,
-    backgroundColor: colors.darkpurple,
-    borderRadius: radius.sm,
-    overflow: "hidden",
-  },
-  cardBody: { padding: space.sm },
-
-  standingsCard: {
-    width: "100%",
-    maxWidth: 672,
-    backgroundColor: colors.rowIdle,
-    borderRadius: radius.sm,
-    overflow: "hidden",
-  },
-  standingsGrid: {
+  total: { gap: 16 },
+  totalRow: {
     flexDirection: "row",
-    gap: space.xl,
-    padding: space.sm,
-    paddingVertical: space.md,
-  },
-  // 3/5 and 2/5 of the grid, as on the web
-  standingsPlayers: { flex: 3 },
-  standingsTeams: { flex: 2 },
-
-  totalBlock: {
-    width: "100%",
-    maxWidth: 672,
     alignItems: "center",
-    gap: space.lg,
+    justifyContent: "center",
+    gap: 16,
   },
-  totalRow: { flexDirection: "row", alignItems: "center", gap: space.lg },
-  totalNumber: { fontFamily: fonts.black, color: colors.yellow },
-  totalLabels: { gap: 2 },
-  totalLabel: { fontFamily: fonts.black, color: colors.pink },
-  totalSince: { fontFamily: fonts.bold, color: colors.white50 },
+  totalNumber: {
+    fontFamily: fonts.black,
+    fontSize: TOTAL * 1.5,
+    lineHeight: TOTAL * 1.5,
+    color: colors.violet,
+  },
+  totalLabel: {
+    fontFamily: fonts.black,
+    fontSize: TOTAL * 0.6,
+    lineHeight: TOTAL * 0.6,
+    color: colors.cream,
+  },
+  totalSince: {
+    marginTop: TOTAL * 0.4 * 0.2,
+    fontFamily: fonts.bold,
+    fontSize: TOTAL * 0.4,
+    lineHeight: TOTAL * 0.4,
+    color: colors.white50,
+  },
 });
