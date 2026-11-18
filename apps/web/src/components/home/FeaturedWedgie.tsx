@@ -91,7 +91,7 @@ export function FeaturedWedgie({
                 className="text-cream/70 mt-1.5 block text-xs font-bold whitespace-nowrap"
               />
             </span>
-            <span className="relative block w-[150px] md:mx-auto md:-mt-4 md:w-[132px]">
+            <span className="relative -mt-7 block w-[150px] md:mx-auto md:-mt-4 md:w-[132px]">
               <CourtPositionDiagram
                 position={wedgie.position}
                 dotClassName="size-2.5"
