@@ -118,8 +118,11 @@ export function PaceGauge({
         >
           On pace for
         </text>
+        {/* Inter is loaded upright only, so Chrome slants it for the italic,
+            which pushes the ink about 3 units right of the anchor. Anchoring
+            at 66 puts the number's ink on the arc's centre (70). */}
         <text
-          x="69"
+          x="66"
           y="74"
           textAnchor="middle"
           fontSize="36"
