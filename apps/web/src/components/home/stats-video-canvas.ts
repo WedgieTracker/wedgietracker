@@ -44,15 +44,6 @@ const GLOW_STOPS: [number, string][] = [
   [0.5, "#7b6bf0"],
   [1, "#a65ff5"],
 ];
-/** The slant of the italic numbers, done by hand so every browser draws it alike. */
-const ITALIC_SKEW = -0.2;
-/**
- * How far the slant moves a line's middle right of where it is drawn: half
- * the cap height (0.73em in Inter) times the skew, less the side bearing,
- * measured on the hero. Italic text is drawn this
- * much to the left so it looks centred.
- */
-const italicLean = (size: number) => -ITALIC_SKEW * 0.3 * size;
 
 export interface SceneAssets {
   logo: CanvasImageSource | null;
@@ -113,8 +104,12 @@ export interface Scene {
   celebrate: boolean;
 }
 
-function font(weight: number, size: number) {
-  return `${weight} ${Math.round(size)}px ${FONT}`;
+/**
+ * The italic numbers use Inter's drawn italic, the same face the site loads,
+ * so they match the page and centre without a hand-made slant.
+ */
+function font(weight: number, size: number, italic = false) {
+  return `${italic ? "italic " : ""}${weight} ${Math.round(size)}px ${FONT}`;
 }
 
 /**
@@ -307,8 +302,8 @@ function fitSize(
   max: number,
   maxWidth: number,
 ) {
-  ctx.font = font(weight, max);
-  const width = ctx.measureText(text).width * (1 + Math.abs(ITALIC_SKEW) / 2);
+  ctx.font = font(weight, max, true);
+  const width = ctx.measureText(text).width;
   return width > maxWidth ? Math.floor((max * maxWidth) / width) : max;
 }
 
@@ -325,15 +320,9 @@ function badgeText(
   { italic = false, weight = 900, colour = CREAM } = {},
 ) {
   ctx.save();
-  ctx.font = font(weight, size);
+  ctx.font = font(weight, size, italic);
   ctx.textAlign = "center";
   ctx.textBaseline = "alphabetic";
-  if (italic) {
-    x -= italicLean(size);
-    ctx.translate(x, y);
-    ctx.transform(1, 0, ITALIC_SKEW, 1, 0, 0);
-    ctx.translate(-x, -y);
-  }
   ctx.shadowColor = "rgb(10 5 30 / 0.45)";
   ctx.shadowOffsetY = size * 0.08;
   ctx.shadowBlur = size * 0.14;
@@ -638,14 +627,9 @@ function drawCalendar(scene: Scene, layout: Layout, t: number) {
       body.h * 0.56,
       body.w * 0.8,
     );
-    ctx.save();
-    const y = body.y + body.h * 0.6;
-    ctx.translate(cx - italicLean(size), y);
-    ctx.transform(1, 0, ITALIC_SKEW, 1, 0, 0);
-    ctx.font = font(900, size);
+    ctx.font = font(900, size, true);
     ctx.fillStyle = "#502394";
-    ctx.fillText(String(days), 0, 0);
-    ctx.restore();
+    ctx.fillText(String(days), cx, body.y + body.h * 0.6);
     ctx.font = font(900, body.w * 0.085);
     ctx.fillStyle = NIGHT;
     ctx.fillText(
@@ -762,6 +746,7 @@ export async function loadVideoFonts(stampFont?: string) {
         .load(`${w} 100px Inter`, "0123456789WEDGIES")
         .catch(() => []),
     ),
+    document.fonts.load("italic 900 100px Inter", "0123456789").catch(() => []),
     stampFont
       ? document.fonts.load(`19px ${stampFont}`, "NEW WEDGIE!").catch(() => [])
       : Promise.resolve([]),

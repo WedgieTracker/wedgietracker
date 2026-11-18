@@ -9,8 +9,12 @@ import { GoogleTagManager } from "@next/third-parties/google";
 import ConsentBannerGeo from "~/components/shared/ConsentBannerGeo";
 import { CONSENT_REQUIRED_REGIONS } from "~/lib/consent-region";
 
+// The italic is loaded too, so the heavy italic numbers use Inter's drawn
+// italic instead of a browser's slanted upright, which leans differently in
+// each browser and pushes centred numbers off centre.
 const inter = Inter({
   subsets: ["latin"],
+  style: ["normal", "italic"],
   variable: "--font-inter",
 });
 

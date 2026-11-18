@@ -319,7 +319,7 @@ export function StatsForNerds({
         <Section title={`${stats.currentSeason} so far`} hideTitle>
           <Card>
             <div className="flex items-center gap-4">
-              <div className="bg-badge grain text-cream text-shadow-badge grid size-20 shrink-0 place-items-center rounded-2xl pr-[0.12em] text-[44px] leading-none font-black italic">
+              <div className="bg-badge grain text-cream text-shadow-badge grid size-20 shrink-0 place-items-center rounded-2xl text-[44px] leading-none font-black italic">
                 {stats.gamesSinceLastWedgie ?? 0}
               </div>
               <div>
@@ -375,7 +375,7 @@ export function StatsForNerds({
                   <dt className="text-cream/60 text-[11.5px] font-black tracking-[0.1em] uppercase">
                     {label}
                   </dt>
-                  <dd className="text-cream pr-[0.1em] text-[26px] leading-none font-black whitespace-nowrap italic">
+                  <dd className="text-cream text-[26px] leading-none font-black whitespace-nowrap italic">
                     {n}
                   </dd>
                 </div>

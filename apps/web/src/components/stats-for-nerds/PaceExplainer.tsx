@@ -213,7 +213,7 @@ export function PaceExplainer({ data }: PaceExplainerProps) {
             >
               −
             </Stepper>
-            <span className="w-12 pr-[0.1em] text-center text-2xl font-black italic">
+            <span className="w-12 text-center text-2xl font-black italic">
               {wedgies}
             </span>
             <Stepper
@@ -284,7 +284,7 @@ function Section({
     <section className="bg-panel border-violet/20 rounded-[22px] border p-[18px] md:p-7">
       <h2 className="text-cream mb-3 flex items-center gap-3 text-[22px] leading-tight font-black tracking-[-0.03em] md:text-[26px]">
         {step && (
-          <span className="bg-button text-shadow-badge inline-flex size-9 shrink-0 items-center justify-center rounded-xl pr-[0.1em] text-xl tracking-normal italic">
+          <span className="bg-button text-shadow-badge inline-flex size-9 shrink-0 items-center justify-center rounded-xl text-xl tracking-normal italic">
             {step}
           </span>
         )}
@@ -353,7 +353,7 @@ function Term({
   return (
     <div className="flex flex-col items-center">
       <span
-        className={`text-cream rounded-xl py-1 pr-[calc(0.75rem+0.1em)] pl-3 text-2xl font-black italic md:text-3xl ${
+        className={`text-cream rounded-xl px-3 py-1 text-2xl font-black italic md:text-3xl ${
           highlight ? "bg-button text-shadow-badge" : "bg-night"
         }`}
       >
