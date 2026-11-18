@@ -20,7 +20,7 @@ export function ErrorScreen({
       <div className="mr-[-20px] w-44 md:w-56" aria-hidden="true">
         <Loader />
       </div>
-      <span className="text-violet pr-[0.1em] text-2xl leading-none font-black italic">
+      <span className="text-violet text-2xl leading-none font-black italic">
         {code}
       </span>
       <h1 className="text-cream text-[34px] leading-none font-black tracking-[-0.03em] md:text-5xl">
