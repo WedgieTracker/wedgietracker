@@ -1,7 +1,8 @@
-import { Linking, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { WebView } from "react-native-webview";
 
 import { getApiBaseUrl } from "@/lib/api";
+import { openExternal } from "@/lib/links";
 import { report } from "@/lib/observability";
 import { colors, space, type } from "@/lib/theme";
 import type { VideoUrls } from "@wedgietracker/core/types/wedgie";
@@ -104,12 +105,12 @@ function EmbeddedVideo({ src }: { src: string }) {
         // box; hand those links to iOS instead, which opens the YouTube app
         // or Safari. The document itself and the embed load as normal.
         onOpenWindow={({ nativeEvent }) =>
-          void Linking.openURL(nativeEvent.targetUrl)
+          void openExternal(nativeEvent.targetUrl)
         }
         onShouldStartLoadWithRequest={(request) => {
           if (request.isTopFrame === false) return true;
           if (isEmbedDocument(request.url, origin)) return true;
-          void Linking.openURL(request.url);
+          void openExternal(request.url);
           return false;
         }}
         // YouTube reports its own 150/152/153 inside the iframe, so these only

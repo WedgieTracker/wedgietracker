@@ -3,7 +3,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Animated,
   Image,
-  Linking,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -24,6 +23,7 @@ import { ErrorState, Loading } from "@/components/States";
 import { WedgiePlayer, pickVideoForApp } from "@/components/WedgiePlayer";
 import { WedgieVideoTabs } from "@/components/WedgieVideoTabs";
 import { api, type RouterOutputs } from "@/lib/api";
+import { openExternal } from "@/lib/links";
 import { track } from "@/lib/observability";
 import { useShotScroll } from "@/lib/screenshot";
 import { GemTag } from "@/components/GemTag";
@@ -319,9 +319,7 @@ function WedgieDetail({
                     styles.shoutout,
                     pressed && styles.shoutoutPressed,
                   ]}
-                  onPress={() =>
-                    void Linking.openURL(shoutoutProfileUrl(handle))
-                  }
+                  onPress={() => void openExternal(shoutoutProfileUrl(handle))}
                 >
                   {({ pressed }) => (
                     <Text
@@ -357,8 +355,7 @@ function WedgieDetail({
               style={styles.noDunks}
               onPress={() => {
                 const tweet = wedgie.noDunksTweet;
-                if (tweet)
-                  void Linking.openURL(tweetUrl("NoDunksInc", tweet.id));
+                if (tweet) void openExternal(tweetUrl("NoDunksInc", tweet.id));
               }}
             >
               <Image
@@ -509,7 +506,7 @@ function ShoutoutNote({ onClose }: { onClose: () => void }) {
         <Text
           style={styles.noteLink}
           accessibilityRole="link"
-          onPress={() => void Linking.openURL("https://x.com/wedgietracker")}
+          onPress={() => void openExternal("https://x.com/wedgietracker")}
         >
           @wedgietracker on X
         </Text>{" "}
@@ -518,7 +515,7 @@ function ShoutoutNote({ onClose }: { onClose: () => void }) {
           style={styles.noteLink}
           accessibilityRole="link"
           onPress={() =>
-            void Linking.openURL("https://bsky.app/profile/wedgietracker.com")
+            void openExternal("https://bsky.app/profile/wedgietracker.com")
           }
         >
           wedgietracker.com on Bluesky
