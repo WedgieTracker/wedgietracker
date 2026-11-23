@@ -2,7 +2,7 @@ import { isGemsDate } from "@wedgietracker/core/utils/formatDate";
 
 /**
  * The text drawn over the Reel, Short and cover templates: a small
- * "WEDGIE" label, the number in Inter Black Italic with the Home counter's
+ * "WEDGIE" label, the number in Shrikhand with the Home counter's
  * two shadows, the player's name on the cover, then the date and
  * the season in a pill. Shared by the server (node-canvas) and the admin
  * preview (browser canvas), so the two can't drift apart.
@@ -13,8 +13,11 @@ import { isGemsDate } from "@wedgietracker/core/utils/formatDate";
  * ignore canvas transforms, so everything is scaled by hand instead.
  *
  * The fonts must be registered under these family names before drawing:
- * InterExtraBold (800), InterBlack (900) and InterBlackItalic (900 italic).
+ * InterExtraBold (800), InterBlack (900) and Shrikhand (its one style).
  */
+
+/** The big number's face, registered under this name by the server and preview. */
+export const NUM_FONT = "Shrikhand";
 
 export type OverlayType = "short" | "thumbnail" | "reel";
 
@@ -210,20 +213,16 @@ export function drawWedgieOverlay(
 
   // The number, shrunk only if it would run off the side
   const num = String(data.number);
+  // Shrikhand's digits stand 0.67em against Inter's 0.73em, which the layout
+  // was drawn for: 1.1x brings them back to the same height on the same
+  // baseline, so the gaps to the label and the pill stay as designed.
   const numSize = p(
-    fitSize(ctx, [num], "InterBlackItalic", L.numSize, W * 0.86, -0.03),
+    fitSize(ctx, [num], NUM_FONT, L.numSize * 1.1, W * 0.86, 0),
   );
-  ctx.font = `${numSize}px InterBlackItalic`;
-  // The italic slant leans the figures right of where they measure; pulled
-  // back by 0.044em, measured on the Reel, so they look centred.
-  shadowedText(
-    ctx,
-    num,
-    cx - 0.044 * numSize,
-    p(L.num),
-    numSize,
-    -0.03 * numSize,
-  );
+  ctx.font = `${numSize}px ${NUM_FONT}`;
+  // Shrikhand's lean is drawn into its advance widths, so the figures centre
+  // on their measured width with no correction and no tracking.
+  shadowedText(ctx, num, cx, p(L.num), numSize, 0);
 
   // The player's name, cover only, two lines with no box
   const lines = data.player ? nameLines(data.player) : [];

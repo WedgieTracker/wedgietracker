@@ -16,11 +16,12 @@ registerFont(path.join(process.cwd(), "public/fonts/Inter-ExtraBold.ttf"), {
   weight: "800",
 });
 
-// Black italic, for the big wedgie number
-registerFont(path.join(process.cwd(), "public/fonts/Inter-BlackItalic.ttf"), {
-  family: "InterBlackItalic",
-  weight: "900",
-  style: "italic",
+// Shrikhand, for the big wedgie number, as the site and app set it. This copy
+// has its italic angle set to 0 (outlines untouched): with Shrikhand's -14
+// degrees, node-canvas on macOS never matched the face and drew a fallback.
+// OFL, licence beside it in Shrikhand-OFL.txt.
+registerFont(path.join(process.cwd(), "public/fonts/Shrikhand-Regular.ttf"), {
+  family: "Shrikhand",
 });
 
 export async function createBackground(
