@@ -1,6 +1,7 @@
 import { X509Certificate, verify } from "node:crypto";
 import { z } from "zod";
 import { addSeasonCoffees } from "~/server/coffees";
+import { saveAppBoardDetails } from "~/server/coffee-board";
 
 /**
  * Apple Root CA - G3, from https://www.apple.com/certificateauthority/.
@@ -215,6 +216,7 @@ export type AppStoreCoffeeResult =
 export async function recordAppStoreCoffee(
   signedTransaction: string,
   trustedRoot: string | Buffer = APPLE_ROOT_CA_G3_PEM,
+  board: { name?: string | null; installId?: string | null } = {},
 ): Promise<AppStoreCoffeeResult> {
   let transaction: AppStoreTransaction;
   try {
@@ -242,7 +244,10 @@ export async function recordAppStoreCoffee(
   }
 
   const coffees = perProduct * transaction.quantity;
-  const added = await addSeasonCoffees(appStoreCoffeeKey(transaction), coffees);
+  const key = appStoreCoffeeKey(transaction);
+  const added = await addSeasonCoffees(key, coffees);
   if (added === "no-season") return { status: "ignored", reason: "no-season" };
+  // Newer apps send a leaderboard name and their install id; older ones don't.
+  await saveAppBoardDetails(key, board);
   return { status: "counted", coffees };
 }

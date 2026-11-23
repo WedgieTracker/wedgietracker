@@ -125,6 +125,20 @@ export const coffeeCheckout = sqliteTable("coffee_checkout", {
    * this purchase; an older or equal one changes nothing.
    */
   refundChangedAt: integer("refund_changed_at"),
+  /**
+   * The name the buyer chose for the coffee leaderboard, or null to stay
+   * anonymous. It shows only once approved (name_status "approved").
+   */
+  displayName: text("display_name"),
+  /** "pending" until a name is approved or rejected in the admin; null with no name. */
+  nameStatus: text("name_status", {
+    enum: ["pending", "approved", "rejected"],
+  }),
+  /**
+   * Groups one buyer's coffees into a single leaderboard place: an HMAC of
+   * the Stripe email, or of the app's per-install id. Never the email itself.
+   */
+  donorKey: text("donor_key"),
 });
 
 /**

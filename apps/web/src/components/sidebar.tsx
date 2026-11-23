@@ -1,8 +1,9 @@
 import {
+  Coffee,
   Flag,
   Home,
-  Settings,
   LoaderPinwheel,
+  Settings,
   User,
   Users,
 } from "lucide-react";
@@ -34,6 +35,11 @@ const items = [
     title: "Reports",
     url: "/admin/reports",
     icon: Flag,
+  },
+  {
+    title: "Coffee names",
+    url: "/admin/coffees",
+    icon: Coffee,
   },
   {
     title: "Players",

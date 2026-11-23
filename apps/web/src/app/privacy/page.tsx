@@ -96,6 +96,10 @@ export default function PrivacyPage() {
               <ul className={docList}>
                 <li>Email address (when you subscribe to our newsletter)</li>
                 <li>Name and email address (when you buy us a coffee)</li>
+                <li>
+                  The name you choose for the coffee leaderboard, if you give
+                  one
+                </li>
               </ul>
 
               <h3 className={docSubheading}>Usage data</h3>
@@ -117,6 +121,17 @@ export default function PrivacyPage() {
           <DocSection title="How we use your information">
             <ul className={docList}>
               <li>To process your coffee donation and send a receipt</li>
+              <li>
+                To show the name you chose on the public coffee leaderboard,
+                once we&apos;ve approved it. Leave it empty and your coffees
+                show as Anonymous.
+              </li>
+              <li>
+                To add up one buyer&apos;s coffees on the leaderboard, using a
+                one-way code made from your email (or, in the app, from a random
+                id the app keeps). The code can&apos;t be turned back into your
+                email, and the email itself isn&apos;t stored for this.
+              </li>
               <li>To send you our newsletter (if subscribed)</li>
               <li>To improve our website and user experience</li>
               <li>To analyze website traffic and usage patterns</li>
