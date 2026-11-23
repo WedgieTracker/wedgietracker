@@ -29,7 +29,7 @@ export function EasterEgg() {
               </div>
               {/* add a gradient from transparent to night on the last 50px of the div */}
             </div>
-            <div className="sm:text-wedgies-text relative z-10 mt-[-.5em] text-3xl leading-none text-white">
+            <div className="sm:text-section-text relative z-10 mt-[-.5em] text-3xl leading-none text-white">
               <div className="flex flex-row items-baseline gap-2">
                 <span className="text-cream text-[.6em] font-black">
                   Wedgie

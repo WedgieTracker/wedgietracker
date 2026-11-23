@@ -89,7 +89,7 @@ async function TotalWedgiesWrapper() {
   const total = await api.wedgie.getTotalWedgies();
   return (
     <div className="flex w-full max-w-2xl flex-col items-center justify-between gap-4">
-      <div className="sm:text-wedgies-text flex flex-row items-center gap-4 text-3xl leading-none">
+      <div className="sm:text-section-text flex flex-row items-center gap-4 text-3xl leading-none">
         <span className="text-violet font-numerals text-[1.5em] font-normal">
           {total}
         </span>
