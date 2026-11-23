@@ -2,9 +2,11 @@ import {
   QueryCache,
   QueryClient,
   QueryClientProvider,
+  focusManager,
 } from "@tanstack/react-query";
 import { httpBatchLink } from "@trpc/client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { AppState } from "react-native";
 import SuperJSON from "superjson";
 
 import { api, getTrpcUrl } from "./api";
@@ -50,6 +52,17 @@ export function ApiProvider({ children }: { children: React.ReactNode }) {
       ],
     }),
   );
+
+  // React Query refetches stale data when the window regains focus, but React
+  // Native has no window. Without this, reopening the app from the background
+  // kept showing whatever it loaded last, so a wedgie already on the site was
+  // missing until a pull-to-refresh or until iOS killed the app.
+  useEffect(() => {
+    const subscription = AppState.addEventListener("change", (status) => {
+      focusManager.setFocused(status === "active");
+    });
+    return () => subscription.remove();
+  }, []);
 
   return (
     <api.Provider client={trpcClient} queryClient={queryClient}>
