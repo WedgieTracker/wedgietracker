@@ -9,9 +9,10 @@ export function Newsletter() {
 
   return (
     <section
+      id="newsletter"
       aria-labelledby="newsletter-title"
       className={cn(
-        "bg-panel border-violet/20 w-full max-w-2xl rounded-[22px] border p-5 md:p-7",
+        "bg-panel border-violet/20 w-full max-w-2xl scroll-mt-6 rounded-[22px] border p-5 md:p-7",
         loading && "pointer-events-none opacity-60",
       )}
     >

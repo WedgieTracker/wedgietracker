@@ -52,6 +52,9 @@ export function Screen({
       contentContainerStyle={[styles.content, { paddingBottom: tabBar }]}
       refreshControl={refreshControl}
       showsVerticalScrollIndicator={false}
+      // Keeps a focused field (the coffee leaderboard name) above the keyboard.
+      automaticallyAdjustKeyboardInsets
+      keyboardShouldPersistTaps="handled"
       onScroll={onScroll}
       scrollEventThrottle={16}
     >

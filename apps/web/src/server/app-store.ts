@@ -1,7 +1,7 @@
 import { X509Certificate, verify } from "node:crypto";
 import { z } from "zod";
 import { addSeasonCoffees } from "~/server/coffees";
-import { saveAppBoardDetails } from "~/server/coffee-board";
+import { saveAppBoardDetails, setBoardName } from "~/server/coffee-board";
 
 /**
  * Apple Root CA - G3, from https://www.apple.com/certificateauthority/.
@@ -250,4 +250,27 @@ export async function recordAppStoreCoffee(
   // Newer apps send a leaderboard name and their install id; older ones don't.
   await saveAppBoardDetails(key, board);
   return { status: "counted", coffees };
+}
+
+/**
+ * Sets the leaderboard name for a coffee bought in the app, from the sheet
+ * shown after buying. The signed transaction proves it's the buyer's own
+ * purchase. Like the website's form, it replaces any name the purchase had,
+ * and a new name waits for approval. False when the purchase isn't counted
+ * (TestFlight, a refund) or doesn't verify.
+ */
+export async function saveAppBoardName(
+  signedTransaction: string,
+  name: string,
+  trustedRoot: string | Buffer = APPLE_ROOT_CA_G3_PEM,
+): Promise<boolean> {
+  let transaction: AppStoreTransaction;
+  try {
+    transaction = verifyAppStoreTransaction(signedTransaction, trustedRoot);
+  } catch {
+    return false;
+  }
+  if (transaction.bundleId !== APP_BUNDLE_ID) return false;
+  if (transaction.environment !== "Production") return false;
+  return setBoardName(appStoreCoffeeKey(transaction), name);
 }
