@@ -280,7 +280,7 @@ export function StatsForNerds({
               <p className="text-cream text-sm leading-none font-bold md:text-base">
                 WE&apos;RE AT
               </p>
-              <p className="text-cream text-shadow-badge font-numerals -mb-[0.12em] text-[clamp(7rem,6rem+6vw,11rem)] leading-[0.88] font-normal">
+              <p className="text-cream text-shadow-badge font-numerals mt-[0.04em] -mb-[0.08em] text-[clamp(7rem,6rem+6vw,11rem)] leading-[0.88] font-normal">
                 <Counter end={stats.wedgiesThisSeason} />
               </p>
               <p className="text-cream text-shadow-badge mt-1 text-4xl leading-none font-black md:text-5xl">

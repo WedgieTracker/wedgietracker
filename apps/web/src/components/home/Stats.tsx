@@ -82,7 +82,7 @@ export function Stats({ stats, isLoading }: StatsProps) {
                 ? "ALL-TIME RECORD TIED"
                 : "WE'RE AT"}
           </div>
-          <div className="text-big-number-mobile text-cream md:text-big-number-medium lg:text-big-number text-shadow-badge font-numerals -mb-[0.095em] leading-[0.88] font-normal whitespace-nowrap">
+          <div className="text-big-number-mobile text-cream md:text-big-number-medium lg:text-big-number text-shadow-badge font-numerals mt-[0.04em] -mb-[0.055em] leading-[0.88] font-normal whitespace-nowrap">
             <Counter
               end={stats.totalWedgies}
               format={(n) => n.toLocaleString()}
