@@ -169,6 +169,7 @@ beforeAll(async () => {
   await migrate("0001_season_coffees.sql");
   await migrate("0003_coffee_refunds.sql");
   await migrate("0004_coffee_refund_order.sql");
+  await migrate("0007_coffee_leaderboard.sql");
 });
 
 afterAll(() => {

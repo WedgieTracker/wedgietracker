@@ -4,6 +4,7 @@ import { coffeeCheckout, global, season } from "@wedgietracker/core/schema";
 import { db } from "~/server/db";
 import { CACHE_TAGS } from "~/server/cache";
 import { stripe } from "~/server/services/stripe";
+import { saveStripeBoardDetails } from "~/server/coffee-board";
 
 /** Coffees are $1 each. */
 const COFFEE_CENTS = 100;
@@ -55,7 +56,10 @@ export async function recordCoffeeCheckout(
   if (coffees < 1) return null;
 
   const added = await addSeasonCoffees(sessionId, coffees);
-  return added === "no-season" ? null : coffees;
+  if (added === "no-season") return null;
+  // On every visit, not only the first: it only fills in what's missing.
+  await saveStripeBoardDetails(sessionId, session);
+  return coffees;
 }
 
 /**

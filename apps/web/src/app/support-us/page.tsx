@@ -1,5 +1,7 @@
 import { PageLayout } from "~/components/layout/PageLayout";
+import { Suspense } from "react";
 import { CoffeeStack } from "~/components/support/CoffeeStack";
+import { CoffeeLeaderboard } from "~/components/support/CoffeeLeaderboard";
 import { ExploreFooter } from "~/components/shared/ExploreFooter";
 import { generateMetadata } from "~/config/metadata";
 
@@ -23,6 +25,9 @@ export default function SupportUsPage() {
           </p>
         </div>
         <CoffeeStack />
+        <Suspense fallback={null}>
+          <CoffeeLeaderboard />
+        </Suspense>
         <ExploreFooter
           className="max-w-xl"
           links={[
