@@ -564,8 +564,9 @@ const styles = StyleSheet.create({
   },
   // A little right padding keeps the slanted digit looking centred.
   stepText: {
-    fontFamily: fonts.blackItalic,
+    fontFamily: fonts.numerals,
     fontSize: 18,
+    lineHeight: 22,
     paddingRight: 2,
     color: colors.cream,
   },

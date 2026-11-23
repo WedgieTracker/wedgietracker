@@ -181,9 +181,9 @@ importers:
       '@expo-google-fonts/inter':
         specifier: ^0.4.2
         version: 0.4.2
-      '@expo-google-fonts/permanent-marker':
-        specifier: ^0.4.0
-        version: 0.4.0
+      '@expo-google-fonts/shrikhand':
+        specifier: ^0.4.1
+        version: 0.4.1
       '@expo/dom-webview':
         specifier: ~58.0.2
         version: 58.0.2(expo@58.0.22)(react-native@0.88.1(@babel/core@7.29.7(supports-color@8.1.1))(@react-native/metro-config@0.88.1(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)
@@ -1731,8 +1731,8 @@ packages:
   '@expo-google-fonts/material-symbols@0.4.47':
     resolution: {integrity: sha512-5G4ObZlyGvDzx6g/+NC+RAMeeCc3dc0/HLu/llY5dYZUlNDYzaZWQZwPUzoTixf27riT8I7ur9mQKPYCPFDJzQ==}
 
-  '@expo-google-fonts/permanent-marker@0.4.0':
-    resolution: {integrity: sha512-yqKSFt3Wu/06XAGFNlT4z5iLmnjtAuSV/vkeumnM/2cgbEv3dQVKDbcdQnowW8N3vNOABGqWxbs4KEiewNOzqA==}
+  '@expo-google-fonts/shrikhand@0.4.1':
+    resolution: {integrity: sha512-kuSZq8qX7ScL8G88e+31CHOs4g7NJl3lhY3mm+JGapLyT41pRnGuNXYfyTfwo6nyhEaMnrShbxdcmhg94Y+Qsw==}
 
   '@expo/cli@58.1.18':
     resolution: {integrity: sha512-voZUcir9mEwvLKBNqQM6Jy2Yp67z8ONmcINXb6ZrLMayb7yxzwvEnN0eeH8ADzUABKL288pv1eJ1WRqtYxXQ/Q==}
@@ -8199,7 +8199,7 @@ snapshots:
 
   '@expo-google-fonts/material-symbols@0.4.47': {}
 
-  '@expo-google-fonts/permanent-marker@0.4.0': {}
+  '@expo-google-fonts/shrikhand@0.4.1': {}
 
   '@expo/cli@58.1.18(@expo/dom-webview@58.0.2)(@expo/metro-runtime@58.0.16)(expo-constants@58.0.14)(expo-font@58.0.11)(expo-router@58.0.29)(expo@58.0.22)(react-dom@19.3.0(react@19.3.0))(react-native@0.88.1(@babel/core@7.29.7(supports-color@8.1.1))(@react-native/metro-config@0.88.1(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)(supports-color@8.1.1)(typescript@6.0.3)':
     dependencies:

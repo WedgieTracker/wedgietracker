@@ -157,6 +157,6 @@ export const fonts = {
   bold: "Inter_700Bold",
   extraBold: "Inter_800ExtraBold",
   black: "Inter_900Black",
-  blackItalic: "Inter_900Black_Italic",
-  marker: "PermanentMarker_400Regular",
+  /** The big numbers and the NEW WEDGIE! stamp, like the No Dunks graphics. */
+  numerals: "Shrikhand_400Regular",
 } as const;

@@ -114,9 +114,9 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   chipText: {
-    fontFamily: fonts.blackItalic,
+    fontFamily: fonts.numerals,
     fontSize: CHIP_TEXT,
-    lineHeight: CHIP_TEXT + 4,
+    lineHeight: Math.ceil(CHIP_TEXT * 1.2),
     color: colors.cream,
     fontVariant: ["tabular-nums"],
   },
