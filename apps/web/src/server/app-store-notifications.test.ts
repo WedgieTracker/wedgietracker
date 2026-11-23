@@ -37,7 +37,7 @@ const { client } = (await import("~/server/db")) as unknown as {
 };
 const { handleAppStoreNotification } =
   await import("./app-store-notifications");
-const { recordAppStoreCoffee } = await import("./app-store");
+const { recordAppStoreCoffee, saveAppBoardName } = await import("./app-store");
 
 // A throwaway chain made with openssl, shaped like Apple's. Test keys only.
 const fixtures = path.join(__dirname, "__fixtures__", "app-store");
@@ -474,5 +474,67 @@ describe("handleAppStoreNotification", () => {
 
     expect(await seasonCoffees("2026-27")).toBe(13);
     expect(await refundedAt(key)).toBeNull();
+  });
+});
+
+describe("leaderboard names from the app", () => {
+  const INSTALL = "6f1c2a4e-8b3d-4c5e-9f7a-1b2c3d4e5f60";
+  const row = async () =>
+    (
+      await client.execute({
+        sql: "SELECT display_name, name_status, donor_key FROM coffee_checkout WHERE session_id = ?",
+        args: [key],
+      })
+    ).rows[0];
+
+  beforeAll(() => {
+    vi.stubEnv("AUTH_SECRET", "test-secret");
+  });
+
+  it("stores the install's donor key with the purchase, never the id", async () => {
+    await recordAppStoreCoffee(signTransaction(), testRoot, {
+      installId: INSTALL,
+    });
+    const r = await row();
+    expect(r?.donor_key).toMatch(/^i:/);
+    expect(r?.donor_key as string).not.toContain(INSTALL);
+    expect(r?.display_name).toBeNull();
+  });
+
+  it("names a counted purchase from the sheet, pending approval", async () => {
+    await recordAppStoreCoffee(signTransaction(), testRoot);
+    expect(
+      await saveAppBoardName(signTransaction(), "  Big   Al ", testRoot),
+    ).toBe(true);
+    expect(await row()).toMatchObject({
+      display_name: "Big Al",
+      name_status: "pending",
+    });
+    // Clearing it goes back to anonymous.
+    expect(await saveAppBoardName(signTransaction(), "", testRoot)).toBe(true);
+    expect(await row()).toMatchObject({
+      display_name: null,
+      name_status: null,
+    });
+  });
+
+  it("refuses TestFlight, uncounted and unverified purchases", async () => {
+    expect(
+      await saveAppBoardName(
+        signTransaction({ environment: "Sandbox" }),
+        "Al",
+        testRoot,
+      ),
+    ).toBe(false);
+    expect(await saveAppBoardName(signTransaction(), "Al", testRoot)).toBe(
+      false,
+    );
+    await recordAppStoreCoffee(signTransaction(), testRoot);
+    const [header, , signature] = signTransaction().split(".");
+    const forged = `${header}.${Buffer.from(
+      JSON.stringify({ transactionId: "2000000123456789" }),
+    ).toString("base64url")}.${signature}`;
+    expect(await saveAppBoardName(forged, "Al", testRoot)).toBe(false);
+    expect((await row())?.display_name).toBeNull();
   });
 });

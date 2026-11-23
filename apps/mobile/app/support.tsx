@@ -10,11 +10,14 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 
 import { CoffeeCup } from "@/components/CoffeeCup";
+import { CoffeeLeaderboard } from "@/components/CoffeeLeaderboard";
+import { CoffeeNameCard } from "@/components/CoffeeNameCard";
 import { CoffeeScoreboard } from "@/components/CoffeeScoreboard";
 import { GradientFill, Grain } from "@/components/Gradient";
 import { Screen } from "@/components/Screen";
 import { StickerButton } from "@/components/StickerButton";
 import { api } from "@/lib/api";
+import { getInstallId } from "@/lib/coffee-board";
 import { report, track } from "@/lib/observability";
 import { useWide } from "@/lib/wide";
 import { colors, fonts } from "@/lib/theme";
@@ -54,7 +57,7 @@ const ATTRIBUTES: { name: string; down?: boolean }[] = [
 type Status =
   | { kind: "idle" }
   | { kind: "buying" }
-  | { kind: "thanks"; coffees: number }
+  | { kind: "thanks"; coffees: number; transaction: string | null }
   | { kind: "failed" }
   | { kind: "unavailable" };
 
@@ -65,36 +68,74 @@ type Status =
  * can't sell right now (no connection), pressing it says so instead.
  */
 export default function SupportScreen() {
-  // Dev builds only: `?cups=5` opens on another pick, for screenshots.
-  const { cups } = useLocalSearchParams<{ cups?: string }>();
+  // Dev builds only: `?cups=5` opens on another pick, and `?thanks=3` on the
+  // thanks and name card, for screenshots.
+  const { cups, thanks } = useLocalSearchParams<{
+    cups?: string;
+    thanks?: string;
+  }>();
   const { wide } = useWide();
   const [count, setCount] = useState<1 | 3 | 5>(() =>
     __DEV__ && (cups === "1" || cups === "5") ? (Number(cups) as 1 | 5) : 3,
   );
-  const [status, setStatus] = useState<Status>({ kind: "idle" });
+  const [status, setStatus] = useState<Status>(() =>
+    __DEV__ && thanks
+      ? { kind: "thanks", coffees: Number(thanks) || 1, transaction: "dev" }
+      : { kind: "idle" },
+  );
   const [checked, setChecked] = useState(false);
   const scoreboard = api.donations.getSeasonCoffees.useQuery(undefined, {
+    retry: 1,
+  });
+  const board = api.donations.getCoffeeBoard.useQuery(undefined, {
     retry: 1,
   });
   const record = api.donations.recordAppStoreCoffee.useMutation();
   const recordRef = useRef(record.mutateAsync);
   recordRef.current = record.mutateAsync;
+  const saveName = api.donations.saveAppBoardName.useMutation();
+  // The name can only go on a purchase the server has counted, so saving it
+  // waits for the purchase to be sent.
+  const recorded = useRef<Promise<unknown>>(Promise.resolve());
 
   const onPurchase = async (purchase: Purchase) => {
     const coffees = COFFEES_OF.get(purchase.productId) ?? 0;
     track("wt_coffee_bought", { coffees });
-    setStatus({ kind: "thanks", coffees: coffees * (purchase.quantity || 1) });
-    if (!purchase.purchaseToken) return;
+    const transaction = purchase.purchaseToken ?? null;
+    setStatus({
+      kind: "thanks",
+      coffees: coffees * (purchase.quantity || 1),
+      transaction,
+    });
+    if (!transaction) return;
+    const send = (async () => {
+      const installId = await getInstallId();
+      await recordRef.current({ signedTransaction: transaction, installId });
+    })();
+    recorded.current = send.catch(() => undefined);
     try {
-      await recordRef.current({ signedTransaction: purchase.purchaseToken });
+      await send;
       // Finished only once the server has it. If it never heard, the store
       // hands the purchase back next time and it is sent again.
       await finishTransaction({ purchase, isConsumable: true });
       void scoreboard.refetch();
+      void board.refetch();
     } catch (error) {
       report("coffee.record", error);
     }
   };
+
+  const onSaveName =
+    status.kind === "thanks" && status.transaction
+      ? async (name: string) => {
+          await recorded.current;
+          const { saved } = await saveName.mutateAsync({
+            signedTransaction: status.transaction!,
+            name,
+          });
+          return saved;
+        }
+      : null;
 
   const {
     connected,
@@ -222,16 +263,7 @@ export default function SupportScreen() {
             </View>
             <View style={[styles.half, styles.halfRight]}>
               {status.kind === "thanks" ? (
-                <View style={styles.thanks} accessibilityLiveRegion="polite">
-                  <Text style={styles.thanksTitle} allowFontScaling={false}>
-                    Thank you!
-                  </Text>
-                  <Text style={styles.thanksText} allowFontScaling={false}>
-                    {status.coffees === 1
-                      ? "That coffee keeps the tracker running."
-                      : `Those ${status.coffees} coffees keep the tracker running.`}
-                  </Text>
-                </View>
+                <CoffeeNameCard coffees={status.coffees} onSave={onSaveName} />
               ) : null}
 
               <StickerButton
@@ -257,6 +289,7 @@ export default function SupportScreen() {
               {scoreboard.error ? null : (
                 <CoffeeScoreboard data={scoreboard.data ?? null} />
               )}
+              {board.data ? <CoffeeLeaderboard board={board.data} /> : null}
             </View>
           </View>
         ) : (
@@ -295,16 +328,7 @@ export default function SupportScreen() {
             </View>
 
             {status.kind === "thanks" ? (
-              <View style={styles.thanks} accessibilityLiveRegion="polite">
-                <Text style={styles.thanksTitle} allowFontScaling={false}>
-                  Thank you!
-                </Text>
-                <Text style={styles.thanksText} allowFontScaling={false}>
-                  {status.coffees === 1
-                    ? "That coffee keeps the tracker running."
-                    : `Those ${status.coffees} coffees keep the tracker running.`}
-                </Text>
-              </View>
+              <CoffeeNameCard coffees={status.coffees} onSave={onSaveName} />
             ) : null}
 
             <StickerButton
@@ -330,6 +354,7 @@ export default function SupportScreen() {
             {scoreboard.error ? null : (
               <CoffeeScoreboard data={scoreboard.data ?? null} />
             )}
+            {board.data ? <CoffeeLeaderboard board={board.data} /> : null}
           </View>
         )}
       </Screen>
@@ -516,20 +541,5 @@ const styles = StyleSheet.create({
     fontFamily: fonts.bold,
     fontSize: 12,
     color: colors.cream50,
-  },
-  thanks: {
-    padding: 14,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: "rgba(240, 225, 182, 0.35)",
-    backgroundColor: colors.violet15,
-  },
-  thanksTitle: { fontFamily: fonts.black, fontSize: 18, color: colors.cream },
-  thanksText: {
-    marginTop: 4,
-    fontFamily: fonts.bold,
-    fontSize: 14,
-    lineHeight: 20,
-    color: colors.cream80,
   },
 });

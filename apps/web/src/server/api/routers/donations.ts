@@ -2,7 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { stripe } from "~/server/services/stripe";
-import { recordAppStoreCoffee } from "~/server/app-store";
+import { recordAppStoreCoffee, saveAppBoardName } from "~/server/app-store";
 import { getSeasonCoffees, recordCoffeeCheckout } from "~/server/coffees";
 import {
   BOARD_NAME_MAX,
@@ -84,6 +84,22 @@ export const donationsRouter = createTRPCRouter({
         installId: input.installId,
       }),
     ),
+
+  /**
+   * Saves the leaderboard name for a coffee bought in the app, from the sheet
+   * after buying. The recap isn't asked for in the app: it links to the
+   * website's form instead.
+   */
+  saveAppBoardName: publicProcedure
+    .input(
+      z.object({
+        signedTransaction: z.string().max(20000),
+        name: z.string().max(200),
+      }),
+    )
+    .mutation(async ({ input }) => ({
+      saved: await saveAppBoardName(input.signedTransaction, input.name),
+    })),
 
   /**
    * Saves the leaderboard name (and, if asked, the morning recap) for a
