@@ -199,7 +199,7 @@ function NewWedgieStamp() {
               <Text
                 style={[
                   styles.bannerText,
-                  { fontSize: 19 * s, lineHeight: 19 * s },
+                  { fontSize: 19 * s, lineHeight: 23 * s },
                 ]}
                 allowFontScaling={false}
               >
@@ -208,7 +208,7 @@ function NewWedgieStamp() {
               <Text
                 style={[
                   styles.bannerText,
-                  { fontSize: 19 * s, lineHeight: 19 * s },
+                  { fontSize: 19 * s, lineHeight: 23 * s },
                 ]}
                 allowFontScaling={false}
               >
