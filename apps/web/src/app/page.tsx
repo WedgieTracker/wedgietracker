@@ -26,7 +26,7 @@ export default async function Home() {
         <Suspense fallback={<StatsSkeleton />}>
           <StatsWrapper />
         </Suspense>
-        <div className="bg-night flex w-full flex-col items-center justify-start gap-12 px-[18px] pt-0 pb-12 md:w-3/5 md:px-8 md:pt-6 lg:w-1/2">
+        <div className="bg-night flex w-full flex-col items-center justify-start gap-12 px-[18px] pt-0 pb-12 md:w-3/5 md:px-8 md:pt-6 lg:w-1/2 min-[112.5rem]:w-[40%] min-[112.5rem]:[zoom:1.25]">
           <Suspense fallback={<LoaderWrapper />}>
             <WedgieListWrapper />
 
