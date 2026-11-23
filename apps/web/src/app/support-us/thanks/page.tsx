@@ -48,7 +48,7 @@ async function Thanks({ searchParams }: { searchParams: Params }) {
       </h1>
       <p className="mt-4 text-xl text-white">
         {claimed
-          ? `Your ${coffees ?? ""} ${coffees === 1 ? "coffee is" : "coffees are"} on the leaderboard as Anonymous. Put your name on ${coffees === 1 ? "it" : "them"}, or leave ${coffees === 1 ? "it" : "them"} anonymous.`
+          ? `Your ${coffees ?? ""} ${coffees === 1 ? "coffee is" : "coffees are"} on the leaderboard. Put your name on ${coffees === 1 ? "it" : "them"}, or leave ${coffees === 1 ? "it" : "them"} anonymous.`
           : "Thank you, that one will keep me going through the late games."}
       </p>
       {coffees && !claimed && (
