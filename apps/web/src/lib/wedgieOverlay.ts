@@ -72,16 +72,18 @@ interface Layout {
 
 function layout(type: OverlayType): Layout {
   if (type === "thumbnail") {
-    const zone = 1440;
+    // The cover shows in Instagram's profile grid cropped to the middle 3:4,
+    // rows 480 to 3360, so the whole block is laid out inside that.
+    const zone = 1380;
     const k = 2;
     return {
       k,
-      label: zone + 150 * k,
-      num: zone + 500 * k,
+      label: zone + 140 * k,
+      num: zone + 480 * k,
       numSize: 400 * k,
-      name: [zone + 690 * k, zone + 805 * k],
+      name: [zone + 660 * k, zone + 775 * k],
       nameSize: 112 * k,
-      row: zone + 975 * k,
+      row: zone + 925 * k,
     };
   }
   const zone = type === "reel" ? 1390 : 2770;
