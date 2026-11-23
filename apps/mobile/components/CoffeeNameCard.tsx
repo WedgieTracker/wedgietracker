@@ -107,7 +107,7 @@ export function CoffeeNameCard({
               Leave it empty to stay anonymous. Names show once they&apos;re
               approved.
             </Text>
-            <Text style={styles.hint} allowFontScaling={false}>
+            <Text style={[styles.hint, styles.count]} allowFontScaling={false}>
               {name.length}/{BOARD_NAME_MAX}
             </Text>
           </View>
@@ -189,6 +189,7 @@ const styles = StyleSheet.create({
     lineHeight: 16,
     color: "rgba(240, 225, 182, 0.55)",
   },
+  count: { flexShrink: 0, fontVariant: ["tabular-nums"] },
   result: {
     textAlign: "center",
     fontFamily: fonts.bold,

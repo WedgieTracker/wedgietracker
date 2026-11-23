@@ -120,7 +120,13 @@ export function CoffeeLeaderboard({ board }: { board: Board }) {
                   </View>
                 ) : (
                   <View style={styles.placeInner}>
-                    <Text style={styles.empty} allowFontScaling={false}>
+                    <Text
+                      style={styles.empty}
+                      numberOfLines={1}
+                      adjustsFontSizeToFit
+                      minimumFontScale={0.75}
+                      allowFontScaling={false}
+                    >
                       Your name here
                     </Text>
                     <View
