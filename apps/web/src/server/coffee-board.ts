@@ -285,14 +285,18 @@ export async function listBoardNames() {
     );
 }
 
-/** Approves or rejects a name; a rejected one shows as Anonymous. */
+/** Approves or rejects a name, from the admin; a rejected one shows as Anonymous. */
 export async function setBoardNameStatus(
   key: string,
   status: "approved" | "rejected",
 ) {
   await db
     .update(coffeeCheckout)
-    .set({ nameStatus: status })
+    .set(
+      status === "approved"
+        ? { nameStatus: status, approvedName: coffeeCheckout.displayName }
+        : { nameStatus: status },
+    )
     .where(
       and(
         eq(coffeeCheckout.sessionId, key),
@@ -300,4 +304,97 @@ export async function setBoardNameStatus(
       ),
     );
   revalidateTag(CACHE_TAGS.COFFEES, { expire: 0 });
+}
+
+export type NameDecision =
+  | { result: "ok" }
+  | { result: "not-found" }
+  | {
+      result: "conflict";
+      current: { name: string | null; status: string | null };
+    };
+
+/**
+ * Decides one name from Butler's card. It names the exact text it decides,
+ * so a name the buyer changed after the card was made is never approved
+ * unseen. Sending the status it already has is fine (a repeated tap); a
+ * name already decided the other way, on the admin page, is a conflict.
+ * "pending" with `from` undoes a decision, if it's still the one made.
+ */
+export async function decideBoardName(
+  key: string,
+  name: string,
+  status: "approved" | "rejected" | "pending",
+  from?: "approved" | "rejected",
+): Promise<NameDecision> {
+  const [row] = await db
+    .select({
+      name: coffeeCheckout.displayName,
+      status: coffeeCheckout.nameStatus,
+    })
+    .from(coffeeCheckout)
+    .where(eq(coffeeCheckout.sessionId, key))
+    .limit(1);
+  if (!row) return { result: "not-found" };
+  const conflict = { result: "conflict" as const, current: row };
+  if (row.name !== name) return conflict;
+  if (row.status === status) return { result: "ok" };
+  if (status === "pending" ? row.status !== from : row.status !== "pending") {
+    return conflict;
+  }
+
+  // Changes only the row as it was read, so a buyer's edit in between wins.
+  const changed = await db
+    .update(coffeeCheckout)
+    .set(
+      status === "approved"
+        ? { nameStatus: status, approvedName: name }
+        : { nameStatus: status },
+    )
+    .where(
+      and(
+        eq(coffeeCheckout.sessionId, key),
+        eq(coffeeCheckout.displayName, name),
+        row.status === null
+          ? isNull(coffeeCheckout.nameStatus)
+          : eq(coffeeCheckout.nameStatus, row.status),
+      ),
+    )
+    .returning({ sessionId: coffeeCheckout.sessionId });
+  if (changed.length === 0) return conflict;
+  revalidateTag(CACHE_TAGS.COFFEES, { expire: 0 });
+  return { result: "ok" };
+}
+
+/**
+ * Names waiting for approval, oldest first, for Butler. `previousName` is
+ * the last one approved for the same purchase, or null for a first name.
+ */
+export async function listPendingBoardNames() {
+  const rows = await db
+    .select({
+      id: coffeeCheckout.sessionId,
+      name: coffeeCheckout.displayName,
+      approvedName: coffeeCheckout.approvedName,
+      coffees: coffeeCheckout.coffees,
+      season: coffeeCheckout.seasonName,
+      createdAt: coffeeCheckout.createdAt,
+    })
+    .from(coffeeCheckout)
+    .where(
+      and(
+        eq(coffeeCheckout.nameStatus, "pending"),
+        sql`${coffeeCheckout.displayName} is not null`,
+        isNull(coffeeCheckout.refundedAt),
+      ),
+    )
+    .orderBy(coffeeCheckout.createdAt);
+  return rows.map(({ approvedName, ...r }) => ({
+    ...r,
+    name: r.name!,
+    previousName: approvedName && approvedName !== r.name ? approvedName : null,
+    source: r.id.startsWith("appstore:")
+      ? ("app" as const)
+      : ("stripe" as const),
+  }));
 }
