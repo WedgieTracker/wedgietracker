@@ -1,5 +1,6 @@
 import { PageLayout } from "~/components/layout/PageLayout";
 import { CoffeeStack } from "~/components/support/CoffeeStack";
+import { CoffeeLeaderboardMock } from "~/components/support/CoffeeLeaderboardMock";
 import { ExploreFooter } from "~/components/shared/ExploreFooter";
 import { generateMetadata } from "~/config/metadata";
 
@@ -23,6 +24,7 @@ export default function SupportUsPage() {
           </p>
         </div>
         <CoffeeStack />
+        <CoffeeLeaderboardMock />
         <ExploreFooter
           className="max-w-xl"
           links={[
