@@ -11,11 +11,15 @@ export default {
         numerals: ["var(--font-shrikhand)", "Georgia", "serif"],
       },
       fontSize: {
-        "big-number": "clamp(8rem, 7rem + 8.4vw, 16.75rem)",
+        "big-number": "clamp(8rem, 7rem + 8.4vw, 22rem)",
         "big-number-mobile": "clamp(7rem, 6rem + 16vw, 18rem)",
         "big-number-medium": "clamp(4rem, 1rem + 16vw, 12rem)",
-        "button-text": "clamp(1rem, 0.8rem + 0.5vw, 2rem)",
+        // Stops at its 1440px size, so wide screens don't blow it up.
+        "button-text": "clamp(1rem, 0.8rem + 0.5vw, 1.25rem)",
         "wedgies-text": "clamp(1.5rem, 1rem + 2vw, 5rem)",
+        // The all-time total and the wedgie definition: wedgies-text, but
+        // stopping at its 1440px size, as the hero's WEDGIES keeps growing.
+        "section-text": "clamp(1.5rem, 1rem + 2vw, 2.8rem)",
         "wedgies-text-mobile": "clamp(1.5rem, 0.5rem + 7vw, 3rem)",
         "pace-text-mobile": "clamp(2rem, 1rem + 2vw, 2.5rem)",
         "pace-text": "clamp(2rem, 0.2rem + 2vw, 2.5rem)",

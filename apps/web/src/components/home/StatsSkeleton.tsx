@@ -20,13 +20,13 @@ export function StatsSkeleton() {
       <div className="bg-badge grain relative flex min-h-[25em] flex-2 flex-col justify-center overflow-hidden p-8 md:min-h-[24em] md:flex-[1.6]">
         <Wave fillPercentage={0} />
 
-        <div className="bg-panel/50 relative z-10 mx-auto w-[clamp(16rem,_13rem_+_16vw,_28rem)] rounded-lg p-4 text-center md:w-[90%] lg:w-[65%] lg:max-w-120 lg:min-w-[24rem]">
-          <div className="text-cream mb-[0.15em] text-sm leading-none font-bold md:text-base">
+        <div className="bg-panel/50 relative z-10 mx-auto w-[clamp(16rem,_13rem_+_16vw,_28rem)] rounded-lg p-4 text-center md:w-[90%] lg:w-[65%] lg:max-w-120 lg:min-w-[24rem] min-[112.5rem]:max-w-[38rem]">
+          <div className="text-cream mb-[0.15em] text-sm leading-none font-bold md:text-base min-[112.5rem]:text-xl">
             WE&apos;RE AT
           </div>
           <div
             aria-hidden="true"
-            className="text-big-number-mobile md:text-big-number-medium lg:text-big-number font-numerals invisible -mb-[0.095em] leading-[0.88] font-normal whitespace-nowrap"
+            className="text-big-number-mobile md:text-big-number-medium lg:text-big-number font-numerals invisible mt-[0.04em] -mb-[0.055em] leading-[0.88] font-normal whitespace-nowrap"
           >
             0
           </div>

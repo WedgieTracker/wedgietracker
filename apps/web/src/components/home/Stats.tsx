@@ -74,15 +74,15 @@ export function Stats({ stats, isLoading }: StatsProps) {
 
         {/* A red animated dot when there are live games: centred below the stats on phones, bottom left from md up */}
 
-        <div className="bg-panel/50 relative z-10 mx-auto w-[clamp(16rem,_13rem_+_16vw,_28rem)] rounded-lg p-4 text-center md:w-[90%] lg:w-[65%] lg:max-w-120 lg:min-w-[24rem]">
-          <div className="text-cream mb-[0.15em] text-sm leading-none font-bold md:text-base">
+        <div className="bg-panel/50 relative z-10 mx-auto w-[clamp(16rem,_13rem_+_16vw,_28rem)] rounded-lg p-4 text-center md:w-[90%] lg:w-[65%] lg:max-w-120 lg:min-w-[24rem] min-[112.5rem]:max-w-[38rem]">
+          <div className="text-cream mb-[0.15em] text-sm leading-none font-bold md:text-base min-[112.5rem]:text-xl">
             {stats.totalWedgies > stats.previousRecord
               ? "NEW ALL-TIME RECORD"
               : stats.totalWedgies === stats.previousRecord
                 ? "ALL-TIME RECORD TIED"
                 : "WE'RE AT"}
           </div>
-          <div className="text-big-number-mobile text-cream md:text-big-number-medium lg:text-big-number text-shadow-badge font-numerals -mb-[0.095em] leading-[0.88] font-normal whitespace-nowrap">
+          <div className="text-big-number-mobile text-cream md:text-big-number-medium lg:text-big-number text-shadow-badge font-numerals mt-[0.04em] -mb-[0.055em] leading-[0.88] font-normal whitespace-nowrap">
             <Counter
               end={stats.totalWedgies}
               format={(n) => n.toLocaleString()}
@@ -106,7 +106,7 @@ export function Stats({ stats, isLoading }: StatsProps) {
             Live games
           </div>
         )}
-        <div className="mx-auto grid w-full max-w-[560px] grid-cols-[1.35fr_1fr] items-center gap-3 md:grid-cols-[300px_auto] md:justify-center md:gap-12">
+        <div className="mx-auto grid w-full max-w-[560px] grid-cols-[1.35fr_1fr] items-center gap-3 md:grid-cols-[300px_auto] md:justify-center md:gap-12 min-[112.5rem]:[zoom:1.25]">
           {showPace ? (
             <PaceGauge
               pace={stats.currentPace}
