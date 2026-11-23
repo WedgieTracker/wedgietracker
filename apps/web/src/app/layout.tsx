@@ -1,6 +1,6 @@
 import "~/styles/globals.css";
 import { Suspense } from "react";
-import { Inter } from "next/font/google";
+import { Inter, Shrikhand } from "next/font/google";
 import { TRPCReactProvider } from "~/trpc/react";
 import { Toaster } from "~/components/ui/toaster";
 import { defaultMetadata } from "~/config/metadata";
@@ -16,6 +16,14 @@ const inter = Inter({
   subsets: ["latin"],
   style: ["normal", "italic"],
   variable: "--font-inter",
+});
+
+// The big numbers, set like the No Dunks stat graphics. Shrikhand has one
+// style that already leans, so it never takes `italic` on top.
+const shrikhand = Shrikhand({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-shrikhand",
 });
 
 export const metadata = defaultMetadata;
@@ -78,7 +86,7 @@ export default function RootLayout({
   const analyticsEnabled = process.env.VERCEL_ENV === "production";
 
   return (
-    <html lang="en" className={`${inter.variable}`}>
+    <html lang="en" className={`${inter.variable} ${shrikhand.variable}`}>
       <body className="bg-night">
         {analyticsEnabled && (
           <>

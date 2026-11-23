@@ -90,7 +90,9 @@ async function TotalWedgiesWrapper() {
   return (
     <div className="flex w-full max-w-2xl flex-col items-center justify-between gap-4">
       <div className="sm:text-wedgies-text flex flex-row items-center gap-4 text-3xl leading-none">
-        <span className="text-violet text-[1.5em] font-black">{total}</span>
+        <span className="text-violet font-numerals text-[1.5em] font-normal">
+          {total}
+        </span>
         <div className="gap-.5 flex flex-col">
           <span className="text-cream text-[0.6em] leading-none font-black uppercase">
             Total Wedgies

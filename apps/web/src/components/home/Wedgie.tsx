@@ -51,7 +51,7 @@ export function Wedgie({
         <span
           // Each number in its own step of the badge ramp; cream on hover.
           style={{ color: wedgieNumberColour(wedgie.number) }}
-          className="group-hover:text-cream! text-4xl leading-none font-black tracking-[-0.04em] whitespace-nowrap italic transition-colors duration-200"
+          className="group-hover:text-cream! font-numerals text-4xl leading-none font-normal whitespace-nowrap transition-colors duration-200"
         >
           <span className="mr-[0.06em] text-[0.42em] tracking-normal opacity-55">
             #
@@ -59,7 +59,7 @@ export function Wedgie({
           {wedgie.number ?? "1"}
           <LocalDate
             date={wedgie.wedgieDate}
-            className="text-cream/50 mt-[5px] block text-[10.5px] font-bold tracking-normal whitespace-nowrap not-italic"
+            className="text-cream/50 mt-[5px] block font-sans text-[10.5px] font-bold tracking-normal whitespace-nowrap not-italic"
           />
         </span>
 

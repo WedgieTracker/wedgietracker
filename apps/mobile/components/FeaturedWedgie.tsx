@@ -167,10 +167,9 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   number: {
-    fontFamily: fonts.blackItalic,
+    fontFamily: fonts.numerals,
     fontSize: 58,
-    lineHeight: 58,
-    letterSpacing: -2.3,
+    lineHeight: 70,
     color: colors.cream,
   },
   hash: {

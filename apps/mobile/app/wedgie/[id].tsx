@@ -703,10 +703,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   badgeHash: {
-    fontFamily: fonts.blackItalic,
+    fontFamily: fonts.numerals,
     color: "rgba(240, 225, 182, 0.6)",
   },
-  badgeNumber: { fontFamily: fonts.blackItalic, color: colors.cream },
+  badgeNumber: { fontFamily: fonts.numerals, color: colors.cream },
   headerText: { flex: 1, gap: 6 },
   date: { fontFamily: fonts.extraBold, color: colors.cream, fontSize: 18 },
   season: {

@@ -26,7 +26,7 @@ export function StatsSkeleton() {
           </div>
           <div
             aria-hidden="true"
-            className="text-big-number-mobile md:text-big-number-medium lg:text-big-number invisible leading-[0.88] font-black whitespace-nowrap"
+            className="text-big-number-mobile md:text-big-number-medium lg:text-big-number font-numerals invisible -mb-[0.095em] leading-[0.88] font-normal whitespace-nowrap"
           >
             0
           </div>

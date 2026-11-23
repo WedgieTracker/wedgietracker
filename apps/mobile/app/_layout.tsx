@@ -3,10 +3,9 @@ import {
   Inter_700Bold,
   Inter_800ExtraBold,
   Inter_900Black,
-  Inter_900Black_Italic,
   useFonts,
 } from "@expo-google-fonts/inter";
-import { PermanentMarker_400Regular } from "@expo-google-fonts/permanent-marker";
+import { Shrikhand_400Regular } from "@expo-google-fonts/shrikhand";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
@@ -38,13 +37,12 @@ void SplashScreen.preventAutoHideAsync();
 function RootLayout() {
   const { wide } = useWide();
   // The site is set in Inter; the heavy weights carry most of its character,
-  // the numbers are black italic, and the calendar's stamp is hand lettered.
+  // and the big numbers and the calendar's stamp are in Shrikhand.
   const [loaded, error] = useFonts({
     Inter_700Bold,
     Inter_800ExtraBold,
     Inter_900Black,
-    Inter_900Black_Italic,
-    PermanentMarker_400Regular,
+    Shrikhand_400Regular,
   });
 
   useScreenTracking();

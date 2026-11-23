@@ -8,6 +8,7 @@ export default {
     extend: {
       fontFamily: {
         sans: ["var(--font-inter)", ...defaultTheme.fontFamily.sans],
+        numerals: ["var(--font-shrikhand)", "Georgia", "serif"],
       },
       fontSize: {
         "big-number": "clamp(8rem, 7rem + 8.4vw, 16.75rem)",

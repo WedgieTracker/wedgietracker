@@ -213,7 +213,7 @@ export function PaceExplainer({ data }: PaceExplainerProps) {
             >
               −
             </Stepper>
-            <span className="w-12 text-center text-2xl font-black italic">
+            <span className="font-numerals w-12 text-center text-2xl font-normal">
               {wedgies}
             </span>
             <Stepper
@@ -353,7 +353,7 @@ function Term({
   return (
     <div className="flex flex-col items-center">
       <span
-        className={`text-cream rounded-xl px-3 py-1 text-2xl font-black italic md:text-3xl ${
+        className={`text-cream font-numerals rounded-xl px-3 py-1 text-2xl font-normal md:text-3xl ${
           highlight ? "bg-button text-shadow-badge" : "bg-night"
         }`}
       >

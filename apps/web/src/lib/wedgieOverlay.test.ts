@@ -80,7 +80,7 @@ describe("drawWedgieOverlay", () => {
         type,
       );
       // The cream number sits on its baseline; its lowest shadow is 0.08em under it.
-      const num = texts.filter((t) => t.font.includes("InterBlackItalic"));
+      const num = texts.filter((t) => t.font.includes("Shrikhand"));
       const numBottom = Math.max(...num.map((t) => t.y + t.size * 0.08));
       const pill = rects[0]!;
       expect(pill.y).toBeGreaterThan(numBottom);

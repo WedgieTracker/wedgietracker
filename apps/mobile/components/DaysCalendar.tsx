@@ -199,7 +199,7 @@ function NewWedgieStamp() {
               <Text
                 style={[
                   styles.bannerText,
-                  { fontSize: 19 * s, lineHeight: 19 * s },
+                  { fontSize: 19 * s, lineHeight: 23 * s },
                 ]}
                 allowFontScaling={false}
               >
@@ -208,7 +208,7 @@ function NewWedgieStamp() {
               <Text
                 style={[
                   styles.bannerText,
-                  { fontSize: 19 * s, lineHeight: 19 * s },
+                  { fontSize: 19 * s, lineHeight: 23 * s },
                 ]}
                 allowFontScaling={false}
               >
@@ -301,11 +301,11 @@ const styles = StyleSheet.create({
     paddingBottom: 3,
   },
   count: {
-    fontFamily: fonts.blackItalic,
+    fontFamily: fonts.numerals,
     fontSize: 58,
     // Taller than the type, so the figure sits lower in its line, where the
     // eye expects it, rather than riding up to the binding.
-    lineHeight: 56,
+    lineHeight: 70,
     // No negative tracking, and a little room on the right, so the slanted
     // digit looks centred rather than leaning off to the right.
     paddingRight: 7,
@@ -350,7 +350,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   bannerText: {
-    fontFamily: fonts.marker,
+    fontFamily: fonts.numerals,
     color: BANNER_INK,
     textAlign: "center",
     includeFontPadding: false,

@@ -312,9 +312,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   gamesNumber: {
-    fontFamily: fonts.blackItalic,
+    fontFamily: fonts.numerals,
     fontSize: 48,
-    lineHeight: 50,
+    lineHeight: 58,
     color: colors.cream,
   },
   gamesLabel: {

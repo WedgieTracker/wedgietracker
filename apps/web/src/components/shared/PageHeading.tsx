@@ -18,7 +18,7 @@ export function PageHeading({
         {title}
       </h1>
       {badge !== undefined && badge !== null && (
-        <span className="bg-button text-cream text-shadow-badge relative rounded-xl px-2.5 py-1 text-[22px] leading-none font-black italic md:text-3xl">
+        <span className="bg-button text-cream text-shadow-badge font-numerals relative rounded-xl px-2.5 py-1 text-[22px] leading-none font-normal md:text-3xl">
           {badge}
           {badgeAction}
         </span>

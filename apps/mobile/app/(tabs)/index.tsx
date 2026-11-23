@@ -296,9 +296,9 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   totalNumber: {
-    fontFamily: fonts.black,
+    fontFamily: fonts.numerals,
     fontSize: TOTAL * 1.5,
-    lineHeight: TOTAL * 1.5,
+    lineHeight: Math.ceil(TOTAL * 1.8),
     color: colors.violet,
   },
   totalLabel: {

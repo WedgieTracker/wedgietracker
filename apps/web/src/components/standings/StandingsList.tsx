@@ -96,7 +96,7 @@ export function StandingsList({
                 key={group[0]!.name}
                 className="border-violet/15 grid grid-cols-[58px_1fr] items-center border-t first:border-t-0"
               >
-                <span className="text-violet pt-[3px] pr-[34px] text-right text-lg font-black italic">
+                <span className="text-violet font-numerals pt-[3px] pr-[34px] text-right text-lg font-normal">
                   {rank}
                 </span>
                 {row(group[0]!)}
@@ -107,7 +107,7 @@ export function StandingsList({
                 aria-label={`Tied ${rank}`}
                 className="border-violet/15 grid grid-cols-[38px_10px_1fr] border-t first:border-t-0"
               >
-                <span className="text-violet sticky top-[72px] z-[1] self-start pt-[3px] pr-3.5 text-right text-lg leading-[50px] font-black italic md:top-[88px]">
+                <span className="text-violet font-numerals sticky top-[72px] z-[1] self-start pt-[3px] pr-3.5 text-right text-lg leading-[50px] font-normal md:top-[88px]">
                   {rank}
                 </span>
                 <span

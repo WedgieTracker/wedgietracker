@@ -357,16 +357,16 @@ const styles = StyleSheet.create({
   // Italic numbers lean right, so no negative tracking and a little room on
   // the right keeps them from looking clipped or off-centre.
   big: {
-    fontFamily: fonts.blackItalic,
+    fontFamily: fonts.numerals,
     fontSize: 58,
-    lineHeight: 56,
+    lineHeight: 70,
     paddingRight: 6,
     color: colors.cream,
   },
   games: {
-    fontFamily: fonts.blackItalic,
+    fontFamily: fonts.numerals,
     fontSize: 30,
-    lineHeight: 30,
+    lineHeight: 36,
     paddingRight: 3,
     color: colors.cream,
   },

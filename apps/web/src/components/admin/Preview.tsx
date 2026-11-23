@@ -46,11 +46,11 @@ export function Preview({
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // The same Inter files the server registers, under the same names
+    // The same font files the server registers, under the same names
     const fontFaces = [
       new FontFace("InterBlack", `url(/fonts/Inter-Black.ttf)`),
       new FontFace("InterExtraBold", `url(/fonts/Inter-ExtraBold.ttf)`),
-      new FontFace("InterBlackItalic", `url(/fonts/Inter-BlackItalic.ttf)`),
+      new FontFace("Shrikhand", `url(/fonts/Shrikhand-Regular.ttf)`),
     ];
 
     void Promise.all(fontFaces.map((font) => font.load())).then(

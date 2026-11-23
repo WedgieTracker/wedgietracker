@@ -80,7 +80,7 @@ export function FeaturedWedgie({
         <span className="bg-badge grain block px-[18px] pt-[18px] pb-4 transition-[filter] duration-200 group-hover:brightness-115 md:flex md:flex-col md:justify-between">
           <span className="grid grid-cols-[1fr_auto] items-end gap-3 md:block">
             <span className="block">
-              <span className="text-cream text-shadow-badge block text-[58px] leading-[0.95] font-black tracking-[-0.04em] italic md:text-[48px]">
+              <span className="text-cream text-shadow-badge font-numerals block text-[58px] leading-[0.95] font-normal md:text-[48px]">
                 <span className="mr-[0.06em] text-[0.42em] tracking-normal opacity-55 [text-shadow:none]">
                   #
                 </span>

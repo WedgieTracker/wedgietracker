@@ -56,7 +56,7 @@ function Big({
 }) {
   return (
     <p
-      className={`text-cream mt-2 leading-[0.88] font-black tracking-[-0.04em] italic ${className}`}
+      className={`text-cream font-numerals mt-2 leading-[0.88] font-normal ${className}`}
     >
       {children}
     </p>
@@ -280,7 +280,7 @@ export function StatsForNerds({
               <p className="text-cream text-sm leading-none font-bold md:text-base">
                 WE&apos;RE AT
               </p>
-              <p className="text-cream text-shadow-badge text-[clamp(7rem,6rem+6vw,11rem)] leading-[0.88] font-black">
+              <p className="text-cream text-shadow-badge font-numerals -mb-[0.12em] text-[clamp(7rem,6rem+6vw,11rem)] leading-[0.88] font-normal">
                 <Counter end={stats.wedgiesThisSeason} />
               </p>
               <p className="text-cream text-shadow-badge mt-1 text-4xl leading-none font-black md:text-5xl">
@@ -319,7 +319,7 @@ export function StatsForNerds({
         <Section title={`${stats.currentSeason} so far`} hideTitle>
           <Card>
             <div className="flex items-center gap-4">
-              <div className="bg-badge grain text-cream text-shadow-badge grid size-20 shrink-0 place-items-center rounded-2xl text-[44px] leading-none font-black italic">
+              <div className="bg-badge grain text-cream text-shadow-badge font-numerals grid size-20 shrink-0 place-items-center rounded-2xl text-[44px] leading-none font-normal">
                 {stats.gamesSinceLastWedgie ?? 0}
               </div>
               <div>
@@ -375,7 +375,7 @@ export function StatsForNerds({
                   <dt className="text-cream/60 text-[11.5px] font-black tracking-[0.1em] uppercase">
                     {label}
                   </dt>
-                  <dd className="text-cream text-[26px] leading-none font-black whitespace-nowrap italic">
+                  <dd className="text-cream font-numerals text-[26px] leading-none font-normal whitespace-nowrap">
                     {n}
                   </dd>
                 </div>
@@ -415,7 +415,7 @@ export function StatsForNerds({
                     key={text}
                     className="grid grid-cols-[3.75rem_1fr] items-center gap-2.5"
                   >
-                    <dt className="text-cream text-center text-[30px] leading-none font-black tracking-[-0.03em] italic">
+                    <dt className="text-cream font-numerals relative top-[0.06em] text-center text-[30px] leading-none font-normal">
                       {n}
                     </dt>
                     <dd className="text-cream/75 text-[13.5px] leading-snug font-extrabold">

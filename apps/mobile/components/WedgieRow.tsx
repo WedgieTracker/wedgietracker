@@ -119,10 +119,9 @@ const styles = StyleSheet.create({
 
   numberCol: { width: 62 },
   number: {
-    fontFamily: fonts.blackItalic,
+    fontFamily: fonts.numerals,
     fontSize: 36,
-    lineHeight: 38,
-    letterSpacing: -1.4,
+    lineHeight: 44,
     color: colors.cream,
   },
   // `text-[0.42em] opacity-55`, on the number's baseline.

@@ -60,14 +60,16 @@ export function WaveCounterPanel({
             styles.bigNumber,
             {
               fontSize: t.bigNumber,
-              lineHeight: t.bigNumber * 0.88,
-              // The padding keeps the tops of the digits from being clipped.
-              paddingTop: t.bigNumber * 0.12,
-              // Their ink sits high in the line box, close under the headline
-              // and far above WEDGIES: nudge it down to even the two gaps,
-              // then pull the whole number up so both stay tight.
-              transform: [{ translateY: t.bigNumber * 0.145 }],
+              // Shrikhand keeps a deep descent below its digits, so the line
+              // is 1.2x the size to clear their tops, and the unused descent
+              // is pulled back under WEDGIES. The right padding leaves room
+              // for the lean of the last digit.
+              lineHeight: t.bigNumber * 1.2,
+              paddingRight: t.bigNumber * 0.08,
+              // Evens the gaps to the headline above and WEDGIES below.
+              transform: [{ translateY: t.bigNumber * 0.1 }],
               marginTop: -t.bigNumber * 0.11,
+              marginBottom: -t.bigNumber * 0.2,
             },
             badgeTextShadow(t.bigNumber),
             value === null && styles.hidden,
@@ -127,7 +129,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   bigNumber: {
-    fontFamily: fonts.black,
+    fontFamily: fonts.numerals,
     color: colors.cream,
     includeFontPadding: false,
   },

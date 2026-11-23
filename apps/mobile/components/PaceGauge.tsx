@@ -115,9 +115,11 @@ export function PaceGauge({
                 styles.number,
                 {
                   fontSize: 36 * s,
-                  lineHeight: 36 * s,
-                  letterSpacing: -1.4 * s,
-                  top: (74 - 36 * 0.76) * s,
+                  // Shrikhand keeps a deep descent below its digits: a line
+                  // 1.2x the size leaves room above them and still puts the
+                  // baseline 0.77x down, where the arc expects it.
+                  lineHeight: 36 * 1.2 * s,
+                  top: (74 - 36 * 0.77) * s,
                 },
                 hidden && styles.hidden,
               ]}
@@ -208,7 +210,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     textAlign: "center",
-    fontFamily: fonts.blackItalic,
+    fontFamily: fonts.numerals,
     color: colors.cream,
   },
   dialPressed: { opacity: 0.8 },

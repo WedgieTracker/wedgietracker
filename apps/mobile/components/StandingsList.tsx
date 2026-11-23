@@ -276,8 +276,9 @@ const styles = StyleSheet.create({
     paddingRight: 34,
     paddingTop: 3,
     textAlign: "right",
-    fontFamily: fonts.blackItalic,
+    fontFamily: fonts.numerals,
     fontSize: 18,
+    lineHeight: 22,
     color: colors.violet,
   },
   // `grid-cols-[38px_10px_1fr]`: rank, bracket, rows.

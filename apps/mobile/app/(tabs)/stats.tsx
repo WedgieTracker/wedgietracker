@@ -710,9 +710,9 @@ const styles = StyleSheet.create({
     paddingTop: 5,
   },
   tileNumber: {
-    fontFamily: fonts.blackItalic,
+    fontFamily: fonts.numerals,
     fontSize: 44,
-    lineHeight: 48,
+    lineHeight: 53,
     color: colors.cream,
   },
   lastPlayer: {
@@ -749,9 +749,9 @@ const styles = StyleSheet.create({
   heatPlaceholder: { height: 240 },
   big: {
     marginTop: 8,
-    fontFamily: fonts.blackItalic,
+    fontFamily: fonts.numerals,
     fontSize: 64,
-    lineHeight: 62,
+    lineHeight: 77,
     paddingRight: 6,
     color: colors.cream,
   },
@@ -775,9 +775,9 @@ const styles = StyleSheet.create({
     color: "rgba(240, 225, 182, 0.6)",
   },
   listValue: {
-    fontFamily: fonts.blackItalic,
+    fontFamily: fonts.numerals,
     fontSize: 26,
-    lineHeight: 28,
+    lineHeight: 32,
     paddingRight: 2.6,
     color: colors.cream,
   },
@@ -790,9 +790,9 @@ const styles = StyleSheet.create({
     width: 60,
     textAlign: "center",
     paddingRight: 3,
-    fontFamily: fonts.blackItalic,
+    fontFamily: fonts.numerals,
     fontSize: 30,
-    lineHeight: 34,
+    lineHeight: 36,
     color: colors.cream,
   },
   recordText: {
