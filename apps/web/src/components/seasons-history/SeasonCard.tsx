@@ -55,7 +55,7 @@ export function SeasonCard({ season }: SeasonCardProps) {
 
       <div className="flex items-end justify-between gap-3">
         <div>
-          <p className="text-cream text-[58px] leading-[0.88] font-black tracking-[-0.04em] italic">
+          <p className="text-cream font-numerals text-[58px] leading-[0.88] font-normal">
             {season.totalWedgies}
           </p>
           <p className="text-cream/60 mt-1.5 text-[11.5px] font-black tracking-[0.14em] uppercase">
@@ -63,7 +63,7 @@ export function SeasonCard({ season }: SeasonCardProps) {
           </p>
         </div>
         <div className="text-right">
-          <p className="text-cream text-[30px] leading-[0.88] font-black tracking-[-0.03em] italic">
+          <p className="text-cream font-numerals text-[30px] leading-[0.88] font-normal">
             {season.totalGames.toLocaleString("en-US")}
           </p>
           <p className="text-cream/60 mt-1.5 text-[11.5px] font-black tracking-[0.14em] uppercase">

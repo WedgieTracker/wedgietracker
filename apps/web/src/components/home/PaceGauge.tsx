@@ -119,12 +119,11 @@ export function PaceGauge({
           On pace for
         </text>
         <text
-          x="68"
+          x="70"
           y="74"
           textAnchor="middle"
           fontSize="36"
-          className="fill-cream font-black italic"
-          letterSpacing="-1.4"
+          className="fill-cream font-numerals font-normal"
         >
           {pace}
         </text>

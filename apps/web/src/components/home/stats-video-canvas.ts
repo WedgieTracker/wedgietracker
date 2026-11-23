@@ -14,6 +14,7 @@ import {
   pickStatusText,
   seededRandom,
 } from "./stats-video-helpers";
+import { STAMP_FONT } from "./stampFont";
 
 /*
   Draws one frame of the stats video. Everything on screen is worked out from
@@ -32,6 +33,8 @@ const VIOLET = "#9A5CF5";
 const INK = "#2A1660";
 const DROP = "#2a1a5c";
 const FONT = `Inter, "Inter Fallback", system-ui, sans-serif`;
+/** The big numbers, in the face the site sets them in (see app/layout.tsx). */
+const NUMERALS = `${STAMP_FONT}, Georgia, serif`;
 const BADGE_STOPS: [number, string][] = [
   [0, "#4769c5"],
   [0.22, "#3650a1"],
@@ -105,11 +108,13 @@ export interface Scene {
 }
 
 /**
- * The italic numbers use Inter's drawn italic, the same face the site loads,
- * so they match the page and centre without a hand-made slant.
+ * `numeral` text is set in Shrikhand like the site's big numbers. It has one
+ * weight and already leans, so it ignores `weight` and never takes `italic`.
  */
-function font(weight: number, size: number, italic = false) {
-  return `${italic ? "italic " : ""}${weight} ${Math.round(size)}px ${FONT}`;
+function font(weight: number, size: number, numeral = false) {
+  return numeral
+    ? `400 ${Math.round(size)}px ${NUMERALS}`
+    : `${weight} ${Math.round(size)}px ${FONT}`;
 }
 
 /**
@@ -746,7 +751,9 @@ export async function loadVideoFonts(stampFont?: string) {
         .load(`${w} 100px Inter`, "0123456789WEDGIES")
         .catch(() => []),
     ),
-    document.fonts.load("italic 900 100px Inter", "0123456789").catch(() => []),
+    document.fonts
+      .load(`400 100px ${STAMP_FONT}`, "0123456789,")
+      .catch(() => []),
     stampFont
       ? document.fonts.load(`19px ${stampFont}`, "NEW WEDGIE!").catch(() => [])
       : Promise.resolve([]),

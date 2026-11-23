@@ -82,7 +82,7 @@ export function Stats({ stats, isLoading }: StatsProps) {
                 ? "ALL-TIME RECORD TIED"
                 : "WE'RE AT"}
           </div>
-          <div className="text-big-number-mobile text-cream md:text-big-number-medium lg:text-big-number text-shadow-badge leading-[0.88] font-black whitespace-nowrap">
+          <div className="text-big-number-mobile text-cream md:text-big-number-medium lg:text-big-number text-shadow-badge font-numerals leading-[0.88] font-normal whitespace-nowrap">
             <Counter
               end={stats.totalWedgies}
               format={(n) => n.toLocaleString()}
@@ -115,7 +115,7 @@ export function Stats({ stats, isLoading }: StatsProps) {
             />
           ) : (
             <div className="bg-panel border-violet/20 rounded-[20px] border px-3.5 py-5 text-center">
-              <div className="text-cream text-5xl leading-none font-black italic">
+              <div className="text-cream font-numerals text-5xl leading-none font-normal">
                 <Counter end={stats.gamesPlayed} />
               </div>
               <div className="text-cream/70 mt-2 text-[13px] font-bold">
