@@ -64,7 +64,8 @@ beforeAll(async () => {
     refund_changed_at integer,
     display_name text,
     name_status text,
-    donor_key text
+    donor_key text,
+    approved_name text
   )`);
 });
 beforeEach(async () => {
@@ -222,5 +223,75 @@ describe("boardRows", () => {
         }),
       ]),
     ).toEqual([{ name: "New", coffees: 2 }]);
+  });
+});
+
+describe("names decided from Butler", () => {
+  const pending = async (name: string) => {
+    await board.setBoardName("cs_live_a", name);
+  };
+
+  it("lists pending names with the one they replace", async () => {
+    await pending("Robert");
+    expect(await board.listPendingBoardNames()).toEqual([
+      expect.objectContaining({
+        id: "cs_live_a",
+        name: "Robert",
+        previousName: null,
+        coffees: 3,
+        season: "2026/27",
+        source: "stripe",
+      }),
+    ]);
+    await board.decideBoardName("cs_live_a", "Robert", "approved");
+    expect(await board.listPendingBoardNames()).toEqual([]);
+    await pending("Bob");
+    expect(await board.listPendingBoardNames()).toEqual([
+      expect.objectContaining({ name: "Bob", previousName: "Robert" }),
+    ]);
+  });
+
+  it("decides only the name shown, and repeats are fine", async () => {
+    await pending("Bob");
+    expect(
+      await board.decideBoardName("cs_live_a", "Robert", "approved"),
+    ).toEqual({
+      result: "conflict",
+      current: { name: "Bob", status: "pending" },
+    });
+    expect(await board.decideBoardName("cs_live_a", "Bob", "approved")).toEqual(
+      { result: "ok" },
+    );
+    expect(await board.decideBoardName("cs_live_a", "Bob", "approved")).toEqual(
+      { result: "ok" },
+    );
+    expect(await row("cs_live_a")).toMatchObject({ name_status: "approved" });
+  });
+
+  it("won't flip a name already decided the other way", async () => {
+    await pending("Bob");
+    await board.setBoardNameStatus("cs_live_a", "rejected");
+    expect(
+      await board.decideBoardName("cs_live_a", "Bob", "approved"),
+    ).toMatchObject({ result: "conflict" });
+    expect(await row("cs_live_a")).toMatchObject({ name_status: "rejected" });
+  });
+
+  it("undoes a decision that still stands", async () => {
+    await pending("Bob");
+    await board.decideBoardName("cs_live_a", "Bob", "rejected");
+    expect(
+      await board.decideBoardName("cs_live_a", "Bob", "pending", "approved"),
+    ).toMatchObject({ result: "conflict" });
+    expect(
+      await board.decideBoardName("cs_live_a", "Bob", "pending", "rejected"),
+    ).toEqual({ result: "ok" });
+    expect(await row("cs_live_a")).toMatchObject({ name_status: "pending" });
+  });
+
+  it("says when there's no such purchase", async () => {
+    expect(
+      await board.decideBoardName("cs_live_zz", "Bob", "approved"),
+    ).toEqual({ result: "not-found" });
   });
 });

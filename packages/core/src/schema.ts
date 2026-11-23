@@ -139,6 +139,11 @@ export const coffeeCheckout = sqliteTable("coffee_checkout", {
    * the Stripe email, or of the app's per-install id. Never the email itself.
    */
   donorKey: text("donor_key"),
+  /**
+   * The last name approved for this purchase, kept when the buyer changes
+   * it, so whoever approves the new one sees what it replaces.
+   */
+  approvedName: text("approved_name"),
 });
 
 /**
