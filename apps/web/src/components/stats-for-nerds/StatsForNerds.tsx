@@ -415,7 +415,7 @@ export function StatsForNerds({
                     key={text}
                     className="grid grid-cols-[3.75rem_1fr] items-center gap-2.5"
                   >
-                    <dt className="text-cream font-numerals text-center text-[30px] leading-none font-normal">
+                    <dt className="text-cream font-numerals relative top-[0.06em] text-center text-[30px] leading-none font-normal">
                       {n}
                     </dt>
                     <dd className="text-cream/75 text-[13.5px] leading-snug font-extrabold">
