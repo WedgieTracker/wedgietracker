@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Wedgie } from "./Wedgie";
 import { FeaturedWedgie } from "./FeaturedWedgie";
 import { WedgieModal } from "./WedgieModal";
-import Link from "next/link";
+import Link from "~/components/shared/HoverLink";
 
 interface WedgieListProps {
   wedgies: WedgieWithTypes[];

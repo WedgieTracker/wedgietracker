@@ -18,6 +18,24 @@ const config = {
   cacheComponents: true,
   // @wedgietracker/core ships raw TypeScript from the workspace
   transpilePackages: ["@wedgietracker/core"],
+  async headers() {
+    // The files in public/ have no content hash in their names, so Vercel
+    // sends them with max-age=0 and browsers ask for them again on every page.
+    // A day lets a visitor keep them between pages; a change still shows by
+    // the next day, and the CDN copy is replaced on every deploy.
+    const day = "public, max-age=86400, stale-while-revalidate=604800";
+    return [
+      {
+        source:
+          "/:file(logo\\.svg|favicon\\.svg|favicon\\.ico|apple-touch-icon\\.png|app-store-badge\\.svg|manifest\\.json|github-logo-dark\\.svg|github-logo-light\\.svg|logo-email\\.png|opengraph-image\\.png)",
+        headers: [{ key: "Cache-Control", value: day }],
+      },
+      {
+        source: "/fonts/:path*",
+        headers: [{ key: "Cache-Control", value: day }],
+      },
+    ];
+  },
   async redirects() {
     return [
       // A short link to the iOS app for posts and bios. Kept temporary so it can

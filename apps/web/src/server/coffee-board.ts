@@ -118,6 +118,8 @@ export async function saveStripeBoardDetails(
         ),
       );
   }
+  // The donor key regroups the board, so it shows on the next read.
+  if (email || name) revalidateTag(CACHE_TAGS.COFFEES, { expire: 0 });
 }
 
 /**
@@ -147,8 +149,8 @@ export async function saveAppBoardDetails(
           isNull(coffeeCheckout.displayName),
         ),
       );
-    revalidateTag(CACHE_TAGS.COFFEES, { expire: 0 });
   }
+  if (installId || clean) revalidateTag(CACHE_TAGS.COFFEES, { expire: 0 });
 }
 
 /**

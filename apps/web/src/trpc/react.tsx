@@ -1,7 +1,7 @@
 "use client";
 
 import { QueryClientProvider, type QueryClient } from "@tanstack/react-query";
-import { loggerLink, httpBatchStreamLink } from "@trpc/client";
+import { loggerLink, httpBatchLink } from "@trpc/client";
 import { createTRPCReact } from "@trpc/react-query";
 import { useState } from "react";
 import SuperJSON from "superjson";
@@ -32,7 +32,10 @@ export function TRPCReactProvider(props: { children: React.ReactNode }) {
             process.env.NODE_ENV === "development" ||
             (op.direction === "down" && op.result instanceof Error),
         }),
-        httpBatchStreamLink({
+        // Not httpBatchStreamLink: a streamed batch sends its headers before
+        // any procedure runs, so Vercel's CDN could never cache it (see
+        // ~/server/api/cdn-cache.ts) and every visit ran the function.
+        httpBatchLink({
           transformer: SuperJSON,
           url: getBaseUrl() + "/api/trpc",
           headers: () => {

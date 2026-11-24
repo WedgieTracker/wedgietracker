@@ -8,7 +8,7 @@ import { EasterEgg } from "~/components/home/EasterEgg";
 import type { WedgieWithTypes } from "@wedgietracker/core/types/wedgie";
 import { Suspense } from "react";
 import { Loader } from "~/components/shared/Loader";
-import Link from "next/link";
+import Link from "~/components/shared/HoverLink";
 import { Newsletter } from "~/components/home/Newsletter";
 import { generateMetadata } from "~/config/metadata";
 import { CoffeeScoreboardLive } from "~/components/home/CoffeeScoreboardLive";

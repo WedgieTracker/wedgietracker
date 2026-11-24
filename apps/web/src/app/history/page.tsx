@@ -1,5 +1,5 @@
 import { Fragment } from "react";
-import Link from "next/link";
+import Link from "~/components/shared/HoverLink";
 import { buildAllWedgiesQuery } from "@wedgietracker/core/utils/allWedgiesUrl";
 import { PageLayout } from "~/components/layout/PageLayout";
 import { ExploreFooter } from "~/components/shared/ExploreFooter";
