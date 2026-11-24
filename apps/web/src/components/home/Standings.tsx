@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "~/components/shared/HoverLink";
 import { PlayersTeams } from "~/components/standings/PlayersTeams";
 
 interface StandingsProps {

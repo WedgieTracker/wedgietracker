@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "~/components/shared/HoverLink";
 import { Suspense } from "react";
 import { recordCoffeeCheckout } from "~/server/coffees";
 import { getBoardName, sessionIdFromClaim } from "~/server/coffee-board";

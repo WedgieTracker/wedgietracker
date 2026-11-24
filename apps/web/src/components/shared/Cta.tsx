@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "~/components/shared/HoverLink";
 import { useNewsletterSubscription } from "~/hooks/use-newsletter";
 
 interface CtaProps {

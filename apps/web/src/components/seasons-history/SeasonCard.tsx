@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "~/components/shared/HoverLink";
 import { buildAllWedgiesQuery } from "@wedgietracker/core/utils/allWedgiesUrl";
 import { TEAMS } from "@wedgietracker/core/utils/teamAliases";
 

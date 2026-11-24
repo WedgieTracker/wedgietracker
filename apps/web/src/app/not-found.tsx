@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "~/components/shared/HoverLink";
 import { PageLayout } from "~/components/layout/PageLayout";
 import { ErrorScreen } from "~/components/shared/ErrorScreen";
 

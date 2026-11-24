@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "~/components/shared/HoverLink";
 import { Wave } from "./Wave";
 import { PaceGauge } from "./PaceGauge";
 import { DaysCalendar } from "./DaysCalendar";

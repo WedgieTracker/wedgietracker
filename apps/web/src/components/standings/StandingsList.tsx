@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "~/components/shared/HoverLink";
 import { useState } from "react";
 import { TEAMS } from "@wedgietracker/core/utils/teamAliases";
 import { cn } from "~/lib/utils";

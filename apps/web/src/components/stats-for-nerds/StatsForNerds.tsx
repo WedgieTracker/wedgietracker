@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "~/components/shared/HoverLink";
 import { TEAMS } from "@wedgietracker/core/utils/teamAliases";
 import { TypingStats } from "./TypingStats";
 import { Wave } from "../home/Wave";

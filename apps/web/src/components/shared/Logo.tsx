@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "~/components/shared/HoverLink";
 export function LogoComponent() {
   return (
     <div className="flex items-center justify-center">

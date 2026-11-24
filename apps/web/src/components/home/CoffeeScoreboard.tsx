@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "~/components/shared/HoverLink";
 
 // Letter-spacing also trails the last character, so the same space on the left keeps it centred.
 const LED = "font-mono tracking-[0.15em] pl-[0.15em]";

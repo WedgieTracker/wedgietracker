@@ -29,6 +29,32 @@ describe("isCdnCacheable", () => {
     ).toBe(true);
   });
 
+  it("accepts the batches the website and app send", () => {
+    expect(
+      isCdnCacheable({
+        ...ok,
+        paths: [
+          "admin.getGlobal",
+          "season.getAllWithStats",
+          "wedgie.getAll",
+          "wedgie.getBySeason",
+          "donations.getSeasonCoffees",
+        ],
+      }),
+    ).toBe(true);
+  });
+
+  it("never caches the admin-only or per-buyer procedures", () => {
+    for (const path of [
+      "wedgie.getById",
+      "donations.listBoardNames",
+      "report.list",
+      "player.getAll",
+    ]) {
+      expect(isCdnCacheable({ ...ok, paths: [path] })).toBe(false);
+    }
+  });
+
   it("rejects a batch that mixes in a non-allowlisted path", () => {
     expect(
       isCdnCacheable({ ...ok, paths: ["wedgie.getStats", "wedgie.getById"] }),
@@ -55,7 +81,7 @@ describe("cdnCacheResponseMeta", () => {
     expect(meta.headers?.get("Vercel-CDN-Cache-Control")).toBe(
       CDN_CACHE_CONTROL,
     );
-    expect(meta.headers?.get("Vercel-Cache-Tag")).toBe("wedgie-data");
+    expect(meta.headers?.get("Vercel-Cache-Tag")).toBe("wedgie-data,coffees");
     expect(meta.headers?.has("Cache-Control")).toBe(false);
   });
 

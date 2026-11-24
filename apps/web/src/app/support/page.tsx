@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "~/components/shared/HoverLink";
 
 import { PageLayout } from "~/components/layout/PageLayout";
 import { AppStoreBadge } from "~/components/shared/AppStoreBadge";

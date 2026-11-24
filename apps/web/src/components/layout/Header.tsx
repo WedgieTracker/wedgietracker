@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "~/components/shared/HoverLink";
 import { LogoComponent } from "~/components/shared/Logo";
 import { CoffeeCup } from "~/components/support/CoffeeCup";
 import { useMenu } from "~/context/MenuContext";

@@ -1,7 +1,7 @@
 "use client";
 
 import { Loader } from "../shared/Loader";
-import Link from "next/link";
+import Link from "~/components/shared/HoverLink";
 import { ShareableStatsVideo } from "./ShareableStatsVideo";
 import { Wave } from "./Wave";
 import { Counter } from "../ui/Counter";

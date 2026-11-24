@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "~/components/shared/HoverLink";
 import { useState } from "react";
 import { useMenu } from "~/context/MenuContext";
 import { socialLinks } from "./SocialIcons";

@@ -1,18 +1,40 @@
 import { CACHE_TAGS } from "~/server/cache";
 
 /**
- * Public, input-free queries that every visitor (and every TRMNL install) reads. Vercel's CDN
- * serves them without invoking the function, so polling traffic on these paths costs nothing.
+ * Public read queries that every visitor, the iOS app and every TRMNL install
+ * read. Vercel's CDN serves them without invoking the function, so this
+ * traffic costs no function CPU.
  *
- * Every procedure here must return the same data for every caller: no session, header or
- * cookie dependent branches.
+ * Every procedure here must return the same data for every caller with the
+ * same input (the input is part of the URL, so the CDN keys on it): no
+ * session, header or cookie dependent branches. Each one must also be cached
+ * under the `wedgie-data` tag, which every write path purges, so a new or
+ * edited wedgie shows at once, or under `coffees` for the coffee queries,
+ * which every coffee write purges (the app reads them straight after buying).
+ * Responses carry both tags, so a batch mixing the two is purged by either.
  */
 export const CDN_CACHEABLE_PATHS: ReadonlySet<string> = new Set([
-  "wedgie.getStats",
-  "wedgie.getTopStandings",
-  "wedgie.getLatestWedgies",
-  "wedgie.getTotalWedgies",
   "admin.getGlobal",
+  "donations.getSeasonCoffees",
+  "donations.getCoffeeBoard",
+  "season.getAll",
+  "season.getAllWithStats",
+  "season.getAllWithGameCount",
+  "season.getSeasonalProgressChartData",
+  "wedgie.getAll",
+  "wedgie.getBySeason",
+  "wedgie.getByPlayer",
+  "wedgie.getByType",
+  "wedgie.getLatest",
+  "wedgie.getLatestWedgies",
+  "wedgie.getStats",
+  "wedgie.getHostedWedgies",
+  "wedgie.getTopStandings",
+  "wedgie.getSeasonStandings",
+  "wedgie.getNerdStats",
+  "wedgie.getNerdExtras",
+  "wedgie.getPaceBreakdown",
+  "wedgie.getTotalWedgies",
 ]);
 
 /**
@@ -28,7 +50,7 @@ export const CDN_CACHEABLE_PATHS: ReadonlySet<string> = new Set([
 export const CDN_CACHE_CONTROL =
   "public, max-age=3600, stale-while-revalidate=86400";
 
-export const CDN_CACHE_TAG = CACHE_TAGS.WEDGIE_DATA;
+export const CDN_CACHE_TAG = `${CACHE_TAGS.WEDGIE_DATA},${CACHE_TAGS.COFFEES}`;
 
 export interface CdnCacheMetaInput {
   type: "query" | "mutation" | "subscription" | "unknown";

@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "~/components/shared/HoverLink";
 import { useState } from "react";
 import { socialLinks } from "./SocialIcons";
 import { AppStoreBadge } from "../shared/AppStoreBadge";
