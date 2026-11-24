@@ -2,6 +2,7 @@ import { google } from "googleapis";
 import path from "path";
 import * as fs from "fs";
 import { type Session } from "next-auth";
+import { createCanvas, loadImage } from "canvas";
 import { createBackground } from "./createBackground";
 import { composeWithWaveBand } from "./waveBand";
 
@@ -45,6 +46,59 @@ export async function createShort(
     console.error("Error creating short:", error);
     return false;
   }
+}
+
+/**
+ * The Short's cover, as a JPEG for YouTube's thumbnail upload: the same
+ * "thumbnail" art as the Reel's cover (wave, big number, name, date), at
+ * 1080x1920 so it stays under YouTube's 2 MB limit. The caller deletes the
+ * file. Without it YouTube picks a frame from the clip.
+ */
+export async function createShortCover(
+  number: number,
+  season: string,
+  player: string,
+  date: string | null,
+): Promise<string> {
+  const backgroundPath = await createBackground(
+    number,
+    season,
+    player,
+    "thumbnail",
+    date,
+  );
+  try {
+    const art = await loadImage(backgroundPath);
+    const canvas = createCanvas(1080, 1920);
+    canvas.getContext("2d").drawImage(art, 0, 0, 1080, 1920);
+    const coverPath = `/tmp/short_cover_${Date.now()}.jpg`;
+    await fs.promises.writeFile(
+      coverPath,
+      canvas.toBuffer("image/jpeg", { quality: 0.9 }),
+    );
+    return coverPath;
+  } finally {
+    await fs.promises.unlink(backgroundPath).catch(console.error);
+  }
+}
+
+/**
+ * Sets a video's thumbnail. The channel needs custom thumbnails enabled
+ * (a verified channel); YouTube then shows it in the Shorts grid too.
+ */
+export async function setVideoThumbnail(
+  auth: OAuth2Client,
+  videoId: string,
+  imagePath: string,
+) {
+  const youtube = google.youtube({ version: "v3", auth });
+  await youtube.thumbnails.set({
+    videoId,
+    media: {
+      mimeType: "image/jpeg",
+      body: fs.createReadStream(imagePath),
+    },
+  });
 }
 
 async function uploadVideo(
@@ -160,6 +214,19 @@ export async function uploadToYoutube(
 
     // Clean up the temporary Short video
     await fs.promises.unlink(shortPath);
+
+    // The cover, so the Short doesn't show a frame of the clip in the grid.
+    // A failure here leaves the upload as it is.
+    if (shortResult.videoId) {
+      const coverPath = await createShortCover(number, season, player, date);
+      try {
+        await setVideoThumbnail(oauth2Client, shortResult.videoId, coverPath);
+      } catch (error) {
+        console.error("Error setting the Short's cover:", error);
+      } finally {
+        await fs.promises.unlink(coverPath).catch(console.error);
+      }
+    }
 
     if (!shortResult.videoId || !originalResult.videoId) {
       throw new Error("Failed to upload videos to YouTube");
