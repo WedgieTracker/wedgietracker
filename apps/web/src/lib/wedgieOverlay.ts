@@ -120,8 +120,11 @@ function trackedWidth(ctx: OverlayContext, text: string, spacing: number) {
 }
 
 /**
- * Centred text with tracking. Each character goes where the untracked prefix
- * before it ends plus the spacing so far, so kerning pairs survive.
+ * Centred text with tracking, keeping the font's kerning. A character starts
+ * where the text up to and including it ends, less its own width, so the
+ * kerning between it and the one before moves it, not the next one (placing
+ * it at the end of the text before it gave "WADE" a wide W-A and a squeezed
+ * A-D).
  */
 function trackedText(
   ctx: OverlayContext,
@@ -136,9 +139,10 @@ function trackedText(
   let prefix = "";
   ctx.textAlign = "left";
   chars.forEach((ch, i) => {
-    const start = ctx.measureText(prefix).width + spacing * i;
-    ctx.fillText(ch, x + start, y);
     prefix += ch;
+    const start =
+      ctx.measureText(prefix).width - ctx.measureText(ch).width + spacing * i;
+    ctx.fillText(ch, x + start, y);
   });
 }
 
